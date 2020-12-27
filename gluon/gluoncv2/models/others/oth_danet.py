@@ -94,7 +94,7 @@ def get_backbone(name, **kwargs):
 class SegBaseModel(HybridBlock):
     r"""Base Model for Semantic Segmentation
 
-    Parameters
+    Parameters:
     ----------
     backbone : string
         Pre-trained dilated backbone network type (default:'resnet50'; 'resnet50',
@@ -150,7 +150,7 @@ class SegBaseModel(HybridBlock):
 class DANet(SegBaseModel):
     r"""Dual Attention Networks for Semantic Segmentation
 
-    Parameters
+    Parameters:
     ----------
     nclass : int
         Number of categories for the training dataset.

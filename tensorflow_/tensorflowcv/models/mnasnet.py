@@ -53,7 +53,7 @@ def dws_exp_se_res_unit(x,
     name : str, default 'dws_exp_se_res_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -141,7 +141,7 @@ def mnas_init_block(x,
     name : str, default 'mnas_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -195,7 +195,7 @@ def mnas_final_block(x,
     name : str, default 'mnas_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -293,7 +293,7 @@ class MnasNet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.

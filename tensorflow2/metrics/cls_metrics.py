@@ -12,7 +12,7 @@ class Accuracy(EvalMetric):
     """
     Computes accuracy classification score.
 
-    Parameters
+    Parameters:
     ----------
     axis : int, default 1
         The axis that represents classes
@@ -43,7 +43,7 @@ class Accuracy(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : tensor
             The labels of the data with class indices as values, one per sample.
@@ -57,7 +57,7 @@ class Accuracy(EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -71,7 +71,7 @@ class TopKAccuracy(EvalMetric):
     """
     Computes top k predictions accuracy.
 
-    Parameters
+    Parameters:
     ----------
     top_k : int, default 1
         Whether targets are in top k predictions.
@@ -104,7 +104,7 @@ class TopKAccuracy(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : tensor
             The labels of the data.
@@ -117,7 +117,7 @@ class TopKAccuracy(EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -131,7 +131,7 @@ class Top1Error(Accuracy):
     """
     Computes top-1 error (inverted accuracy classification score).
 
-    Parameters
+    Parameters:
     ----------
     axis : int, default 1
         The axis that represents classes.
@@ -159,7 +159,7 @@ class Top1Error(Accuracy):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -173,7 +173,7 @@ class TopKError(TopKAccuracy):
     """
     Computes top-k error (inverted top k predictions accuracy).
 
-    Parameters
+    Parameters:
     ----------
     top_k : int
         Whether targets are out of top k predictions, default 1
@@ -203,7 +203,7 @@ class TopKError(TopKAccuracy):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.

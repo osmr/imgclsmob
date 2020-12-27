@@ -30,7 +30,7 @@ def interpolate_bilinear(p,
     transpose : bool, default True
         Whether do transpose of the output against input.
 
-    Returns
+    Returns:
     -------
     zz : NDArray
        Interpolated values.

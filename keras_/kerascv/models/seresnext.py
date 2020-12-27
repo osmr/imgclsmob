@@ -40,7 +40,7 @@ def seresnext_unit(x,
     name : str, default 'seresnext_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

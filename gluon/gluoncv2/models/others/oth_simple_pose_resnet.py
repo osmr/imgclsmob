@@ -193,7 +193,7 @@ def get_simple_pose_resnet(base_name,
 def oth_simple_pose_resnet18_v1b(**kwargs):
     r"""ResNet-18 backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -208,7 +208,7 @@ def oth_simple_pose_resnet18_v1b(**kwargs):
 def oth_simple_pose_resnet50_v1b(**kwargs):
     r"""ResNet-50 backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -223,7 +223,7 @@ def oth_simple_pose_resnet50_v1b(**kwargs):
 def oth_simple_pose_resnet101_v1b(**kwargs):
     r"""ResNet-101 backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -238,7 +238,7 @@ def oth_simple_pose_resnet101_v1b(**kwargs):
 def oth_simple_pose_resnet152_v1b(**kwargs):
     r"""ResNet-152 backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -253,7 +253,7 @@ def oth_simple_pose_resnet152_v1b(**kwargs):
 def oth_simple_pose_resnet50_v1d(**kwargs):
     r"""ResNet-50-d backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -268,7 +268,7 @@ def oth_simple_pose_resnet50_v1d(**kwargs):
 def oth_simple_pose_resnet101_v1d(**kwargs):
     r"""ResNet-101-d backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -283,7 +283,7 @@ def oth_simple_pose_resnet101_v1d(**kwargs):
 def oth_simple_pose_resnet152_v1d(**kwargs):
     r"""ResNet-152-d backbone model from `"Simple Baselines for Human Pose Estimation and Tracking"
     <https://arxiv.org/abs/1804.06208>`_ paper.
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.

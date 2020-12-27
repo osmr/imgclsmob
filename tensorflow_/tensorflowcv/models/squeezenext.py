@@ -37,7 +37,7 @@ def sqnxt_unit(x,
     name : str, default 'sqnxt_unit'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -142,7 +142,7 @@ def sqnxt_init_block(x,
     name : str, default 'sqnxt_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -220,7 +220,7 @@ class SqueezeNext(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.
@@ -293,7 +293,7 @@ def get_squeezenext(version,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -348,7 +348,7 @@ def sqnxt23_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -367,7 +367,7 @@ def sqnxt23_w3d2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -386,7 +386,7 @@ def sqnxt23_w2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -405,7 +405,7 @@ def sqnxt23v5_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -424,7 +424,7 @@ def sqnxt23v5_w3d2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -443,7 +443,7 @@ def sqnxt23v5_w2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

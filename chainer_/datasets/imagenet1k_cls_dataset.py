@@ -20,7 +20,7 @@ class ImageNet1K(DatasetMixin):
     """
     ImageNet-1K classification dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str, default '~/.chainer/datasets/imagenet'
         Path to the folder stored the dataset.

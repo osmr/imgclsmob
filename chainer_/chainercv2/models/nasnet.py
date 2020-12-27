@@ -42,7 +42,7 @@ class NasDualPathScheme(object):
     x_prev : Tensor
         Previous processed tensor.
 
-    Returns
+    Returns:
     -------
     x_next : Tensor
         Next processed tensor.
@@ -76,7 +76,7 @@ def nasnet_dual_path_scheme_ordinal(block,
     x : Tensor
         Current processed tensor.
 
-    Returns
+    Returns:
     -------
     x_next : Tensor
         Next processed tensor.
@@ -180,7 +180,7 @@ def process_with_padding(x,
     pad_width : tuple of tuple of int, default ((0, 0), (0, 0), (1, 0), (1, 0))
         Whether the layer uses a bias vector.
 
-    Returns
+    Returns:
     -------
     chainer.Variable or numpy.ndarray or cupy.ndarray
         Resulted tensor.

@@ -11,7 +11,7 @@ class CocoHpeOksApMetric(mx.metric.EvalMetric):
     """
     Detection metric for COCO bbox task.
 
-    Parameters
+    Parameters:
     ----------
     coco_annotations_file_path : str
         COCO anotation file path.
@@ -96,7 +96,7 @@ class CocoHpeOksApMetric(mx.metric.EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : list of `NDArray`
             The labels of the data.

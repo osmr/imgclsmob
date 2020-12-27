@@ -346,7 +346,7 @@ class FastSCNN(HybridBlock):
 def get_fastscnn(dataset='citys', ctx=cpu(0), pretrained=False,
                  root='~/.mxnet/models', **kwargs):
     r"""Fast-SCNN: Fast Semantic Segmentation Network
-    Parameters
+    Parameters:
     ----------
     dataset : str, default cityscapes
     ctx : Context, default CPU
@@ -369,7 +369,7 @@ def get_fastscnn(dataset='citys', ctx=cpu(0), pretrained=False,
 
 def fastscnn_cityscapes(**kwargs):
     r"""Fast-SCNN: Fast Semantic Segmentation Network
-        Parameters
+        Parameters:
         ----------
         dataset : str, default cityscapes
         ctx : Context, default CPU

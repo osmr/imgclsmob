@@ -35,7 +35,7 @@ def dark_convYxY(x,
     name : str, default 'dark_convYxY'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

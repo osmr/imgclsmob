@@ -1434,7 +1434,7 @@ def update_and_initialize_logging(args):
     """
     Update arguments ans initialize logging.
 
-    Parameters
+    Parameters:
     ----------
     args : ArgumentParser
         Main script arguments.

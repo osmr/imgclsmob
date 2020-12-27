@@ -28,7 +28,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns
+    Returns:
     -------
     int
         Weighted number of channels.
@@ -106,7 +106,7 @@ def swish(x,
     name : str, default 'swish'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -131,7 +131,7 @@ def get_activation_layer(x,
     name : str, default 'activ'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -159,7 +159,7 @@ def is_channels_first():
     """
     Is tested data format channels first.
 
-    Returns
+    Returns:
     -------
     bool
         A flag.
@@ -171,7 +171,7 @@ def get_channel_axis():
     """
     Get channel axis.
 
-    Returns
+    Returns:
     -------
     int
         Channel axis.
@@ -204,7 +204,7 @@ def flatten(x,
     reshape : bool, default False
         Whether do reshape instead of flatten.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -242,7 +242,7 @@ def batchnorm(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -285,7 +285,7 @@ def lrn(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -360,7 +360,7 @@ def maxpool2d(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -436,7 +436,7 @@ def avgpool2d(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -529,7 +529,7 @@ def conv2d(x,
     name : str, default 'conv2d'
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -643,7 +643,7 @@ def conv1x1(x,
     name : str, default 'conv1x1'
         Layer name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -686,7 +686,7 @@ def conv3x3(x,
     name : str, default 'conv3x3'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -721,7 +721,7 @@ def depthwise_conv3x3(x,
     name : str, default 'depthwise_conv3x3'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -783,7 +783,7 @@ def conv_block(x,
     name : str, default 'conv_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -845,7 +845,7 @@ def conv1x1_block(x,
     name : str, default 'conv1x1_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -906,7 +906,7 @@ def conv3x3_block(x,
     name : str, default 'conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -966,7 +966,7 @@ def conv5x5_block(x,
     name : str, default 'conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1016,7 +1016,7 @@ def conv7x7_block(x,
     name : str, default 'conv7x7_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1069,7 +1069,7 @@ def dwconv3x3_block(x,
     name : str, default 'dwconv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1124,7 +1124,7 @@ def dwconv5x5_block(x,
     name : str, default 'dwconv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1173,7 +1173,7 @@ def pre_conv_block(x,
     name : str, default 'pre_conv_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
@@ -1223,7 +1223,7 @@ def pre_conv1x1_block(x,
     name : str, default 'preres_conv1x1'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
@@ -1263,7 +1263,7 @@ def pre_conv3x3_block(x,
     name : str, default 'pre_conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
@@ -1292,7 +1292,7 @@ def channel_shuffle(x,
     groups : int
         Number of groups.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1332,7 +1332,7 @@ def channel_shuffle_lambda(channels,
     groups : int
         Number of groups.
 
-    Returns
+    Returns:
     -------
     Layer
         Channel shuffle layer.
@@ -1369,7 +1369,7 @@ def se_block(x,
     name : str, default 'se_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -1406,7 +1406,7 @@ class GluonBatchNormalization(BatchNormalization):
     """
     Batch normalization layer wrapper for implementation of the Gluon type of BatchNorm default parameters.
 
-    Parameters
+    Parameters:
     ----------
     momentum : float, default 0.9
         Momentum for the moving average.
@@ -1491,7 +1491,7 @@ class GluonBatchNormalization(BatchNormalization):
                 Apply native MXNet/Gluon batch normalization on x with given moving_mean, moving_var, beta and gamma.
 
 
-                Parameters
+                Parameters:
                 ----------
                 x : keras.backend tensor/variable/symbol
                     Input tensor/variable/symbol.
@@ -1513,7 +1513,7 @@ class GluonBatchNormalization(BatchNormalization):
                 fix_gamma : bool, default False
                     Fix gamma while training.
 
-                Returns
+                Returns:
                 -------
                 keras.backend tensor/variable/symbol
                     Resulted tensor/variable/symbol.

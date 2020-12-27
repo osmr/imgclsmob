@@ -114,7 +114,7 @@ def parse_args():
     """
     Parse python script parameters (common part).
 
-    Returns
+    Returns:
     -------
     ArgumentParser
         Resulted args.
@@ -181,7 +181,7 @@ class SuperPointFrontend(object):
           H - Image height.
           W - Image width.
           dist_thresh - Distance to suppress, measured as an infinty norm distance.
-        Returns
+        Returns:
           nmsed_corners - 3xN numpy matrix with surviving corners.
           nmsed_inds - N length numpy vector with surviving corner indices.
         """

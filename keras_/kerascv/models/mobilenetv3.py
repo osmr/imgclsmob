@@ -47,7 +47,7 @@ def mobilenetv3_unit(x,
     name : str, default 'mobilenetv3_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -125,7 +125,7 @@ def mobilenetv3_final_block(x,
     name : str, default 'mobilenetv3_final_block'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -171,7 +171,7 @@ def mobilenetv3_classifier(x,
     name : str, default 'mobilenetv3_classifier'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

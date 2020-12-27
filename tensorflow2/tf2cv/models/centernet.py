@@ -147,7 +147,7 @@ class CenterNetHeatmapMaxDet(nn.Layer):
     """
     CenterNet decoder for heads (heatmap, wh, reg).
 
-    Parameters
+    Parameters:
     ----------
     topk : int, default 40
         Keep only `topk` detections.
@@ -212,7 +212,7 @@ class CenterNet(tf.keras.Model):
     """
     CenterNet model from 'Objects as Points,' https://arxiv.org/abs/1904.07850.
 
-    Parameters
+    Parameters:
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -310,7 +310,7 @@ def get_centernet(backbone,
     """
     Create CenterNet model with specific parameters.
 
-    Parameters
+    Parameters:
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -327,7 +327,7 @@ def get_centernet(backbone,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A network.

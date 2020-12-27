@@ -271,7 +271,7 @@ def parse_args():
     """
     Parse python script parameters (common part).
 
-    Returns
+    Returns:
     -------
     ArgumentParser
         Resulted args.
@@ -311,7 +311,7 @@ def init_rand(seed):
     seed : int
         Seed value.
 
-    Returns
+    Returns:
     -------
     int
         Generated seed value.
@@ -396,7 +396,7 @@ def prepare_trainer(net,
     state_file_path : str, default None
         Path for file with trainer state.
 
-    Returns
+    Returns:
     -------
     Trainer
         Trainer.
@@ -554,7 +554,7 @@ def train_epoch(epoch,
     batch_size_scale : int
         Manual batch-size increasing factor.
 
-    Returns
+    Returns:
     -------
     float
         Loss value.

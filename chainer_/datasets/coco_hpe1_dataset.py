@@ -14,7 +14,7 @@ class CocoHpe1Dataset(GetterDataset):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.
@@ -299,7 +299,7 @@ class CocoHpe1Dataset(GetterDataset):
 
         All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
 
-        Parameters
+        Parameters:
         ----------
         xyxy : list, tuple or numpy.ndarray
             The bbox in format (xmin, ymin, xmax, ymax).
@@ -310,7 +310,7 @@ class CocoHpe1Dataset(GetterDataset):
         height : int or float
             Boundary height.
 
-        Returns
+        Returns:
         -------
         tuple or np.array
             Description of returned object.
@@ -339,14 +339,14 @@ class CocoHpe1Dataset(GetterDataset):
         """
         Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
 
-        Parameters
+        Parameters:
         ----------
         xywh : list, tuple or numpy.ndarray
             The bbox in format (x, y, w, h).
             If numpy.ndarray is provided, we expect multiple bounding boxes with
             shape `(N, 4)`.
 
-        Returns
+        Returns:
         -------
         tuple or np.ndarray
             The converted bboxes in format (xmin, ymin, xmax, ymax).

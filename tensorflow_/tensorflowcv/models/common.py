@@ -26,7 +26,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns
+    Returns:
     -------
     int
         Weighted number of channels.
@@ -50,7 +50,7 @@ def hsigmoid(x,
     name : str, default 'hsigmoid'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -70,7 +70,7 @@ def hswish(x,
     name : str, default 'hswish'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -93,7 +93,7 @@ def get_activation_layer(x,
     name : str, default 'activ'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -122,7 +122,7 @@ def is_channels_first(data_format):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     bool
         A flag.
@@ -139,7 +139,7 @@ def get_channel_axis(data_format):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     int
         Channel axis.
@@ -159,7 +159,7 @@ def flatten(x,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -194,7 +194,7 @@ def batchnorm(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -236,7 +236,7 @@ def maxpool2d(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -300,7 +300,7 @@ def avgpool2d(x,
     name : str, default None
         Layer name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -384,7 +384,7 @@ def conv2d(x,
     name : str, default 'conv2d'
         Layer name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -489,7 +489,7 @@ def conv1x1(x,
     name : str, default 'conv1x1'
         Layer name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -539,7 +539,7 @@ def conv3x3(x,
     name : str, default 'conv3x3'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -578,7 +578,7 @@ def depthwise_conv3x3(x,
     name : str, default 'depthwise_conv3x3'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -644,7 +644,7 @@ def conv_block(x,
     name : str, default 'conv_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -711,7 +711,7 @@ def conv1x1_block(x,
     name : str, default 'conv1x1_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -776,7 +776,7 @@ def conv3x3_block(x,
     name : str, default 'conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -840,7 +840,7 @@ def conv5x5_block(x,
     name : str, default 'conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -897,7 +897,7 @@ def conv7x7_block(x,
     name : str, default 'conv7x7_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -955,7 +955,7 @@ def dwconv3x3_block(x,
     name : str, default 'dwconv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -1014,7 +1014,7 @@ def dwconv5x5_block(x,
     name : str, default 'dwconv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -1070,7 +1070,7 @@ def pre_conv_block(x,
     name : str, default 'pre_conv_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two Tensors
         Resulted tensor and preactivated input tensor.
@@ -1129,7 +1129,7 @@ def pre_conv1x1_block(x,
     name : str, default 'pre_conv1x1_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two Tensors
         Resulted tensor and preactivated input tensor.
@@ -1177,7 +1177,7 @@ def pre_conv3x3_block(x,
     name : str, default 'pre_conv3x3_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two Tensors
         Resulted tensor and preactivated input tensor.
@@ -1211,7 +1211,7 @@ def channel_shuffle(x,
     data_format : str
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     keras.Tensor
         Resulted tensor.
@@ -1257,7 +1257,7 @@ def channel_shuffle2(x,
     data_format : str
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     keras.Tensor
         Resulted tensor.
@@ -1316,7 +1316,7 @@ def se_block(x,
     name : str, default 'se_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.

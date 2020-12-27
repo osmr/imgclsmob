@@ -38,7 +38,7 @@ class DeconvResnet(nn.HybridBlock):
     """
     Deconvolutional ResNet.
 
-    Parameters
+    Parameters:
     ----------
     base_network : str
         Name of the base feature extraction network.
@@ -139,7 +139,7 @@ def get_deconv_resnet(base_network,
     """
     Get resnet with deconv layers.
 
-    Parameters
+    Parameters:
     ----------
     base_network : str
         Name of the base feature extraction network.
@@ -149,7 +149,7 @@ def get_deconv_resnet(base_network,
         mx.cpu() or mx.gpu()
     pretrained : type
         Description of parameter `pretrained`.
-    Returns
+    Returns:
     -------
     get_deconv_resnet(base_network, pretrained=False,
         Description of returned object.
@@ -164,7 +164,7 @@ def get_deconv_resnet(base_network,
 def resnet18_v1b_deconv(**kwargs):
     """Resnet18 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet18 v1b model with deconv layers.
@@ -176,7 +176,7 @@ def resnet18_v1b_deconv(**kwargs):
 def resnet50_v1b_deconv(**kwargs):
     """Resnet50 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet50 v1b model with deconv layers.
@@ -188,7 +188,7 @@ def resnet50_v1b_deconv(**kwargs):
 def resnet101_v1b_deconv(**kwargs):
     """Resnet101 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet101 v1b model with deconv layers.
@@ -203,7 +203,7 @@ class CenterNetDecoder(gluon.HybridBlock):
     """
     Decorder for centernet.
 
-    Parameters
+    Parameters:
     ----------
     topk : int
         Only keep `topk` results.
@@ -251,7 +251,7 @@ class CenterNet(nn.HybridBlock):
     """
     Objects as Points. https://arxiv.org/abs/1904.07850v2
 
-    Parameters
+    Parameters:
     ----------
     backbone : mxnet.gluon.nn.HybridBlock
         The base feature extraction network.
@@ -339,7 +339,7 @@ def get_center_net(model_name,
     """
     Get a center net instance.
 
-    Parameters
+    Parameters:
     ----------
     model_name : str or None
         Model name, if `None` is used, you must specify `features` to be a `HybridBlock`.
@@ -354,7 +354,7 @@ def get_center_net(model_name,
     root : str
         Model weights storing path.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.

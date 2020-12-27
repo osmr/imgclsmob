@@ -14,7 +14,7 @@ class VOCSegDataset(SegDataset):
     """
     Pascal VOC2012 semantic segmentation dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to VOCdevkit folder.

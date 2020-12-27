@@ -14,7 +14,7 @@ class VOCSegDataset(SegDataset):
     """
     Pascal VOC2012 semantic segmentation dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to VOCdevkit folder.
@@ -223,7 +223,7 @@ def voc_train_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -246,7 +246,7 @@ def voc_val_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -272,7 +272,7 @@ def voc_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -306,7 +306,7 @@ def voc_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -344,7 +344,7 @@ def voc_test_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

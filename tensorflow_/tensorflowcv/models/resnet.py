@@ -42,7 +42,7 @@ def res_block(x,
     name : str, default 'res_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -99,7 +99,7 @@ def res_bottleneck_block(x,
     name : str, default 'res_bottleneck_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -166,7 +166,7 @@ def res_unit(x,
     name : str, default 'res_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -235,7 +235,7 @@ def res_init_block(x,
     name : str, default 'res_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -315,7 +315,7 @@ class ResNet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.
@@ -388,7 +388,7 @@ def get_resnet(blocks,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -479,7 +479,7 @@ def resnet10(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -499,7 +499,7 @@ def resnet12(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -519,7 +519,7 @@ def resnet14(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -539,7 +539,7 @@ def resnetbc14b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -559,7 +559,7 @@ def resnet16(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -579,7 +579,7 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -599,7 +599,7 @@ def resnet18_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -619,7 +619,7 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -638,7 +638,7 @@ def resnet18(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -658,7 +658,7 @@ def resnet26(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -678,7 +678,7 @@ def resnetbc26b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -697,7 +697,7 @@ def resnet34(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -717,7 +717,7 @@ def resnetbc38b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -736,7 +736,7 @@ def resnet50(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -756,7 +756,7 @@ def resnet50b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -775,7 +775,7 @@ def resnet101(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -795,7 +795,7 @@ def resnet101b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -814,7 +814,7 @@ def resnet152(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -834,7 +834,7 @@ def resnet152b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -854,7 +854,7 @@ def resnet200(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -874,7 +874,7 @@ def resnet200b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

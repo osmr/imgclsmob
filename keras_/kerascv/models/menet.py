@@ -44,7 +44,7 @@ def me_unit(x,
     name : str, default 'me_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -162,7 +162,7 @@ def me_init_block(x,
     name : str, default 'me_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

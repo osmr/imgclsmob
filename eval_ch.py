@@ -111,7 +111,7 @@ def parse_args():
     """
     Create python script parameters (common part).
 
-    Returns
+    Returns:
     -------
     ArgumentParser
         Resulted args.
@@ -167,7 +167,7 @@ def calc_model_accuracy(net,
     ml_type : str, default 'imgcls'
         Machine learning type.
 
-    Returns
+    Returns:
     -------
     list of floats
         Accuracy values.
@@ -229,7 +229,7 @@ def test_model(args):
     args : ArgumentParser
         Main script arguments.
 
-    Returns
+    Returns:
     -------
     float
         Main accuracy value.

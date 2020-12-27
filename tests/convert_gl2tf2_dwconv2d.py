@@ -14,7 +14,7 @@ def is_channels_first(data_format):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     bool
         A flag.

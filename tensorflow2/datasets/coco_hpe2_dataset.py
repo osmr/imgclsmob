@@ -17,7 +17,7 @@ class CocoHpe2Dataset(object):
     """
     COCO keypoint detection (2D multiple human pose estimation) dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.
@@ -567,7 +567,7 @@ class CocoHpeDirectoryIterator(DirectoryIterator):
         # Arguments
             index_array: Array of sample indices to include in batch.
 
-        # Returns
+        # Returns:
             A batch of transformed samples.
         """
         batch_x = None
@@ -632,7 +632,7 @@ def cocohpe_val_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -658,7 +658,7 @@ def cocohpe_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -696,7 +696,7 @@ def cocohpe_test_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

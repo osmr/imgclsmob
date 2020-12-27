@@ -16,7 +16,7 @@ class ImageNet1K(ImageFolder):
     """
     ImageNet-1K classification dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str, default '~/.torch/datasets/imagenet'
         Path to the folder stored the dataset.
@@ -142,7 +142,7 @@ def imagenet_train_transform(ds_metainfo,
     jitter_param : float
         How much to jitter values.
 
-    Returns
+    Returns:
     -------
     Compose
         Image transform sequence.
@@ -171,7 +171,7 @@ def imagenet_val_transform(ds_metainfo):
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
 
-    Returns
+    Returns:
     -------
     Compose
         Image transform sequence.
@@ -195,7 +195,7 @@ class CvResize(object):
     """
     Resize the input PIL Image to the given size via OpenCV.
 
-    Parameters
+    Parameters:
     ----------
     size : int or tuple of (W, H)
         Size of output image.
@@ -213,12 +213,12 @@ class CvResize(object):
         """
         Resize image.
 
-        Parameters
+        Parameters:
         ----------
         img : PIL.Image
             input image.
 
-        Returns
+        Returns:
         -------
         PIL.Image
             Resulted image.
@@ -263,7 +263,7 @@ def calc_val_resize_value(input_image_size=(224, 224),
     resize_inv_factor : float
         Resize inverted factor.
 
-    Returns
+    Returns:
     -------
     int
         Resize value.

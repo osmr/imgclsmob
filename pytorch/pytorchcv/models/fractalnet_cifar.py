@@ -164,7 +164,7 @@ class FractalBlock(nn.Module):
         loc_drop_prob : float
             Local drop path probability.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted mask.
@@ -209,7 +209,7 @@ class FractalBlock(nn.Module):
         training : bool
             Whether training mode for network.
 
-        Returns
+        Returns:
         -------
         Tensor
             Joined output.

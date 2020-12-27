@@ -49,7 +49,7 @@ def me_unit(x,
     name : str, default 'me_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -193,7 +193,7 @@ def me_init_block(x,
     name : str, default 'me_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -282,7 +282,7 @@ class MENet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.
@@ -354,7 +354,7 @@ def get_menet(first_stage_channels,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -424,7 +424,7 @@ def menet108_8x1_g3(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -444,7 +444,7 @@ def menet128_8x1_g4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -464,7 +464,7 @@ def menet160_8x1_g8(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -484,7 +484,7 @@ def menet228_12x1_g3(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -504,7 +504,7 @@ def menet256_12x1_g4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -524,7 +524,7 @@ def menet348_12x1_g3(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -544,7 +544,7 @@ def menet352_12x1_g8(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -564,7 +564,7 @@ def menet456_24x1_g3(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

@@ -18,7 +18,7 @@ def seg_pixel_accuracy_nd(label_imask,
     """
     The segmentation pixel accuracy (for MXNet nd-arrays).
 
-    Parameters
+    Parameters:
     ----------
     label_imask : mx.nd.array
         Ground truth index mask (maybe batch of).
@@ -33,7 +33,7 @@ def seg_pixel_accuracy_nd(label_imask,
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
-    Returns
+    Returns:
     -------
     float or tuple of two floats
         PA metric value.
@@ -62,14 +62,14 @@ def segm_mean_accuracy(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
     pred_imask : nd.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         MA metric value.
@@ -107,14 +107,14 @@ def segm_mean_iou(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
     pred_imask : nd.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         MIoU metric value.
@@ -152,14 +152,14 @@ def seg_mean_iou2_nd(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask (batch of).
     pred_hmask : nd.array
         Predicted one-hot mask (batch of).
 
-    Returns
+    Returns:
     -------
     float
         MIoU metric value.
@@ -189,14 +189,14 @@ def segm_fw_iou(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
     pred_imask : nd.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         FrIoU metric value.
@@ -229,14 +229,14 @@ def segm_fw_iou2(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
     pred_imask : nd.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         FrIoU metric value.

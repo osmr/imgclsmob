@@ -47,7 +47,7 @@ def sepreres_unit(x,
     name : str, default 'sepreres_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -151,7 +151,7 @@ class SEPreResNet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.
@@ -226,7 +226,7 @@ def get_sepreresnet(blocks,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -313,7 +313,7 @@ def sepreresnet10(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -332,7 +332,7 @@ def sepreresnet12(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -351,7 +351,7 @@ def sepreresnet14(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -370,7 +370,7 @@ def sepreresnet16(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -389,7 +389,7 @@ def sepreresnet18(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -408,7 +408,7 @@ def sepreresnet26(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -427,7 +427,7 @@ def sepreresnetbc26b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -446,7 +446,7 @@ def sepreresnet34(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -465,7 +465,7 @@ def sepreresnetbc38b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -484,7 +484,7 @@ def sepreresnet50(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -504,7 +504,7 @@ def sepreresnet50b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -523,7 +523,7 @@ def sepreresnet101(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -543,7 +543,7 @@ def sepreresnet101b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -562,7 +562,7 @@ def sepreresnet152(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -582,7 +582,7 @@ def sepreresnet152b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -602,7 +602,7 @@ def sepreresnet200(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -622,7 +622,7 @@ def sepreresnet200b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

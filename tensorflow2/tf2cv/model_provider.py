@@ -913,7 +913,7 @@ def get_model(name, **kwargs):
     name : str
         Name of model.
 
-    Returns
+    Returns:
     -------
     Module
         Resulted model.

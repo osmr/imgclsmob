@@ -42,7 +42,7 @@ def sepreres_unit(x,
     name : str, default 'sepreres_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor.

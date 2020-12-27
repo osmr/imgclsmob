@@ -47,7 +47,7 @@ def shuffle_unit(x,
     name : str, default 'shuffle_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -143,7 +143,7 @@ def shuffle_init_block(x,
     name : str, default 'shuffle_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -225,7 +225,7 @@ class ShuffleNet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.
@@ -293,7 +293,7 @@ def get_shufflenet(groups,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -353,7 +353,7 @@ def shufflenet_g1_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -373,7 +373,7 @@ def shufflenet_g2_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -393,7 +393,7 @@ def shufflenet_g3_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -413,7 +413,7 @@ def shufflenet_g4_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -433,7 +433,7 @@ def shufflenet_g8_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -453,7 +453,7 @@ def shufflenet_g1_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -473,7 +473,7 @@ def shufflenet_g3_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -493,7 +493,7 @@ def shufflenet_g1_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -513,7 +513,7 @@ def shufflenet_g3_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -533,7 +533,7 @@ def shufflenet_g1_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -553,7 +553,7 @@ def shufflenet_g3_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

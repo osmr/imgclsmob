@@ -126,7 +126,7 @@ class SCBottleneck(nn.Module):
 
 class SCNet(nn.Module):
     """ SCNet Variants Definations
-    Parameters
+    Parameters:
     ----------
     block : Block
         Class for the residual block.

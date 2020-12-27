@@ -17,7 +17,7 @@ __all__ = ['oth_icnet_resnet50_citys']
 class ICNet(SegBaseModel):
     r"""Image Cascade Network (ICNet)
 
-    Parameters
+    Parameters:
     ----------
     nclass : int
         Number of categories for the training dataset.
@@ -318,7 +318,7 @@ def get_icnet(dataset='citys', backbone='resnet50', pretrained=False,
               root='~/.mxnet/models', pretrained_base=False, ctx=cpu(0), **kwargs):
     r"""Image Cascade Network
 
-    Parameters
+    Parameters:
     ----------
     dataset : str, default citys
         The dataset that model pretrained on. (default: cityscapes)
@@ -359,7 +359,7 @@ def get_icnet(dataset='citys', backbone='resnet50', pretrained=False,
 def oth_icnet_resnet50_citys(**kwargs):
     r"""Image Cascade Network
 
-    Parameters
+    Parameters:
     ----------
     dataset : str, default citys
         The dataset that model pretrained on. (default: cityscapes)

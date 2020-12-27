@@ -39,7 +39,7 @@ class NasDualPathScheme(object):
     x_prev : Tensor
         Previous processed tensor.
 
-    Returns
+    Returns:
     -------
     x_next : Tensor
         Next processed tensor.
@@ -72,7 +72,7 @@ def nasnet_dual_path_scheme_ordinal(module,
     x : Tensor
         Current processed tensor.
 
-    Returns
+    Returns:
     -------
     x_next : Tensor
         Next processed tensor.

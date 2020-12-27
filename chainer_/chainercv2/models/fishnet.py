@@ -29,7 +29,7 @@ def channel_squeeze(x,
     groups : int
         Number of groups.
 
-    Returns
+    Returns:
     -------
     chainer.Variable or numpy.ndarray or cupy.ndarray
         Resulted variable.

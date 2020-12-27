@@ -39,7 +39,7 @@ def senet_bottleneck(x,
     name : str, default 'senet_bottleneck'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -100,7 +100,7 @@ def senet_unit(x,
     name : str, default 'senet_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -165,7 +165,7 @@ def senet_init_block(x,
     name : str, default 'senet_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

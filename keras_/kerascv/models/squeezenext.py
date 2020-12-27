@@ -32,7 +32,7 @@ def sqnxt_unit(x,
     name : str, default 'sqnxt_unit'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -119,7 +119,7 @@ def sqnxt_init_block(x,
     name : str, default 'sqnxt_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

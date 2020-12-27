@@ -9,7 +9,7 @@ class SegDataset(object):
     """
     Segmentation base dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to data folder.
@@ -160,7 +160,7 @@ class SegDirectoryIterator(DirectoryIterator):
         # Arguments
             index_array: Array of sample indices to include in batch.
 
-        # Returns
+        # Returns:
             A batch of transformed samples.
         """
         # batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=self.dtype)

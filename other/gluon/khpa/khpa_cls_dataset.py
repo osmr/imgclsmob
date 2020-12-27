@@ -17,7 +17,7 @@ class KHPA(Dataset):
     """
     Load the KHPA classification dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str, default '~/.mxnet/datasets/imagenet'
         Path to the folder stored the dataset.

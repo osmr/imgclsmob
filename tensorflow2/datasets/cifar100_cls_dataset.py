@@ -32,7 +32,7 @@ def cifar100_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -62,7 +62,7 @@ def cifar100_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

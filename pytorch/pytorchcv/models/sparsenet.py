@@ -24,7 +24,7 @@ def sparsenet_exponential_fetch(lst):
     lst : list
         List of something.
 
-    Returns
+    Returns:
     -------
     list
         Filtered list.

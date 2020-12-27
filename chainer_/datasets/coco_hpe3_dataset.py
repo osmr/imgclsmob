@@ -14,7 +14,7 @@ class CocoHpe3Dataset(GetterDataset):
     """
     COCO keypoint detection (2D multiple human pose estimation) dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.

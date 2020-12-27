@@ -43,7 +43,7 @@ class BilinearUpSample(mx.init.Initializer):
 class DeconvResnet(nn.HybridBlock):
     """Deconvolutional ResNet.
 
-    Parameters
+    Parameters:
     ----------
     base_network : str
         Name of the base feature extraction network.
@@ -167,7 +167,7 @@ class DeconvResnet(nn.HybridBlock):
 def get_deconv_resnet(base_network, pretrained=False, ctx=cpu(), use_dcnv2=False, **kwargs):
     """Get resnet with deconv layers.
 
-    Parameters
+    Parameters:
     ----------
     base_network : str
         Name of the base feature extraction network.
@@ -179,7 +179,7 @@ def get_deconv_resnet(base_network, pretrained=False, ctx=cpu(), use_dcnv2=False
         If true, will use DCNv2 layers in upsampling blocks
     pretrained : type
         Description of parameter `pretrained`.
-    Returns
+    Returns:
     -------
     get_deconv_resnet(base_network, pretrained=False,
         Description of returned object.
@@ -196,7 +196,7 @@ def get_deconv_resnet(base_network, pretrained=False, ctx=cpu(), use_dcnv2=False
 def resnet18_v1b_deconv(**kwargs):
     """Resnet18 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet18 v1b model with deconv layers.
@@ -208,7 +208,7 @@ def resnet18_v1b_deconv(**kwargs):
 def resnet18_v1b_deconv_dcnv2(**kwargs):
     """Resnet18 v1b model with deconv layers and deformable v2 conv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet18 v1b model with deconv layers and deformable v2 conv layers.
@@ -220,7 +220,7 @@ def resnet18_v1b_deconv_dcnv2(**kwargs):
 def resnet50_v1b_deconv(**kwargs):
     """Resnet50 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet50 v1b model with deconv layers.
@@ -232,7 +232,7 @@ def resnet50_v1b_deconv(**kwargs):
 def resnet50_v1b_deconv_dcnv2(**kwargs):
     """Resnet50 v1b model with deconv layers and deformable v2 conv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet50 v1b model with deconv layers and deformable v2 conv layers.
@@ -244,7 +244,7 @@ def resnet50_v1b_deconv_dcnv2(**kwargs):
 def resnet101_v1b_deconv(**kwargs):
     """Resnet101 v1b model with deconv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet101 v1b model with deconv layers.
@@ -256,7 +256,7 @@ def resnet101_v1b_deconv(**kwargs):
 def resnet101_v1b_deconv_dcnv2(**kwargs):
     """Resnet101 v1b model with deconv layers and deformable v2 conv layers.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A Resnet101 v1b model with deconv layers and deformable v2 conv layers.
@@ -269,7 +269,7 @@ def resnet101_v1b_deconv_dcnv2(**kwargs):
 class CenterNetDecoder(gluon.HybridBlock):
     """Decorder for centernet.
 
-    Parameters
+    Parameters:
     ----------
     topk : int
         Only keep `topk` results.
@@ -315,7 +315,7 @@ class CenterNetDecoder(gluon.HybridBlock):
 class CenterNet(nn.HybridBlock):
     """Objects as Points. https://arxiv.org/abs/1904.07850v2
 
-    Parameters
+    Parameters:
     ----------
     base_network : mxnet.gluon.nn.HybridBlock
         The base feature extraction network.
@@ -405,7 +405,7 @@ class CenterNet(nn.HybridBlock):
     def num_classes(self):
         """Return number of foreground classes.
 
-        Returns
+        Returns:
         -------
         int
             Number of foreground classes
@@ -416,7 +416,7 @@ class CenterNet(nn.HybridBlock):
     def set_nms(self, nms_thresh=0, nms_topk=400, post_nms=100):
         """Set non-maximum suppression parameters.
 
-        Parameters
+        Parameters:
         ----------
         nms_thresh : float, default is 0.
             Non-maximum suppression threshold. You can specify < 0 or > 1 to disable NMS.
@@ -429,7 +429,7 @@ class CenterNet(nn.HybridBlock):
             based on COCO dataset which has maximum 100 objects per image. You can adjust this
             number if expecting more objects. You can use -1 to return all detections.
 
-        Returns
+        Returns:
         -------
         None
 
@@ -443,7 +443,7 @@ class CenterNet(nn.HybridBlock):
     def reset_class(self, classes, reuse_weights=None):
         """Reset class categories and class predictors.
 
-        Parameters
+        Parameters:
         ----------
         classes : iterable of str
             The new categories. ['apple', 'orange'] for example.
@@ -486,7 +486,7 @@ def get_center_net(name, dataset, pretrained=False, ctx=mx.cpu(),
                    root=os.path.join('~', '.mxnet', 'models'), **kwargs):
     """Get a center net instance.
 
-    Parameters
+    Parameters:
     ----------
     name : str or None
         Model name, if `None` is used, you must specify `features` to be a `HybridBlock`.
@@ -501,7 +501,7 @@ def get_center_net(name, dataset, pretrained=False, ctx=mx.cpu(),
     root : str
         Model weights storing path.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -528,14 +528,14 @@ def get_center_net(name, dataset, pretrained=False, ctx=mx.cpu(),
 def center_net_resnet18_v1b_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet18_v1b base network on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -561,14 +561,14 @@ def center_net_resnet18_v1b_voc(pretrained=False, pretrained_base=True, **kwargs
 def center_net_resnet18_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet18_v1b base network with deformable v2 conv layers on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -594,14 +594,14 @@ def center_net_resnet18_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, **
 def center_net_resnet18_v1b_coco(pretrained=False, pretrained_base=False, **kwargs):
     """Center net with resnet18_v1b base network on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -627,14 +627,14 @@ def center_net_resnet18_v1b_coco(pretrained=False, pretrained_base=False, **kwar
 def center_net_resnet18_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet18_v1b base network with deformable v2 conv layer on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -660,14 +660,14 @@ def center_net_resnet18_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, *
 def center_net_resnet50_v1b_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet50_v1b base network on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -693,14 +693,14 @@ def center_net_resnet50_v1b_voc(pretrained=False, pretrained_base=True, **kwargs
 def center_net_resnet50_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet50_v1b base network with deformable conv layers on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -726,14 +726,14 @@ def center_net_resnet50_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, **
 def center_net_resnet50_v1b_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet50_v1b base network on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -759,14 +759,14 @@ def center_net_resnet50_v1b_coco(pretrained=False, pretrained_base=True, **kwarg
 def center_net_resnet50_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet50_v1b base network with deformable v2 conv layers on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -792,14 +792,14 @@ def center_net_resnet50_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, *
 def center_net_resnet101_v1b_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -825,14 +825,14 @@ def center_net_resnet101_v1b_voc(pretrained=False, pretrained_base=True, **kwarg
 def center_net_resnet101_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network with deformable conv layers on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -858,14 +858,14 @@ def center_net_resnet101_v1b_dcnv2_voc(pretrained=False, pretrained_base=True, *
 def center_net_resnet101_v1b_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -891,14 +891,14 @@ def center_net_resnet101_v1b_coco(pretrained=False, pretrained_base=True, **kwar
 def center_net_resnet101_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network with deformable v2 conv layers on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -924,14 +924,14 @@ def center_net_resnet101_v1b_dcnv2_coco(pretrained=False, pretrained_base=True, 
 def center_net_dla34_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with dla34 base network on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -957,14 +957,14 @@ def center_net_dla34_voc(pretrained=False, pretrained_base=True, **kwargs):
 def center_net_dla34_dcnv2_voc(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network with deformable conv layers on voc dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -990,14 +990,14 @@ def center_net_dla34_dcnv2_voc(pretrained=False, pretrained_base=True, **kwargs)
 def center_net_dla34_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.
@@ -1023,14 +1023,14 @@ def center_net_dla34_coco(pretrained=False, pretrained_base=True, **kwargs):
 def center_net_dla34_dcnv2_coco(pretrained=False, pretrained_base=True, **kwargs):
     """Center net with resnet101_v1b base network with deformable v2 conv layers on coco dataset.
 
-    Parameters
+    Parameters:
     ----------
     classes : iterable of str
         Names of custom foreground classes. `len(classes)` is the number of foreground classes.
     pretrained_base : bool or str, optional, default is True
         Load pretrained base network, the extra layers are randomized.
 
-    Returns
+    Returns:
     -------
     HybridBlock
         A CenterNet detection network.

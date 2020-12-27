@@ -36,7 +36,7 @@ def fire_conv(x,
     name : str, default 'fire_conv'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -80,7 +80,7 @@ def fire_unit(x,
     name : str, default 'fire_unit'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -139,7 +139,7 @@ def squeeze_init_block(x,
     name : str, default 'squeeze_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -341,7 +341,7 @@ def squeezeresnet_v1_0(**kwargs):
 
 def squeezeresnet_v1_1(**kwargs):
     """
-    SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
+    SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer Parameters:
     and <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
     Parameters:

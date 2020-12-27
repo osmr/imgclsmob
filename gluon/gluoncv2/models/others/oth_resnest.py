@@ -217,7 +217,7 @@ class Bottleneck(HybridBlock):
 
 class ResNeSt(HybridBlock):
     """ ResNeSt Model
-    Parameters
+    Parameters:
     ----------
     layers : list of int
         Numbers of layers in each block

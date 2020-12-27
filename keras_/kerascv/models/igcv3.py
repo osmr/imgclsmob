@@ -36,7 +36,7 @@ def inv_res_unit(x,
     name : str, default 'inv_res_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

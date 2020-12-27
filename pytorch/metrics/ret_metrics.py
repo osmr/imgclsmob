@@ -13,7 +13,7 @@ class PointDetectionMatchRatio(EvalMetric):
     """
     Computes point detection match ratio (with mean residual).
 
-    Parameters
+    Parameters:
     ----------
     pts_max_count : int
         Maximal count of points.
@@ -56,7 +56,7 @@ class PointDetectionMatchRatio(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         homography : torch.Tensor
             Homography (from source image to destination one).
@@ -281,7 +281,7 @@ class PointDescriptionMatchRatio(EvalMetric):
     """
     Computes point description match ratio.
 
-    Parameters
+    Parameters:
     ----------
     pts_max_count : int
         Maximal count of points.
@@ -328,7 +328,7 @@ class PointDescriptionMatchRatio(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         homography : torch.Tensor
             Homography (from source image to destination one).

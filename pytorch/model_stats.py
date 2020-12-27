@@ -24,12 +24,12 @@ def calc_block_num_params2(net):
     """
     Calculate number of trainable parameters in the block (not iterative).
 
-    Parameters
+    Parameters:
     ----------
     net : Module
         Model/block.
 
-    Returns
+    Returns:
     -------
     int
         Number of parameters.
@@ -45,12 +45,12 @@ def calc_block_num_params(module):
     """
     Calculate number of trainable parameters in the block (iterative).
 
-    Parameters
+    Parameters:
     ----------
     module : Module
         Model/block.
 
-    Returns
+    Returns:
     -------
     int
         Number of parameters.

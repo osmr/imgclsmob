@@ -40,7 +40,7 @@ def shuffle_unit(x,
     name : str, default 'shuffle_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -131,7 +131,7 @@ def shuffle_init_block(x,
     name : str, default 'shuffle_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -248,7 +248,7 @@ def get_shufflenetv2b(width_scale,
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -296,7 +296,7 @@ def shufflenetv2b_wd2(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -319,7 +319,7 @@ def shufflenetv2b_w1(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -342,7 +342,7 @@ def shufflenetv2b_w3d2(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -365,7 +365,7 @@ def shufflenetv2b_w2(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     functor
         Functor for model graph creation with extra fields.

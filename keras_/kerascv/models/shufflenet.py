@@ -42,7 +42,7 @@ def shuffle_unit(x,
     name : str, default 'shuffle_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -122,7 +122,7 @@ def shuffle_init_block(x,
     name : str, default 'shuffle_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

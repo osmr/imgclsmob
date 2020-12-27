@@ -33,7 +33,7 @@ def vgg_dense(x,
     name : str, default 'vgg_dense'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -72,7 +72,7 @@ def vgg_output_block(x,
     name : str, default 'vgg_output_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -151,7 +151,7 @@ class VGG(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.

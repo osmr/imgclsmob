@@ -10,7 +10,7 @@ from mxnet.gluon import nn
 class FastSCNN(HybridBlock):
     r"""Fast-SCNN: Fast Semantic Segmentation Network
 
-    Parameters
+    Parameters:
     ----------
     nclass : int
         Number of categories for the training dataset.
@@ -369,7 +369,7 @@ class _FastPyramidPooling(HybridBlock):
 def get_fastscnn(dataset='citys', ctx=cpu(0), pretrained=False,
                  root='~/.mxnet/models', **kwargs):
     r"""Fast-SCNN: Fast Semantic Segmentation Network
-    Parameters
+    Parameters:
     ----------
     dataset : str, default cityscapes
     ctx : Context, default CPU
@@ -397,7 +397,7 @@ def get_fastscnn(dataset='citys', ctx=cpu(0), pretrained=False,
 
 def oth_fastscnn_citys(**kwargs):
     r"""Fast-SCNN: Fast Semantic Segmentation Network
-        Parameters
+        Parameters:
         ----------
         dataset : str, default cityscapes
         ctx : Context, default CPU

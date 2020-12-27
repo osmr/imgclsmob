@@ -122,7 +122,7 @@ def resize(img,
     """
     Resize the input PIL Image to the given size via OpenCV.
 
-    Parameters
+    Parameters:
     ----------
     img : PIL.Image
         input image.
@@ -131,7 +131,7 @@ def resize(img,
     interpolation : int
         Interpolation method for resizing.
 
-    Returns
+    Returns:
     -------
     PIL.Image
         Resulted image.
@@ -169,14 +169,14 @@ def center_crop(img,
     """
     Crop the given PIL Image.
 
-    Parameters
+    Parameters:
     ----------
     img : PIL.Image
         input image.
     output_size : tuple of (W, H)
         Size of output image.
 
-    Returns
+    Returns:
     -------
     PIL.Image
         Resulted image.
@@ -211,7 +211,7 @@ def load_image_imagenet1k_val(path,
             Supported interpolation methods are 'nearest', 'bilinear', 'bicubic', 'lanczos',
             'box', 'hamming' By default, 'nearest' is used.
 
-    # Returns
+    # Returns:
         A PIL Image instance.
 
     # Raises
@@ -271,7 +271,7 @@ def imagenet_train_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -300,7 +300,7 @@ def imagenet_val_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -329,7 +329,7 @@ def imagenet_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -362,7 +362,7 @@ def imagenet_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

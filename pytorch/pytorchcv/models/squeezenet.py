@@ -324,7 +324,7 @@ def squeezeresnet_v1_0(**kwargs):
 
 def squeezeresnet_v1_1(**kwargs):
     """
-    SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
+    SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer Parameters:
     and <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
     Parameters:

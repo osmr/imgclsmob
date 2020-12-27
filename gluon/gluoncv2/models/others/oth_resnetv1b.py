@@ -109,7 +109,7 @@ class ResNetV1b(HybridBlock):
     """ Pre-trained ResNetV1b Model, which produces the strides of 8
     featuremaps at conv5.
 
-    Parameters
+    Parameters:
     ----------
     block : Block
         Class for the residual block. Options are BasicBlockV1, BottleneckV1.
@@ -268,7 +268,7 @@ class ResNetV1b(HybridBlock):
 def resnet18_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-18 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -304,7 +304,7 @@ def resnet18_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet34_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-34 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -340,7 +340,7 @@ def resnet34_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet50_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -375,7 +375,7 @@ def resnet50_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet50_v1b_gn(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-50 GroupNorm model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -409,7 +409,7 @@ def resnet50_v1b_gn(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwar
 def resnet101_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-101 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -444,7 +444,7 @@ def resnet101_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet101_v1b_gn(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-50 GroupNorm model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -478,7 +478,7 @@ def resnet101_v1b_gn(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwa
 def resnet152_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1b-152 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -513,7 +513,7 @@ def resnet152_v1b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet50_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1c-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -545,7 +545,7 @@ def resnet50_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet101_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1c-101 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -576,7 +576,7 @@ def resnet101_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet152_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1c-152 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -607,7 +607,7 @@ def resnet152_v1c(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet50_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1d-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -638,7 +638,7 @@ def resnet50_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet101_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1d-101 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -669,7 +669,7 @@ def resnet101_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet152_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1d-152 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -700,7 +700,7 @@ def resnet152_v1d(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet50_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1e-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -732,7 +732,7 @@ def resnet50_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet101_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1e-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -764,7 +764,7 @@ def resnet101_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet152_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1e-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -797,7 +797,7 @@ def resnet152_v1e(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet50_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1s-50 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -820,7 +820,7 @@ def resnet50_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
 def resnet101_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1s-101 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.
@@ -843,7 +843,7 @@ def resnet101_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
 def resnet152_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1s-152 model.
 
-    Parameters
+    Parameters:
     ----------
     pretrained : bool or str
         Boolean value controls whether to load the default pretrained weights for model.

@@ -13,7 +13,7 @@ class CityscapesSegDataset(SegDataset):
     """
     Cityscapes semantic segmentation dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to a folder with `leftImg8bit` and `gtFine` subfolders.

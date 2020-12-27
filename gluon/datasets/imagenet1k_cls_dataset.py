@@ -17,7 +17,7 @@ class ImageNet1K(ImageFolderDataset):
 
     Refer to MXNet documentation for the description of this dataset and how to prepare it.
 
-    Parameters
+    Parameters:
     ----------
     root : str, default '~/.mxnet/datasets/imagenet'
         Path to the folder stored the dataset.
@@ -269,7 +269,7 @@ def imagenet_train_transform(ds_metainfo,
     lighting_param : float
         How much to noise intensity of the image.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -317,7 +317,7 @@ def imagenet_val_transform(ds_metainfo):
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -351,7 +351,7 @@ def calc_val_resize_value(input_image_size=(224, 224),
     resize_inv_factor : float
         Resize inverted factor.
 
-    Returns
+    Returns:
     -------
     int
         Resize value.

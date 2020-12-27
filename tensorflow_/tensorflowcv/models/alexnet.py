@@ -47,7 +47,7 @@ def alex_conv(x,
     name : str, default 'alex_conv'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -90,7 +90,7 @@ def alex_dense(x,
     name : str, default 'alex_dense'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -129,7 +129,7 @@ def alex_output_block(x,
     name : str, default 'alex_output_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -216,7 +216,7 @@ class AlexNet(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns
+        Returns:
         -------
         Tensor
             Resulted tensor.

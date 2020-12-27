@@ -94,7 +94,7 @@ def _try_load_parameters(self, filename=None, model=None, ctx=None, allow_missin
 class ZeroUniform(Initializer):
     """Initializes weights with random values uniformly sampled from a given range.
 
-    Parameters
+    Parameters:
     ----------
     scale : float, optional
         The bound on the range of the generated random values.
@@ -112,7 +112,7 @@ class ZeroUniform(Initializer):
 class PixelShuffle(HybridBlock):
     """PixelShuffle layer for re-org channel to spatial dimention.
 
-    Parameters
+    Parameters:
     ----------
     upscale_factor : int
         Upscaling factor for input->output spatially.
@@ -135,7 +135,7 @@ class PixelShuffle(HybridBlock):
 class DUC(HybridBlock):
     """ DUC layer
 
-    Parameters
+    Parameters:
     ----------
     planes : int
         Number of output channels.
@@ -243,7 +243,7 @@ class Bottleneck(HybridBlock):
 
 class FastSEResNet(HybridBlock):
     """ FastSEResNet """
-    try_load_parameters = _try_load_parameters
+    try_load_parameters = _try_load_Parameters:
 
     def __init__(self, architecture, norm_layer=nn.BatchNorm, **kwargs):
         super(FastSEResNet, self).__init__()
@@ -369,7 +369,7 @@ def get_alphapose(name, dataset, num_joints, pretrained=False,
                   root=os.path.join('~', '.mxnet', 'models'), **kwargs):
     r"""Utility function to return AlphaPose networks.
 
-    Parameters
+    Parameters:
     ----------
     name : str
         Model name.
@@ -383,7 +383,7 @@ def get_alphapose(name, dataset, num_joints, pretrained=False,
     root : str
         Model weights storing path.
 
-    Returns
+    Returns:
     -------
     mxnet.gluon.HybridBlock
         The AlphaPose network.
@@ -412,12 +412,12 @@ def get_alphapose(name, dataset, num_joints, pretrained=False,
 
 def oth_alpha_pose_resnet101_v1b_coco(pretrained=False, **kwargs):
     r""" ResNet-101 backbone model from AlphaPose
-    Parameters
+    Parameters:
     ----------
     num_gpus : int
         Number of usable GPUs.
 
-    Returns
+    Returns:
     -------
     mxnet.gluon.HybridBlock
         The AlphaPose network.

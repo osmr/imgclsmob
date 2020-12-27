@@ -15,7 +15,7 @@ class CocoSegDataset(SegDataset):
     """
     COCO semantic segmentation dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to `annotations`, `train2017`, and `val2017` folders.

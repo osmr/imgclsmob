@@ -36,7 +36,7 @@ def preres_block(x,
     name : str, default 'preres_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
@@ -80,7 +80,7 @@ def preres_bottleneck_block(x,
     name : str, default 'preres_bottleneck_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
@@ -135,7 +135,7 @@ def preres_unit(x,
     name : str, default 'preres_unit'
         Unit name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor.
@@ -189,7 +189,7 @@ def preres_init_block(x,
     name : str, default 'preres_init_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -227,7 +227,7 @@ def preres_activation(x,
     name : str, default 'preres_activation'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

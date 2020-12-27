@@ -17,7 +17,7 @@ def seg_pixel_accuracy_np(label_imask,
     """
     The segmentation pixel accuracy.
 
-    Parameters
+    Parameters:
     ----------
     label_imask : np.array
         Ground truth index mask (maybe batch of).
@@ -32,7 +32,7 @@ def seg_pixel_accuracy_np(label_imask,
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
-    Returns
+    Returns:
     -------
     float or tuple of two ints
         PA metric value.
@@ -60,14 +60,14 @@ def segm_mean_accuracy_hmasks(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns
+    Returns:
     -------
     float
         MA metric value.
@@ -104,14 +104,14 @@ def segm_mean_accuracy(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_imask : np.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         MA metric value.
@@ -149,14 +149,14 @@ def segm_mean_iou_imasks(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns
+    Returns:
     -------
     float
         MA metric value.
@@ -193,14 +193,14 @@ def seg_mean_iou_np(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_imask : np.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         MIoU metric value.
@@ -238,14 +238,14 @@ def segm_mean_iou2(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask (batch of).
     pred_hmask : nd.array
         Predicted one-hot mask (batch of).
 
-    Returns
+    Returns:
     -------
     float
         MIoU metric value.
@@ -281,7 +281,7 @@ def seg_mean_iou_imasks_np(label_imask,
     """
     The segmentation mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_imask : nd.array
         Ground truth index mask (batch of).
@@ -302,7 +302,7 @@ def seg_mean_iou_imasks_np(label_imask,
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
-    Returns
+    Returns:
     -------
     float or tuple of two np.arrays of int
         MIoU metric value.
@@ -357,14 +357,14 @@ def segm_fw_iou_hmasks(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns
+    Returns:
     -------
     float
         FrIoU metric value.
@@ -396,14 +396,14 @@ def segm_fw_iou(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
     pred_imask : np.array
         Predicted index mask.
 
-    Returns
+    Returns:
     -------
     float
         FrIoU metric value.

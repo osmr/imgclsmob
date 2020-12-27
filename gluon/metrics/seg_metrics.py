@@ -14,7 +14,7 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
     """
     Computes the pixel-wise accuracy.
 
-    Parameters
+    Parameters:
     ----------
     axis : int, default 1
         The axis that represents classes.
@@ -69,7 +69,7 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : list of `NDArray`
             The labels of the data.
@@ -133,7 +133,7 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -156,7 +156,7 @@ class MeanIoUMetric(mx.metric.EvalMetric):
     """
     Computes the mean intersection over union.
 
-    Parameters
+    Parameters:
     ----------
     axis : int, default 1
         The axis that represents classes
@@ -222,7 +222,7 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : list of `NDArray`
             The labels of the data.
@@ -292,7 +292,7 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.

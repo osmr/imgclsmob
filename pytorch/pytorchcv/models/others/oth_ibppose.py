@@ -161,7 +161,7 @@ class Hourglass(nn.Module):
         self.bn = bn
         self.resBlock = resBlock
         self.convBlock = convBlock
-        # will execute when instantiate the Hourglass object, prepare network's parameters
+        # will execute when instantiate the Hourglass object, prepare network's Parameters:
         self.hg = self._make_hour_glass()
         self.downsample = nn.MaxPool2d(2, 2)  # no learning parameters, can be used any times repeatedly
         self.upsample = nn.Upsample(scale_factor=2, mode='nearest')  # no learning parameters  # FIXME: 改成反卷积？
@@ -417,7 +417,7 @@ def load_model(net,
     """
     Load model state dictionary from a file.
 
-    Parameters
+    Parameters:
     ----------
     net : Module
         Network in which weights are loaded.

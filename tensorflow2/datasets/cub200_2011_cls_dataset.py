@@ -205,7 +205,7 @@ def cub200_train_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -234,7 +234,7 @@ def cub200_val_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns
+    Returns:
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -263,7 +263,7 @@ def cub200_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -295,7 +295,7 @@ def cub200_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

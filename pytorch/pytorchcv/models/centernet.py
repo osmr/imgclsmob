@@ -123,7 +123,7 @@ class CenterNetHeatmapMaxDet(nn.Module):
     """
     CenterNet decoder for heads (heatmap, wh, reg).
 
-    Parameters
+    Parameters:
     ----------
     topk : int, default 40
         Keep only `topk` detections.
@@ -183,7 +183,7 @@ class CenterNet(nn.Module):
     """
     CenterNet model from 'Objects as Points,' https://arxiv.org/abs/1904.07850.
 
-    Parameters
+    Parameters:
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -271,7 +271,7 @@ def get_centernet(backbone,
     """
     Create CenterNet model with specific parameters.
 
-    Parameters
+    Parameters:
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -286,7 +286,7 @@ def get_centernet(backbone,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     nn.Module
         A network.

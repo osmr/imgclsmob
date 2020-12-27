@@ -23,7 +23,7 @@ def get_pip_versions(package_list,
     python_version : str, default ''
         Python version ('2', '3', '') appended to 'pip' command.
 
-    Returns
+    Returns:
     -------
     dict
         Dictionary with module descriptions.
@@ -50,7 +50,7 @@ def get_package_versions(package_list):
     package_list : list of str
         List of package names.
 
-    Returns
+    Returns:
     -------
     dict
         Dictionary with module descriptions.
@@ -91,7 +91,7 @@ def get_pyenv_info(packages,
     sys_info : bool, default True
         Whether to show platform info.
 
-    Returns
+    Returns:
     -------
     dict
         Dictionary with module descriptions.
@@ -148,7 +148,7 @@ def pretty_print_dict2str(d):
     d : dict
         Dictionary with module descriptions.
 
-    Returns
+    Returns:
     -------
     str
         Resulted string.
@@ -181,7 +181,7 @@ def get_env_stats(packages,
     sys_info : bool, default True
         Whether to show platform info.
 
-    Returns
+    Returns:
     -------
     str
         Resulted string with information.

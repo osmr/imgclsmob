@@ -11,7 +11,7 @@ from .cifar10_cls_dataset import CIFAR10MetaInfo
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
     """Download an given URL
 
-    Parameters
+    Parameters:
     ----------
     url : str
         URL to download
@@ -28,7 +28,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     verify_ssl : bool, default True
         Verify SSL certificates.
 
-    Returns
+    Returns:
     -------
     str
         The file path of the downloaded file.
@@ -94,14 +94,14 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
 def _check_sha1(filename, sha1_hash):
     """Check whether the sha1 hash of the file content matches the expected hash.
 
-    Parameters
+    Parameters:
     ----------
     filename : str
         Path to the file.
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
 
-    Returns
+    Returns:
     -------
     bool
         Whether the file content matches the expected hash.
@@ -125,7 +125,7 @@ def get_svhn_data(root,
     Note: The SVHN dataset assigns the label `10` to the digit `0`. However, in this Dataset,
     we assign the label `0` to the digit `0`.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to temp folder for storing data.
@@ -185,7 +185,7 @@ def svhn_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.
@@ -217,7 +217,7 @@ def svhn_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns
+    Returns:
     -------
     Sequential
         Image transform sequence.

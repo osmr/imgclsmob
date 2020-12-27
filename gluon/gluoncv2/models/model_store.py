@@ -649,14 +649,14 @@ def get_model_file(model_name,
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
 
-    Parameters
+    Parameters:
     ----------
     model_name : str
         Name of the model.
     local_model_store_dir_path : str, default $MXNET_HOME/models
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     file_path
         Path to the requested pretrained model file.

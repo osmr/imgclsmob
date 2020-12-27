@@ -26,7 +26,7 @@ def channel_squeeze(x,
     groups : int
         Number of groups.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.

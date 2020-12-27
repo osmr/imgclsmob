@@ -11,7 +11,7 @@ class Top1Error(mx.metric.Accuracy):
     """
     Computes top-1 error (inverted accuracy classification score).
 
-    Parameters
+    Parameters:
     ----------
     axis : int, default 1
         The axis that represents classes.
@@ -39,7 +39,7 @@ class Top1Error(mx.metric.Accuracy):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -56,7 +56,7 @@ class TopKError(mx.metric.TopKAccuracy):
     """
     Computes top-k error (inverted top k predictions accuracy).
 
-    Parameters
+    Parameters:
     ----------
     top_k : int
         Whether targets are out of top k predictions, default 1
@@ -86,7 +86,7 @@ class TopKError(mx.metric.TopKAccuracy):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.

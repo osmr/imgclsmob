@@ -120,7 +120,7 @@ def parse_args():
     """
     Parse python script parameters (common part).
 
-    Returns
+    Returns:
     -------
     ArgumentParser
         Resulted args.
@@ -156,12 +156,12 @@ def prepare_dataset_metainfo(args):
     """
     Get dataset metainfo by name of dataset.
 
-    Parameters
+    Parameters:
     ----------
     args : ArgumentParser
         Main script arguments.
 
-    Returns
+    Returns:
     -------
     DatasetMetaInfo
         Dataset metainfo.
@@ -191,7 +191,7 @@ def prepare_data_source(ds_metainfo,
     num_workers : int
         Number of background workers.
 
-    Returns
+    Returns:
     -------
     DataLoader
         Data source.
@@ -220,7 +220,7 @@ def prepare_metric(ds_metainfo,
     data_subset : str
         Data subset.
 
-    Returns
+    Returns:
     -------
     CompositeEvalMetric
         Metric object instance.
@@ -250,7 +250,7 @@ def update_input_image_size(net,
     input_size : int
         Preliminary value for input image size.
 
-    Returns
+    Returns:
     -------
     tuple of 2 ints
         Spatial size of the expected input image.
@@ -297,7 +297,7 @@ def calc_model_accuracy(net,
     extended_log : bool, default False
         Whether to log more precise accuracy values.
 
-    Returns
+    Returns:
     -------
     list of floats
         Accuracy values.
@@ -347,7 +347,7 @@ def test_model(args):
     args : ArgumentParser
         Main script arguments.
 
-    Returns
+    Returns:
     -------
     float
         Main accuracy value.

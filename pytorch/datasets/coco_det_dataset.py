@@ -17,7 +17,7 @@ class CocoDetDataset(data.Dataset):
     """
     MS COCO detection dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to folder storing the dataset.
@@ -131,12 +131,12 @@ class CocoDetDataset(data.Dataset):
     def _parse_image_path(self, entry):
         """How to parse image dir and path from entry.
 
-        Parameters
+        Parameters:
         ----------
         entry : dict
             COCO entry, e.g. including width, height, image path, etc..
 
-        Returns
+        Returns:
         -------
         abs_path : str
             Absolute path for corresponding image.
@@ -238,7 +238,7 @@ class CocoDetDataset(data.Dataset):
 
         All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
 
-        Parameters
+        Parameters:
         ----------
         xyxy : list, tuple or numpy.ndarray
             The bbox in format (xmin, ymin, xmax, ymax).
@@ -249,7 +249,7 @@ class CocoDetDataset(data.Dataset):
         height : int or float
             Boundary height.
 
-        Returns
+        Returns:
         -------
         tuple or np.array
             Description of returned object.
@@ -278,14 +278,14 @@ class CocoDetDataset(data.Dataset):
         """
         Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
 
-        Parameters
+        Parameters:
         ----------
         xywh : list, tuple or numpy.ndarray
             The bbox in format (x, y, w, h).
             If numpy.ndarray is provided, we expect multiple bounding boxes with
             shape `(N, 4)`.
 
-        Returns
+        Returns:
         -------
         tuple or np.ndarray
             The converted bboxes in format (xmin, ymin, xmax, ymax).
@@ -354,7 +354,7 @@ class CocoDetValTransform(object):
         """
         Get affine transform matrix given center, scale and rotation.
 
-        Parameters
+        Parameters:
         ----------
         center : tuple of float
             Center point.
@@ -369,7 +369,7 @@ class CocoDetValTransform(object):
         inv : bool
             Whether inverse the computation.
 
-        Returns
+        Returns:
         -------
         numpy.ndarray
             Affine matrix.
@@ -407,14 +407,14 @@ class CocoDetValTransform(object):
         """
         Get rotation direction.
 
-        Parameters
+        Parameters:
         ----------
         src_point : tuple of float
             Original point.
         rot_rad : float
             Rotation radian.
 
-        Returns
+        Returns:
         -------
         tuple of float
             Rotation.
@@ -432,14 +432,14 @@ class CocoDetValTransform(object):
         """
         Get the 3rd point position given first two points.
 
-        Parameters
+        Parameters:
         ----------
         a : tuple of float
             First point.
         b : tuple of float
             Second point.
 
-        Returns
+        Returns:
         -------
         tuple of float
             Third point.
@@ -452,14 +452,14 @@ class CocoDetValTransform(object):
         """
         Apply affine transform to a bounding box given transform matrix t.
 
-        Parameters
+        Parameters:
         ----------
         pt : numpy.ndarray
             Bounding box with shape (1, 2).
         t : numpy.ndarray
             Transformation matrix with shape (2, 3).
 
-        Returns
+        Returns:
         -------
         numpy.ndarray
             New bounding box with shape (1, 2).
@@ -484,11 +484,11 @@ class Tuple(object):
         """
         Batchify the input data.
 
-        Parameters
+        Parameters:
         ----------
         data : list
             The samples to batchfy. Each sample should contain N attributes.
-        Returns
+        Returns:
         -------
         tuple
             A tuple of length N. Contains the batchified result of each attribute in the input.
@@ -507,12 +507,12 @@ class Stack(object):
         """
         Batchify the input data.
 
-        Parameters
+        Parameters:
         ----------
         data : list
             The input data samples
 
-        Returns
+        Returns:
         -------
         NDArray
             Result.
@@ -553,12 +553,12 @@ class Pad(object):
         """
         Batchify the input data.
 
-        Parameters
+        Parameters:
         ----------
         data : list
             A list of N samples. Each sample can be 1) ndarray or
              2) a list/tuple of ndarrays
-        Returns
+        Returns:
         -------
         NDArray
             Data in the minibatch. Shape is (N, ...)
@@ -627,7 +627,7 @@ def get_post_transform(orig_w, orig_h, out_w, out_h):
     """Get the post prediction affine transforms. This will be used to adjust the prediction results
     according to original coco image resolutions.
 
-    Parameters
+    Parameters:
     ----------
     orig_w : int
         Original width of the image.
@@ -638,7 +638,7 @@ def get_post_transform(orig_w, orig_h, out_w, out_h):
     out_h : int
         Height of the output image after prediction.
 
-    Returns
+    Returns:
     -------
     numpy.ndarray
         Affine transform matrix 3x2.

@@ -12,7 +12,7 @@ class CIFAR100Fine(CIFAR100):
     CIFAR-100 image classification dataset.
 
 
-    Parameters
+    Parameters:
     ----------
     root : str, default $MXNET_HOME/datasets/cifar100
         Path to temp folder for storing data.

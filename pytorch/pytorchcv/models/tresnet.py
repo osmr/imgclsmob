@@ -23,7 +23,7 @@ def anti_aliased_downsample(x):
     x : Tensor
         Input tensor.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.
@@ -253,7 +253,7 @@ def space_to_depth(x):
     x : Tensor
         Input tensor.
 
-    Returns
+    Returns:
     -------
     Tensor
         Resulted tensor.

@@ -172,14 +172,14 @@ def get_model_file(model_name,
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
 
-    Parameters
+    Parameters:
     ----------
     model_name : str
         Name of the model.
     local_model_store_dir_path : str, default $TENSORFLOW_HOME/models
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     file_path
         Path to the requested pretrained model file.
@@ -224,7 +224,7 @@ def get_model_file(model_name,
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
     """Download an given URL
 
-    Parameters
+    Parameters:
     ----------
     url : str
         URL to download
@@ -241,7 +241,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     verify_ssl : bool, default True
         Verify SSL certificates.
 
-    Returns
+    Returns:
     -------
     str
         The file path of the downloaded file.
@@ -307,14 +307,14 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
 def _check_sha1(filename, sha1_hash):
     """Check whether the sha1 hash of the file content matches the expected hash.
 
-    Parameters
+    Parameters:
     ----------
     filename : str
         Path to the file.
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
 
-    Returns
+    Returns:
     -------
     bool
         Whether the file content matches the expected hash.
@@ -334,12 +334,12 @@ def load_state_dict(file_path):
     """
     Load model state dictionary from a file.
 
-    Parameters
+    Parameters:
     ----------
     file_path : str
         Path to the file.
 
-    Returns
+    Returns:
     -------
     state_dict : dict
         Dictionary with values of model variables.
@@ -360,14 +360,14 @@ def download_state_dict(model_name,
     """
     Load model state dictionary from a file with downloading it if necessary.
 
-    Parameters
+    Parameters:
     ----------
     model_name : str
         Name of the model.
     local_model_store_dir_path : str, default $TENSORFLOW_HOME/models
         Location for keeping the model parameters.
 
-    Returns
+    Returns:
     -------
     state_dict : dict
         Dictionary with values of model variables.
@@ -387,7 +387,7 @@ def init_variables_from_state_dict(sess,
     """
     Initialize model variables from state dictionary.
 
-    Parameters
+    Parameters:
     ----------
     sess: Session
         A Session to use to load the weights.

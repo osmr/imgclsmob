@@ -13,7 +13,7 @@ def img_normalization(img,
     """
     Normalization as in the ImageNet-1K validation procedure.
 
-    Parameters
+    Parameters:
     ----------
     img : np.array
         input image.
@@ -22,7 +22,7 @@ def img_normalization(img,
     std_rgb : tuple of 3 float
         STD of RGB channels in the dataset.
 
-    Returns
+    Returns:
     -------
     np.array
         Output image.

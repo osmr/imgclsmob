@@ -11,7 +11,7 @@ def check_label_shapes(labels, preds, shape=False):
     """
     Helper function for checking shape of label and prediction.
 
-    Parameters
+    Parameters:
     ----------
     labels : list of xp.array
         The labels of the data.
@@ -33,7 +33,7 @@ class EvalMetric(object):
     """
     Base class for all evaluation metrics.
 
-    Parameters
+    Parameters:
     ----------
     name : str
         Name of this metric instance for display.
@@ -76,7 +76,7 @@ class EvalMetric(object):
         """
         Update the internal evaluation with named label and pred.
 
-        Parameters
+        Parameters:
         ----------
         labels : OrderedDict of str -> xp.array
             name to array mapping for labels.
@@ -99,7 +99,7 @@ class EvalMetric(object):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : xp.array
             The labels of the data.
@@ -128,7 +128,7 @@ class EvalMetric(object):
         """
         Gets the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -144,7 +144,7 @@ class EvalMetric(object):
         """
         Gets the current global evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -163,7 +163,7 @@ class EvalMetric(object):
         """
         Returns zipped name and value pairs.
 
-        Returns
+        Returns:
         -------
         list of tuples
             A (name, value) tuple list.
@@ -179,7 +179,7 @@ class EvalMetric(object):
         """
         Returns zipped name and value pairs for global results.
 
-        Returns
+        Returns:
         -------
         list of tuples
             A (name, value) tuple list.
@@ -199,7 +199,7 @@ class CompositeEvalMetric(EvalMetric):
     """
     Manages multiple evaluation metrics.
 
-    Parameters
+    Parameters:
     ----------
     name : str, default 'composite'
         Name of this metric instance for display.
@@ -226,7 +226,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Adds a child metric.
 
-        Parameters
+        Parameters:
         ----------
         metric
             A metric instance.
@@ -248,7 +248,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters
+        Parameters:
         ----------
         labels : xp.array
             The labels of the data.
@@ -283,7 +283,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Returns the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.
@@ -304,7 +304,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Returns the current evaluation result.
 
-        Returns
+        Returns:
         -------
         names : list of str
            Name of the metrics.

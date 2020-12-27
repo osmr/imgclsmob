@@ -31,7 +31,7 @@ def vgg_dense(x,
     name : str, default 'vgg_dense'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -65,7 +65,7 @@ def vgg_output_block(x,
     name : str, default 'vgg_output_block'
         Block name.
 
-    Returns
+    Returns:
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

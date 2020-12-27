@@ -15,7 +15,7 @@ class WiderfaceDetDataset(dataset.Dataset):
     """
     WIDER FACE detection dataset.
 
-    Parameters
+    Parameters:
     ----------
     root : str
         Path to folder storing the dataset.

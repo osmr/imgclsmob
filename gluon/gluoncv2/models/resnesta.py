@@ -3,8 +3,8 @@
     Original paper: 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 """
 
-__all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnesta50', 'resnesta101', 'resnesta152',
-           'resnesta200', 'resnesta269', 'ResNeStADownBlock']
+__all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnestabc38', 'resnesta50', 'resnesta101',
+           'resnesta152', 'resnesta200', 'resnesta269', 'ResNeStADownBlock']
 
 import os
 from mxnet import cpu
@@ -484,6 +484,23 @@ def resnestabc26(**kwargs):
     return get_resnesta(blocks=26, bottleneck=True, model_name="resnestabc26", **kwargs)
 
 
+def resnestabc38(**kwargs):
+    """
+    ResNeSt(A)-BC-38 with average downsampling model from 'ResNeSt: Split-Attention Networks,'
+    https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnesta(blocks=38, bottleneck=True, model_name="resnestabc38", **kwargs)
+
+
 def resnesta50(**kwargs):
     """
     ResNeSt(A)-50 with average downsampling model with stride at the second convolution in bottleneck block
@@ -583,6 +600,7 @@ def _test():
         (resnestabc14, 224),
         (resnesta18, 224),
         (resnestabc26, 224),
+        (resnestabc38, 224),
         (resnesta50, 224),
         (resnesta101, 224),
         (resnesta152, 224),
@@ -610,6 +628,7 @@ def _test():
         assert (model != resnestabc14 or weight_count == 10611688)
         assert (model != resnesta18 or weight_count == 12763784)
         assert (model != resnestabc26 or weight_count == 17069448)
+        assert (model != resnestabc38 or weight_count == 23527208)
         assert (model != resnesta50 or weight_count == 27483240)
         assert (model != resnesta101 or weight_count == 48275016)
         assert (model != resnesta152 or weight_count == 65316040)

@@ -280,6 +280,7 @@ _models = {
     'resnestabc14': resnestabc14,
     'resnesta18': resnesta18,
     'resnestabc26': resnestabc26,
+    'resnestabc38': resnestabc38,
     'resnesta50': resnesta50,
     'resnesta101': resnesta101,
     'resnesta152': resnesta152,

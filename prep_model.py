@@ -68,7 +68,7 @@ def post_process(dst_dir_path,
                  model_name,
                  model_file_path,
                  log_file_path,
-                 line_count):
+                 log_line_num):
     """
     Post-process weight/log files.
 
@@ -82,11 +82,18 @@ def post_process(dst_dir_path,
         Model file path.
     log_file_path : str
         Log file path.
-    line_count : int
-        Log file last line count for analysis.
+    log_line_num : int
+        Log file last line number for analysis.
+
+    Returns:
+    -------
+    str
+        top5 error value.
+    str
+        sha1 hex digest.
     """
     with open(log_file_path, "r") as f:
-        log_file_tail = f.read().splitlines()[-line_count:]
+        log_file_tail = f.read().splitlines()[log_line_num]
     top5_err = re.findall(r"\d+\.\d+", re.findall(r", err-top5=\d+\.\d+", log_file_tail)[0])[0].split(".")[1]
 
     model_file_ext = ".".join(os.path.basename(model_file_path).split(".")[1:])
@@ -98,8 +105,9 @@ def post_process(dst_dir_path,
     os.rename(model_file_path, dst_model_file_path)
     os.rename(log_file_path, dst_model_file_path + ".log")
 
-    with zipfile.ZipFile(dst_model_file_path + ".zip", "w") as zf:
-        zf.write(dst_model_file_path)
+    with zipfile.ZipFile(dst_model_file_path + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(filename=dst_model_file_path, arcname=dst_model_file_name)
+    os.remove(dst_model_file_path)
 
     return top5_err, sha1_value
 
@@ -165,15 +173,16 @@ def main():
     if not os.path.exists(log_file_path):
         raise Exception("Log file doesn't exist: {}".format(log_file_path))
 
-    command = "python3 eval_gl.py --model={model_name} --resume={model_file_path} --save-dir={root_dir_path}" \
-              " --num-gpus=1 --batch-size=100 -j=4 --calc-flops"
-    subprocess.call([command.format(
-        model_name=model_name,
-        model_file_path=model_file_path,
-        root_dir_path=root_dir_path)], shell=True)
+    # command = "python3 eval_gl.py --model={model_name} --resume={model_file_path} --save-dir={root_dir_path}" \
+    #           " --num-gpus=1 --batch-size=100 -j=4 --calc-flops"
+    # subprocess.call([command.format(
+    #     model_name=model_name,
+    #     model_file_path=model_file_path,
+    #     root_dir_path=root_dir_path)], shell=True)
 
     dst_dir_path = os.path.join(root_dir_path, "_result")
-    os.mkdir(dst_dir_path)
+    if not os.path.exists(dst_dir_path):
+        os.mkdir(dst_dir_path)
 
     gl_log_file_path = os.path.join(dst_dir_path, "train.log")
     shutil.copy2(log_file_path, gl_log_file_path)
@@ -190,10 +199,16 @@ def main():
         model_name=model_name,
         model_file_path=gl_model_file_path,
         log_file_path=gl_log_file_path,
-        line_count=4)
+        log_line_num=-3)
     types.append("gl")
     top5s.append(top5_err)
     sha1s.append(sha1_value)
+
+    process_pt(
+        model_name=model_name,
+        root_dir_path=root_dir_path,
+        model_file_path=model_file_path,
+        log_file_path=log_file_path)
 
     slice_df_dict = {
         "Type": types,
@@ -205,12 +220,6 @@ def main():
         os.path.join(root_dir_path, "info.csv"),
         sep="\t",
         index=False)
-
-    # process_pt(
-    #     model_name=model_name,
-    #     root_dir_path=root_dir_path,
-    #     model_file_path=model_file_path,
-    #     log_file_path=log_file_path)
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, Conv2d, BatchNorm, AvgPool2d,\
-    MaxPool2d, get_channel_axis, flatten
+    MaxPool2d, SimpleSequential, get_channel_axis, flatten
 
 
 class MEUnit(nn.Layer):
@@ -248,7 +248,7 @@ class MENet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(MEInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -256,7 +256,7 @@ class MENet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 downsample = (j == 0)
                 ignore_group = (i == 0) and (j == 0)

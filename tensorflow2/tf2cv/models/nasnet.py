@@ -9,8 +9,8 @@ __all__ = ['NASNet', 'nasnet_4a1056', 'nasnet_6a4032', 'nasnet_dual_path_sequent
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, AvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, flatten, is_channels_first,\
-    get_channel_axis
+from .common import MaxPool2d, AvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, SimpleSequential, flatten,\
+    is_channels_first, get_channel_axis
 
 
 class NasDualPathScheme(object):
@@ -1463,7 +1463,7 @@ class NASNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=0.5,
             name="dropout"))

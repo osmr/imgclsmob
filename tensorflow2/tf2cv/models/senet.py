@@ -9,7 +9,7 @@ import os
 import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, SEBlock, MaxPool2d, flatten
+from .common import conv1x1_block, conv3x3_block, SEBlock, MaxPool2d, SimpleSequential, flatten
 
 
 class SENetBottleneck(nn.Layer):
@@ -239,7 +239,7 @@ class SENet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(SEInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -247,7 +247,7 @@ class SENet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             identity_conv3x3 = (i != 0)
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
@@ -268,7 +268,7 @@ class SENet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=0.2,
             name="dropout"))

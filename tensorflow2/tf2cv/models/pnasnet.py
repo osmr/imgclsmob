@@ -9,7 +9,7 @@ __all__ = ['PNASNet', 'pnasnet5large']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, conv1x1, flatten, is_channels_first, get_channel_axis
+from .common import MaxPool2d, conv1x1, SimpleSequential, flatten, is_channels_first, get_channel_axis
 from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock
 
 
@@ -623,7 +623,7 @@ class PNASNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=0.5,
             name="dropout"))

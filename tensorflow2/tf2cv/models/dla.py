@@ -8,7 +8,8 @@ __all__ = ['DLA', 'dla34', 'dla46c', 'dla46xc', 'dla60', 'dla60x', 'dla60xc', 'd
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, conv7x7_block, flatten, is_channels_first, get_channel_axis
+from .common import conv1x1, conv1x1_block, conv3x3_block, conv7x7_block, SimpleSequential, flatten, is_channels_first,\
+    get_channel_axis
 from .resnet import ResBlock, ResBottleneck
 from .resnext import ResNeXtBottleneck
 
@@ -398,7 +399,7 @@ class DLA(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(DLAInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,

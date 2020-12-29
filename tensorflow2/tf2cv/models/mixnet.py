@@ -9,7 +9,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, get_activation_layer, Conv2d, BatchNorm, conv1x1_block,\
-    conv3x3_block, dwconv3x3_block, SEBlock, flatten, is_channels_first, get_channel_axis
+    conv3x3_block, dwconv3x3_block, SEBlock, SimpleSequential, flatten, is_channels_first, get_channel_axis
 
 
 class MixConv(nn.Layer):
@@ -436,7 +436,7 @@ class MixNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(MixInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -444,7 +444,7 @@ class MixNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if ((j == 0) and (i != 3)) or \
                                ((j == len(channels_per_stage) // 2) and (i == 3)) else 1

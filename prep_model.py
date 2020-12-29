@@ -231,8 +231,8 @@ def main():
         "Sha1": [],
     }
 
-    # dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
-    dst_frameworks = ["chainer", "tf2"]
+    dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
+    # dst_frameworks = ["tf2"]
     for dst_framework in dst_frameworks:
         process_fwk(
             prep_info_dict=prep_info_dict,

@@ -9,7 +9,8 @@ __all__ = ['FBNet', 'fbnet_cb']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, flatten, is_channels_first
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SimpleSequential, flatten,\
+    is_channels_first
 
 
 class FBNetUnit(nn.Layer):
@@ -187,7 +188,7 @@ class FBNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(FBNetInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -196,7 +197,7 @@ class FBNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) else 1
                 use_kernel3 = kernels3[i][j] == 1

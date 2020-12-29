@@ -11,7 +11,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
-    HSwish, flatten, is_channels_first
+    HSwish, SimpleSequential, flatten, is_channels_first
 
 
 class MobileNetV3Unit(nn.Layer):
@@ -261,7 +261,7 @@ class MobileNetV3(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -271,7 +271,7 @@ class MobileNetV3(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 exp_channels_ij = exp_channels[i][j]
                 strides = 2 if (j == 0) and ((i != 0) or first_stride) else 1

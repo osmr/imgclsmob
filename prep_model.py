@@ -140,21 +140,25 @@ def process_fwk(prep_info_dict,
     if dst_framework == "gluon":
         dst_model_file_ext = "params"
         eval_script = "eval_gl"
+        num_gpus = 1
         calc_flops = "--calc-flops"
         log_line_num = -3
     elif dst_framework == "pytorch":
         dst_model_file_ext = "pth"
         eval_script = "eval_pt"
+        num_gpus = 1
         calc_flops = "--calc-flops"
         log_line_num = -3
     elif dst_framework == "chainer":
         dst_model_file_ext = "npz"
         eval_script = "eval_ch"
+        num_gpus = 0
         calc_flops = ""
         log_line_num = -2
     elif dst_framework == "tf2":
         dst_model_file_ext = "tf2.h5"
         eval_script = "eval_tf2"
+        num_gpus = 1
         calc_flops = ""
         log_line_num = -2
     else:
@@ -179,12 +183,13 @@ def process_fwk(prep_info_dict,
             dst_dir_path=dst_dir_path)], shell=True)
 
     command = "python3 {eval_script}.py --model={model_name} --resume={dst_raw_model_file_path}" \
-              " --save-dir={dst_dir_path} --num-gpus=1 --batch-size=100 -j=4 {calc_flops}"
+              " --save-dir={dst_dir_path} --num-gpus={num_gpus} --batch-size=100 -j=4 {calc_flops}"
     subprocess.call([command.format(
         eval_script=eval_script,
         model_name=model_name,
         dst_raw_model_file_path=dst_raw_model_file_path,
         dst_dir_path=dst_dir_path,
+        num_gpus=num_gpus,
         calc_flops=calc_flops)], shell=True)
 
     if dst_framework == "gluon":
@@ -226,7 +231,8 @@ def main():
         "Sha1": [],
     }
 
-    dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
+    # dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
+    dst_frameworks = ["chainer", "tf2"]
     for dst_framework in dst_frameworks:
         process_fwk(
             prep_info_dict=prep_info_dict,

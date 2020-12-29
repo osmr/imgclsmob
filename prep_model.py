@@ -68,6 +68,7 @@ def post_process(dst_dir_path,
                  model_name,
                  model_file_path,
                  log_file_path,
+                 dst_model_file_ext,
                  log_line_num):
     """
     Post-process weight/log files.
@@ -82,25 +83,25 @@ def post_process(dst_dir_path,
         Model file path.
     log_file_path : str
         Log file path.
+    dst_model_file_ext : str
+        Destination model file extension.
     log_line_num : int
         Log file last line number for analysis.
 
     Returns:
     -------
-    str
+    top5_err : str
         top5 error value.
-    str
+    sha1_value : str
         sha1 hex digest.
     """
     with open(log_file_path, "r") as f:
         log_file_tail = f.read().splitlines()[log_line_num]
     top5_err = re.findall(r"\d+\.\d+", re.findall(r", err-top5=\d+\.\d+", log_file_tail)[0])[0].split(".")[1]
 
-    model_file_ext = ".".join(os.path.basename(model_file_path).split(".")[1:])
-
     sha1_value = calc_sha1(model_file_path)
 
-    dst_model_file_name = "{}-{}-{}.{}".format(model_name, top5_err, sha1_value[:8], model_file_ext)
+    dst_model_file_name = "{}-{}-{}.{}".format(model_name, top5_err, sha1_value[:8], dst_model_file_ext)
     dst_model_file_path = os.path.join(dst_dir_path, dst_model_file_name)
     os.rename(model_file_path, dst_model_file_path)
     os.rename(log_file_path, dst_model_file_path + ".log")
@@ -112,58 +113,100 @@ def post_process(dst_dir_path,
     return top5_err, sha1_value
 
 
-def process_pt(model_name,
-               root_dir_path,
-               model_file_path,
-               log_file_path):
+def process_fwk(prep_info_dict,
+                dst_framework,
+                dst_dir_path,
+                model_name,
+                model_file_path,
+                log_file_path):
     """
-    Parse python script parameters.
+    Process weights on specific framework.
 
     Parameters:
     ----------
+    prep_info_dict : dict
+        Dictionary with preparation meta-info.
+    dst_dir_path : str
+        Destination dir path.
     model_name : str
         Model name.
-    root_dir_path : str
-        Root dir path.
     model_file_path : str
         Model file path.
     log_file_path : str
         Log file path.
+    dst_framework : str
+        Destination framework.
     """
-    pt_dir_path = os.path.join(root_dir_path, "pt-{}".format(model_name))
-    os.mkdir(pt_dir_path)
-    shutil.copy2(log_file_path, pt_dir_path)
-    pt_model_file_path = os.path.join(pt_dir_path, "{}.pth".format(model_name))
-    command = "python3 convert_models.py --src-fwk=gluon --dst-fwk=pytorch --src-model={model_name}" \
-              " --dst-model={model_name} --src-params={model_file_path} --dst-params={pt_model_file_path}" \
-              " --save-dir={pt_dir_path}"
+    if dst_framework == "gluon":
+        dst_model_file_ext = "params"
+        eval_script = "eval_gl"
+        calc_flops = "--calc-flops"
+        log_line_num = -3
+    elif dst_framework == "pytorch":
+        dst_model_file_ext = "pth"
+        eval_script = "eval_pt"
+        calc_flops = "--calc-flops"
+        log_line_num = -3
+    elif dst_framework == "chainer":
+        dst_model_file_ext = "npz"
+        eval_script = "eval_ch"
+        calc_flops = ""
+        log_line_num = -2
+    elif dst_framework == "tf2":
+        dst_model_file_ext = "tf2.h5"
+        eval_script = "eval_tf2"
+        calc_flops = ""
+        log_line_num = -2
+    else:
+        raise ValueError("Unknown framework: {}".format(dst_framework))
+
+    dst_raw_log_file_path = os.path.join(dst_dir_path, "train.log")
+    shutil.copy2(log_file_path, dst_raw_log_file_path)
+
+    dst_raw_model_file_path = os.path.join(dst_dir_path, "{}.{}".format(model_name, dst_model_file_ext))
+
+    if dst_framework == "gluon":
+        shutil.copy2(model_file_path, dst_raw_model_file_path)
+    else:
+        command = "python3 convert_models.py --src-fwk=gluon --dst-fwk={dst_framework} --src-model={model_name}" \
+                  " --dst-model={model_name} --src-params={model_file_path} --dst-params={dst_raw_model_file_path}" \
+                  " --save-dir={dst_dir_path}"
+        subprocess.call([command.format(
+            dst_framework=dst_framework,
+            model_name=model_name,
+            model_file_path=model_file_path,
+            dst_raw_model_file_path=dst_raw_model_file_path,
+            dst_dir_path=dst_dir_path)], shell=True)
+
+    command = "python3 {eval_script}.py --model={model_name} --resume={dst_raw_model_file_path}" \
+              " --save-dir={dst_dir_path} --num-gpus=1 --batch-size=100 -j=4 {calc_flops}"
     subprocess.call([command.format(
+        eval_script=eval_script,
         model_name=model_name,
-        model_file_path=model_file_path,
-        pt_model_file_path=pt_model_file_path,
-        pt_dir_path=pt_dir_path)], shell=True)
-    command = "python3 eval_pt.py --model={model_name} --resume={pt_model_file_path} --save-dir={pt_dir_path}" \
-              " --num-gpus=1 --batch-size=100 -j=4 --calc-flops"
-    subprocess.call([command.format(
+        dst_raw_model_file_path=dst_raw_model_file_path,
+        dst_dir_path=dst_dir_path,
+        calc_flops=calc_flops)], shell=True)
+
+    if dst_framework == "gluon":
+        shutil.copy2(dst_raw_log_file_path, log_file_path)
+
+    top5_err, sha1_value = post_process(
+        dst_dir_path=dst_dir_path,
         model_name=model_name,
-        pt_model_file_path=pt_model_file_path,
-        pt_dir_path=pt_dir_path)], shell=True)
+        model_file_path=dst_raw_model_file_path,
+        log_file_path=dst_raw_log_file_path,
+        dst_model_file_ext=dst_model_file_ext,
+        log_line_num=log_line_num)
 
-    pt_log_file_path = os.path.join(pt_dir_path, "train.log")
-    line_count = 4
-    with open(pt_log_file_path, "r") as f:
-        log_file_tail = f.read().splitlines()[-line_count:]
-    top5_err = re.findall(r"\d+\.\d+", re.findall(r", err-top5=\d+\.\d+", log_file_tail)[0])[0].split(".")[1]
-
-    sha1_value = calc_sha1(pt_model_file_path)
-
-    dst_pt_model_file_path = os.path.join(pt_dir_path, "{}-{}-{}.pth".format(model_name, top5_err, sha1_value[:8]))
-    os.rename(pt_model_file_path, dst_pt_model_file_path)
+    prep_info_dict["Type"].append(dst_framework)
+    prep_info_dict["Top5"].append(top5_err)
+    prep_info_dict["Sha1"].append(sha1_value)
 
 
 def main():
     args = parse_args()
     model_name = args.model
+
     model_file_path = os.path.expanduser(args.resume)
     if not os.path.exists(model_file_path):
         raise Exception("Model file doesn't exist: {}".format(model_file_path))
@@ -173,51 +216,29 @@ def main():
     if not os.path.exists(log_file_path):
         raise Exception("Log file doesn't exist: {}".format(log_file_path))
 
-    # command = "python3 eval_gl.py --model={model_name} --resume={model_file_path} --save-dir={root_dir_path}" \
-    #           " --num-gpus=1 --batch-size=100 -j=4 --calc-flops"
-    # subprocess.call([command.format(
-    #     model_name=model_name,
-    #     model_file_path=model_file_path,
-    #     root_dir_path=root_dir_path)], shell=True)
-
     dst_dir_path = os.path.join(root_dir_path, "_result")
     if not os.path.exists(dst_dir_path):
         os.mkdir(dst_dir_path)
 
-    gl_log_file_path = os.path.join(dst_dir_path, "train.log")
-    shutil.copy2(log_file_path, gl_log_file_path)
-
-    gl_model_file_path = os.path.join(dst_dir_path, "{}.params".format(model_name))
-    shutil.copy2(model_file_path, gl_model_file_path)
-
-    types = []
-    top5s = []
-    sha1s = []
-
-    top5_err, sha1_value = post_process(
-        dst_dir_path=dst_dir_path,
-        model_name=model_name,
-        model_file_path=gl_model_file_path,
-        log_file_path=gl_log_file_path,
-        log_line_num=-3)
-    types.append("gl")
-    top5s.append(top5_err)
-    sha1s.append(sha1_value)
-
-    process_pt(
-        model_name=model_name,
-        root_dir_path=root_dir_path,
-        model_file_path=model_file_path,
-        log_file_path=log_file_path)
-
-    slice_df_dict = {
-        "Type": types,
-        "Top5": top5s,
-        "Sha1": sha1s,
+    prep_info_dict = {
+        "Type": [],
+        "Top5": [],
+        "Sha1": [],
     }
-    slice_df = pd.DataFrame(slice_df_dict)
-    slice_df.to_csv(
-        os.path.join(root_dir_path, "info.csv"),
+
+    dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
+    for dst_framework in dst_frameworks:
+        process_fwk(
+            prep_info_dict=prep_info_dict,
+            dst_framework=dst_framework,
+            dst_dir_path=dst_dir_path,
+            model_name=model_name,
+            model_file_path=model_file_path,
+            log_file_path=log_file_path)
+
+    prep_info_df = pd.DataFrame(prep_info_dict)
+    prep_info_df.to_csv(
+        os.path.join(root_dir_path, "prep_info.csv"),
         sep="\t",
         index=False)
 

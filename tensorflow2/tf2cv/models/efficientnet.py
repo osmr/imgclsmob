@@ -17,7 +17,7 @@ import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
-    is_channels_first
+    SimpleSequential, is_channels_first
 
 
 def calc_tf_padding(x,
@@ -328,7 +328,7 @@ class EfficientNet(tf.keras.Model):
         self.data_format = data_format
         activation = "swish"
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(EffiInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -341,7 +341,7 @@ class EfficientNet(tf.keras.Model):
         for i, channels_per_stage in enumerate(channels):
             kernel_sizes_per_stage = kernel_sizes[i]
             expansion_factors_per_stage = expansion_factors[i]
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 kernel_size = kernel_sizes_per_stage[j]
                 expansion_factor = expansion_factors_per_stage[j]
@@ -383,7 +383,7 @@ class EfficientNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         if dropout_rate > 0.0:
             self.output1.add(nn.Dropout(
                 rate=dropout_rate,

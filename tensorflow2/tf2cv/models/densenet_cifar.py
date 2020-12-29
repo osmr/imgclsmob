@@ -16,7 +16,7 @@ __all__ = ['CIFARDenseNet', 'densenet40_k12_cifar10', 'densenet40_k12_cifar100',
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv3x3, pre_conv3x3_block, flatten, get_channel_axis, is_channels_first
+from .common import conv3x3, pre_conv3x3_block, SimpleSequential, flatten, get_channel_axis, is_channels_first
 from .preresnet import PreResActivation
 from .densenet import DenseUnit, TransitionBlock
 
@@ -105,7 +105,7 @@ class CIFARDenseNet(tf.keras.Model):
         self.data_format = data_format
         unit_class = DenseUnit if bottleneck else DenseSimpleUnit
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(conv3x3(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -113,7 +113,7 @@ class CIFARDenseNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             if i != 0:
                 stage.add(TransitionBlock(
                     in_channels=in_channels,

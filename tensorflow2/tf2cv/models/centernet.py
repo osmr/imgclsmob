@@ -10,7 +10,7 @@ __all__ = ['CenterNet', 'centernet_resnet18_voc', 'centernet_resnet18_coco', 'ce
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, conv1x1, conv3x3_block, DeconvBlock, Concurrent, is_channels_first
+from .common import MaxPool2d, conv1x1, conv3x3_block, DeconvBlock, Concurrent, SimpleSequential, is_channels_first
 from .resnet import resnet18, resnet50b, resnet101b
 
 
@@ -253,7 +253,7 @@ class CenterNet(tf.keras.Model):
         self.backbone = backbone
         self.backbone._name = "backbone"
 
-        self.decoder = tf.keras.Sequential(name="decoder")
+        self.decoder = SimpleSequential(name="decoder")
         in_channels = backbone_out_channels
         for i, out_channels in enumerate(channels):
             self.decoder.add(CenterNetDecoderUnit(

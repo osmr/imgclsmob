@@ -9,8 +9,8 @@ __all__ = ['SelecSLS', 'selecsls42', 'selecsls42b', 'selecsls60', 'selecsls60b',
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, DualPathSequential, AvgPool2d, flatten, is_channels_first,\
-    get_channel_axis
+from .common import conv1x1_block, conv3x3_block, DualPathSequential, AvgPool2d, SimpleSequential, flatten,\
+    is_channels_first, get_channel_axis
 
 
 class SelecSLSBlock(nn.Layer):
@@ -175,7 +175,7 @@ class SelecSLS(tf.keras.Model):
         for i, channels_per_stage in enumerate(channels):
             k = i - len(skip_channels)
             stage = DualPathSequential(name="stage{}".format(i + 1)) if k < 0 else\
-                tf.keras.Sequential(name="stage{}".format(i + 1))
+                SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if j == 0 else 1
                 if k < 0:

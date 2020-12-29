@@ -8,7 +8,7 @@ __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, conv1x1_block, conv3x3_block, MaxPool2d, flatten
+from .common import Conv2d, conv1x1_block, conv3x3_block, MaxPool2d, SimpleSequential, flatten
 
 
 def dark_convYxY(in_channels,
@@ -90,9 +90,9 @@ class DarkNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 stage.add(dark_convYxY(
                     in_channels=in_channels,
@@ -110,7 +110,7 @@ class DarkNet(tf.keras.Model):
                     name="pool{}".format(i + 1)))
             self.features.add(stage)
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(Conv2d(
             in_channels=in_channels,
             out_channels=classes,

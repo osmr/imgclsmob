@@ -9,7 +9,7 @@ __all__ = ['DiracNetV2', 'diracnet18v2', 'diracnet34v2']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, MaxPool2d, flatten, is_channels_first
+from .common import Conv2d, MaxPool2d, SimpleSequential, flatten, is_channels_first
 
 
 class DiracConv(nn.Layer):
@@ -157,7 +157,7 @@ class DiracNetV2(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(DiracInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -165,7 +165,7 @@ class DiracNetV2(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 stage.add(dirac_conv3x3(
                     in_channels=in_channels,

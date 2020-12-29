@@ -4,8 +4,8 @@
     https://arxiv.org/abs/1908.07919.
 """
 
-__all__ = ['hrnet_w18_small_v1', 'hrnet_w18_small_v2', 'hrnetv2_w18', 'hrnetv2_w30', 'hrnetv2_w32', 'hrnetv2_w40',
-           'hrnetv2_w44', 'hrnetv2_w48', 'hrnetv2_w64']
+__all__ = ['HRNet', 'hrnet_w18_small_v1', 'hrnet_w18_small_v2', 'hrnetv2_w18', 'hrnetv2_w30', 'hrnetv2_w32',
+           'hrnetv2_w40', 'hrnetv2_w44', 'hrnetv2_w48', 'hrnetv2_w64']
 
 import os
 import tensorflow as tf

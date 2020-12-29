@@ -8,7 +8,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import ConvBlock, conv1x1_block, conv7x7_block, MaxPool2d, flatten
+from .common import ConvBlock, conv1x1_block, conv7x7_block, MaxPool2d, SimpleSequential, flatten
 
 
 class SqnxtUnit(nn.Layer):
@@ -181,7 +181,7 @@ class SqueezeNext(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(SqnxtInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -189,7 +189,7 @@ class SqueezeNext(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
                 stage.add(SqnxtUnit(

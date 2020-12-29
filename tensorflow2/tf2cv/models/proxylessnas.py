@@ -10,7 +10,7 @@ __all__ = ['ProxylessNAS', 'proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import ConvBlock, conv1x1_block, conv3x3_block, flatten, is_channels_first
+from .common import ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, flatten, is_channels_first
 
 
 class ProxylessBlock(nn.Layer):
@@ -198,7 +198,7 @@ class ProxylessNAS(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -209,7 +209,7 @@ class ProxylessNAS(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             residuals_per_stage = residuals[i]
             shortcuts_per_stage = shortcuts[i]
             kernel_sizes_per_stage = kernel_sizes[i]

@@ -796,14 +796,14 @@ class InceptionV4(tf.keras.Model):
         normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
         reduction_units = [ReductionAUnit, ReductionBUnit]
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(InceptInitBlock(
             in_channels=in_channels,
             data_format=data_format,
             name="init_block"))
 
         for i, layers_per_stage in enumerate(layers):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j in range(layers_per_stage):
                 if (j == 0) and (i != 0):
                     unit = reduction_units[i - 1]
@@ -819,7 +819,7 @@ class InceptionV4(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         if dropout_rate > 0.0:
             self.output1.add(nn.Dropout(
                 rate=dropout_rate,

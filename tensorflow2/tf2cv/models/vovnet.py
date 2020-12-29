@@ -9,7 +9,8 @@ __all__ = ['VoVNet', 'vovnet27s', 'vovnet39', 'vovnet57']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, SequentialConcurrent, MaxPool2d, flatten, is_channels_first
+from .common import conv1x1_block, conv3x3_block, SequentialConcurrent, MaxPool2d, SimpleSequential, flatten,\
+    is_channels_first
 
 
 class VoVUnit(nn.Layer):
@@ -167,7 +168,7 @@ class VoVNet(tf.keras.Model):
         self.data_format = data_format
         init_block_channels = 128
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(VoVInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -175,7 +176,7 @@ class VoVNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 use_residual = (j != 0)
                 resize = (j == 0) and (i != 0)

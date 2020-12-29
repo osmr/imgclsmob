@@ -557,7 +557,7 @@ class LwOpenPose(tf.keras.Model):
         self.calc_3d_features = calc_3d_features
         num_heatmap_paf = 3 * keypoints
 
-        self.encoder = tf.keras.Sequential(name="encoder")
+        self.encoder = SimpleSequential(name="encoder")
         backbone = SimpleSequential(name="backbone")
         backbone.add(conv3x3_block(
             in_channels=in_channels,
@@ -589,7 +589,7 @@ class LwOpenPose(tf.keras.Model):
             name="final_block"))
         in_channels = encoder_final_block_channels
 
-        self.decoder = tf.keras.Sequential(name="decoder")
+        self.decoder = SimpleSequential(name="decoder")
         self.decoder.add(LwopDecoderInitBlock(
             in_channels=in_channels,
             keypoints=keypoints,

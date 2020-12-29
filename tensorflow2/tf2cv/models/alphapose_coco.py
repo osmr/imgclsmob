@@ -7,7 +7,7 @@ __all__ = ['AlphaPose', 'alphapose_fastseresnet101b_coco']
 
 import os
 import tensorflow as tf
-from .common import conv3x3, PixelShuffle, DucBlock, HeatmapMaxDetBlock, is_channels_first
+from .common import conv3x3, PixelShuffle, DucBlock, HeatmapMaxDetBlock, SimpleSequential, is_channels_first
 from .fastseresnet import fastseresnet101b
 
 
@@ -54,7 +54,7 @@ class AlphaPose(tf.keras.Model):
         self.backbone = backbone
         self.backbone._name = "backbone"
 
-        self.decoder = tf.keras.Sequential(name="decoder")
+        self.decoder = SimpleSequential(name="decoder")
         self.decoder.add(PixelShuffle(
             scale_factor=2,
             data_format=data_format,

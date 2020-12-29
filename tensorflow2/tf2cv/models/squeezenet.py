@@ -9,7 +9,7 @@ __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import get_channel_axis, Conv2d, MaxPool2d, flatten
+from .common import get_channel_axis, Conv2d, MaxPool2d, SimpleSequential, flatten
 
 
 class FireConv(nn.Layer):
@@ -193,7 +193,7 @@ class SqueezeNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(SqueezeInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -202,7 +202,7 @@ class SqueezeNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             stage.add(MaxPool2d(
                 pool_size=3,
                 strides=2,
@@ -226,7 +226,7 @@ class SqueezeNet(tf.keras.Model):
             rate=0.5,
             name="dropout"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(Conv2d(
             in_channels=in_channels,
             out_channels=classes,

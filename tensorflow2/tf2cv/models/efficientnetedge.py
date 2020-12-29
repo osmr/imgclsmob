@@ -10,7 +10,7 @@ import os
 import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import round_channels, conv1x1_block, conv3x3_block, SEBlock, is_channels_first
+from .common import round_channels, conv1x1_block, conv3x3_block, SEBlock, SimpleSequential, is_channels_first
 from .efficientnet import EffiInvResUnit, EffiInitBlock
 
 
@@ -148,7 +148,7 @@ class EfficientNetEdge(tf.keras.Model):
         self.data_format = data_format
         activation = "relu"
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(EffiInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -163,7 +163,7 @@ class EfficientNetEdge(tf.keras.Model):
             expansion_factors_per_stage = expansion_factors[i]
             mid_from_in = (i != 0)
             use_skip = (i != 0)
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 kernel_size = kernel_sizes_per_stage[j]
                 expansion_factor = expansion_factors_per_stage[j]
@@ -208,7 +208,7 @@ class EfficientNetEdge(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         if dropout_rate > 0.0:
             self.output1.add(nn.Dropout(
                 rate=dropout_rate,

@@ -9,7 +9,8 @@ __all__ = ['IBNDenseNet', 'ibn_densenet121', 'ibn_densenet161', 'ibn_densenet169
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, BatchNorm, pre_conv3x3_block, IBN, flatten, is_channels_first, get_channel_axis
+from .common import Conv2d, BatchNorm, pre_conv3x3_block, IBN, SimpleSequential, flatten, is_channels_first,\
+    get_channel_axis
 from .preresnet import PreResInitBlock, PreResActivation
 from .densenet import TransitionBlock
 
@@ -218,7 +219,7 @@ class IBNDenseNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(PreResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -226,7 +227,7 @@ class IBNDenseNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             if i != 0:
                 stage.add(TransitionBlock(
                     in_channels=in_channels,

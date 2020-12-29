@@ -9,7 +9,7 @@ __all__ = ['SimplePoseMobile', 'simplepose_mobile_resnet18_coco', 'simplepose_mo
 
 import os
 import tensorflow as tf
-from .common import conv1x1, DucBlock, HeatmapMaxDetBlock, is_channels_first
+from .common import conv1x1, DucBlock, HeatmapMaxDetBlock, SimpleSequential, is_channels_first
 from .resnet import resnet18, resnet50b
 from .mobilenet import mobilenet_w1
 from .mobilenetv2 import mobilenetv2b_w1
@@ -63,7 +63,7 @@ class SimplePoseMobile(tf.keras.Model):
         self.backbone = backbone
         self.backbone._name = "backbone"
 
-        self.decoder = tf.keras.Sequential(name="decoder")
+        self.decoder = SimpleSequential(name="decoder")
         in_channels = backbone_out_channels
         self.decoder.add(conv1x1(
             in_channels=in_channels,

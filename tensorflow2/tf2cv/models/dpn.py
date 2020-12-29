@@ -8,8 +8,8 @@ __all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn98', 'dpn107', 'dpn131']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, GlobalAvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, flatten,\
-    is_channels_first, get_channel_axis
+from .common import MaxPool2d, GlobalAvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, SimpleSequential,\
+    flatten, is_channels_first, get_channel_axis
 
 
 class GlobalAvgMaxPool2D(nn.Layer):
@@ -504,7 +504,7 @@ class DPN(tf.keras.Model):
             data_format=data_format,
             name="final_block"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         if for_training or not test_time_pool:
             self.output1.add(GlobalAvgPool2d(
                 data_format=data_format,

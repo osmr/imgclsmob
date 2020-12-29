@@ -335,14 +335,14 @@ class Xception(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(XceptionInitBlock(
             in_channels=in_channels,
             data_format=data_format,
             name="init_block"))
         in_channels = 64
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 stage.add(XceptionUnit(
                     in_channels=in_channels,

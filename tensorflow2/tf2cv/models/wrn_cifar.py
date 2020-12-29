@@ -9,7 +9,7 @@ __all__ = ['CIFARWRN', 'wrn16_10_cifar10', 'wrn16_10_cifar100', 'wrn16_10_svhn',
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv3x3, flatten, is_channels_first
+from .common import conv3x3, SimpleSequential, flatten, is_channels_first
 from .preresnet import PreResUnit, PreResActivation
 
 
@@ -45,7 +45,7 @@ class CIFARWRN(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(conv3x3(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -53,7 +53,7 @@ class CIFARWRN(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
                 stage.add(PreResUnit(

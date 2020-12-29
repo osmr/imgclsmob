@@ -9,8 +9,8 @@ __all__ = ['BNInception', 'bninception']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, AvgPool2d, Concurrent, flatten,\
-    is_channels_first
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, AvgPool2d, Concurrent, SimpleSequential,\
+    flatten, is_channels_first
 
 
 class Inception3x3Branch(nn.Layer):
@@ -437,7 +437,7 @@ class BNInception(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(StemBlock(
             in_channels=in_channels,
             out_channels=init_block_channels_list[1],
@@ -450,7 +450,7 @@ class BNInception(tf.keras.Model):
         for i, channels_per_stage in enumerate(channels):
             mid1_channels_list_i = mid1_channels_list[i]
             mid2_channels_list_i = mid2_channels_list[i]
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 if (j == 0) and (i != 0):
                     stage.add(ReductionBlock(

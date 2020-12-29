@@ -9,7 +9,7 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 
 import os
 import tensorflow as tf
-from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock, is_channels_first
+from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock, SimpleSequential, is_channels_first
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -57,7 +57,7 @@ class SimplePose(tf.keras.Model):
         self.backbone = backbone
         self.backbone._name = "backbone"
 
-        self.decoder = tf.keras.Sequential(name="decoder")
+        self.decoder = SimpleSequential(name="decoder")
         in_channels = backbone_out_channels
         for i, out_channels in enumerate(channels):
             self.decoder.add(DeconvBlock(

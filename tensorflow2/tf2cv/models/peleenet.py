@@ -8,8 +8,8 @@ __all__ = ['PeleeNet', 'peleenet']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, Concurrent, MaxPool2d, AvgPool2d, flatten, is_channels_first,\
-    get_channel_axis
+from .common import conv1x1_block, conv3x3_block, Concurrent, MaxPool2d, AvgPool2d, SimpleSequential, flatten,\
+    is_channels_first, get_channel_axis
 
 
 class PeleeBranch1(nn.Layer):
@@ -281,7 +281,7 @@ class PeleeNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(StemBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -290,7 +290,7 @@ class PeleeNet(tf.keras.Model):
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             bottleneck_size = bottleneck_sizes[i]
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             if i != 0:
                 stage.add(TransitionBlock(
                     in_channels=in_channels,
@@ -317,7 +317,7 @@ class PeleeNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         if dropout_rate > 0.0:
             self.output1.add(nn.Dropout(
                 rate=dropout_rate,

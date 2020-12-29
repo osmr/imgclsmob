@@ -9,7 +9,7 @@ __all__ = ['BagNet', 'bagnet9', 'bagnet17', 'bagnet33']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, ConvBlock, flatten, is_channels_first
+from .common import conv1x1, conv1x1_block, conv3x3_block, ConvBlock, SimpleSequential, flatten, is_channels_first
 
 
 class BagNetBottleneck(nn.Layer):
@@ -207,7 +207,7 @@ class BagNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(BagNetInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -215,7 +215,7 @@ class BagNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != len(channels) - 1) else 1
                 kernel_size = 3 if j < normal_kernel_sizes[i] else 1

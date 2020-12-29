@@ -1063,14 +1063,14 @@ class PolyNet(tf.keras.Model):
         normal_units = [PolyAUnit, PolyBUnit, PolyCUnit]
         reduction_units = [ReductionAUnit, ReductionBUnit]
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(PolyInitBlock(
             in_channels=in_channels,
             data_format=data_format,
             name="init_block"))
 
         for i, (two_way_scales_per_stage, poly_scales_per_stage) in enumerate(zip(two_way_scales, poly_scales)):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, (two_way_scale, poly_scale) in enumerate(zip(two_way_scales_per_stage, poly_scales_per_stage)):
                 if (j == 0) and (i != 0):
                     unit = reduction_units[i - 1]
@@ -1091,7 +1091,7 @@ class PolyNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=dropout_rate,
             name="dropout"))

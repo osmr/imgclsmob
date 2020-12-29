@@ -424,7 +424,7 @@ class ESPNetv2(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=dropout_rate,
             name="dropout"))

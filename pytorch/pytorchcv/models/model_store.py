@@ -76,7 +76,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnext50_32x4d', '0558', 'b629a5227df20b2d522e4f72c40f1cf87ee9b055', 'v0.0.417', 'ResNeXt-50 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('resnext101_32x4d', '0523', '279a3189c6fed46dd12c2ee210bc6a493f629c76', 'v0.0.417', 'ResNeXt-101 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('resnext101_64x4d', '0509', '2af0b82274bbcf5ee75575c58c3dd6a4a292b0ae', 'v0.0.417', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
-    ('seresnet10', '1366', '6ec312230962e5f809e2dd77444a2a1bdfbb06f4', 'v0.0.354', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet10', '1202', '8dace12e6aaac68d3c272f52b2513a5b40a4f959', 'v0.0.486', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet18', '0961', '022123a5e88c9917e63165f5b5a7808a606d452a', 'v0.0.355', 'SE-ResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet26', '0824', '64fc8759c5bb9b9b40b2e33a46420ee22ae268c9', 'v0.0.363', 'SE-ResNet-26', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnetbc26b', '0703', 'b98d9d6afca4d79d0347001542162b9fe4071d39', 'v0.0.366', 'SE-ResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -122,7 +122,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx004', '0866', '9584cc0b8e461f624b3050a59bb36b15e04df980', 'v0.0.479', 'RegNetX-400MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx006', '0791', '30ca597ae0506cb588a7fd8d2fecc4be8402b0cf', 'v0.0.482', 'RegNetX-600MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx008', '0740', '157abf5e7c9244a482bf7655e75bfaea143b4d61', 'v0.0.482', 'RegNetX-800MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnetx016', '0672', '0b4c11fbf514add51d2ebd78f7839167a79930f2', 'v0.0.473', 'RegNetX-1.6GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx016', '0637', '6de8a97b67a34be6e9acc234261f051da1b9444a', 'v0.0.486', 'RegNetX-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx032', '0600', 'a32d8fa368a4c3f426588e3d0d58e5624f000a51', 'v0.0.473', 'RegNetX-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx040', '0586', '54660c9ceef3013f2bdb4ec0fd4ec404f97d9861', 'v0.0.473', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx064', '0557', 'e28df79ca0a7a4a6895e9a497f82aebcaffbac79', 'v0.0.473', 'RegNetX-6.4GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -134,7 +134,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety004', '0769', '8c36573f17d3ef2ab8770be2593e94d714b035d7', 'v0.0.481', 'RegNetY-400MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety006', '0712', 'd6401a374a2c35ed1b2ac29a885438834c38cd0a', 'v0.0.483', 'RegNetY-600MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety008', '0660', 'ed298c233ef1ce2e3f82a6d23be1eebd43afdd75', 'v0.0.483', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety016', '0630', '2b0b575949b23c6ba7328ddfd72211265a128c8f', 'v0.0.473', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety016', '0581', 'b45eccd6d1a80dc6e5608abd89c79db7547f2735', 'v0.0.486', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety032', '0404', 'cb3314864b68dfd2e0037928a3b635c81f86ccb2', 'v0.0.473', 'RegNetY-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety040', '0541', '238ef52bb276368285b3a7b810af4ca78a97c5c9', 'v0.0.473', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety064', '0523', '494ac81bb4bb1e9528b54f751907e3f2c32ba50e', 'v0.0.473', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -170,7 +170,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bagnet9', '2961', 'cab1179284e9749697f38c1c7e5f0e172be12c89', 'v0.0.255', 'BagNet-9', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('bagnet17', '1884', '6b2a100f8d14d4616709586483f625743ed04769', 'v0.0.255', 'BagNet-17', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('bagnet33', '1301', '4f17b6e837dacd978b15708ffbb2c1e6be3c371a', 'v0.0.255', 'BagNet-33', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
-    ('dla34', '0794', '04698d78b16f2d08e4396b5b0c9f46cb42542242', 'v0.0.202', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
+    ('dla34', '0724', '649c67e61942283abe7f6a798fb9fcae346e5a5d', 'v0.0.486', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46c', '1323', 'efcd363642a4b479892f47edae7440f0eea05edb', 'v0.0.282', 'DLA-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46xc', '1269', '00d3754ad0ff22636bb1f4b4fb8baebf4751a1ee', 'v0.0.293', 'DLA-X-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60', '0669', 'b2cd6e51a322512a6cb45414982a2ec71285daad', 'v0.0.202', 'DLA-60', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
@@ -258,7 +258,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2_w3d4', '1082', '8656de5a8d90b29779c35c5ce521267c841fd717', 'v0.0.230', 'MobileNetV2 x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w1', '0887', '13a021bca5b679b76156829743f7182da42e8bb6', 'v0.0.213', 'MobileNetV2 x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_wd4', '2368', '399f95e6cb3c15d57516c1d328201a0af3de5882', 'v0.0.483', 'MobileNetV2b x0.25', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mobilenetv2b_wd2', '1459', '757eef4c2bdf7b6f74437ac53a4ed75788587b88', 'v0.0.481', 'MobileNetV2b x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_wd2', '1408', 'f820ea858dd7be1bbe0ca4639581911d98183cde', 'v0.0.486', 'MobileNetV2b x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_w3d4', '1105', '0924efc9ca677d2bccfe3987b1e0e1e47afe69e8', 'v0.0.483', 'MobileNetV2b x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_w1', '0912', '2bcab1d0cd3be4eb270d65e390ff7c9776e38a04', 'v0.0.483', 'MobileNetV2b x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv3_large_w1', '0779', '38e392f58bdf99b2832b26341bc9704ac63a3672', 'v0.0.411', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
@@ -267,7 +267,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('igcv3_w3d4', '1140', '63f43cf8d334111d55d06f2f9bf7e1e4871d162c', 'v0.0.207', 'IGCV3 x0.75', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_w1', '0920', '12385791681f09adb3a08926c95471f332f538b6', 'v0.0.243', 'IGCV3 x1.0', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mnasnet_b1', '0785', '188ea3e90d657703130c86ca19df474baa2cf3d0', 'v0.0.419', 'MnasNet-B1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('mnasnet_a1', '0744', 'e415e240fbceef353a0bf356f50e401a61606190', 'v0.0.419', 'MnasNet-A1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('mnasnet_a1', '0720', 'e155916ce24d06e273e8f90540707bcb7e1f9eab', 'v0.0.486', 'MnasNet-A1', '1807.11626', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darts', '0775', 'fc3171c5b89b270fc7673dbbb5047f5879d7e774', 'v0.0.485', 'DARTS', '1806.09055', 'in1k', 224, 0.875, 200, '[quark0/darts]'),  # noqa
     ('proxylessnas_cpu', '0761', 'fe9572b11899395acbeef9374827dcc04e103ce3', 'v0.0.304', 'ProxylessNAS CPU', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa
     ('proxylessnas_gpu', '0745', 'acca5941c454d896410060434b8f983d2db80727', 'v0.0.333', 'ProxylessNAS GPU', '1812.00332', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -310,7 +310,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mixnet_l', '0582', '6cf2c97538d4173d9f6bc80a6ec299463df2d1f3', 'v0.0.414', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('resneta10', '1190', 'a066e5e07f13f8f2a67971931496d1c1ac09bbe1', 'v0.0.484', 'ResNet(A)-10', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetabc14b', '0990', 'bad51cb083aae58479112ad11a3fe9430346e185', 'v0.0.477', 'ResNet(A)-BC-14b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
-    ('resneta18', '0887', '5402c05130d4fd902c26c805edfbd2a0063d989f', 'v0.0.470', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa
+    ('resneta18', '0831', 'e9f206f480c46b489fbd300fa77db31d740c4f3b', 'v0.0.486', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0563', '1a1cc735a2af26f31fb1207a6bb487f48c23d401', 'v0.0.452', 'ResNet(A)-50b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta101b', '0503', '80d275397837e8f40908cdb4b2cc3e427a1196ee', 'v0.0.452', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta152b', '0482', '9b55f86f63c7402c0093903883e114a9f4809061', 'v0.0.452', 'ResNet(A)-152b', '', 'in1k', 0, 0.0, 0, ''),  # noqa

@@ -211,7 +211,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ResNeXt-50 (32x4d) | 20.78 | 5.58 | 25,028,904 | 4,255.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext50_32x4d-0558-b629a522.pth.log)) |
 | ResNeXt-101 (32x4d) | 19.98 | 5.23 | 44,177,704 | 8,003.45M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext101_32x4d-0523-279a3189.pth.log)) |
 | ResNeXt-101 (64x4d) | 19.58 | 5.09 | 83,455,272 | 15,500.27M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext101_64x4d-0509-2af0b822.pth.log)) |
-| SE-ResNet-10 | 33.89 | 13.66 | 5,463,332 | 894.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.354/seresnet10-1366-6ec31223.pth.log)) |
+| SE-ResNet-10 | 31.76 | 12.02 | 5,463,332 | 894.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/seresnet10-1202-8dace12e.pth.log)) |
 | SE-ResNet-18 | 28.18 | 9.61 | 11,778,592 | 1,820.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.355/seresnet18-0961-022123a5.pth.log)) |
 | SE-ResNet-26 | 25.67 | 8.24 | 18,093,852 | 2,747.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.363/seresnet26-0824-64fc8759.pth.log)) |
 | SE-ResNet-BC-26b | 23.59 | 7.03 | 17,395,976 | 2,359.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.366/seresnetbc26b-0703-b98d9d6a.pth.log)) |
@@ -257,7 +257,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | RegNetX-400MF | 26.44 | 8.66 | 5,157,512 | 403.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.479/regnetx004-0866-9584cc0b.pth.log)) |
 | RegNetX-600MF | 24.96 | 7.91 | 6,196,040 | 608.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx006-0791-30ca597a.pth.log)) |
 | RegNetX-800MF | 24.21 | 7.40 | 7,259,656 | 809.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx008-0740-157abf5e.pth.log)) |
-| RegNetX-1.6GF | 23.32 | 6.72 | 9,190,136 | 1,618.99M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx016-0672-0b4c11fb.pth.log)) |
+| RegNetX-1.6GF | 22.44 | 6.37 | 9,190,136 | 1,618.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnetx016-0637-6de8a97b.pth.log)) |
 | RegNetX-3.2GF | 22.08 | 6.00 | 15,296,552 | 3,199.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx032-0600-a32d8fa3.pth.log)) |
 | RegNetX-4.0GF | 21.61 | 5.86 | 22,118,248 | 3,986.29M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx040-0586-54660c9c.pth.log)) |
 | RegNetX-6.4GF | 21.06 | 5.57 | 26,209,256 | 6,491.01M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx064-0557-e28df79c.pth.log)) |
@@ -269,7 +269,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | RegNetY-400MF | 25.02 | 7.69 | 4,344,144 | 410.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0769-8c36573f.pth.log)) |
 | RegNetY-600MF | 23.79 | 7.12 | 6,055,160 | 610.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety006-0712-d6401a37.pth.log)) |
 | RegNetY-800MF | 22.67 | 6.60 | 6,263,168 | 808.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety008-0660-ed298c23.pth.log)) |
-| RegNetY-1.6GF | 22.40 | 6.30 | 11,202,430 | 1,629.48M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety016-0630-2b0b5759.pth.log)) |
+| RegNetY-1.6GF | 21.41 | 5.81 | 11,202,430 | 1,629.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnety016-0581-b45eccd6.pth.log)) |
 | RegNetY-3.2GF | 18.04 | 4.04 | 19,436,338 | 3,199.15M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety032-0404-cb331486.pth.log)) |
 | RegNetY-4.0GF | 20.84 | 5.41 | 20,646,656 | 3,999.16M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety040-0541-238ef52b.pth.log)) |
 | RegNetY-6.4GF | 20.23 | 5.23 | 30,583,252 | 6,388.91M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety064-0523-494ac81b.pth.log)) |
@@ -305,7 +305,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | BagNet-9 | 53.61 | 29.61 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-2961-cab11792.pth.log)) |
 | BagNet-17 | 41.20 | 18.84 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-1884-6b2a100f.pth.log)) |
 | BagNet-33 | 33.34 | 13.01 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1301-4f17b6e8.pth.log)) |
-| DLA-34 | 25.36 | 7.94 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0794-04698d78.pth.log)) |
+| DLA-34 | 24.59 | 7.24 | 15,742,104 | 3,071.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0724-649c67e6.pth.log)) |
 | DLA-46-C | 34.28 | 13.23 | 1,301,400 | 585.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.282/dla46c-1323-efcd3636.pth.log)) |
 | DLA-X-46-C | 33.26 | 12.69 | 1,068,440 | 546.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.293/dla46xc-1269-00d3754a.pth.log)) |
 | DLA-60 | 22.98 | 6.69 | 22,036,632 | 4,255.49M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60-0669-b2cd6e51.pth.log)) |
@@ -393,7 +393,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | MobileNetV2 x0.75 | 30.17 | 10.82 | 2,627,592 | 198.50M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.230/mobilenetv2_w3d4-1082-8656de5a.pth.log)) |
 | MobileNetV2 x1.0 | 26.97 | 8.87 | 3,504,960 | 329.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.213/mobilenetv2_w1-0887-13a021bc.pth.log)) |
 | MobileNetV2b x0.25 | 47.05 | 23.68 | 1,516,312 | 33.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_wd4-2368-399f95e6.pth.log)) |
-| MobileNetV2b x0.5 | 35.72 | 14.59 | 1,964,448 | 96.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/mobilenetv2b_wd2-1459-757eef4c.pth.log)) |
+| MobileNetV2b x0.5 | 34.77 | 14.08 | 1,964,448 | 96.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/mobilenetv2b_wd2-1408-f820ea85.pth.log)) |
 | MobileNetV2b x0.75 | 30.74 | 11.05 | 2,626,968 | 190.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w3d4-1105-0924efc9.pth.log)) |
 | MobileNetV2b x1.0 | 27.70 | 9.12 | 3,503,872 | 315.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w1-0912-2bcab1d0.pth.log)) |
 | MobileNetV3 L/224/1.0 | 24.86 | 7.79 | 5,481,752 | 227.09M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0779-38e392f5.pth.log)) |
@@ -402,7 +402,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | IGCV3 x0.75 | 31.05 | 11.40 | 2,638,084 | 210.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.207/igcv3_w3d4-1140-63f43cf8.pth.log)) |
 | IGCV3 x1.0 | 27.91 | 9.20 | 3,491,688 | 340.79M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.243/igcv3_w1-0920-12385791.pth.log)) |
 | MnasNet-B1 | 25.38 | 7.85 | 4,383,312 | 326.30M |  From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.419/mnasnet_b1-0785-188ea3e9.pth.log)) |
-| MnasNet-A1 | 24.67 | 7.44 | 3,887,038 | 326.07M |  From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.419/mnasnet_a1-0744-e415e240.pth.log)) |
+| MnasNet-A1 | 24.39 | 7.20 | 3,887,038 | 326.07M |  Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/mnasnet_a1-0720-e155916c.pth.log)) |
 | DARTS | 25.31 | 7.75 | 4,718,752 | 539.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/darts-0775-fc3171c5.pth.log)) |
 | ProxylessNAS CPU | 24.71 | 7.61 | 4,361,648 | 459.96M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_cpu-0761-fe9572b1.pth.log)) |
 | ProxylessNAS GPU | 24.79 | 7.45 | 7,119,848 | 476.08M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.333/proxylessnas_gpu-0745-acca5941.pth.log)) |
@@ -445,7 +445,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | MixNet-L | 21.12 | 5.82 | 7,329,252 | 591.34M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.414/mixnet_l-0582-6cf2c975.pth.log)) |
 | ResNet(A)-10 | 31.29 | 11.90 | 5,438,024 | 1,135.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.484/resneta10-1190-a066e5e0.pth.log)) |
 | ResNet(A)-BC-14 | 28.06 | 9.90 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0990-bad51cb0.pth.log)) |
-| ResNet(A)-18 | 27.05 | 8.87 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.470/resneta18-0887-5402c051.pth.log)) |
+| ResNet(A)-18 | 25.54 | 8.31 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0831-e9f206f4.pth.log)) |
 | ResNet(A)-50b | 21.13 | 5.63 | 25,576,264 | 4,352.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta50b-0563-1a1cc735.pth.log)) |
 | ResNet(A)-101b | 19.78 | 5.03 | 44,568,392 | 8,072.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta101b-0503-80d27539.pth.log)) |
 | ResNet(A)-152b | 19.62 | 4.82 | 60,212,040 | 11,796.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta152b-0482-9b55f86f.pth.log)) |

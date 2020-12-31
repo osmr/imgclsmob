@@ -294,7 +294,7 @@ Some remarks:
 | SelecSLS-60 | 22.45 | 6.30 | 30,670,768 | 3,591.78M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60-0630-a799a0e5.tf2.h5.log)) |
 | SelecSLS-60b | 21.89 | 6.04 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0604-bc9c4319.tf2.h5.log)) |
 | HarDNet-39DS | 26.49 | 8.71 | 3,488,228 | 437.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0871-0bd9fa5e.tf2.h5.log)) |
-| HarDNet-68DS | 26.36 | 8.45 | 4,180,602 | 788.86M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68ds-0845-dd35f3f9.tf2.h5.log)) |
+| HarDNet-68DS | 24.24 | 7.41 | 4,180,602 | 788.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0741-371ee29a.tf2.h5.log)) |
 | HarDNet-68 | 24.55 | 7.40 | 17,565,348 | 4,256.32M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68-0740-9ea05e39.tf2.h5.log)) |
 | HarDNet-85 | 22.62 | 6.44 | 36,670,212 | 9,088.58M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet85-0644-7892e221.tf2.h5.log)) |
 | SqueezeNet v1.0 | 39.23 | 17.60 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/squeezenet_v1_0-1760-d13ba732.tf2.h5.log)) |

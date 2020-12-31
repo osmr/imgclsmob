@@ -192,7 +192,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('selecsls60', '0630', 'a799a0e5ddcc3991808bd8d98a83a3e717ee87e4', 'v0.0.430', 'in1k', 0.875),
     ('selecsls60b', '0604', 'bc9c43191043382b38e3be5893d1d8316ca401e9', 'v0.0.430', 'in1k', 0.875),
     ('hardnet39ds', '0871', '0bd9fa5e72e0a80229534c195f160f5d6e603763', 'v0.0.485', 'in1k', 0.875),
-    ('hardnet68ds', '0845', 'dd35f3f91bfe55c354d4aac2b5830c3a744741ed', 'v0.0.435', 'in1k', 0.875),
+    ('hardnet68ds', '0741', '371ee29a54f43a89fa2c4803b28fd1bc6d03d25d', 'v0.0.487', 'in1k', 0.875),
     ('hardnet68', '0740', '9ea05e3973dddb52b970872fc3ed76fa32d10731', 'v0.0.435', 'in1k', 0.875),
     ('hardnet85', '0644', '7892e2215c2d1c32996be09a724c8125c8c49572', 'v0.0.435', 'in1k', 0.875),
     ('squeezenet_v1_0', '1760', 'd13ba73265325f21eb34e782989a7269cad406c6', 'v0.0.422', 'in1k', 0.875),

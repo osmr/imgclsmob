@@ -343,7 +343,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SelecSLS-60 | 22.50 | 6.33 | 30,670,768 | 3,591.78M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60-0633-86377594.params.log)) |
 | SelecSLS-60b | 21.90 | 6.00 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0600-aaa75794.params.log)) |
 | HarDNet-39DS | 26.52 | 8.64 | 3,488,228 | 437.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0864-72e8423e.params.log)) |
-| HarDNet-68DS | 26.43 | 8.47 | 4,180,602 | 788.86M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68ds-0847-0962e9a5.params.log)) |
+| HarDNet-68DS | 24.25 | 7.38 | 4,180,602 | 788.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0738-012bf3ac.params.log)) |
 | HarDNet-68 | 24.58 | 7.36 | 17,565,348 | 4,256.32M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68-0736-84d17675.params.log)) |
 | HarDNet-85 | 22.61 | 6.42 | 36,670,212 | 9,088.58M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet85-0642-00c005ce.params.log)) |
 | SqueezeNet v1.0 | 38.73 | 17.34 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1734-e6f8b0e8.params.log)) |

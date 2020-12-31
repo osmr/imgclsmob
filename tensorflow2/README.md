@@ -716,6 +716,7 @@ Some remarks:
 [rwightman/pyt...models]: https://github.com/rwightman/pytorch-image-models
 [soeaver/AirNet-PyTorch]: https://github.com/soeaver/AirNet-PyTorch
 [dyhan0920/Pyramid...PyTorch]: https://github.com/dyhan0920/PyramidNet-PyTorch
+[szagoruyko/diracnets]: https://github.com/szagoruyko/diracnets
 [szagoruyko/functional-zoo]: https://github.com/szagoruyko/functional-zoo
 [Jongchan/attention-module]: https://github.com/Jongchan/attention-module
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models

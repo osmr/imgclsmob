@@ -24,7 +24,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bn_vgg16', '0779', '0f570b928b180f909fa39df3924f89c746816722', 'v0.0.359', 'BN-VGG-16', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg19', '0712', '3f286cbd2a57abb4c516425c5e095c2cfc8d54e3', 'v0.0.360', 'BN-VGG-19', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg11b', '0996', 'ef747edc87705e1ed500a31c80199273b2fbd5fa', 'v0.0.407', 'BN-VGG-11b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('bn_vgg13b', '0963', 'cf9352f47805c18798c0f80ab0e158ec5401331e', 'v0.0.110', 'BN-VGG-13b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('bn_vgg13b', '0924', '5f313c535fc47c3ad6bd2f741f453dbcf8191be6', 'v0.0.488', 'BN-VGG-13b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg16b', '0874', 'af4f2d0bbfda667e6b7b3ad4cda5ca331021cd18', 'v0.0.110', 'BN-VGG-16b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('bn_vgg19b', '0840', 'b6919f7f74b3174a86818062b2d1d4cf5a110b8b', 'v0.0.110', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa

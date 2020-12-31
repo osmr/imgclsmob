@@ -24,7 +24,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('bn_vgg16', '0759', '1ca9dee8ef41ed84a216636d3c21380988ea1bf8', 'v0.0.422', 'in1k', 0.875),
     ('bn_vgg19', '0688', '81d25be84932c1c2848cabd4533423e3fd2cdbec', 'v0.0.422', 'in1k', 0.875),
     ('bn_vgg11b', '0975', 'aeaccfdc4a655d895e280165cf5be856472ca91f', 'v0.0.422', 'in1k', 0.875),
-    ('bn_vgg13b', '1019', '1102ffb7817ff11a8db85f1b9b8519b100da26a0', 'v0.0.422', 'in1k', 0.875),
+    ('bn_vgg13b', '0916', '64ddd3e799df62223424441e0acd22d8f6a1bef8', 'v0.0.488', 'in1k', 0.875),
     ('bn_vgg16b', '0862', '137178f78ace3943333a98d980dd88b4746e66af', 'v0.0.422', 'in1k', 0.875),
     ('bn_vgg19b', '0817', 'cd68a741183cbbab52562c4b7330d721e8ffa739', 'v0.0.422', 'in1k', 0.875),
     ('bninception', '0865', '4cab3cce0eb1b79b872b189f5b0d9e4bb20f5ff4', 'v0.0.423', 'in1k', 0.875),

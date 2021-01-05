@@ -167,7 +167,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | BN-VGG-11b | 29.24 | 9.75 | 132,868,840 | 7,630.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.407/bn_vgg11b-0975-685ae89d.params.log)) |
 | BN-VGG-13b | 28.23 | 9.12 | 133,053,736 | 11,342.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.488/bn_vgg13b-0912-fc678318.params.log)) |
 | BN-VGG-16b | 25.83 | 7.75 | 138,365,992 | 15,507.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.489/bn_vgg16b-0775-77dad99b.params.log)) |
-| BN-VGG-19b | 25.66 | 8.15 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.110/bn_vgg19b-0815-3a0e43e6.params.log)) |
+| BN-VGG-19b | 24.79 | 7.35 | 143,678,248 | 19,672.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.490/bn_vgg19b-0735-8d9a132b.params.log)) |
 | BN-Inception | 25.12 | 7.54 | 11,295,240 | 2,048.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.405/bninception-0754-75225419.params.log)) |
 | ResNet-10 | 32.54 | 12.53 | 5,418,792 | 894.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/resnet10-1253-651853ca.params.log)) |
 | ResNet-12 | 31.68 | 12.03 | 5,492,776 | 1,126.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/resnet12-1203-a4194854.params.log)) |
@@ -424,7 +424,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | NASNet-A 4@1056 | 25.37 | 7.95 | 5,289,978 | 584.90M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0795-5c78908e.params.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |
 | PNASNet-5-Large | 17.90 | 4.28 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.114/pnasnet5large-0428-998a548f.params.log)) |
-| SPNASNet | 26.92 | 8.67 | 4,421,616 | 346.73M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.416/spnasnet-0867-a223136f.params.log)) |
+| SPNASNet | 25.10 | 7.76 | 4,421,616 | 346.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.490/spnasnet-0776-09cc881e.params.log)) |
 | EfficientNet-B0 | 24.50 | 7.22 | 5,288,548 | 413.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.364/efficientnet_b0-0722-041a8346.params.log)) |
 | EfficientNet-B1 | 22.89 | 6.26 | 7,794,184 | 730.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.376/efficientnet_b1-0626-455dcb2a.params.log)) |
 | EfficientNet-B0b | 22.96 | 6.70 | 5,288,548 | 413.13M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b0b-0670-8892ba58.params.log)) |

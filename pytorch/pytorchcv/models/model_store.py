@@ -26,7 +26,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bn_vgg11b', '0996', 'ef747edc87705e1ed500a31c80199273b2fbd5fa', 'v0.0.407', 'BN-VGG-11b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg13b', '0924', '5f313c535fc47c3ad6bd2f741f453dbcf8191be6', 'v0.0.488', 'BN-VGG-13b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg16b', '0795', 'bfff365ac38a763aaed4b4d9bdc7b2cdbe6c8e9f', 'v0.0.489', 'BN-VGG-16b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('bn_vgg19b', '0840', 'b6919f7f74b3174a86818062b2d1d4cf5a110b8b', 'v0.0.110', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('bn_vgg19b', '0746', 'f523b4e4b070a170f63e9bb6965fca3764751aa9', 'v0.0.490', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet10', '1293', 'cedc302c71cfa87c1fb2c52a9c156522187fd929', 'v0.0.483', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet12', '1223', '84a43cf672c708a016dd1142ca1a23c278931532', 'v0.0.485', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -282,7 +282,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('nasnet_4a1056', '0816', 'd21bbaf5e937c2e06134fa40e7bdb1f501423b86', 'v0.0.97', 'NASNet-A 4@1056', '1707.07012', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('nasnet_6a4032', '0421', 'f354d28f4acdde399e081260c3f46152eca5d27e', 'v0.0.101', 'NASNet-A 6@4032', '1707.07012', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('pnasnet5large', '0428', '65de46ebd049e494c13958d5671aba5abf803ff3', 'v0.0.114', 'PNASNet-5-Large', '1712.00559', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
-    ('spnasnet', '0817', '290a4fd99674b8f32d5143774ca0141f1b511733', 'v0.0.416', 'SPNASNet', '1904.02877', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('spnasnet', '0798', 'a25ca15768d91c0c09b473352bf54a2b954257d4', 'v0.0.490', 'SPNASNet', '1904.02877', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('efficientnet_b0', '0752', '0e3861300b8f1d1d0fb1bd15f0e06bba1ad6309b', 'v0.0.364', 'EfficientNet-B0', '1905.11946', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('efficientnet_b1', '0638', 'ac77bcd722dc4f3edfa24b9fb7b8f9cece3d85ab', 'v0.0.376', 'EfficientNet-B1', '1905.11946', 'in1k', 240, 0.882, 200, ''),  # noqa
     ('efficientnet_b0b', '0702', 'ecf61b9b50666a6b444a9d789a5ff1087c65d0d8', 'v0.0.403', 'EfficientNet-B0b', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

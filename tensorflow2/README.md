@@ -128,7 +128,7 @@ Some remarks:
 | BN-VGG-11b | 29.31 | 9.75 | 132,868,840 | 7,630.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/bn_vgg11b-0975-aeaccfdc.tf2.h5.log)) |
 | BN-VGG-13b | 28.23 | 9.16 | 133,053,736 | 11,342.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.488/bn_vgg13b-0916-64ddd3e7.tf2.h5.log)) |
 | BN-VGG-16b | 25.80 | 7.76 | 138,365,992 | 15,507.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.489/bn_vgg16b-0776-4e07f81c.tf2.h5.log)) |
-| BN-VGG-19b | 25.64 | 8.17 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/bn_vgg19b-0817-cd68a741.tf2.h5.log)) |
+| BN-VGG-19b | 24.86 | 7.33 | 143,678,248 | 19,672.26M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.490/bn_vgg19b-0733-7a0920e8.tf2.h5.log)) |
 | BN-Inception | 26.62 | 8.65 | 11,295,240 | 2,048.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/bninception-0865-4cab3cce.tf2.h5.log)) |
 | ResNet-10 | 32.56 | 12.56 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/resnet10-1256-b113c5e6.tf2.h5.log)) |
 | ResNet-12 | 31.63 | 12.01 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/resnet12-1201-b8f1c73d.tf2.h5.log)) |
@@ -374,7 +374,7 @@ Some remarks:
 | NASNet-A 4@1056 | 25.83 | 8.33 | 5,289,978 | 584.90M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/nasnet_4a1056-0833-9710e638.tf2.h5.log)) |
 | NASNet-A 6@4032 | 18.24 | 4.27 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/nasnet_6a4032-0427-1f0d2198.tf2.h5.log)) |
 | PNASNet-5-Large | 18.02 | 4.27 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/pnasnet5large-0427-90e804af.tf2.h5.log)) |
-| SPNASNet | 26.97 | 8.73 | 4,421,616 | 346.73M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/spnasnet-0873-a38a57a3.tf2.h5.log)) |
+| SPNASNet | 25.06 | 7.77 | 4,421,616 | 346.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.490/spnasnet-0777-774167df.tf2.h5.log)) |
 | EfficientNet-B0 | 24.49 | 7.25 | 5,288,548 | 413.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/efficientnet_b0-0725-fc13925b.tf2.h5.log)) |
 | EfficientNet-B1 | 22.93 | 6.30 | 7,794,184 | 730.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/efficientnet_b1-0630-82e0c512.tf2.h5.log)) |
 | EfficientNet-B0b | 23.05 | 6.68 | 5,288,548 | 413.13M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b0b-0668-77127244.tf2.h5.log)) |

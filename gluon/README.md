@@ -171,7 +171,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | BN-Inception | 25.12 | 7.54 | 11,295,240 | 2,048.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.405/bninception-0754-75225419.params.log)) |
 | ResNet-10 | 32.54 | 12.53 | 5,418,792 | 894.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/resnet10-1253-651853ca.params.log)) |
 | ResNet-12 | 31.68 | 12.03 | 5,492,776 | 1,126.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/resnet12-1203-a4194854.params.log)) |
-| ResNet-14 | 32.18 | 12.20 | 5,788,200 | 1,357.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.256/resnet14-1220-fcdddcef.params.log)) |
+| ResNet-14 | 30.38 | 10.86 | 5,788,200 | 1,357.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/resnet14-1086-5d9f22a7.params.log)) |
 | ResNet-BC-14b | 29.22 | 10.33 | 10,064,936 | 1,479.12M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/resnetbc14b-1033-4ff348be.params.log)) |
 | ResNet-16 | 30.24 | 10.88 | 6,968,872 | 1,589.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.259/resnet16-1088-2bc07547.params.log)) |
 | ResNet-18 x0.25 | 39.31 | 17.40 | 3,937,400 | 270.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.262/resnet18_wd4-1740-a74ea15d.params.log)) |
@@ -344,7 +344,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SelecSLS-60b | 21.90 | 6.00 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0600-aaa75794.params.log)) |
 | HarDNet-39DS | 26.52 | 8.64 | 3,488,228 | 437.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0864-72e8423e.params.log)) |
 | HarDNet-68DS | 24.25 | 7.38 | 4,180,602 | 788.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0738-012bf3ac.params.log)) |
-| HarDNet-68 | 24.58 | 7.36 | 17,565,348 | 4,256.32M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68-0736-84d17675.params.log)) |
+| HarDNet-68 | 24.10 | 7.10 | 17,565,348 | 4,256.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/hardnet68-0710-c8d4c059.params.log)) |
 | HarDNet-85 | 22.61 | 6.42 | 36,670,212 | 9,088.58M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet85-0642-00c005ce.params.log)) |
 | SqueezeNet v1.0 | 38.73 | 17.34 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1734-e6f8b0e8.params.log)) |
 | SqueezeNet v1.1 | 39.09 | 17.39 | 1,235,496 | 352.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-d7a1483a.params.log)) |
@@ -403,7 +403,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2b x0.5 | 34.26 | 13.73 | 1,964,448 | 96.42M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/mobilenetv2b_wd2-1373-3bfc8a59.params.log)) |
 | MobileNetV2b x0.75 | 30.19 | 10.64 | 2,626,968 | 190.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w3d4-1064-5d4dc4e5.params.log)) |
 | MobileNetV2b x1.0 | 27.16 | 8.84 | 3,503,872 | 315.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w1-0884-ab0ea399.params.log)) |
-| MobileNetV3 L/224/1.0 | 24.63 | 7.69 | 5,481,752 | 226.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0769-7f4b9203.params.log)) |
+| MobileNetV3 L/224/1.0 | 24.36 | 7.29 | 5,481,752 | 226.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/mobilenetv3_large_w1-0729-db741a99.params.log)) |
 | IGCV3 x0.25 | 53.43 | 28.30 | 1,534,020 | 41.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.142/igcv3_wd4-2830-71abf6e0.params.log)) |
 | IGCV3 x0.5 | 39.41 | 17.03 | 1,985,528 | 111.12M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.132/igcv3_wd2-1703-145b7089.params.log)) |
 | IGCV3 x0.75 | 30.71 | 10.96 | 2,638,084 | 210.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.207/igcv3_w3d4-1096-3c7c86fc.params.log)) |

@@ -156,7 +156,7 @@ Some remarks:
 | BN-Inception | 25.11 | 7.52 | 11,295,240 | 2,048.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.405/bninception-0752-44a9e12c.npz.log)) |
 | ResNet-10 | 32.58 | 12.55 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/resnet10-1255-bc5960a1.npz.log)) |
 | ResNet-12 | 31.62 | 12.04 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/resnet12-1204-651ffc1c.npz.log)) |
-| ResNet-14 | 32.22 | 12.25 | 5,788,200 | 1,357.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.256/resnet14-1225-b0d4ee07.npz.log)) |
+| ResNet-14 | 30.36 | 10.93 | 5,788,200 | 1,357.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/resnet14-1093-adafc1c1.npz.log)) |
 | ResNet-BC-14b | 29.22 | 10.36 | 10,064,936 | 1,479.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/resnetbc14b-1036-8c665d1b.npz.log)) |
 | ResNet-16 | 30.21 | 10.89 | 6,968,872 | 1,589.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.259/resnet16-1089-ae220662.npz.log)) |
 | ResNet-18 x0.25 | 39.32 | 17.45 | 3,937,400 | 270.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.262/resnet18_wd4-1745-79de61de.npz.log)) |
@@ -322,7 +322,7 @@ Some remarks:
 | SelecSLS-60b | 21.89 | 6.01 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0601-12266671.npz.log)) |
 | HarDNet-39DS | 26.48 | 8.70 | 3,488,228 | 437.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0870-fcf92ed6.npz.log)) |
 | HarDNet-68DS | 24.22 | 7.43 | 4,180,602 | 788.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0743-a6b77ed0.npz.log)) |
-| HarDNet-68 | 24.51 | 7.38 | 17,565,348 | 4,256.32M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68-0738-df5e6284.npz.log)) |
+| HarDNet-68 | 24.09 | 7.12 | 17,565,348 | 4,256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/hardnet68-0712-935bcf94.npz.log)) |
 | HarDNet-85 | 22.61 | 6.44 | 36,670,212 | 9,088.58M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet85-0644-8fdfe8fb.npz.log)) |
 | SqueezeNet v1.0 | 38.76 | 17.38 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1738-4c55a6a5.npz.log)) |
 | SqueezeNet v1.1 | 39.13 | 17.40 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1740-b236c204.npz.log)) |
@@ -381,7 +381,7 @@ Some remarks:
 | MobileNetV2b x0.5 | 34.25 | 13.76 | 1,964,448 | 96.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/mobilenetv2b_wd2-1376-f68cc37d.npz.log)) |
 | MobileNetV2b x0.75 | 30.19 | 10.67 | 2,626,968 | 190.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w3d4-1067-ba0caa95.npz.log)) |
 | MobileNetV2b x1.0 | 27.19 | 8.90 | 3,503,872 | 315.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w1-0890-dbc98d15.npz.log)) |
-| MobileNetV3 L/224/1.0 | 24.68 | 7.71 | 5,481,752 | 227.09M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0771-b78635d1.npz.log)) |
+| MobileNetV3 L/224/1.0 | 24.36 | 7.33 | 5,481,752 | 227.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/mobilenetv3_large_w1-0733-20f2980c.npz.log)) |
 | IGCV3 x0.25 | 53.36 | 28.28 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.142/igcv3_wd4-2828-25942192.npz.log)) |
 | IGCV3 x0.5 | 39.36 | 17.04 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.132/igcv3_wd2-1704-86246558.npz.log)) |
 | IGCV3 x0.75 | 30.67 | 10.99 | 2,638,084 | 210.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.207/igcv3_w3d4-1099-b0dbc54a.npz.log)) |

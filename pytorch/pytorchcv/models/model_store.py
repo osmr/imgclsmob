@@ -30,7 +30,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet10', '1293', 'cedc302c71cfa87c1fb2c52a9c156522187fd929', 'v0.0.483', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet12', '1223', '84a43cf672c708a016dd1142ca1a23c278931532', 'v0.0.485', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnet14', '1246', 'd5b55c113168c02f1b39b65f8908b0db467a2d74', 'v0.0.256', 'ResNet-14', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnet14', '1109', 'b3132cbfb7d64ae83b1cd2e3954f4c5b1180fd7b', 'v0.0.491', 'ResNet-14', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnetbc14b', '1074', '14b1fd95d8b7964c0e7c6eba22f6f58db03d3df0', 'v0.0.481', 'ResNet-BC-14b', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet16', '1118', 'd54bc41afa244476ca28380111f66d188905ecbc', 'v0.0.259', 'ResNet-16', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet18_wd4', '1785', 'fe79b31f56e7becab9c014dbc14ccdb564b5148f', 'v0.0.262', 'ResNet-18 x0.25', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -261,7 +261,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2b_wd2', '1408', 'f820ea858dd7be1bbe0ca4639581911d98183cde', 'v0.0.486', 'MobileNetV2b x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_w3d4', '1105', '0924efc9ca677d2bccfe3987b1e0e1e47afe69e8', 'v0.0.483', 'MobileNetV2b x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_w1', '0912', '2bcab1d0cd3be4eb270d65e390ff7c9776e38a04', 'v0.0.483', 'MobileNetV2b x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mobilenetv3_large_w1', '0779', '38e392f58bdf99b2832b26341bc9704ac63a3672', 'v0.0.411', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('mobilenetv3_large_w1', '0744', 'b59cae6daf1edc5f412fcd794693bb22dc3d4573', 'v0.0.491', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_wd4', '2871', 'c9f28301391601e5e8ae93139431a9e0d467317c', 'v0.0.142', 'IGCV3 x0.25', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_wd2', '1732', '8c504f443283d8a32787275b23771082fcaab61b', 'v0.0.132', 'IGCV3 x0.5', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_w3d4', '1140', '63f43cf8d334111d55d06f2f9bf7e1e4871d162c', 'v0.0.207', 'IGCV3 x0.75', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa

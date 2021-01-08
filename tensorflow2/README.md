@@ -225,7 +225,7 @@ Some remarks:
 | RegNetX-600MF | 24.69 | 7.59 | 6,196,040 | 608.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx006-0759-2e47a916.tf2.h5.log)) |
 | RegNetX-800MF | 24.11 | 7.27 | 7,259,656 | 809.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx008-0727-b19816ad.tf2.h5.log)) |
 | RegNetX-1.6GF | 22.13 | 6.13 | 9,190,136 | 1,618.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnetx016-0613-c51845ab.tf2.h5.log)) |
-| RegNetX-3.2GF | 21.74 | 5.79 | 15,296,552 | 3,199.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx032-0579-2dc089c7.tf2.h5.log)) |
+| RegNetX-3.2GF | 21.31 | 5.68 | 15,296,552 | 3,199.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/regnetx032-0568-5f628734.tf2.h5.log)) |
 | RegNetX-4.0GF | 21.27 | 5.78 | 22,118,248 | 3,986.29M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx040-0578-58bdb5ac.tf2.h5.log)) |
 | RegNetX-6.4GF | 20.76 | 5.40 | 26,209,256 | 6,491.01M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx064-0540-32169638.tf2.h5.log)) |
 | RegNetX-8.0GF | 20.68 | 5.42 | 39,572,648 | 8,017.94M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx080-0542-d0c9bc40.tf2.h5.log)) |
@@ -279,7 +279,7 @@ Some remarks:
 | DLA-X-102 | 21.95 | 6.02 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x-0602-46640eec.tf2.h5.log)) |
 | DLA-X2-102 | 21.11 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x2-0553-06c93031.tf2.h5.log)) |
 | DLA-169 | 21.97 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla169-0590-e010166d.tf2.h5.log)) |
-| HRNet-W18 Small V1 | 28.43 | 9.74 | 13,187,464 | 1,614.87M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnet_w18_small_v1-0974-8db99936.tf2.h5.log)) |
+| HRNet-W18 Small V1 | 26.23 | 8.71 | 13,187,464 | 1,614.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0871-6ae644af.tf2.h5.log)) |
 | HRNet-W18 Small V2 | 25.72 | 8.05 | 15,597,464 | 2,618.54M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnet_w18_small_v2-0805-fcb8e218.tf2.h5.log)) |
 | HRNetV2-W18 | 24.02 | 6.86 | 21,299,004 | 4,322.66M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w18-0686-71c614d7.tf2.h5.log)) |
 | HRNetV2-W30 | 22.31 | 6.06 | 37,712,220 | 8,156.14M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w30-0606-4883e345.tf2.h5.log)) |
@@ -403,7 +403,7 @@ Some remarks:
 | ResNet(A)-10 | 30.89 | 11.61 | 5,438,024 | 1,135.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.484/resneta10-1161-208ecb25.tf2.h5.log)) |
 | ResNet(A)-BC-14 | 27.72 | 9.60 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0960-96153ace.tf2.h5.log)) |
 | ResNet(A)-18 | 25.40 | 8.04 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0804-aa3ba975.tf2.h5.log)) |
-| ResNet(A)-50b | 20.81 | 5.43 | 25,576,264 | 4,352.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta50b-0543-ba99aca4.tf2.h5.log)) |
+| ResNet(A)-50b | 20.79 | 5.38 | 25,576,264 | 4,352.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/resneta50b-0538-54936268.tf2.h5.log)) |
 | ResNet(A)-101b | 19.47 | 4.90 | 44,568,392 | 8,072.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta101b-0490-d6dfa524.tf2.h5.log)) |
 | ResNet(A)-152b | 19.42 | 4.65 | 60,212,040 | 11,796.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta152b-0465-a54b896f.tf2.h5.log)) |
 | ResNet(D)-50b | 20.80 | 5.49 | 25,680,808 | 20,497.60M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.447/resnetd50b-0549-1c84294f.tf2.h5.log)) |

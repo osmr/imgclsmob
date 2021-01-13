@@ -1135,15 +1135,18 @@ class NormActivation(nn.Module):
         Number of input channels.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     """
     def __init__(self,
                  in_channels,
-                 bn_eps=1e-5):
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
         super(NormActivation, self).__init__()
         self.bn = nn.BatchNorm2d(
             num_features=in_channels,
             eps=bn_eps)
-        self.activ = nn.ReLU(inplace=True)
+        self.activ = get_activation_layer(activation)
 
     def forward(self, x):
         x = self.bn(x)

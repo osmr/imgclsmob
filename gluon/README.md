@@ -277,7 +277,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetY-800MF | 22.54 | 6.45 | 6,263,168 | 808.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety008-0645-d92881be.params.log)) |
 | RegNetY-1.6GF | 21.23 | 5.68 | 11,202,430 | 1,628.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnety016-0568-c4541a25.params.log)) |
 | RegNetY-3.2GF | 18.32 | 4.13 | 19,436,338 | 3,197.70M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety032-0413-90666985.params.log)) |
-| RegNetY-4.0GF | 20.65 | 5.37 | 20,646,656 | 3,997.63M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety040-0537-523ecd34.params.log)) |
+| RegNetY-4.0GF | 19.56 | 4.67 | 20,646,656 | 3,997.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/regnety040-0467-6039a215.params.log)) |
 | RegNetY-6.4GF | 20.09 | 5.12 | 30,583,252 | 6,386.79M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety064-0512-66d05225.params.log)) |
 | RegNetY-8.0GF | 20.03 | 5.09 | 39,180,068 | 7,994.33M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety080-0509-687183a2.params.log)) |
 | RegNetY-12GF | 19.69 | 4.82 | 51,822,544 | 12,129.89M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety120-0482-0946781a.params.log)) |
@@ -315,7 +315,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-34 | 24.31 | 7.05 | 15,742,104 | 3,071.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-557c5f4f.params.log)) |
 | DLA-46-C | 33.84 | 12.86 | 1,301,400 | 585.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.182/dla46c-1286-5b38b67f.params.log)) |
 | DLA-X-46-C | 32.96 | 12.25 | 1,068,440 | 546.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.293/dla46xc-1225-e570f5f0.params.log)) |
-| DLA-60 | 23.84 | 7.08 | 22,036,632 | 4,255.49M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60-0708-954571d6.params.log)) |
+| DLA-60 | 21.27 | 5.54 | 22,036,632 | 4,255.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/dla60-0554-88b141c4.params.log)) |
 | DLA-X-60 | 20.70 | 5.53 | 17,352,344 | 3,543.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0553-58924af8.params.log)) |
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |
 | DLA-102 | 22.87 | 6.44 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0644-cadbb1cc.params.log)) |

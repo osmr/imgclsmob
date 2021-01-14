@@ -136,7 +136,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety008', '0660', 'ed298c233ef1ce2e3f82a6d23be1eebd43afdd75', 'v0.0.483', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety016', '0581', 'b45eccd6d1a80dc6e5608abd89c79db7547f2735', 'v0.0.486', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety032', '0404', 'cb3314864b68dfd2e0037928a3b635c81f86ccb2', 'v0.0.473', 'RegNetY-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety040', '0541', '238ef52bb276368285b3a7b810af4ca78a97c5c9', 'v0.0.473', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety040', '0470', '052d76810aca2267e217a219d600299acc171c40', 'v0.0.494', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety064', '0523', '494ac81bb4bb1e9528b54f751907e3f2c32ba50e', 'v0.0.473', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety080', '0513', 'c69743cd3e6f38d0b6ef366496b95a04b71b2912', 'v0.0.473', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety120', '0492', 'ba4fb43d03c1ad4bc94d6a3ae8a240a4c081c6f7', 'v0.0.473', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -173,7 +173,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dla34', '0724', '649c67e61942283abe7f6a798fb9fcae346e5a5d', 'v0.0.486', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46c', '1323', 'efcd363642a4b479892f47edae7440f0eea05edb', 'v0.0.282', 'DLA-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46xc', '1269', '00d3754ad0ff22636bb1f4b4fb8baebf4751a1ee', 'v0.0.293', 'DLA-X-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dla60', '0669', 'b2cd6e51a322512a6cb45414982a2ec71285daad', 'v0.0.202', 'DLA-60', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
+    ('dla60', '0570', 'f8ea80aa6155591c1082b3caaa0815d164ae2259', 'v0.0.494', 'DLA-60', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60x', '0575', 'fae6dc6d434d4cf0b52e5d4b3da13b5230d08c02', 'v0.0.493', 'DLA-X-60', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60xc', '1091', '0f6381f335e5bbb4c69b360be61a4a08e5c7a9de', 'v0.0.289', 'DLA-X-60-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102', '0605', '11df13220b44f51dc8c925fbd9fc334bc8d115b4', 'v0.0.202', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa

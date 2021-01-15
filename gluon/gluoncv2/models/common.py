@@ -6,10 +6,10 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'SelectableDense', 'BatchNormExtra', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
            'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock',
-           'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
-           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
+           'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN', 'DualPathSequential',
+           'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1341,6 +1341,45 @@ class DeconvBlock(HybridBlock):
         return x
 
 
+class NormActivation(HybridBlock):
+    """
+    Activation block with preliminary batch normalization. It's used by itself as the final block in PreResNet.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
+    activation : function or str or None, default nn.Activation('relu')
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 bn_epsilon=1e-5,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 activation=(lambda: nn.Activation("relu")),
+                 **kwargs):
+        super(NormActivation, self).__init__(**kwargs)
+        with self.name_scope():
+            self.bn = BatchNormExtra(
+                in_channels=in_channels,
+                epsilon=bn_epsilon,
+                use_global_stats=bn_use_global_stats,
+                cudnn_off=bn_cudnn_off)
+            self.activ = get_activation_layer(activation)
+
+    def hybrid_forward(self, F, x):
+        x = self.bn(x)
+        x = self.activ(x)
+        return x
+
+
 class InterpolationBlock(HybridBlock):
     """
     Interpolation block.
@@ -1444,6 +1483,12 @@ class ChannelShuffle(HybridBlock):
 
     def hybrid_forward(self, F, x):
         return channel_shuffle(x, self.groups)
+
+    def __repr__(self):
+        s = "{name}(groups={groups})"
+        return s.format(
+            name=self.__class__.__name__,
+            groups=self.groups)
 
 
 def channel_shuffle2(x,

@@ -149,6 +149,8 @@ from .models.nvpattexp import *
 
 from .models.regnetv import *
 
+from .models.dicenet import *
+
 __all__ = ['get_model']
 
 
@@ -1217,6 +1219,15 @@ _models = {
     'regnetv120': regnetv120,
     'regnetv160': regnetv160,
     'regnetv320': regnetv320,
+
+    'dicenet_wd5': dicenet_wd5,
+    'dicenet_wd2': dicenet_wd2,
+    'dicenet_w3d4': dicenet_w3d4,
+    'dicenet_w1': dicenet_w1,
+    'dicenet_w5d4': dicenet_w5d4,
+    'dicenet_w3d2': dicenet_w3d2,
+    'dicenet_w7d8': dicenet_w7d8,
+    'dicenet_w2': dicenet_w2,
 }
 
 

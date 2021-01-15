@@ -50,25 +50,24 @@ class SpatialDiceBranch(nn.Module):
             real_in_size = (height, real_sp_size)
             base_in_size = (height, self.base_sp_size)
 
-        y = x.clone()
         if real_sp_size != self.base_sp_size:
             if real_sp_size < self.base_sp_size:
-                y = F.interpolate(y, mode="bilinear", size=base_in_size, align_corners=True)
+                x = F.interpolate(x, size=base_in_size, mode="bilinear", align_corners=True)
             else:
-                y = F.adaptive_avg_pool2d(y, output_size=base_in_size)
+                x = F.adaptive_avg_pool2d(x, output_size=base_in_size)
 
-        y = y.transpose(1, self.index).contiguous()
-        z = self.conv(y)
-        z = z.transpose(1, self.index).contiguous()
+        x = x.transpose(1, self.index).contiguous()
+        x = self.conv(x)
+        x = x.transpose(1, self.index).contiguous()
 
-        changed_sp_size = z.size(self.index)
+        changed_sp_size = x.size(self.index)
         if real_sp_size != changed_sp_size:
             if changed_sp_size < real_sp_size:
-                z = F.interpolate(z, mode="bilinear", size=real_in_size, align_corners=True)
+                x = F.interpolate(x, size=real_in_size, mode="bilinear", align_corners=True)
             else:
-                z = F.adaptive_avg_pool2d(z, output_size=real_in_size)
+                x = F.adaptive_avg_pool2d(x, output_size=real_in_size)
 
-        return z
+        return x
 
 
 class DiceBaseBlock(nn.Module):
@@ -102,17 +101,15 @@ class DiceBaseBlock(nn.Module):
 
         self.norm_activ = NormActivation(
             in_channels=mid_channels,
-            activation=(lambda: nn.PReLU(mid_channels)))
-
+            activation=(lambda: nn.PReLU(num_parameters=mid_channels)))
         self.shuffle = ChannelShuffle(
             channels=mid_channels,
             groups=3)
-
         self.squeeze_conv = conv1x1_block(
             in_channels=mid_channels,
             out_channels=channels,
             groups=channels,
-            activation=(lambda: nn.PReLU(channels)))
+            activation=(lambda: nn.PReLU(num_parameters=channels)))
 
     def forward(self, x):
         x = self.convs(x)
@@ -186,16 +183,14 @@ class DiceBlock(nn.Module):
         self.base_block = DiceBaseBlock(
             channels=in_channels,
             in_size=in_size)
-
         self.att = DiceAttBlock(
             in_channels=in_channels,
             out_channels=out_channels)
-
         self.proj_conv = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             groups=proj_groups,
-            activation=(lambda: nn.PReLU(in_channels)))
+            activation=(lambda: nn.PReLU(num_parameters=in_channels)))
 
     def forward(self, x):
         x = self.base_block(x)
@@ -222,11 +217,11 @@ class StridedDiceLeftBranch(nn.Module):
             out_channels=channels,
             stride=2,
             groups=channels,
-            activation=(lambda: nn.PReLU(channels)))
+            activation=(lambda: nn.PReLU(num_parameters=channels)))
         self.conv2 = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: nn.PReLU(channels)))
+            activation=(lambda: nn.PReLU(num_parameters=channels)))
 
     def forward(self, x):
         x = self.conv1(x)
@@ -260,7 +255,7 @@ class StridedDiceRightBranch(nn.Module):
         self.conv = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: nn.PReLU(channels)))
+            activation=(lambda: nn.PReLU(num_parameters=channels)))
 
     def forward(self, x):
         x = self.pool(x)
@@ -325,7 +320,7 @@ class ShuffledDiceRightBranch(nn.Module):
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation=(lambda: nn.PReLU(out_channels)))
+            activation=(lambda: nn.PReLU(num_parameters=out_channels)))
         self.dice = DiceBlock(
             in_channels=out_channels,
             out_channels=out_channels,
@@ -363,7 +358,6 @@ class ShuffledDiceBlock(nn.Module):
             in_channels=right_in_channels,
             out_channels=right_out_channels,
             in_size=in_size)
-
         self.shuffle = ChannelShuffle(
             channels=(2 * right_out_channels),
             groups=2)
@@ -395,7 +389,7 @@ class DiceInitBlock(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             stride=2,
-            activation=(lambda: nn.PReLU(out_channels)))
+            activation=(lambda: nn.PReLU(num_parameters=out_channels)))
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -475,8 +469,9 @@ class DiceNet(nn.Module):
                  in_size=(224, 224),
                  num_classes=1000):
         super(DiceNet, self).__init__()
-        assert (in_size[0] % 32 == 0)
-        assert (in_size[1] % 32 == 0)
+        assert ((in_size[0] % 32 == 0) and (in_size[1] % 32 == 0))
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", DiceInitBlock(

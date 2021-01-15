@@ -1277,6 +1277,12 @@ class ChannelShuffle(nn.Module):
     def forward(self, x):
         return channel_shuffle(x, self.groups)
 
+    def __repr__(self):
+        s = "{name}(groups={groups})"
+        return s.format(
+            name=self.__class__.__name__,
+            groups=self.groups)
+
 
 def channel_shuffle2(x,
                      groups):

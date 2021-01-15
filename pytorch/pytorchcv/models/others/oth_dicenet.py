@@ -4,6 +4,9 @@ from torch.nn import init
 from torch import nn
 import torch.nn.functional as F
 
+__all__ = ['oth_dicenet_wd5', 'oth_dicenet_wd2', 'oth_dicenet_w3d4', 'oth_dicenet_w1', 'oth_dicenet_w3d2',
+           'oth_dicenet_w5d4', 'oth_dicenet_w7d8', 'oth_dicenet_w2']
+
 
 # helper function for activations
 def activation_fn(features, name='prelu', inplace=True):
@@ -202,10 +205,10 @@ class DICE(nn.Module):
         proj_out = self.proj_layer(outputs)
         return proj_out * linear_wts
 
-    def __repr__(self):
-        s = '{name}(in_channels={channel_in}, out_channels={channel_out}, kernel_size={ksize}, vol_shuffle={shuffle}, ' \
-            'width={width}, height={height}, dilation={dilation})'
-        return s.format(name=self.__class__.__name__, **self.__dict__)
+    # def __repr__(self):
+    #     s = '{name}(in_channels={channel_in}, out_channels={channel_out}, kernel_size={ksize}, vol_shuffle={shuffle}, ' \
+    #         'width={width}, height={height}, dilation={dilation})'
+    #     return s.format(name=self.__class__.__name__, **self.__dict__)
 
 
 class StridedDICE(nn.Module):
@@ -248,10 +251,10 @@ class StridedDICE(nn.Module):
         concat = torch.cat([x_left, x_right], 1)
         return self.shuffle(concat)
 
-    def __repr__(self):
-        s = '{name}(in_channels={channel_in}, out_channels={channel_out}, kernel_size={ksize}, ' \
-            'width={width}, height={height})'
-        return s.format(name=self.__class__.__name__, **self.__dict__)
+    # def __repr__(self):
+    #     s = '{name}(in_channels={channel_in}, out_channels={channel_out}, kernel_size={ksize}, ' \
+    #         'width={width}, height={height})'
+    #     return s.format(name=self.__class__.__name__, **self.__dict__)
 
 
 class ShuffleDICEBlock(nn.Module):
@@ -279,9 +282,9 @@ class ShuffleDICEBlock(nn.Module):
 
         return self.shuffle(torch.cat((left, right), 1))
 
-    def __repr__(self):
-        s = '{name}(in_channels={inplanes}, out_channels={outplanes})'
-        return s.format(name=self.__class__.__name__, **self.__dict__)
+    # def __repr__(self):
+    #     s = '{name}(in_channels={inplanes}, out_channels={outplanes})'
+    #     return s.format(name=self.__class__.__name__, **self.__dict__)
 
 
 class CNNModel(nn.Module):

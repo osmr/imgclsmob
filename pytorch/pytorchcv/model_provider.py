@@ -149,6 +149,9 @@ from .models.superpointnet import *
 # from .models.others.oth_tresnet import *
 # from .models.tresnet import *
 
+from .models.others.oth_dicenet import *
+from .models.dicenet import *
+
 __all__ = ['get_model']
 
 
@@ -1116,6 +1119,24 @@ _models = {
 
     # 'oth_tresnet_m': oth_tresnet_m,
     # 'tresnet_m': tresnet_m,
+
+    'oth_dicenet_wd5': oth_dicenet_wd5,
+    'oth_dicenet_wd2': oth_dicenet_wd2,
+    'oth_dicenet_w3d4': oth_dicenet_w3d4,
+    'oth_dicenet_w1': oth_dicenet_w1,
+    'oth_dicenet_w5d4': oth_dicenet_w5d4,
+    'oth_dicenet_w3d2': oth_dicenet_w3d2,
+    'oth_dicenet_w7d8': oth_dicenet_w7d8,
+    'oth_dicenet_w2': oth_dicenet_w2,
+
+    'dicenet_wd5': dicenet_wd5,
+    'dicenet_wd2': dicenet_wd2,
+    'dicenet_w3d4': dicenet_w3d4,
+    'dicenet_w1': dicenet_w1,
+    'dicenet_w5d4': dicenet_w5d4,
+    'dicenet_w3d2': dicenet_w3d2,
+    'dicenet_w7d8': dicenet_w7d8,
+    'dicenet_w2': dicenet_w2,
 }
 
 

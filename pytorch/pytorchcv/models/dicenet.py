@@ -3,7 +3,7 @@
     Original paper: 'DiCENet: Dimension-wise Convolutions for Efficient Networks,' https://arxiv.org/abs/1906.03516.
 """
 
-__all__ = ['DiceNet', 'dicenet_wd5', 'dicenet_wd2', 'dicenet_w3d4', 'dicenet_w1', 'dicenet_w3d2', 'dicenet_w5d4',
+__all__ = ['DiceNet', 'dicenet_wd5', 'dicenet_wd2', 'dicenet_w3d4', 'dicenet_w1', 'dicenet_w5d4', 'dicenet_w3d2',
            'dicenet_w7d8', 'dicenet_w2']
 
 import os
@@ -16,6 +16,16 @@ from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, NormActivati
 
 
 class SpatialDiceBranch(nn.Module):
+    """
+    Spatial element of DiCE block for selected dimension.
+
+    Parameters:
+    ----------
+    sp_size : int
+        Desired size for selected spatial dimension.
+    is_height : bool
+        Is selected dimension height.
+    """
     def __init__(self,
                  sp_size,
                  is_height):
@@ -62,6 +72,16 @@ class SpatialDiceBranch(nn.Module):
 
 
 class DiceBaseBlock(nn.Module):
+    """
+    Base part of DiCE block (without attention).
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    in_size : tuple of two ints
+        Spatial size of the expected input image.
+    """
     def __init__(self,
                  channels,
                  in_size):
@@ -103,6 +123,18 @@ class DiceBaseBlock(nn.Module):
 
 
 class DiceAttBlock(nn.Module):
+    """
+    Pure attention part of DiCE block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    reduction : int, default 4
+        Squeeze reduction value.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -133,7 +165,7 @@ class DiceAttBlock(nn.Module):
 
 class DiceBlock(nn.Module):
     """
-    DICE block (volume-wise separable convolutions).
+    DiCE block (volume-wise separable convolutions).
 
     Parameters:
     ----------
@@ -174,10 +206,17 @@ class DiceBlock(nn.Module):
 
 
 class StridedDiceLeftBranch(nn.Module):
+    """
+    Left branch of the strided DiCE block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    """
     def __init__(self,
                  channels):
         super(StridedDiceLeftBranch, self).__init__()
-
         self.conv1 = conv3x3_block(
             in_channels=channels,
             out_channels=channels,
@@ -196,11 +235,20 @@ class StridedDiceLeftBranch(nn.Module):
 
 
 class StridedDiceRightBranch(nn.Module):
+    """
+    Right branch of the strided DiCE block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    in_size : tuple of two ints
+        Spatial size of the expected input image.
+    """
     def __init__(self,
                  channels,
                  in_size):
         super(StridedDiceRightBranch, self).__init__()
-
         self.pool = nn.AvgPool2d(
             kernel_size=3,
             padding=1,
@@ -223,7 +271,7 @@ class StridedDiceRightBranch(nn.Module):
 
 class StridedDiceBlock(nn.Module):
     """
-    Strided DICE block (strided volume-wise separable convolutions).
+    Strided DiCE block (strided volume-wise separable convolutions).
 
     Parameters:
     ----------
@@ -242,8 +290,8 @@ class StridedDiceBlock(nn.Module):
         assert (out_channels == 2 * in_channels)
 
         self.branches = Concurrent()
-        self.branches.add_module("left", StridedDiceLeftBranch(channels=in_channels))
-        self.branches.add_module("right", StridedDiceRightBranch(
+        self.branches.add_module("left_branch", StridedDiceLeftBranch(channels=in_channels))
+        self.branches.add_module("right_branch", StridedDiceRightBranch(
             channels=in_channels,
             in_size=in_size))
         self.shuffle = ChannelShuffle(
@@ -256,39 +304,76 @@ class StridedDiceBlock(nn.Module):
         return x
 
 
-class ShuffledDiceBlock(nn.Module):
+class ShuffledDiceRightBranch(nn.Module):
+    """
+    Right branch of the shuffled DiCE block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    in_size : tuple of two ints
+        Spatial size of the expected input image.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 in_size,
-                 c_tag=0.5):
+                 in_size):
+        super(ShuffledDiceRightBranch, self).__init__()
+        self.conv = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            activation=(lambda: nn.PReLU(out_channels)))
+        self.dice = DiceBlock(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            in_size=in_size)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.dice(x)
+        return x
+
+
+class ShuffledDiceBlock(nn.Module):
+    """
+    Shuffled DiCE block (shuffled volume-wise separable convolutions).
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    in_size : tuple of two ints
+        Spatial size of the expected input image.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 in_size):
         super(ShuffledDiceBlock, self).__init__()
-        self.left_part = round(c_tag * in_channels)
+        self.left_part = in_channels - in_channels // 2
         right_in_channels = in_channels - self.left_part
         right_out_channels = out_channels - self.left_part
 
-        self.layer_right = nn.Sequential(
-            conv1x1_block(
-                in_channels=right_in_channels,
-                out_channels=right_out_channels,
-                activation=(lambda: nn.PReLU(right_out_channels))),
-            DiceBlock(
-                in_channels=right_out_channels,
-                out_channels=right_out_channels,
-                in_size=in_size)
-        )
+        self.right_branch = ShuffledDiceRightBranch(
+            in_channels=right_in_channels,
+            out_channels=right_out_channels,
+            in_size=in_size)
 
         self.shuffle = ChannelShuffle(
             channels=(2 * right_out_channels),
             groups=2)
 
     def forward(self, x):
-        left = x[:, :self.left_part, :, :]
-        right = x[:, self.left_part:, :, :]
-
-        right = self.layer_right(right)
-
-        return self.shuffle(torch.cat((left, right), 1))
+        x1, x2 = torch.chunk(x, chunks=2, dim=1)
+        x2 = self.right_branch(x2)
+        x = torch.cat((x1, x2), dim=1)
+        x = self.shuffle(x)
+        return x
 
 
 class DiceInitBlock(nn.Module):

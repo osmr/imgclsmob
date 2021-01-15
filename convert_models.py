@@ -1019,6 +1019,27 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
+    if src_model.startswith("oth_dicenet"):
+        src1 = list(filter(re.compile("\.conv_height\.").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src2 = list(filter(re.compile("\.conv_width\.").search, src1n))
+        src2n = [key for key in src1n if key not in src2]
+        src3 = list(filter(re.compile("\.linear_comb_layer\.").search, src2n))
+        src3n = [key for key in src2n if key not in src3]
+        src4 = list(filter(re.compile("\.proj_layer\.").search, src3n))
+        src4n = [key for key in src3n if key not in src4]
+        src_param_keys = src4n + src1 + src2 + src3 + src4
+
+        dst1 = list(filter(re.compile("\.h_conv\.").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst2 = list(filter(re.compile("\.w_conv\.").search, dst1n))
+        dst2n = [key for key in dst1n if key not in dst2]
+        dst3 = list(filter(re.compile("\.att\.").search, dst2n))
+        dst3n = [key for key in dst2n if key not in dst3]
+        dst4 = list(filter(re.compile("\.proj_conv\.").search, dst3n))
+        dst4n = [key for key in dst3n if key not in dst4]
+        dst_param_keys = dst4n + dst1 + dst2 + dst3 + dst4
+
     if src_model.startswith("oth_proxyless"):
         src1 = src_param_keys[5]
         del src_param_keys[5]

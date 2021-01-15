@@ -9,7 +9,7 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalA
            'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'SimpleSequential',
            'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
            'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten',
-           'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
+           'AdaptiveAvgPool2D', 'NormActivation', 'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 from functools import partial
@@ -1948,6 +1948,36 @@ class AdaptiveAvgPool2D(Chain):
     """
     def __call__(self, x):
         return F.average_pooling_2d(x, ksize=x.shape[2:])
+
+
+class NormActivation(Chain):
+    """
+    Activation block with preliminary batch normalization. It's used by itself as the final block in PreResNet.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu),
+                 **kwargs):
+        super(NormActivation, self).__init__(**kwargs)
+        self.bn = L.BatchNormalization(
+            size=in_channels,
+            eps=bn_eps)
+        self.activ = get_activation_layer(activation)
+
+    def __call__(self, x):
+        x = self.bn(x)
+        x = self.activ(x)
+        return x
 
 
 class InterpolationBlock(Chain):

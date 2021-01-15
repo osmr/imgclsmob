@@ -140,7 +140,7 @@ class VGG(Chain):
                 setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'classifier', VGGOutputBlock(
+                setattr(self.output, "classifier", VGGOutputBlock(
                     in_channels=in_channels,
                     classes=classes))
 

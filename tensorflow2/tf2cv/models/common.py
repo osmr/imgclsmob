@@ -10,7 +10,8 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_si
            'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
            'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
            'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'MultiOutputSequential', 'ParallelConcurent', 'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'NormActivation', 'InterpolationBlock', 'Hourglass',
+           'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -3071,6 +3072,42 @@ class ParallelConcurent(SimpleSequential):
         for block, xi in zip(self.children, x):
             out.append(block(xi, training=training))
         return out
+
+
+class NormActivation(nn.Layer):
+    """
+    Activation block with preliminary batch normalization. It's used by itself as the final block in PreResNet.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 bn_eps=1e-5,
+                 activation="relu",
+                 data_format="channels_last",
+                 **kwargs):
+        super(NormActivation, self).__init__(**kwargs)
+        assert (in_channels is not None)
+
+        self.bn = BatchNorm(
+                epsilon=bn_eps,
+                data_format=data_format,
+                name="bn")
+        self.activ = get_activation_layer(activation, name="activ")
+
+    def call(self, x, training=None):
+        x = self.bn(x, training=training)
+        x = self.activ(x)
+        return x
 
 
 class InterpolationBlock(nn.Layer):

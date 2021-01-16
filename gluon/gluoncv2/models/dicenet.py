@@ -10,7 +10,7 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, NormActivation, ChannelShuffle, Concurrent, PReLU2
+from common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, NormActivation, ChannelShuffle, Concurrent, PReLU2
 
 
 class SpatialDiceBranch(HybridBlock):
@@ -224,13 +224,14 @@ class DiceBlock(HybridBlock):
             self.att = DiceAttBlock(
                 in_channels=in_channels,
                 out_channels=out_channels)
+            # assert (in_channels == out_channels)
             self.proj_conv = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 groups=proj_groups,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off,
-                activation=(lambda: PReLU2(in_channels=in_channels)))
+                activation=(lambda: PReLU2(in_channels=out_channels)))
 
     def hybrid_forward(self, F, x):
         x = self.base_block(x)

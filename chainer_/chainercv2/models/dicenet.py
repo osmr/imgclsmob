@@ -204,7 +204,7 @@ class DiceBlock(Chain):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 groups=proj_groups,
-                activation=(lambda: L.PReLU(shape=(in_channels,))))
+                activation=(lambda: L.PReLU(shape=(out_channels,))))
 
     def __call__(self, x):
         x = self.base_block(x)

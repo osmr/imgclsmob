@@ -190,7 +190,7 @@ class DiceBlock(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             groups=proj_groups,
-            activation=(lambda: nn.PReLU(num_parameters=in_channels)))
+            activation=(lambda: nn.PReLU(num_parameters=out_channels)))
 
     def forward(self, x):
         x = self.base_block(x)

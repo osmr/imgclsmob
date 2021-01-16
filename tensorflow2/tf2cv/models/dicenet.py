@@ -10,8 +10,8 @@ import os
 import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, MaxPool2d, NormActivation, ChannelShuffle,\
-    Concurrent, PReLU2, SimpleSequential, is_channels_first, get_channel_axis
+from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, AvgPool2d, MaxPool2d, NormActivation,\
+    ChannelShuffle, Concurrent, PReLU2, SimpleSequential, is_channels_first, get_channel_axis, flatten
 
 
 class SpatialDiceBranch(nn.Layer):
@@ -34,7 +34,11 @@ class SpatialDiceBranch(nn.Layer):
                  **kwargs):
         super(SpatialDiceBranch, self).__init__(**kwargs)
         self.is_height = is_height
-        self.index = 2 if is_height else 3
+        self.data_format = data_format
+        if is_channels_first(self.data_format):
+            self.index = 2 if is_height else 3
+        else:
+            self.index = 1 if is_height else 2
         self.base_sp_size = sp_size
 
         self.conv = conv3x3(
@@ -45,32 +49,62 @@ class SpatialDiceBranch(nn.Layer):
             name="conv")
 
     def call(self, x, training=None):
-        # height, width = x.size()[2:]
-        # if self.is_height:
-        #     real_sp_size = height
-        #     real_in_size = (real_sp_size, width)
-        #     base_in_size = (self.base_sp_size, width)
-        # else:
-        #     real_sp_size = width
-        #     real_in_size = (height, real_sp_size)
-        #     base_in_size = (height, self.base_sp_size)
-        #
-        # if real_sp_size != self.base_sp_size:
-        #     if real_sp_size < self.base_sp_size:
-        #         x = F.interpolate(x, size=base_in_size, mode="bilinear", align_corners=True)
-        #     else:
-        #         x = F.adaptive_avg_pool2d(x, output_size=base_in_size)
-        #
-        # x = x.transpose(1, self.index).contiguous()
-        # x = self.conv(x)
-        # x = x.transpose(1, self.index).contiguous()
-        #
-        # changed_sp_size = x.size(self.index)
-        # if real_sp_size != changed_sp_size:
-        #     if changed_sp_size < real_sp_size:
-        #         x = F.interpolate(x, size=real_in_size, mode="bilinear", align_corners=True)
-        #     else:
-        #         x = F.adaptive_avg_pool2d(x, output_size=real_in_size)
+        x_shape = x.get_shape().as_list()
+
+        height, width = x_shape[2:4] if is_channels_first(self.data_format) else x_shape[1:3]
+        if self.is_height:
+            real_sp_size = height
+            real_in_size = (real_sp_size, width)
+            base_in_size = (self.base_sp_size, width)
+        else:
+            real_sp_size = width
+            real_in_size = (height, real_sp_size)
+            base_in_size = (height, self.base_sp_size)
+
+        if real_sp_size != self.base_sp_size:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=[0, 2, 3, 1])
+            x = tf.image.resize(
+                images=x,
+                size=base_in_size,
+                method=self.method)
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=[0, 3, 1, 2])
+
+        if self.is_height:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 2, 1, 3))
+            else:
+                x = tf.transpose(x, perm=(0, 3, 2, 1))
+        else:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 3, 2, 1))
+            else:
+                x = tf.transpose(x, perm=(0, 1, 3, 2))
+
+        x = self.conv(x)
+
+        if self.is_height:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 2, 1, 3))
+            else:
+                x = tf.transpose(x, perm=(0, 3, 2, 1))
+        else:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 3, 2, 1))
+            else:
+                x = tf.transpose(x, perm=(0, 1, 3, 2))
+
+        changed_sp_size = x.shape[self.index]
+        if real_sp_size != changed_sp_size:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=[0, 2, 3, 1])
+            x = tf.image.resize(
+                images=x,
+                size=real_in_size,
+                method=self.method)
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=[0, 3, 1, 2])
 
         return x
 
@@ -97,26 +131,26 @@ class DiceBaseBlock(nn.Layer):
         mid_channels = 3 * channels
 
         self.convs = Concurrent()
-        self.convs.add_module("ch_conv", conv3x3(
+        self.convs.add(conv3x3(
             in_channels=channels,
             out_channels=channels,
             groups=channels,
             data_format=data_format,
-            name=""))
-        self.convs.add_module("h_conv", SpatialDiceBranch(
+            name="ch_conv"))
+        self.convs.add(SpatialDiceBranch(
             sp_size=in_size[0],
             is_height=True,
             data_format=data_format,
-            name=""))
-        self.convs.add_module("w_conv", SpatialDiceBranch(
+            name="h_conv"))
+        self.convs.add(SpatialDiceBranch(
             sp_size=in_size[1],
             is_height=False,
             data_format=data_format,
-            name=""))
+            name="w_conv"))
 
         self.norm_activ = NormActivation(
             in_channels=mid_channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=mid_channels)),
             data_format=data_format,
             name="norm_activ")
         self.shuffle = ChannelShuffle(
@@ -128,15 +162,15 @@ class DiceBaseBlock(nn.Layer):
             in_channels=mid_channels,
             out_channels=channels,
             groups=channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=channels)),
             data_format=data_format,
             name="squeeze_conv")
 
     def call(self, x, training=None):
         x = self.convs(x)
-        x = self.norm_activ(x)
+        x = self.norm_activ(x, training=training)
         x = self.shuffle(x)
-        x = self.squeeze_conv(x)
+        x = self.squeeze_conv(x, training=training)
         return x
 
 
@@ -232,14 +266,14 @@ class DiceBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             groups=proj_groups,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=out_channels)),
             data_format=data_format,
             name="proj_conv")
 
     def call(self, x, training=None):
-        x = self.base_block(x)
-        w = self.att(x)
-        x = self.proj_conv(x)
+        x = self.base_block(x, training=training)
+        w = self.att(x, training=training)
+        x = self.proj_conv(x, training=training)
         x = x * w
         return x
 
@@ -263,21 +297,21 @@ class StridedDiceLeftBranch(nn.Layer):
         self.conv1 = conv3x3_block(
             in_channels=channels,
             out_channels=channels,
-            stride=2,
+            strides=2,
             groups=channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=channels)),
             data_format=data_format,
             name="conv1")
         self.conv2 = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=channels)),
             data_format=data_format,
             name="conv2")
 
     def call(self, x, training=None):
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = self.conv1(x, training=training)
+        x = self.conv2(x, training=training)
         return x
 
 
@@ -300,10 +334,10 @@ class StridedDiceRightBranch(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(StridedDiceRightBranch, self).__init__(**kwargs)
-        self.pool = nn.AvgPool2d(
-            kernel_size=3,
+        self.pool = AvgPool2d(
+            pool_size=3,
+            strides=2,
             padding=1,
-            stride=2,
             data_format=data_format,
             name="pool")
         self.dice = DiceBlock(
@@ -315,14 +349,14 @@ class StridedDiceRightBranch(nn.Layer):
         self.conv = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=channels)),
             data_format=data_format,
             name="conv")
 
     def call(self, x, training=None):
         x = self.pool(x)
-        x = self.dice(x)
-        x = self.conv(x)
+        x = self.dice(x, training=training)
+        x = self.conv(x, training=training)
         return x
 
 
@@ -351,15 +385,15 @@ class StridedDiceBlock(nn.Layer):
         assert (out_channels == 2 * in_channels)
 
         self.branches = Concurrent()
-        self.branches.add_module("left_branch", StridedDiceLeftBranch(
+        self.branches.add(StridedDiceLeftBranch(
             channels=in_channels,
             data_format=data_format,
-            name=""))
-        self.branches.add_module("right_branch", StridedDiceRightBranch(
+            name="left_branch"))
+        self.branches.add(StridedDiceRightBranch(
             channels=in_channels,
             in_size=in_size,
             data_format=data_format,
-            name=""))
+            name="right_branch"))
         self.shuffle = ChannelShuffle(
             channels=out_channels,
             groups=2,
@@ -367,7 +401,7 @@ class StridedDiceBlock(nn.Layer):
             name="shuffle")
 
     def call(self, x, training=None):
-        x = self.branches(x)
+        x = self.branches(x, training=training)
         x = self.shuffle(x)
         return x
 
@@ -397,7 +431,7 @@ class ShuffledDiceRightBranch(nn.Layer):
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=out_channels)),
             data_format=data_format,
             name="conv")
         self.dice = DiceBlock(
@@ -409,7 +443,7 @@ class ShuffledDiceRightBranch(nn.Layer):
 
     def call(self, x, training=None):
         x = self.conv(x, training=training)
-        x = self.dice(x)
+        x = self.dice(x, training=training)
         return x
 
 
@@ -455,7 +489,7 @@ class ShuffledDiceBlock(nn.Layer):
     def call(self, x, training=None):
         axis = get_channel_axis(self.data_format)
         x1, x2 = tf.split(x, num_or_size_splits=2, axis=axis)
-        x2 = self.right_branch(x2)
+        x2 = self.right_branch(x2, training=training)
         x = tf.concat([x1, x2], axis=axis)
         x = self.shuffle(x)
         return x
@@ -483,8 +517,8 @@ class DiceInitBlock(nn.Layer):
         self.conv = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            stride=2,
-            activation=(lambda: PReLU2()),
+            strides=2,
+            activation=(lambda: PReLU2(in_channels=out_channels)),
             data_format=data_format,
             name="conv")
         self.pool = MaxPool2d(
@@ -525,6 +559,8 @@ class DiceClassifier(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(DiceClassifier, self).__init__(**kwargs)
+        self.data_format = data_format
+
         self.conv1 = conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
@@ -542,6 +578,9 @@ class DiceClassifier(nn.Layer):
             name="conv2")
 
     def call(self, x, training=None):
+        axis = -1 if is_channels_first(self.data_format) else 1
+        x = tf.expand_dims(tf.expand_dims(x, axis=axis), axis=axis)
+
         x = self.conv1(x)
         x = self.dropout(x, training=training)
         x = self.conv2(x)
@@ -623,6 +662,7 @@ class DiceNet(nn.Layer):
     def call(self, x, training=None):
         x = self.features(x, training=training)
         x = self.output1(x, training=training)
+        x = flatten(x, self.data_format)
         return x
 
 

@@ -10,7 +10,7 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, NormActivation, ChannelShuffle, Concurrent, PReLU2
+from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, NormActivation, ChannelShuffle, Concurrent, PReLU2
 
 
 class SpatialDiceBranch(HybridBlock):

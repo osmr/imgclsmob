@@ -150,7 +150,7 @@ class DiceBaseBlock(nn.Layer):
 
         self.norm_activ = NormActivation(
             in_channels=mid_channels,
-            activation=(lambda: PReLU2(in_channels=mid_channels)),
+            activation=(lambda: PReLU2(in_channels=mid_channels, name="activ")),
             data_format=data_format,
             name="norm_activ")
         self.shuffle = ChannelShuffle(
@@ -162,7 +162,7 @@ class DiceBaseBlock(nn.Layer):
             in_channels=mid_channels,
             out_channels=channels,
             groups=channels,
-            activation=(lambda: PReLU2(in_channels=channels)),
+            activation=(lambda: PReLU2(in_channels=channels, name="activ")),
             data_format=data_format,
             name="squeeze_conv")
 
@@ -266,7 +266,7 @@ class DiceBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             groups=proj_groups,
-            activation=(lambda: PReLU2(in_channels=out_channels)),
+            activation=(lambda: PReLU2(in_channels=out_channels, name="activ")),
             data_format=data_format,
             name="proj_conv")
 
@@ -299,13 +299,13 @@ class StridedDiceLeftBranch(nn.Layer):
             out_channels=channels,
             strides=2,
             groups=channels,
-            activation=(lambda: PReLU2(in_channels=channels)),
+            activation=(lambda: PReLU2(in_channels=channels, name="activ")),
             data_format=data_format,
             name="conv1")
         self.conv2 = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: PReLU2(in_channels=channels)),
+            activation=(lambda: PReLU2(in_channels=channels, name="activ")),
             data_format=data_format,
             name="conv2")
 
@@ -349,7 +349,7 @@ class StridedDiceRightBranch(nn.Layer):
         self.conv = conv1x1_block(
             in_channels=channels,
             out_channels=channels,
-            activation=(lambda: PReLU2(in_channels=channels)),
+            activation=(lambda: PReLU2(in_channels=channels, name="activ")),
             data_format=data_format,
             name="conv")
 
@@ -431,7 +431,7 @@ class ShuffledDiceRightBranch(nn.Layer):
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation=(lambda: PReLU2(in_channels=out_channels)),
+            activation=(lambda: PReLU2(in_channels=out_channels, name="activ")),
             data_format=data_format,
             name="conv")
         self.dice = DiceBlock(
@@ -518,7 +518,7 @@ class DiceInitBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             strides=2,
-            activation=(lambda: PReLU2(in_channels=out_channels)),
+            activation=(lambda: PReLU2(in_channels=out_channels, name="activ")),
             data_format=data_format,
             name="conv")
         self.pool = MaxPool2d(
@@ -587,7 +587,7 @@ class DiceClassifier(nn.Layer):
         return x
 
 
-class DiceNet(nn.Layer):
+class DiceNet(tf.keras.Model):
     """
     DiCENet model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,' https://arxiv.org/abs/1906.03516.
 

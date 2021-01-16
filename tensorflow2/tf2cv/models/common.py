@@ -208,7 +208,7 @@ class PReLU2(nn.PReLU):
     def build(self, input_shape):
         self.alpha = self.add_weight(
             shape=(self.in_channels,),
-            name='alpha',
+            name="alpha",
             initializer=self.alpha_initializer,
             regularizer=self.alpha_regularizer,
             constraint=self.alpha_constraint)

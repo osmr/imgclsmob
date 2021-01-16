@@ -99,12 +99,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('senet154', '0461', '6512228c820897cd09f877527a553ca99d673956', 'v0.0.13', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('resnestabc14', '0647', '0c3d9e34aebf0dee0dbcbb937eb54f2a7fc8f64a', 'v0.0.493', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta18', '0707', 'efca5a69587dcdff3aa5d3d7cbd621d082299e27', 'v0.0.489', 'ResNeSt(A)-18', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnestabc26', '0571', 'd6a8a7ae2f6b1224ff51a6c1ee4b94c4795218db', 'v0.0.465', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnestabc26', '0476', '7d97b20648e1f38454e6f5b1fe796c8eaf6e7e74', 'v0.0.495', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta50', '0462', 'c98fe61543ea770d120d157eed2030c60a6bc70d', 'v0.0.465', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta101', '0403', '61e147732069b54ed4da4b342b1b8526a0e9df54', 'v0.0.465', 'ResNeSt(A)-101', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta200', '0339', '6dc300871b186950ee64fd28bb168f7fb4a036e3', 'v0.0.465', 'ResNeSt(A)-200', '2004.08955', 'in1k', 256, 0.875, 150, ''),  # noqa
     ('resnesta269', '0338', '6a555ce85eb177299eb43747cf019a50d3a143c1', 'v0.0.465', 'ResNeSt(A)-269', '2004.08955', 'in1k', 320, 0.875, 100, ''),  # noqa
-    ('ibn_resnet50', '0641', 'e48a1fe5f7e448d4b784ef4dc0f33832f3370a9b', 'v0.0.127', 'IBN-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
+    ('ibn_resnet50', '0576', '40c420fcbbfd87bf634fc5b351746e124c32e401', 'v0.0.495', 'IBN-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibn_resnet101', '0561', '5279c78a0dbfc722cfcfb788af479b6133920528', 'v0.0.127', 'IBN-ResNet-101', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibnb_resnet50', '0686', 'e138995e6acda4b496375beac6d01cd7a9f79876', 'v0.0.127', 'IBN(b)-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibn_resnext101_32x4d', '0542', 'b5233c663a4d207d08c21107d6c951956e910be8', 'v0.0.127', 'IBN-ResNeXt-101 (32x4d)', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
@@ -124,7 +124,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx008', '0740', '157abf5e7c9244a482bf7655e75bfaea143b4d61', 'v0.0.482', 'RegNetX-800MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx016', '0637', '6de8a97b67a34be6e9acc234261f051da1b9444a', 'v0.0.486', 'RegNetX-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx032', '0592', '75dc82ab5cbc1b715444b8336b5178580bd6d7d9', 'v0.0.492', 'RegNetX-3.2GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnetx040', '0586', '54660c9ceef3013f2bdb4ec0fd4ec404f97d9861', 'v0.0.473', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx040', '0488', 'b891108c3dd4594ae0d6ecb91ad7be3d2d96878d', 'v0.0.495', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx064', '0557', 'e28df79ca0a7a4a6895e9a497f82aebcaffbac79', 'v0.0.473', 'RegNetX-6.4GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx080', '0551', 'e8d5baaac129477540ef4614fcb45cafd9173851', 'v0.0.473', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx120', '0538', '5eb7ad44af359b980da57a849e93973dcfe2646f', 'v0.0.473', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -199,11 +199,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('vovnet57', '0628', '99f8a0c8958de38e89194014a08e312205bb3e1e', 'v0.0.431', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, '[stigma0617/VoVNet.pytorch]'),  # noqa
     ('selecsls42b', '0611', 'acff1e8b36428719059eec4b60c7b2c045a54d8e', 'v0.0.493', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('selecsls60b', '0584', '470ace6b9b8db32b84924825908b426a9e38dd09', 'v0.0.430', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('selecsls60b', '0559', 'a0e7b4effe66dc58c76d22a7647dfce7f3639c33', 'v0.0.495', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hardnet39ds', '0881', 'ea47fc939a130a70c5fa3326c3af6ba049a99f92', 'v0.0.485', 'HarDNet-39DS', '1909.00948', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hardnet68ds', '0756', 'e0da07508c1eb92fee49df42243836892fe2f4c8', 'v0.0.487', 'HarDNet-68DS', '1909.00948', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hardnet68', '0699', '2e207f79a1995f5f30d5b9fca3391bb8e7b8594f', 'v0.0.435', 'HarDNet-68', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
-    ('hardnet85', '0611', 'ae85d8af40610e08765f1bfc25b8414ac70d7451', 'v0.0.435', 'HarDNet-85', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
+    ('hardnet85', '0586', '39d80e9361844e8ba02b08e93a7440eac14d2eda', 'v0.0.495', 'HarDNet-85', '1909.00948', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezenet_v1_0', '1766', 'afdbcf1aef39237300656d2c5a7dba19230e29fc', 'v0.0.128', 'SqueezeNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezenet_v1_1', '1772', '25b77bc39e35612abbe7c2344d2c3e1e6756c2f8', 'v0.0.88', 'SqueezeNet v1.1', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezeresnet_v1_0', '1809', '25bfc02edeffb279010242614e7d73bbeacc0170', 'v0.0.178', 'SqueezeResNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -279,7 +279,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('inceptionv4', '0529', '5cb7b4e4b8f62d6b4346855d696b06b426b44f3d', 'v0.0.105', 'InceptionV4', '1602.07261', 'in1k', 299, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('inceptionresnetv2', '0490', '1d1b4d184e6d41091c5ac3321d99fa554b498dbe', 'v0.0.107', 'InceptionResNetV2', '1602.07261', 'in1k', 299, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('polynet', '0452', '6a1b295dad3f261b48e845f1b283e4eef3ab5a0b', 'v0.0.96', 'PolyNet', '1611.05725', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
-    ('nasnet_4a1056', '0816', 'd21bbaf5e937c2e06134fa40e7bdb1f501423b86', 'v0.0.97', 'NASNet-A 4@1056', '1707.07012', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('nasnet_4a1056', '0803', '44f5ecbe03da2cd21803c555366121e29b207907', 'v0.0.495', 'NASNet-A 4@1056', '1707.07012', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('nasnet_6a4032', '0421', 'f354d28f4acdde399e081260c3f46152eca5d27e', 'v0.0.101', 'NASNet-A 6@4032', '1707.07012', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('pnasnet5large', '0428', '65de46ebd049e494c13958d5671aba5abf803ff3', 'v0.0.114', 'PNASNet-5-Large', '1712.00559', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('spnasnet', '0798', 'a25ca15768d91c0c09b473352bf54a2b954257d4', 'v0.0.490', 'SPNASNet', '1904.02877', 'in1k', 224, 0.875, 200, ''),  # noqa

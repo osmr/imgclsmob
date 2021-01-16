@@ -1969,10 +1969,11 @@ class NormActivation(Chain):
                  activation=(lambda: F.relu),
                  **kwargs):
         super(NormActivation, self).__init__(**kwargs)
-        self.bn = L.BatchNormalization(
-            size=in_channels,
-            eps=bn_eps)
-        self.activ = get_activation_layer(activation)
+        with self.init_scope():
+            self.bn = L.BatchNormalization(
+                size=in_channels,
+                eps=bn_eps)
+            self.activ = get_activation_layer(activation)
 
     def __call__(self, x):
         x = self.bn(x)

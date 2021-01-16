@@ -44,7 +44,7 @@ class SpatialDiceBranch(Chain):
                 groups=self.base_sp_size)
 
     def __call__(self, x):
-        height, width = x.size()[2:]
+        height, width = x.shape[2:]
         if self.is_height:
             real_sp_size = height
             real_in_size = (real_sp_size, width)
@@ -58,18 +58,22 @@ class SpatialDiceBranch(Chain):
             if real_sp_size < self.base_sp_size:
                 x = F.resize_images(x, output_shape=base_in_size, mode="bilinear", align_corners=True)
             else:
-                x = F.average_pooling_2d(x, ksize=base_in_size)  # ???
+                # ksize = (real_in_size[0] // base_in_size[0], real_in_size[1] // base_in_size[1])
+                # x = F.average_pooling_2d(x, ksize=ksize)
+                x = F.resize_images(x, output_shape=base_in_size, mode="bilinear", align_corners=True)
 
-        x = x.transpose(1, self.index).contiguous()
+        x = F.swapaxes(x, axis1=1, axis2=self.index)
         x = self.conv(x)
-        x = x.transpose(1, self.index).contiguous()
+        x = F.swapaxes(x, axis1=1, axis2=self.index)
 
-        changed_sp_size = x.size(self.index)
+        changed_sp_size = x.shape[self.index]
         if real_sp_size != changed_sp_size:
             if changed_sp_size < real_sp_size:
                 x = F.resize_images(x, output_shape=real_in_size, mode="bilinear", align_corners=True)
             else:
-                x = F.average_pooling_2d(x, ksize=real_in_size)  # ???
+                # ksize = (x.shape[2] // real_in_size[0], x.shape[3] // real_in_size[1])
+                # x = F.average_pooling_2d(x, ksize=ksize)
+                x = F.resize_images(x, output_shape=real_in_size, mode="bilinear", align_corners=True)
 
         return x
 
@@ -537,7 +541,7 @@ class DiceNet(Chain):
                     dropout_rate=dropout_rate))
                 setattr(self.output, "final_flatten", partial(
                     F.reshape,
-                    shape=(-1, in_channels)))
+                    shape=(-1, classes)))
 
     def __call__(self, x):
         x = self.features(x)

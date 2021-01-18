@@ -322,6 +322,14 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ESPNetv2 x1.25 | 32.06 | 12.18 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1218-85d97b2b.pth.log)) |
 | ESPNetv2 x1.5 | 30.83 | 11.29 | 2,314,856 | 185.77M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w3d2-1129-3bbb49ad.pth.log)) |
 | ESPNetv2 x2.0 | 27.94 | 9.61 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0961-13ba0f72.pth.log)) |
+| DiCENet x0.2 | 53.91 | 29.38 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-2938-2d721aa1.pth.log)) |
+| DiCENet x0.5 | 46.16 | 22.58 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2258-4f35289a.pth.log)) |
+| DiCENet x0.75 | 37.06 | 15.74 | 1,495,676 | 55.80M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1574-29d7d14f.pth.log)) |
+| DiCENet x1.0 | 33.59 | 13.25 | 1,805,604 | 82.17M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w1-1325-d3648c4c.pth.log)) |
+| DiCENet x1.25 | 32.26 | 12.40 | 2,162,888 | 111.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w5d4-1240-8c4dd6f6.pth.log)) |
+| DiCENet x1.5 | 30.55 | 11.23 | 2,652,200 | 151.81M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d2-1123-e5c5db64.pth.log)) |
+| DiCENet x1.75 | 29.76 | 10.62 | 3,264,932 | 201.26M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1062-8b599d46.pth.log)) |
+| DiCENet x2.0 | 28.95 | 10.19 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1019-44e2153f.pth.log)) |
 | HRNet-W18 Small V1 | 26.48 | 9.01 | 13,187,464 | 1,615.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0901-30023064.pth.log)) |
 | HRNet-W18 Small V2 | 24.87 | 7.58 | 15,597,464 | 2,618.84M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v2-0758-27f85f31.pth.log)) |
 | HRNetV2-W18 | 23.24 | 6.56 | 21,299,004 | 4,323.07M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0656-78b1f85b.pth.log)) |
@@ -779,6 +787,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [kevin-ssy/FishNet]: https://github.com/kevin-ssy/FishNet
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
+[sacmehta/EdgeNets]: https://github.com/sacmehta/EdgeNets
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
 [MIT-HAN-LAB/ProxylessNAS]: https://github.com/MIT-HAN-LAB/ProxylessNAS

@@ -307,6 +307,14 @@ Some remarks:
 | ESPNetv2 x1.25 | 33.07 | 12.68 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1268-dc69f420.npz.log)) |
 | ESPNetv2 x1.5 | 31.96 | 11.92 | 2,314,856 | 185.77M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w3d2-1192-2b7fc5cf.npz.log)) |
 | ESPNetv2 x2.0 | 28.95 | 9.90 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0990-bfb3ab7c.npz.log)) |
+| DiCENet x0.2 | 55.10 | 30.64 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3064-118c88d2.npz.log)) |
+| DiCENet x0.5 | 47.55 | 23.66 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2366-4f9b934a.npz.log)) |
+| DiCENet x0.75 | 38.19 | 16.42 | 1,495,676 | 55.80M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1642-c97e9157.npz.log)) |
+| DiCENet x1.0 | 35.00 | 14.24 | 1,805,604 | 82.17M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w1-1424-841472b0.npz.log)) |
+| DiCENet x1.25 | 33.20 | 12.94 | 2,162,888 | 111.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w5d4-1294-341988ea.npz.log)) |
+| DiCENet x1.5 | 31.72 | 11.91 | 2,652,200 | 151.81M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d2-1191-d201b985.npz.log)) |
+| DiCENet x1.75 | 30.60 | 11.19 | 3,264,932 | 201.26M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1119-9a467046.npz.log)) |
+| DiCENet x2.0 | 29.92 | 10.63 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1063-224f4153.npz.log)) |
 | HRNet-W18 Small V1 | 26.24 | 8.73 | 13,187,464 | 1,615.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0873-96476e4b.npz.log)) |
 | HRNet-W18 Small V2 | 25.69 | 8.02 | 15,597,464 | 2,618.84M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v2-0802-17518355.npz.log)) |
 | HRNetV2-W18 | 24.02 | 6.85 | 21,299,004 | 4,323.07M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0685-fc886311.npz.log)) |
@@ -762,6 +770,7 @@ Some remarks:
 [kevin-ssy/FishNet]: https://github.com/kevin-ssy/FishNet
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
+[sacmehta/EdgeNets]: https://github.com/sacmehta/EdgeNets
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
 [MIT-HAN-LAB/ProxylessNAS]: https://github.com/MIT-HAN-LAB/ProxylessNAS

@@ -281,6 +281,14 @@ Some remarks:
 | DLA-X-102 | 21.95 | 6.02 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x-0602-46640eec.tf2.h5.log)) |
 | DLA-X2-102 | 21.11 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x2-0553-06c93031.tf2.h5.log)) |
 | DLA-169 | 21.97 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla169-0590-e010166d.tf2.h5.log)) |
+| DiCENet x0.2 | 55.84 | 31.16 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3116-6fbe46e2.tf2.h5.log)) |
+| DiCENet x0.5 | 48.32 | 24.29 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2429-fbf5fc52.tf2.h5.log)) |
+| DiCENet x0.75 | 39.02 | 17.01 | 1,495,676 | 55.80M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1701-bc438808.tf2.h5.log)) |
+| DiCENet x1.0 | 36.01 | 14.91 | 1,805,604 | 82.17M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w1-1491-7e0a19a8.tf2.h5.log)) |
+| DiCENet x1.25 | 34.29 | 13.52 | 2,162,888 | 111.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w5d4-1352-834f1cb5.tf2.h5.log)) |
+| DiCENet x1.5 | 32.14 | 12.16 | 2,652,200 | 151.81M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d2-1216-8cba581c.tf2.h5.log)) |
+| DiCENet x1.75 | 31.76 | 11.84 | 3,264,932 | 201.26M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1184-0b337403.tf2.h5.log)) |
+| DiCENet x2.0 | 30.49 | 11.13 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1113-a597b5bc.tf2.h5.log)) |
 | HRNet-W18 Small V1 | 26.23 | 8.71 | 13,187,464 | 1,614.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0871-6ae644af.tf2.h5.log)) |
 | HRNet-W18 Small V2 | 25.72 | 8.05 | 15,597,464 | 2,618.54M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnet_w18_small_v2-0805-fcb8e218.tf2.h5.log)) |
 | HRNetV2-W18 | 24.02 | 6.86 | 21,299,004 | 4,322.66M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w18-0686-71c614d7.tf2.h5.log)) |
@@ -724,6 +732,7 @@ Some remarks:
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
 [fyu/drn]: https://github.com/fyu/drn
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
+[sacmehta/EdgeNets]: https://github.com/sacmehta/EdgeNets
 [XingangPan/IBN-Net]: https://github.com/XingangPan/IBN-Net
 [HRNet/HRNet...ation]: https://github.com/HRNet/HRNet-Image-Classification
 [stigma0617/VoVNet.pytorch]: https://github.com/stigma0617/VoVNet.pytorch

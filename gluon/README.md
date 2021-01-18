@@ -329,6 +329,14 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ESPNetv2 x1.25 | 33.14 | 12.73 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1273-b119ad9e.params.log)) |
 | ESPNetv2 x1.5 | 32.04 | 11.94 | 2,314,856 | 185.77M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w3d2-1194-3804a850.params.log)) |
 | ESPNetv2 x2.0 | 28.91 | 9.94 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0994-c212d81a.params.log)) |
+| DiCENet x0.2 | 55.15 | 30.67 | 1,130,704 | 18.70M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3067-e7d01194.params.log)) |
+| DiCENet x0.5 | 47.59 | 23.70 | 1,214,120 | 30.39M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2370-add0bc22.params.log)) |
+| DiCENet x0.75 | 38.25 | 16.47 | 1,495,676 | 55.64M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1647-7200f0a3.params.log)) |
+| DiCENet x1.0 | 35.05 | 14.29 | 1,805,604 | 81.96M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w1-1429-6775498a.params.log)) |
+| DiCENet x1.25 | 33.23 | 12.96 | 2,162,888 | 111.60M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w5d4-1296-d24fc61e.params.log)) |
+| DiCENet x1.5 | 31.74 | 11.91 | 2,652,200 | 151.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d2-1191-08213162.params.log)) |
+| DiCENet x1.75 | 30.54 | 11.21 | 3,264,932 | 200.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1121-be69a971.params.log)) |
+| DiCENet x2.0 | 29.93 | 10.58 | 3,979,044 | 257.49M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1058-66980b52.params.log)) |
 | HRNet-W18 Small V1 | 26.20 | 8.73 | 13,187,464 | 1,614.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0873-1060c1c5.params.log)) |
 | HRNet-W18 Small V2 | 25.75 | 8.02 | 15,597,464 | 2,618.54M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v2-0802-052ff8f9.params.log)) |
 | HRNetV2-W18 | 24.01 | 6.85 | 21,299,004 | 4,322.66M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0685-21c708c4.params.log)) |
@@ -854,6 +862,7 @@ Some remarks:
 [kevin-ssy/FishNet]: https://github.com/kevin-ssy/FishNet
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
+[sacmehta/EdgeNets]: https://github.com/sacmehta/EdgeNets
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
 [MIT-HAN-LAB/ProxylessNAS]: https://github.com/MIT-HAN-LAB/ProxylessNAS

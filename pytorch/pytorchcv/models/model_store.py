@@ -151,7 +151,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('densenet201', '0612', '6adc8625a4afa53e335272bab01b4908a0ca3f00', 'v0.0.426', 'DenseNet-201', '1608.06993', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('condensenet74_c4_g4', '0828', '5ba550494cae7081d12c14b02b2a02365539d377', 'v0.0.4', 'CondenseNet-74 (C=G=4)', '1711.09224', 'in1k', 224, 0.875, 200, '[ShichenLiu/CondenseNet]'),  # noqa
     ('condensenet74_c8_g8', '1006', '3574d874fefc3307f241690bad51f20e61be1542', 'v0.0.4', 'CondenseNet-74 (C=G=8)', '1711.09224', 'in1k', 224, 0.875, 200, '[ShichenLiu/CondenseNet]'),  # noqa
-    ('peleenet', '1151', '9c47b80297ac072a923cda763b78e7218cd52d3a', 'v0.0.141', 'PeleeNet', '1804.06882', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('peleenet', '1004', '5107a95d09d062cb152986169aa5b6f8f08afa47', 'v0.0.496', 'PeleeNet', '1804.06882', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('wrn50_2', '0641', '83897ab9f015f6f988e51108e12518b08e1819dd', 'v0.0.113', 'WRN-50-2', '1605.07146', 'in1k', 224, 0.875, 200, '[szagoruyko/functional-zoo]'),  # noqa
     ('drnc26', '0755', '35405bd52a0c721f3dc64f18d433074f263b7339', 'v0.0.116', 'DRN-C-26', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnc42', '0657', '7c99c4608a9a5e5f073f657b92f258ba4ba5ac77', 'v0.0.116', 'DRN-C-42', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
@@ -198,7 +198,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('vovnet39', '0564', '63bfa613870b37bd4fb5b71412e7875392aa4f66', 'v0.0.493', 'VoVNet-39', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('vovnet57', '0628', '99f8a0c8958de38e89194014a08e312205bb3e1e', 'v0.0.431', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, '[stigma0617/VoVNet.pytorch]'),  # noqa
     ('selecsls42b', '0611', 'acff1e8b36428719059eec4b60c7b2c045a54d8e', 'v0.0.493', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('selecsls60', '0529', '1e1b05bc1432fe7c4a8bac26278c16f7486a498f', 'v0.0.496', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls60b', '0559', 'a0e7b4effe66dc58c76d22a7647dfce7f3639c33', 'v0.0.495', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hardnet39ds', '0881', 'ea47fc939a130a70c5fa3326c3af6ba049a99f92', 'v0.0.485', 'HarDNet-39DS', '1909.00948', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hardnet68ds', '0756', 'e0da07508c1eb92fee49df42243836892fe2f4c8', 'v0.0.487', 'HarDNet-68DS', '1909.00948', 'in1k', 224, 0.875, 200, ''),  # noqa

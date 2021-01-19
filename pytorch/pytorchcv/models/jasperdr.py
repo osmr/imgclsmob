@@ -1,128 +1,25 @@
 """
-    Jasper for ASR, implemented in PyTorch.
+    Jasper DR (Dense Residual) for ASR, implemented in PyTorch.
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x5', 'ConvBlock1d', 'conv1d1x1_block', 'JasperFinalBlock']
+__all__ = ['JasperDr', 'jasperdr5x3', 'jasperdr10x5']
 
 import os
+import torch
 import torch.nn as nn
+from .common import DualPathSequential, ParallelConcurent
+from .jasper import ConvBlock1d, conv1d1x1_block, JasperFinalBlock
 
 
-class ConvBlock1d(nn.Module):
+class JasperDrUnit(nn.Module):
     """
-    Standard 1D convolution block with Batch normalization and activation.
+    Jasper DR unit with residual connection.
 
     Parameters:
     ----------
     in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int
-        Convolution window size.
-    stride : int
-        Strides of the convolution.
-    padding : int
-        Padding value for convolution layer.
-    dilation : int
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    dropout_rate : float, default 0.0
-        Parameter of Dropout layer. Faction of the input units to drop.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True)),
-                 dropout_rate=0.0):
-        super(ConvBlock1d, self).__init__()
-        self.activate = (activation is not None)
-        self.use_dropout = (dropout_rate != 0.0)
-        self.use_bn = use_bn
-
-        self.conv = nn.Conv1d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        if self.use_bn:
-            self.bn = nn.BatchNorm1d(
-                num_features=out_channels,
-                eps=bn_eps)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=dropout_rate)
-
-    def forward(self, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        return x
-
-
-def conv1d1x1_block(in_channels,
-                    out_channels,
-                    stride=1,
-                    padding=0,
-                    **kwargs):
-    """
-    1x1 version of the standard 1D convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 0
-        Padding value for convolution layer.
-    """
-    return ConvBlock1d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=padding,
-        **kwargs)
-
-
-class JasperUnit(nn.Module):
-    """
-    Jasper unit with residual connection.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
+        Number of input channels (for actual input and each identity connections).
     out_channels : int
         Number of output channels.
     kernel_size : int
@@ -133,18 +30,21 @@ class JasperUnit(nn.Module):
         Count of body convolution blocks.
     """
     def __init__(self,
-                 in_channels,
+                 in_channels_list,
                  out_channels,
                  kernel_size,
                  dropout_rate,
                  repeat):
-        super(JasperUnit, self).__init__()
-        self.identity_conv = conv1d1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            dropout_rate=0.0,
-            activation=None)
+        super(JasperDrUnit, self).__init__()
+        self.identity_convs = ParallelConcurent()
+        for i, dense_in_channels_i in enumerate(in_channels_list):
+            self.identity_convs.add_module("block{}".format(i + 1), conv1d1x1_block(
+                in_channels=dense_in_channels_i,
+                out_channels=out_channels,
+                dropout_rate=0.0,
+                activation=None))
 
+        in_channels = in_channels_list[-1]
         self.body = nn.Sequential()
         for i in range(repeat):
             activation = (lambda: nn.ReLU(inplace=True)) if i < repeat - 1 else None
@@ -162,62 +62,21 @@ class JasperUnit(nn.Module):
         self.activ = nn.ReLU(inplace=True)
         self.dropout = nn.Dropout(p=dropout_rate)
 
-    def forward(self, x):
-        identity = self.identity_conv(x)
+    def forward(self, x, y=None):
+        y = [x] if y is None else y + [x]
+        identity = self.identity_convs(y)
+        identity = torch.stack(tuple(identity), dim=1)
+        identity = identity.sum(dim=1)
         x = self.body(x)
         x = x + identity
         x = self.activ(x)
         x = self.dropout(x)
-        return x
+        return x, y
 
 
-class JasperFinalBlock(nn.Module):
+class JasperDr(nn.Module):
     """
-    Jasper specific final block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    channels : list of int
-        Number of output channels for each block.
-    kernel_sizes : list of int
-        Kernel sizes for each block.
-    dropout_rates : list of int
-        Dropout rates for each block.
-    """
-    def __init__(self,
-                 in_channels,
-                 channels,
-                 kernel_sizes,
-                 dropout_rates):
-        super(JasperFinalBlock, self).__init__()
-        self.conv1 = ConvBlock1d(
-            in_channels=in_channels,
-            out_channels=channels[-2],
-            kernel_size=kernel_sizes[-2],
-            stride=1,
-            padding=(kernel_sizes[-2] // 2),
-            dilation=2,
-            dropout_rate=dropout_rates[-2])
-        self.conv2 = ConvBlock1d(
-            in_channels=channels[-2],
-            out_channels=channels[-1],
-            kernel_size=kernel_sizes[-1],
-            stride=1,
-            padding=(kernel_sizes[-1] // 2),
-            dilation=2,
-            dropout_rate=dropout_rates[-1])
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        return x
-
-
-class Jasper(nn.Module):
-    """
-    Jasper model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
+    Jasper DR model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 
     Parameters:
     ----------
@@ -241,11 +100,14 @@ class Jasper(nn.Module):
                  repeat,
                  in_channels=120,
                  num_classes=11):
-        super(Jasper, self).__init__()
+        super(JasperDr, self).__init__()
         self.in_size = None
         self.num_classes = num_classes
 
-        self.features = nn.Sequential()
+        self.features = DualPathSequential(
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=1)
         self.features.add_module("init_block", ConvBlock1d(
                 in_channels=in_channels,
                 out_channels=channels[0],
@@ -254,10 +116,12 @@ class Jasper(nn.Module):
                 padding=(kernel_sizes[0] // 2),
                 dropout_rate=dropout_rates[0]))
         in_channels = channels[0]
+        in_channels_list = []
         for i, (out_channels, kernel_size, dropout_rate) in\
                 enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
-            self.features.add_module("unit{}".format(i + 1), JasperUnit(
-                in_channels=in_channels,
+            in_channels_list += [in_channels]
+            self.features.add_module("unit{}".format(i + 1), JasperDrUnit(
+                in_channels_list=in_channels_list,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 dropout_rate=dropout_rate,
@@ -291,13 +155,13 @@ class Jasper(nn.Module):
         return x
 
 
-def get_jasper(version,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
-               **kwargs):
+def get_jasperdr(version,
+                 model_name=None,
+                 pretrained=False,
+                 root=os.path.join("~", ".torch", "models"),
+                 **kwargs):
     """
-    Create Jasper model with specific parameters.
+    Create Jasper DR model with specific parameters.
 
     Parameters:
     ----------
@@ -331,7 +195,7 @@ def get_jasper(version,
     else:
         raise ValueError("Unsupported Jasper version: {}".format(version))
 
-    net = Jasper(
+    net = JasperDr(
         channels=channels,
         kernel_sizes=kernel_sizes,
         dropout_rates=dropout_rates,
@@ -350,9 +214,9 @@ def get_jasper(version,
     return net
 
 
-def jasper5x3(**kwargs):
+def jasperdr5x3(**kwargs):
     """
-    Jasper 5x3 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
+    Jasper DR 5x3 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
     Parameters:
@@ -362,12 +226,12 @@ def jasper5x3(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="5x3", model_name="jasper5x3", **kwargs)
+    return get_jasperdr(version="5x3", model_name="jasperdr5x3", **kwargs)
 
 
-def jasper10x5(**kwargs):
+def jasperdr10x5(**kwargs):
     """
-    Jasper 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
+    Jasper DR 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
     Parameters:
@@ -377,7 +241,7 @@ def jasper10x5(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="10x5", model_name="jasper10x5", **kwargs)
+    return get_jasperdr(version="10x5", model_name="jasperdr10x5", **kwargs)
 
 
 def _calc_width(net):
@@ -398,8 +262,8 @@ def _test():
     num_classes = 11
 
     models = [
-        jasper5x3,
-        jasper10x5,
+        jasperdr5x3,
+        jasperdr10x5,
     ]
 
     for model in models:
@@ -413,10 +277,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != jasper5x3 or weight_count == 107820299)
-        assert (model != jasper10x5 or weight_count == 322426123)
+        assert (model != jasperdr5x3 or weight_count == 109848331)
+        assert (model != jasperdr10x5 or weight_count == 332771595)
 
-        batch = 1
+        batch = 4
         seq_len = np.random.randint(60, 150)
         x = torch.randn(batch, audio_features, seq_len)
         y = net(x)

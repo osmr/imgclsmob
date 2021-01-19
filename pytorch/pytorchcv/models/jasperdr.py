@@ -3,13 +3,13 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['JasperDr', 'jasperdr5x3', 'jasperdr10x5']
+__all__ = ['JasperDr', 'jasperdr5x3', 'jasperdr10x4', 'jasperdr10x5']
 
 import os
 import torch
 import torch.nn as nn
 from .common import DualPathSequential, ParallelConcurent
-from .jasper import ConvBlock1d, conv1d1x1_block, JasperFinalBlock
+from .jasper import ConvBlock1d, conv1d1_block, JasperFinalBlock
 
 
 class JasperDrUnit(nn.Module):
@@ -38,7 +38,7 @@ class JasperDrUnit(nn.Module):
         super(JasperDrUnit, self).__init__()
         self.identity_convs = ParallelConcurent()
         for i, dense_in_channels_i in enumerate(in_channels_list):
-            self.identity_convs.add_module("block{}".format(i + 1), conv1d1x1_block(
+            self.identity_convs.add_module("block{}".format(i + 1), conv1d1_block(
                 in_channels=dense_in_channels_i,
                 out_channels=out_channels,
                 dropout_rate=0.0,
@@ -183,7 +183,7 @@ def get_jasperdr(version,
         kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
         dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
         repeat = 3
-    elif version == "10x5":
+    elif version in ("10x4", "10x5"):
         channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
         kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
         dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
@@ -191,7 +191,12 @@ def get_jasperdr(version,
         channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
         kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
         dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
-        repeat = 5
+        if version == "10x4":
+            repeat = 4
+        elif version == "10x5":
+            repeat = 5
+        else:
+            raise ValueError("Unsupported Jasper version: {}".format(version))
     else:
         raise ValueError("Unsupported Jasper version: {}".format(version))
 
@@ -229,6 +234,21 @@ def jasperdr5x3(**kwargs):
     return get_jasperdr(version="5x3", model_name="jasperdr5x3", **kwargs)
 
 
+def jasperdr10x4(**kwargs):
+    """
+    Jasper DR 10x4 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
+    https://arxiv.org/abs/1904.03288.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_jasperdr(version="10x4", model_name="jasperdr10x4", **kwargs)
+
+
 def jasperdr10x5(**kwargs):
     """
     Jasper DR 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
@@ -263,6 +283,7 @@ def _test():
 
     models = [
         jasperdr5x3,
+        jasperdr10x4,
         jasperdr10x5,
     ]
 
@@ -278,6 +299,7 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != jasperdr5x3 or weight_count == 109848331)
+        assert (model != jasperdr10x4 or weight_count == 271878411)
         assert (model != jasperdr10x5 or weight_count == 332771595)
 
         batch = 4

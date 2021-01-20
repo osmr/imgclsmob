@@ -170,31 +170,19 @@ def get_jasperdr(version,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    if version == "5x3":
-        channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
-        kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
-        dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
-        stage_repeat = [1, 1, 1, 1, 1, 1, 1, 1, 1]
-        channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
-        kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
-        dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
-        repeat = 3
-    elif version in ("10x4", "10x5"):
-        channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
-        kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
-        dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
-        stage_repeat = [1, 2, 2, 2, 2, 2, 1, 1, 1]
-        channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
-        kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
-        dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
-        if version == "10x4":
-            repeat = 4
-        elif version == "10x5":
-            repeat = 5
-        else:
-            raise ValueError("Unsupported Jasper version: {}".format(version))
-    else:
-        raise ValueError("Unsupported Jasper version: {}".format(version))
+    import numpy as np
+
+    blocks, repeat = tuple(map(int, version.split("x")))
+    main_stage_repeat = blocks // 5
+
+    channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
+    kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
+    dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
+    stage_repeat = np.full((8,), 1)
+    stage_repeat[1:-2] *= main_stage_repeat
+    channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
+    kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
+    dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
 
     net = JasperDr(
         channels=channels,
@@ -315,6 +303,7 @@ def _test():
         x = mx.nd.random.normal(shape=(batch, audio_features, seq_len), ctx=ctx)
         y = net(x)
         assert (y.shape[:2] == (batch, classes))
+        assert (y.shape[2] in [seq_len // 2, seq_len // 2 + 1])
 
 
 if __name__ == "__main__":

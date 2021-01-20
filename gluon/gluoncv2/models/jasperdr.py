@@ -28,6 +28,10 @@ class JasperDrUnit(HybridBlock):
         Parameter of Dropout layer. Faction of the input units to drop.
     repeat : int
         Count of body convolution blocks.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels_list,
@@ -35,6 +39,8 @@ class JasperDrUnit(HybridBlock):
                  kernel_size,
                  dropout_rate,
                  repeat,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  **kwargs):
         super(JasperDrUnit, self).__init__(**kwargs)
         with self.name_scope():
@@ -44,7 +50,9 @@ class JasperDrUnit(HybridBlock):
                     in_channels=dense_in_channels_i,
                     out_channels=out_channels,
                     dropout_rate=0.0,
-                    activation=None))
+                    activation=None,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
 
             in_channels = in_channels_list[-1]
             self.body = nn.HybridSequential(prefix="")
@@ -58,7 +66,9 @@ class JasperDrUnit(HybridBlock):
                     strides=1,
                     padding=(kernel_size // 2),
                     dropout_rate=dropout_rate_i,
-                    activation=activation))
+                    activation=activation,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
                 in_channels = out_channels
 
             self.activ = nn.Activation("relu")
@@ -90,6 +100,10 @@ class JasperDr(HybridBlock):
         Dropout rates for each unit and initial/final block.
     repeat : int
         Count of body convolution blocks.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 120
         Number of input channels (audio features).
     classes : int, default 11
@@ -100,6 +114,8 @@ class JasperDr(HybridBlock):
                  kernel_sizes,
                  dropout_rates,
                  repeat,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  in_channels=120,
                  classes=11,
                  **kwargs):
@@ -118,7 +134,9 @@ class JasperDr(HybridBlock):
                 kernel_size=kernel_sizes[0],
                 strides=2,
                 padding=(kernel_sizes[0] // 2),
-                dropout_rate=dropout_rates[0]))
+                dropout_rate=dropout_rates[0],
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off))
             in_channels = channels[0]
             in_channels_list = []
             for i, (out_channels, kernel_size, dropout_rate) in\
@@ -129,13 +147,17 @@ class JasperDr(HybridBlock):
                     out_channels=out_channels,
                     kernel_size=kernel_size,
                     dropout_rate=dropout_rate,
-                    repeat=repeat))
+                    repeat=repeat,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
                 in_channels = out_channels
             self.features.add(JasperFinalBlock(
                 in_channels=in_channels,
                 channels=channels,
                 kernel_sizes=kernel_sizes,
-                dropout_rates=dropout_rates))
+                dropout_rates=dropout_rates,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off))
             in_channels = channels[-1]
 
             self.output = conv1d1(

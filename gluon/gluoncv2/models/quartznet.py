@@ -272,7 +272,6 @@ class QuartzFinalBlock(HybridBlock):
                 kernel_size=kernel_sizes[-1],
                 strides=1,
                 padding=(kernel_sizes[-1] // 2),
-                dilation=2,
                 dropout_rate=dropout_rates[-1],
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)

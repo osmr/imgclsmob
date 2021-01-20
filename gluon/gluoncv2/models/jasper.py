@@ -95,8 +95,8 @@ class ConvBlock1d(HybridBlock):
                  **kwargs):
         super(ConvBlock1d, self).__init__(**kwargs)
         self.activate = (activation is not None)
-        self.use_dropout = (dropout_rate != 0.0)
         self.use_bn = use_bn
+        self.use_dropout = (dropout_rate != 0.0)
 
         with self.name_scope():
             self.conv = nn.Conv1D(
@@ -271,7 +271,6 @@ class JasperFinalBlock(HybridBlock):
                 kernel_size=kernel_sizes[-1],
                 strides=1,
                 padding=(kernel_sizes[-1] // 2),
-                dilation=2,
                 dropout_rate=dropout_rates[-1],
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)

@@ -269,7 +269,6 @@ class QuartzFinalBlock(nn.Module):
             kernel_size=kernel_sizes[-1],
             stride=1,
             padding=(kernel_sizes[-1] // 2),
-            dilation=2,
             dropout_rate=dropout_rates[-1])
 
     def forward(self, x):

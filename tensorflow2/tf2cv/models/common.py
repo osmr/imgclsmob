@@ -4,8 +4,8 @@
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'ReLU6',
            'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
-           'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1',
-           'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
+           'BatchNorm', 'InstanceNorm', 'IBN', 'Conv1d', 'Conv2d', 'SelectableDense', 'DenseBlock', 'ConvBlock1d',
+           'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
            'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',

@@ -24,7 +24,7 @@ def conv1d1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int, default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -132,9 +132,9 @@ def conv1d1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int, default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 0
+    padding : int, default 0
         Padding value for convolution layer.
     """
     return ConvBlock1d(

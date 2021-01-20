@@ -9,7 +9,7 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import DualPathSequential, ParallelConcurent
-from .jasper import ConvBlock1d, conv1d1_block, JasperFinalBlock
+from .jasper import conv1d1, ConvBlock1d, conv1d1_block, JasperFinalBlock
 
 
 class JasperDrUnit(HybridBlock):
@@ -34,8 +34,9 @@ class JasperDrUnit(HybridBlock):
                  out_channels,
                  kernel_size,
                  dropout_rate,
-                 repeat):
-        super(JasperDrUnit, self).__init__()
+                 repeat,
+                 **kwargs):
+        super(JasperDrUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.identity_convs = ParallelConcurent()
             for i, dense_in_channels_i in enumerate(in_channels_list):
@@ -100,8 +101,9 @@ class JasperDr(HybridBlock):
                  dropout_rates,
                  repeat,
                  in_channels=120,
-                 classes=11):
-        super(JasperDr, self).__init__()
+                 classes=11,
+                 **kwargs):
+        super(JasperDr, self).__init__(**kwargs)
         self.in_size = None
         self.classes = classes
 
@@ -136,11 +138,10 @@ class JasperDr(HybridBlock):
                 dropout_rates=dropout_rates))
             in_channels = channels[-1]
 
-            self.output = nn.Conv1D(
-                channels=classes,
-                kernel_size=1,
-                use_bias=True,
-                in_channels=in_channels)
+            self.output = conv1d1(
+                in_channels=in_channels,
+                out_channels=classes,
+                use_bias=True)
 
     def hybrid_forward(self, F, x):
         x = self.features(x)

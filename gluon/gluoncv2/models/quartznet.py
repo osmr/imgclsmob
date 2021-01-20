@@ -1,50 +1,22 @@
 """
-    Jasper for ASR, implemented in Gluon.
-    Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
+    QuartzNet for ASR, implemented in Gluon.
+    Original paper: 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable Convolutions,'
+    https://arxiv.org/abs/1910.10261.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'conv1d1', 'ConvBlock1d', 'conv1d1_block',
-           'JasperFinalBlock']
+__all__ = ['QuartzNet', 'quartznet5x5', 'quartznet10x5', 'quartznet15x5']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import BatchNormExtra
+from .jasper import conv1d1, conv1d1_block, ConvBlock1d
+from .common import BatchNormExtra, ChannelShuffle
 
 
-def conv1d1(in_channels,
-            out_channels,
-            strides=1,
-            groups=1,
-            use_bias=False):
+class DwsConvBlock1d(HybridBlock):
     """
-    1-dim kernel version of the 1D convolution layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int, default 1
-        Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    use_bias : bool, default False
-        Whether the layer uses a bias vector.
-    """
-    return nn.Conv1D(
-        channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        groups=groups,
-        use_bias=use_bias,
-        in_channels=in_channels)
-
-
-class ConvBlock1d(HybridBlock):
-    """
-    Standard 1D convolution block with batch normalization, activation, and dropout.
+    Depthwise version of the 1D standard convolution block with batch normalization, activation, dropout, and channel
+    shuffle.
 
     Parameters:
     ----------
@@ -93,21 +65,31 @@ class ConvBlock1d(HybridBlock):
                  activation=(lambda: nn.Activation("relu")),
                  dropout_rate=0.0,
                  **kwargs):
-        super(ConvBlock1d, self).__init__(**kwargs)
+        super(DwsConvBlock1d, self).__init__(**kwargs)
         self.activate = (activation is not None)
-        self.use_dropout = (dropout_rate != 0.0)
         self.use_bn = use_bn
+        self.use_dropout = (dropout_rate != 0.0)
+        self.use_channel_shuffle = (groups > 1)
 
         with self.name_scope():
-            self.conv = nn.Conv1D(
-                channels=out_channels,
+            self.dw_conv = nn.Conv1D(
+                channels=in_channels,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
                 dilation=dilation,
-                groups=groups,
+                groups=in_channels,
                 use_bias=use_bias,
                 in_channels=in_channels)
+            self.pw_conv = conv1d1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                groups=groups,
+                use_bias=use_bias)
+            if self.use_channel_shuffle:
+                self.shuffle = ChannelShuffle(
+                    channels=out_channels,
+                    groups=groups)
             if self.use_bn:
                 self.bn = BatchNormExtra(
                     in_channels=out_channels,
@@ -120,7 +102,10 @@ class ConvBlock1d(HybridBlock):
                 self.dropout = nn.Dropout(rate=dropout_rate)
 
     def hybrid_forward(self, F, x):
-        x = self.conv(x)
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
+        if self.use_channel_shuffle:
+            x = self.shuffle(x)
         if self.use_bn:
             x = self.bn(x)
         if self.activate:
@@ -130,13 +115,11 @@ class ConvBlock1d(HybridBlock):
         return x
 
 
-def conv1d1_block(in_channels,
-                  out_channels,
-                  strides=1,
-                  padding=0,
-                  **kwargs):
+def dwsconv1d1_block(stride=1,
+                     padding=0,
+                     **kwargs):
     """
-    1-dim kernel version of the standard 1D convolution block.
+    1-dim kernel version of the 1D depthwise version convolution block.
 
     Parameters:
     ----------
@@ -144,23 +127,37 @@ def conv1d1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int, default 1
+    kernel_size : int
+        Convolution window size.
+    stride : int, default 1
         Strides of the convolution.
     padding : int, default 0
         Padding value for convolution layer.
+    dilation : int
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    dropout_rate : float, default 0.0
+        Parameter of Dropout layer. Faction of the input units to drop.
     """
-    return ConvBlock1d(
-        in_channels=in_channels,
-        out_channels=out_channels,
+    return DwsConvBlock1d(
         kernel_size=1,
-        strides=strides,
+        stride=stride,
         padding=padding,
         **kwargs)
 
 
-class JasperUnit(HybridBlock):
+class QuartzUnit(HybridBlock):
     """
-    Jasper unit with residual connection.
+    QuartzNet unit with residual connection.
 
     Parameters:
     ----------
@@ -182,7 +179,7 @@ class JasperUnit(HybridBlock):
                  dropout_rate,
                  repeat,
                  **kwargs):
-        super(JasperUnit, self).__init__(**kwargs)
+        super(QuartzUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.identity_conv = conv1d1_block(
                 in_channels=in_channels,
@@ -194,7 +191,7 @@ class JasperUnit(HybridBlock):
             for i in range(repeat):
                 activation = (lambda: nn.Activation("relu")) if i < repeat - 1 else None
                 dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
-                self.body.add(ConvBlock1d(
+                self.body.add(DwsConvBlock1d(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=kernel_size,
@@ -216,9 +213,9 @@ class JasperUnit(HybridBlock):
         return x
 
 
-class JasperFinalBlock(HybridBlock):
+class QuartzFinalBlock(HybridBlock):
     """
-    Jasper specific final block.
+    QuartzNet specific final block.
 
     Parameters:
     ----------
@@ -237,9 +234,9 @@ class JasperFinalBlock(HybridBlock):
                  kernel_sizes,
                  dropout_rates,
                  **kwargs):
-        super(JasperFinalBlock, self).__init__(**kwargs)
+        super(QuartzFinalBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = ConvBlock1d(
+            self.conv1 = DwsConvBlock1d(
                 in_channels=in_channels,
                 out_channels=channels[-2],
                 kernel_size=kernel_sizes[-2],
@@ -262,9 +259,10 @@ class JasperFinalBlock(HybridBlock):
         return x
 
 
-class Jasper(HybridBlock):
+class QuartzNet(HybridBlock):
     """
-    Jasper model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
+    QuartzNet model from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable Convolutions,'
+    https://arxiv.org/abs/1910.10261.
 
     Parameters:
     ----------
@@ -289,13 +287,13 @@ class Jasper(HybridBlock):
                  in_channels=120,
                  classes=11,
                  **kwargs):
-        super(Jasper, self).__init__(**kwargs)
+        super(QuartzNet, self).__init__(**kwargs)
         self.in_size = None
         self.classes = classes
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            self.features.add(ConvBlock1d(
+            self.features.add(DwsConvBlock1d(
                 in_channels=in_channels,
                 out_channels=channels[0],
                 kernel_size=kernel_sizes[0],
@@ -305,14 +303,14 @@ class Jasper(HybridBlock):
             in_channels = channels[0]
             for i, (out_channels, kernel_size, dropout_rate) in\
                     enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
-                self.features.add(JasperUnit(
+                self.features.add(QuartzUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=kernel_size,
                     dropout_rate=dropout_rate,
                     repeat=repeat))
                 in_channels = out_channels
-            self.features.add(JasperFinalBlock(
+            self.features.add(QuartzFinalBlock(
                 in_channels=in_channels,
                 channels=channels,
                 kernel_sizes=kernel_sizes,
@@ -330,14 +328,14 @@ class Jasper(HybridBlock):
         return x
 
 
-def get_jasper(version,
-               model_name=None,
-               pretrained=False,
-               ctx=cpu(),
-               root=os.path.join("~", ".mxnet", "models"),
-               **kwargs):
+def get_quartznet(version,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join("~", ".mxnet", "models"),
+                  **kwargs):
     """
-    Create Jasper model with specific parameters.
+    Create QuartzNet model with specific parameters.
 
     Parameters:
     ----------
@@ -357,16 +355,16 @@ def get_jasper(version,
     blocks, repeat = tuple(map(int, version.split("x")))
     main_stage_repeat = blocks // 5
 
-    channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
-    kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
-    dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
+    channels_per_stage = [256, 256, 256, 512, 512, 512, 512, 1024]
+    kernel_sizes_per_stage = [33, 33, 39, 51, 63, 75, 87, 1]
+    dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
     stage_repeat = np.full((8,), 1)
     stage_repeat[1:-2] *= main_stage_repeat
     channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
     kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
     dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
 
-    net = Jasper(
+    net = QuartzNet(
         channels=channels,
         kernel_sizes=kernel_sizes,
         dropout_rates=dropout_rates,
@@ -386,10 +384,10 @@ def get_jasper(version,
     return net
 
 
-def jasper5x3(**kwargs):
+def quartznet5x5(**kwargs):
     """
-    Jasper 5x3 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
-    https://arxiv.org/abs/1904.03288.
+    QuartzNet 5x5 model from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable
+    Convolutions,' https://arxiv.org/abs/1910.10261.
 
     Parameters:
     ----------
@@ -400,13 +398,13 @@ def jasper5x3(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="5x3", model_name="jasper5x3", **kwargs)
+    return get_quartznet(version="5x5", model_name="quartznet5x5", **kwargs)
 
 
-def jasper10x4(**kwargs):
+def quartznet10x5(**kwargs):
     """
-    Jasper 10x4 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
-    https://arxiv.org/abs/1904.03288.
+    QuartzNet 10x5 model from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable
+    Convolutions,' https://arxiv.org/abs/1910.10261.
 
     Parameters:
     ----------
@@ -417,13 +415,13 @@ def jasper10x4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="10x4", model_name="jasper10x4", **kwargs)
+    return get_quartznet(version="10x5", model_name="quartznet10x5", **kwargs)
 
 
-def jasper10x5(**kwargs):
+def quartznet15x5(**kwargs):
     """
-    Jasper 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
-    https://arxiv.org/abs/1904.03288.
+    QuartzNet 15x5 model from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable
+    Convolutions,' https://arxiv.org/abs/1910.10261.
 
     Parameters:
     ----------
@@ -434,7 +432,7 @@ def jasper10x5(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="10x5", model_name="jasper10x5", **kwargs)
+    return get_quartznet(version="15x5", model_name="quartznet15x5", **kwargs)
 
 
 def _calc_width(net):
@@ -457,9 +455,9 @@ def _test():
     classes = 11
 
     models = [
-        jasper5x3,
-        jasper10x4,
-        jasper10x5,
+        quartznet5x5,
+        quartznet10x5,
+        quartznet15x5,
     ]
 
     for model in models:
@@ -476,9 +474,9 @@ def _test():
         # net.hybridize()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != jasper5x3 or weight_count == 107820299)
-        assert (model != jasper10x4 or weight_count == 261532939)
-        assert (model != jasper10x5 or weight_count == 322426123)
+        assert (model != quartznet5x5 or weight_count == 6710915)
+        assert (model != quartznet10x5 or weight_count == 12816515)
+        assert (model != quartznet15x5 or weight_count == 18922115)
 
         batch = 4
         seq_len = np.random.randint(60, 150)

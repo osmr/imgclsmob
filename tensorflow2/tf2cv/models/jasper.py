@@ -9,7 +9,7 @@ __all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'conv1d1', 'ConvBl
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from common import get_activation_layer, Conv1d, BatchNorm, SimpleSequential, is_channels_first
+from .common import get_activation_layer, Conv1d, BatchNorm, SimpleSequential, is_channels_first
 
 
 def conv1d1(in_channels,

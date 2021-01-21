@@ -1,5 +1,5 @@
 """
-    QuartzNet for ASR, implemented in Gluon.
+    QuartzNet for ASR, implemented in Chainer.
     Original paper: 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable Convolutions,'
     https://arxiv.org/abs/1910.10261.
 """
@@ -7,13 +7,51 @@
 __all__ = ['QuartzNet', 'quartznet5x5', 'quartznet10x5', 'quartznet15x5']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import SimpleSequential
 from .jasper import conv1d1, conv1d1_block, ConvBlock1d
-from .common import BatchNormExtra, ChannelShuffle
 
 
-class DwsConvBlock1d(HybridBlock):
+class ChannelShuffle1d(Chain):
+    """
+    1D version of the channel shuffle layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 channels,
+                 groups,
+                 **kwargs):
+        super(ChannelShuffle1d, self).__init__(**kwargs)
+        if channels % groups != 0:
+            raise ValueError('channels must be divisible by groups')
+        self.groups = groups
+
+    def __call__(self, x):
+        batch, channels, seq_len = x.shape
+        channels_per_group = channels // self.groups
+        x = F.reshape(x, shape=(batch, self.groups, channels_per_group, seq_len))
+        x = F.swapaxes(x, axis1=1, axis2=2)
+        x = F.reshape(x, shape=(batch, channels, seq_len))
+        return x
+
+    def __repr__(self):
+        s = "{name}(groups={groups})"
+        return s.format(
+            name=self.__class__.__name__,
+            groups=self.groups)
+
+
+class DwsConvBlock1d(Chain):
     """
     Depthwise version of the 1D standard convolution block with batch normalization, activation, dropout, and channel
     shuffle.
@@ -24,13 +62,13 @@ class DwsConvBlock1d(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int
+    ksize : int
         Convolution window size.
-    strides : int
-        Strides of the convolution.
-    padding : int
+    stride : int
+        Stride of the convolution.
+    pad : int
         Padding value for convolution layer.
-    dilation : int, default 1
+    dilate : int, default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -38,13 +76,9 @@ class DwsConvBlock1d(HybridBlock):
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default F.relu
         Activation function or name of activation function.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
@@ -52,17 +86,15 @@ class DwsConvBlock1d(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 dilation=1,
+                 ksize,
+                 stride,
+                 pad,
+                 dilate=1,
                  groups=1,
                  use_bias=False,
                  use_bn=True,
-                 bn_epsilon=1e-5,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
-                 activation=(lambda: nn.Activation("relu")),
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu),
                  dropout_rate=0.0,
                  **kwargs):
         super(DwsConvBlock1d, self).__init__(**kwargs)
@@ -71,37 +103,37 @@ class DwsConvBlock1d(HybridBlock):
         self.use_dropout = (dropout_rate != 0.0)
         self.use_channel_shuffle = (groups > 1)
 
-        with self.name_scope():
-            self.dw_conv = nn.Conv1D(
-                channels=in_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
-                groups=in_channels,
-                use_bias=use_bias,
-                in_channels=in_channels)
+        with self.init_scope():
+            self.dw_conv = L.Convolution1D(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=(not use_bias),
+                dilate=dilate,
+                groups=in_channels)
             self.pw_conv = conv1d1(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 groups=groups,
                 use_bias=use_bias)
             if self.use_channel_shuffle:
-                self.shuffle = ChannelShuffle(
+                self.shuffle = ChannelShuffle1d(
                     channels=out_channels,
                     groups=groups)
             if self.use_bn:
-                self.bn = BatchNormExtra(
-                    in_channels=out_channels,
-                    epsilon=bn_epsilon,
-                    use_global_stats=bn_use_global_stats,
-                    cudnn_off=bn_cudnn_off)
+                self.bn = L.BatchNormalization(
+                    size=out_channels,
+                    eps=bn_eps)
             if self.activate:
                 self.activ = activation()
             if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
+                self.dropout = partial(
+                    F.dropout,
+                    ratio=dropout_rate)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.dw_conv(x)
         x = self.pw_conv(x)
         if self.use_channel_shuffle:
@@ -116,7 +148,7 @@ class DwsConvBlock1d(HybridBlock):
 
 
 def dwsconv1d1_block(stride=1,
-                     padding=0,
+                     pad=0,
                      **kwargs):
     """
     1-dim kernel version of the 1D depthwise version convolution block.
@@ -127,11 +159,11 @@ def dwsconv1d1_block(stride=1,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int, default 1
-        Strides of the convolution.
-    padding : int, default 0
+    stride : int, default 1.
+        Stride of the convolution.
+    pad : int, default 0.
         Padding value for convolution layer.
-    dilation : int, default 1
+    dilate : int, default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -139,25 +171,21 @@ def dwsconv1d1_block(stride=1,
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default F.relu
         Activation function or name of activation function.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     return DwsConvBlock1d(
-        kernel_size=1,
+        ksize=1,
         stride=stride,
-        padding=padding,
+        pad=pad,
         **kwargs)
 
 
-class QuartzUnit(HybridBlock):
+class QuartzUnit(Chain):
     """
     QuartzNet unit with residual connection.
 
@@ -167,56 +195,49 @@ class QuartzUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int
+    ksize : int
         Convolution window size.
     dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     repeat : int
         Count of body convolution blocks.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  dropout_rate,
                  repeat,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
                  **kwargs):
         super(QuartzUnit, self).__init__(**kwargs)
-        with self.name_scope():
+        with self.init_scope():
             self.identity_conv = conv1d1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 dropout_rate=0.0,
-                activation=None,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off)
+                activation=None)
 
-            self.body = nn.HybridSequential(prefix="")
-            for i in range(repeat):
-                activation = (lambda: nn.Activation("relu")) if i < repeat - 1 else None
-                dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
-                self.body.add(DwsConvBlock1d(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    strides=1,
-                    padding=(kernel_size // 2),
-                    dropout_rate=dropout_rate_i,
-                    activation=activation,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off))
-                in_channels = out_channels
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                for i in range(repeat):
+                    activation = (lambda: F.relu) if i < repeat - 1 else None
+                    dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
+                    setattr(self.body, "block{}".format(i + 1), DwsConvBlock1d(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        ksize=ksize,
+                        stride=1,
+                        pad=(ksize // 2),
+                        dropout_rate=dropout_rate_i,
+                        activation=activation))
+                    in_channels = out_channels
 
-            self.activ = nn.Activation("relu")
-            self.dropout = nn.Dropout(rate=dropout_rate)
+            self.activ = F.relu
+            self.dropout = partial(
+                    F.dropout,
+                    ratio=dropout_rate)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         identity = self.identity_conv(x)
         x = self.body(x)
         x = x + identity
@@ -225,7 +246,7 @@ class QuartzUnit(HybridBlock):
         return x
 
 
-class QuartzFinalBlock(HybridBlock):
+class QuartzFinalBlock(Chain):
     """
     QuartzNet specific final block.
 
@@ -235,52 +256,42 @@ class QuartzFinalBlock(HybridBlock):
         Number of input channels.
     channels : list of int
         Number of output channels for each block.
-    kernel_sizes : list of int
+    ksizes : list of int
         Kernel sizes for each block.
     dropout_rates : list of int
         Dropout rates for each block.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  channels,
-                 kernel_sizes,
+                 ksizes,
                  dropout_rates,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
                  **kwargs):
         super(QuartzFinalBlock, self).__init__(**kwargs)
-        with self.name_scope():
+        with self.init_scope():
             self.conv1 = DwsConvBlock1d(
                 in_channels=in_channels,
                 out_channels=channels[-2],
-                kernel_size=kernel_sizes[-2],
-                strides=1,
-                padding=(2 * kernel_sizes[-2] // 2 - 1),
-                dilation=2,
-                dropout_rate=dropout_rates[-2],
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off)
+                ksize=ksizes[-2],
+                stride=1,
+                pad=(2 * ksizes[-2] // 2 - 1),
+                dilate=2,
+                dropout_rate=dropout_rates[-2])
             self.conv2 = ConvBlock1d(
                 in_channels=channels[-2],
                 out_channels=channels[-1],
-                kernel_size=kernel_sizes[-1],
-                strides=1,
-                padding=(kernel_sizes[-1] // 2),
-                dropout_rate=dropout_rates[-1],
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off)
+                ksize=ksizes[-1],
+                stride=1,
+                pad=(ksizes[-1] // 2),
+                dropout_rate=dropout_rates[-1])
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class QuartzNet(HybridBlock):
+class QuartzNet(Chain):
     """
     QuartzNet model from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel Separable Convolutions,'
     https://arxiv.org/abs/1910.10261.
@@ -289,16 +300,12 @@ class QuartzNet(HybridBlock):
     ----------
     channels : list of int
         Number of output channels for each unit and initial/final block.
-    kernel_sizes : list of int
+    ksizes : list of int
         Kernel sizes for each unit and initial/final block.
     dropout_rates : list of int
         Dropout rates for each unit and initial/final block.
     repeat : int
         Count of body convolution blocks.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 120
         Number of input channels (audio features).
     classes : int, default 11
@@ -306,11 +313,9 @@ class QuartzNet(HybridBlock):
     """
     def __init__(self,
                  channels,
-                 kernel_sizes,
+                 ksizes,
                  dropout_rates,
                  repeat,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
                  in_channels=120,
                  classes=11,
                  **kwargs):
@@ -318,44 +323,39 @@ class QuartzNet(HybridBlock):
         self.in_size = None
         self.classes = classes
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix="")
-            self.features.add(DwsConvBlock1d(
-                in_channels=in_channels,
-                out_channels=channels[0],
-                kernel_size=kernel_sizes[0],
-                strides=2,
-                padding=(kernel_sizes[0] // 2),
-                dropout_rate=dropout_rates[0],
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
-            in_channels = channels[0]
-            for i, (out_channels, kernel_size, dropout_rate) in\
-                    enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
-                self.features.add(QuartzUnit(
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", DwsConvBlock1d(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    dropout_rate=dropout_rate,
-                    repeat=repeat,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off))
-                in_channels = out_channels
-            self.features.add(QuartzFinalBlock(
-                in_channels=in_channels,
-                channels=channels,
-                kernel_sizes=kernel_sizes,
-                dropout_rates=dropout_rates,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
-            in_channels = channels[-1]
+                    out_channels=channels[0],
+                    ksize=ksizes[0],
+                    stride=2,
+                    pad=(ksizes[0] // 2),
+                    dropout_rate=dropout_rates[0]))
+                in_channels = channels[0]
+                for i, (out_channels, ksize, dropout_rate) in\
+                        enumerate(zip(channels[1:-2], ksizes[1:-2], dropout_rates[1:-2])):
+                    setattr(self.features, "unit{}".format(i + 1), QuartzUnit(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        ksize=ksize,
+                        dropout_rate=dropout_rate,
+                        repeat=repeat))
+                    in_channels = out_channels
+                setattr(self.features, "final_block", QuartzFinalBlock(
+                    in_channels=in_channels,
+                    channels=channels,
+                    ksizes=ksizes,
+                    dropout_rates=dropout_rates))
+                in_channels = channels[-1]
 
             self.output = conv1d1(
                 in_channels=in_channels,
                 out_channels=classes,
                 use_bias=True)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x
@@ -364,8 +364,7 @@ class QuartzNet(HybridBlock):
 def get_quartznet(version,
                   model_name=None,
                   pretrained=False,
-                  ctx=cpu(),
-                  root=os.path.join("~", ".mxnet", "models"),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create QuartzNet model with specific parameters.
@@ -378,9 +377,7 @@ def get_quartznet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     import numpy as np
@@ -394,12 +391,12 @@ def get_quartznet(version,
     stage_repeat = np.full((8,), 1)
     stage_repeat[1:-2] *= main_stage_repeat
     channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
-    kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
+    ksizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
     dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
 
     net = QuartzNet(
         channels=channels,
-        kernel_sizes=kernel_sizes,
+        ksizes=ksizes,
         dropout_rates=dropout_rates,
         repeat=repeat,
         **kwargs)
@@ -408,11 +405,11 @@ def get_quartznet(version,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        load_npz(
+            file=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            obj=net)
 
     return net
 
@@ -426,9 +423,7 @@ def quartznet5x5(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_quartznet(version="5x5", model_name="quartznet5x5", **kwargs)
@@ -443,9 +438,7 @@ def quartznet10x5(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_quartznet(version="10x5", model_name="quartznet10x5", **kwargs)
@@ -460,28 +453,17 @@ def quartznet15x5(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_quartznet(version="15x5", model_name="quartznet15x5", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    return weight_count
-
-
 def _test():
     import numpy as np
-    import mxnet as mx
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
     audio_features = 120
@@ -500,20 +482,15 @@ def _test():
             classes=classes,
             pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        # net.hybridize()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != quartznet5x5 or weight_count == 6710915)
         assert (model != quartznet10x5 or weight_count == 12816515)
         assert (model != quartznet15x5 or weight_count == 18922115)
 
-        batch = 4
+        batch = 1
         seq_len = np.random.randint(60, 150)
-        x = mx.nd.random.normal(shape=(batch, audio_features, seq_len), ctx=ctx)
+        x = np.random.rand(batch, audio_features, seq_len).astype(np.float32)
         y = net(x)
         assert (y.shape[:2] == (batch, classes))
         assert (y.shape[2] in [seq_len // 2, seq_len // 2 + 1])

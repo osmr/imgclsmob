@@ -150,13 +150,11 @@ def dwsconv1d1_block(stride=1,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int
-        Convolution window size.
     stride : int, default 1
         Strides of the convolution.
     padding : int, default 0
         Padding value for convolution layer.
-    dilation : int
+    dilation : int, default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.

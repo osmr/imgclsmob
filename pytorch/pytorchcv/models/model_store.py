@@ -73,7 +73,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnext14_32x4d', '1146', '89aa679393d8356ce5589749b4371714bf4ceac0', 'v0.0.327', 'ResNeXt-14 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext26_32x2d', '0887', 'c3bd130747909a8c89546f3b3f5ce08bb4f55731', 'v0.0.373', 'ResNeXt-26 (32x2d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext26_32x4d', '0746', '1011ac35e30d753b79f0600a5376c87a37b67a61', 'v0.0.332', 'ResNeXt-26 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnext50_32x4d', '0558', 'b629a5227df20b2d522e4f72c40f1cf87ee9b055', 'v0.0.417', 'ResNeXt-50 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('resnext50_32x4d', '0560', 'd7976503d13734114364e0dfef1d22f6d76546d9', 'v0.0.498', 'ResNeXt-50 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext101_32x4d', '0523', '279a3189c6fed46dd12c2ee210bc6a493f629c76', 'v0.0.417', 'ResNeXt-101 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('resnext101_64x4d', '0509', '2af0b82274bbcf5ee75575c58c3dd6a4a292b0ae', 'v0.0.417', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('seresnet10', '1202', '8dace12e6aaac68d3c272f52b2513a5b40a4f959', 'v0.0.486', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -156,7 +156,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('drnc26', '0755', '35405bd52a0c721f3dc64f18d433074f263b7339', 'v0.0.116', 'DRN-C-26', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnc42', '0657', '7c99c4608a9a5e5f073f657b92f258ba4ba5ac77', 'v0.0.116', 'DRN-C-42', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnc58', '0601', '70ec1f56c23da863628d126a6ed0ad10f037a2ac', 'v0.0.116', 'DRN-C-58', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
-    ('drnd22', '0823', '5c2c6a0cf992409ab388e04e9fbd06b7141bdf47', 'v0.0.116', 'DRN-D-22', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
+    ('drnd22', '0758', '02cb44bdea9b05e988e65576f79f5f5c133f2664', 'v0.0.498', 'DRN-D-22', '1705.09914', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('drnd38', '0695', '4630f0fb3f721f4a2296e05aacb1231ba7530ae5', 'v0.0.116', 'DRN-D-38', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnd54', '0586', 'bfdc1f8826027b247e2757be45b176b3b91b9ea3', 'v0.0.116', 'DRN-D-54', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnd105', '0548', 'a643f4dcf9e4b69eab06b76e54ce22169f837592', 'v0.0.116', 'DRN-D-105', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa

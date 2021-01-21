@@ -31,6 +31,7 @@ from .models.darknet import *
 from .models.darknet53 import *
 from .models.bagnet import *
 from .models.dla import *
+from .models.dicenet import *
 from .models.hrnet import *
 from .models.vovnet import *
 from .models.selecsls import *
@@ -103,7 +104,8 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
-from .models.dicenet import *
+from .models.jasper import *
+from .models.jasperdr import *
 
 __all__ = ['get_model']
 
@@ -357,6 +359,15 @@ _models = {
     'dla102x': dla102x,
     'dla102x2': dla102x2,
     'dla169': dla169,
+
+    'dicenet_wd5': dicenet_wd5,
+    'dicenet_wd2': dicenet_wd2,
+    'dicenet_w3d4': dicenet_w3d4,
+    'dicenet_w1': dicenet_w1,
+    'dicenet_w5d4': dicenet_w5d4,
+    'dicenet_w3d2': dicenet_w3d2,
+    'dicenet_w7d8': dicenet_w7d8,
+    'dicenet_w2': dicenet_w2,
 
     'hrnet_w18_small_v1': hrnet_w18_small_v1,
     'hrnet_w18_small_v2': hrnet_w18_small_v2,
@@ -904,14 +915,13 @@ _models = {
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
 
-    'dicenet_wd5': dicenet_wd5,
-    'dicenet_wd2': dicenet_wd2,
-    'dicenet_w3d4': dicenet_w3d4,
-    'dicenet_w1': dicenet_w1,
-    'dicenet_w5d4': dicenet_w5d4,
-    'dicenet_w3d2': dicenet_w3d2,
-    'dicenet_w7d8': dicenet_w7d8,
-    'dicenet_w2': dicenet_w2,
+    'jasper5x3': jasper5x3,
+    'jasper10x4': jasper10x4,
+    'jasper10x5': jasper10x5,
+
+    'jasperdr5x3': jasperdr5x3,
+    'jasperdr10x4': jasperdr10x4,
+    'jasperdr10x5': jasperdr10x5,
 }
 
 

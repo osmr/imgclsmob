@@ -45,6 +45,7 @@ from .models.dla import *
 from .models.msdnet import *
 from .models.fishnet import *
 from .models.espnetv2 import *
+from .models.dicenet import *
 from .models.hrnet import *
 from .models.vovnet import *
 from .models.selecsls import *
@@ -137,6 +138,10 @@ from .models.nvpattexp import *
 
 from .models.superpointnet import *
 
+from .models.jasper import *
+from .models.jasperdr import *
+from .models.quartznet import *
+
 # from .models.others.oth_pose_resnet import *
 # from .models.others.oth_lwopenpose2d import *
 # from .models.others.oth_lwopenpose3d import *
@@ -149,8 +154,6 @@ from .models.superpointnet import *
 # from .models.others.oth_tresnet import *
 # from .models.tresnet import *
 
-from .models.others.oth_dicenet import *
-from .models.dicenet import *
 
 __all__ = ['get_model']
 
@@ -492,6 +495,15 @@ _models = {
     'espnetv2_w5d4': espnetv2_w5d4,
     'espnetv2_w3d2': espnetv2_w3d2,
     'espnetv2_w2': espnetv2_w2,
+
+    'dicenet_wd5': dicenet_wd5,
+    'dicenet_wd2': dicenet_wd2,
+    'dicenet_w3d4': dicenet_w3d4,
+    'dicenet_w1': dicenet_w1,
+    'dicenet_w5d4': dicenet_w5d4,
+    'dicenet_w3d2': dicenet_w3d2,
+    'dicenet_w7d8': dicenet_w7d8,
+    'dicenet_w2': dicenet_w2,
 
     'hrnet_w18_small_v1': hrnet_w18_small_v1,
     'hrnet_w18_small_v2': hrnet_w18_small_v2,
@@ -1099,6 +1111,18 @@ _models = {
 
     'superpointnet': superpointnet,
 
+    'jasper5x3': jasper5x3,
+    'jasper10x4': jasper10x4,
+    'jasper10x5': jasper10x5,
+
+    'jasperdr5x3': jasperdr5x3,
+    'jasperdr10x4': jasperdr10x4,
+    'jasperdr10x5': jasperdr10x5,
+
+    'quartznet5x5': quartznet5x5,
+    'quartznet10x5': quartznet10x5,
+    'quartznet15x5': quartznet15x5,
+
     # 'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
     # 'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,
     # 'oth_pose_coco_resnet_101_256x192': oth_pose_coco_resnet_101_256x192,
@@ -1119,24 +1143,6 @@ _models = {
 
     # 'oth_tresnet_m': oth_tresnet_m,
     # 'tresnet_m': tresnet_m,
-
-    'oth_dicenet_wd5': oth_dicenet_wd5,
-    'oth_dicenet_wd2': oth_dicenet_wd2,
-    'oth_dicenet_w3d4': oth_dicenet_w3d4,
-    'oth_dicenet_w1': oth_dicenet_w1,
-    'oth_dicenet_w5d4': oth_dicenet_w5d4,
-    'oth_dicenet_w3d2': oth_dicenet_w3d2,
-    'oth_dicenet_w7d8': oth_dicenet_w7d8,
-    'oth_dicenet_w2': oth_dicenet_w2,
-
-    'dicenet_wd5': dicenet_wd5,
-    'dicenet_wd2': dicenet_wd2,
-    'dicenet_w3d4': dicenet_w3d4,
-    'dicenet_w1': dicenet_w1,
-    'dicenet_w5d4': dicenet_w5d4,
-    'dicenet_w3d2': dicenet_w3d2,
-    'dicenet_w7d8': dicenet_w7d8,
-    'dicenet_w2': dicenet_w2,
 }
 
 

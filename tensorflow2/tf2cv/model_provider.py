@@ -106,6 +106,7 @@ from .models.nvpattexp import *
 
 from .models.jasper import *
 from .models.jasperdr import *
+from .models.quartznet import *
 
 __all__ = ['get_model']
 
@@ -922,6 +923,10 @@ _models = {
     'jasperdr5x3': jasperdr5x3,
     'jasperdr10x4': jasperdr10x4,
     'jasperdr10x5': jasperdr10x5,
+
+    'quartznet5x5': quartznet5x5,
+    'quartznet10x5': quartznet10x5,
+    'quartznet15x5': quartznet15x5,
 }
 
 

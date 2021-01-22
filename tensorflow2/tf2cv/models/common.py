@@ -810,23 +810,34 @@ class Conv1d(nn.Layer):
                  **kwargs):
         super(Conv1d, self).__init__(**kwargs)
         assert (in_channels is not None)
-        assert (groups == 1)
         assert (not force_same) or ((padding == kernel_size // 2) and (strides == 1) and (dilation == 1))
+        self.use_conv = (groups == 1)
+        self.use_dw_conv = (groups > 1) and (groups == out_channels) and (out_channels == in_channels)
         self.data_format = data_format
 
         self.use_pad = (padding > 0) and (not force_same)
         if self.use_pad:
             self.pad = nn.ZeroPadding1D(padding=padding)
 
-        self.conv = nn.Conv1D(
-            filters=out_channels,
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=("valid" if not force_same else "same"),
-            data_format=data_format,
-            dilation_rate=dilation,
-            use_bias=use_bias,
-            name="conv")
+        if self.use_conv:
+            self.conv = nn.Conv1D(
+                filters=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=("valid" if not force_same else "same"),
+                data_format=data_format,
+                dilation_rate=dilation,
+                use_bias=use_bias,
+                name="conv")
+        elif self.use_dw_conv:
+            self.dw_conv = nn.DepthwiseConv2D(
+                kernel_size=(kernel_size, 1),
+                strides=strides,
+                padding=("valid" if not force_same else "same"),
+                data_format=data_format,
+                dilation_rate=dilation,
+                use_bias=use_bias,
+                name="dw_conv")
 
     def call(self, x):
         if self.use_pad:
@@ -835,7 +846,18 @@ class Conv1d(nn.Layer):
             x = self.pad(x)
             if is_channels_first(self.data_format):
                 x = tf.transpose(x, perm=(0, 2, 1))
-        x = self.conv(x)
+        if self.use_conv:
+            x = self.conv(x)
+        elif self.use_dw_conv:
+            if is_channels_first(self.data_format):
+                x = tf.expand_dims(x, axis=3)
+            else:
+                x = tf.expand_dims(x, axis=2)
+            x = self.dw_conv(x)
+            if is_channels_first(self.data_format):
+                x = tf.squeeze(x, axis=3)
+            else:
+                x = tf.squeeze(x, axis=2)
         return x
 
 

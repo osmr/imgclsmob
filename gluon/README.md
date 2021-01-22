@@ -187,7 +187,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-BC-38b | 23.50 | 6.72 | 21,925,416 | 3,234.21M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.328/resnetbc38b-0672-82094464.params.log)) |
 | ResNet-50 | 22.15 | 6.04 | 25,557,032 | 3,877.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.329/resnet50-0604-a71d1d2a.params.log)) |
 | ResNet-50b | 22.06 | 6.11 | 25,557,032 | 4,110.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.308/resnet50b-0611-ca12f8d8.params.log)) |
-| ResNet-101 | 21.66 | 5.99 | 44,549,160 | 7,597.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet101-0599-a6d3a5f4.params.log)) |
+| ResNet-101 | 20.52 | 5.16 | 44,549,160 | 7,597.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/resnet101-0516-75a3105c.params.log)) |
 | ResNet-101b | 20.26 | 5.12 | 44,549,160 | 7,830.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.357/resnet101b-0512-af5c4233.params.log)) |
 | ResNet-152 | 20.76 | 5.35 | 60,192,808 | 11,321.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.144/resnet152-0535-bbdd7ed1.params.log)) |
 | ResNet-152b | 19.63 | 4.80 | 60,192,808 | 11,554.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.378/resnet152b-0480-7277968c.params.log)) |
@@ -257,7 +257,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | AirNet50-1x64d (r=2) | 22.48 | 6.21 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0621-347358cc.params.log)) |
 | AirNet50-1x64d (r=16) | 22.91 | 6.46 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0646-0b847b99.params.log)) |
 | AirNeXt50-32x4d (r=2) | 21.51 | 5.75 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0575-ab104fb5.params.log)) |
-| BAM-ResNet-50 | 23.68 | 6.96 | 25,915,099 | 4,196.09M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.124/bam_resnet50-0696-7e573b61.params.log)) |
+| BAM-ResNet-50 | 20.59 | 5.38 | 25,915,099 | 4,196.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0538-fa612c3d.params.log)) |
 | CBAM-ResNet-50 | 23.02 | 6.38 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.125/cbam_resnet50-0638-78be5665.params.log)) |
 | SCNet-50 | 20.53 | 5.11 | 25,564,584 | 3,951.01M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0511-359d35d0.params.log)) |
 | SCNet-101 | 21.65 | 5.99 | 44,565,416 | 7,204.19M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet101-0599-8c30a4c7.params.log)) |
@@ -340,7 +340,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DiCENet x1.75 | 30.54 | 11.21 | 3,264,932 | 200.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1121-be69a971.params.log)) |
 | DiCENet x2.0 | 29.93 | 10.58 | 3,979,044 | 257.49M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1058-66980b52.params.log)) |
 | HRNet-W18 Small V1 | 26.20 | 8.73 | 13,187,464 | 1,614.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0873-1060c1c5.params.log)) |
-| HRNet-W18 Small V2 | 25.75 | 8.02 | 15,597,464 | 2,618.54M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v2-0802-052ff8f9.params.log)) |
+| HRNet-W18 Small V2 | 21.71 | 6.02 | 15,597,464 | 2,618.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0602-1f319e1b.params.log)) |
 | HRNetV2-W18 | 24.01 | 6.85 | 21,299,004 | 4,322.66M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0685-21c708c4.params.log)) |
 | HRNetV2-W30 | 22.31 | 6.07 | 37,712,220 | 8,156.14M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w30-0607-93553fe4.params.log)) |
 | HRNetV2-W32 | 22.27 | 6.07 | 41,232,680 | 8,973.31M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w32-0607-e68bcf90.params.log)) |

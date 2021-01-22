@@ -149,7 +149,7 @@ Some remarks:
 | ResNet-BC-38b | 23.44 | 6.77 | 21,925,416 | 3,234.21M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnetbc38b-0677-75e405a7.tf2.h5.log)) |
 | ResNet-50 | 22.09 | 6.04 | 25,557,032 | 3,877.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet50-0604-728800bf.tf2.h5.log)) |
 | ResNet-50b | 22.09 | 6.14 | 25,557,032 | 4,110.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet50b-0614-b2a49da6.tf2.h5.log)) |
-| ResNet-101 | 21.59 | 6.01 | 44,549,160 | 7,597.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet101-0601-b6befeb4.tf2.h5.log)) |
+| ResNet-101 | 20.52 | 5.18 | 44,549,160 | 7,597.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/resnet101-0518-64320ac1.tf2.h5.log)) |
 | ResNet-101b | 20.25 | 5.11 | 44,549,160 | 7,830.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet101b-0511-e3076227.tf2.h5.log)) |
 | ResNet-152 | 20.72 | 5.34 | 60,192,808 | 11,321.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet152-0534-2d8e394a.tf2.h5.log)) |
 | ResNet-152b | 19.60 | 4.80 | 60,192,808 | 11,554.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet152b-0480-b77f1e2c.tf2.h5.log)) |
@@ -219,7 +219,7 @@ Some remarks:
 | AirNet50-1x64d (r=2) | 22.54 | 6.23 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r2-0623-6940f0e5.tf2.h5.log)) |
 | AirNet50-1x64d (r=16) | 22.89 | 6.50 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r16-0650-b7bb8662.tf2.h5.log)) |
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
-| BAM-ResNet-50 | 23.67 | 6.97 | 25,915,099 | 4,196.09M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bam_resnet50-0697-3a4101c8.tf2.h5.log)) |
+| BAM-ResNet-50 | 20.60 | 5.37 | 25,915,099 | 4,196.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0537-a9720e15.tf2.h5.log)) |
 | CBAM-ResNet-50 | 22.96 | 6.39 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/cbam_resnet50-0639-1d0bdb0e.tf2.h5.log)) |
 | SCNet-50 | 21.18 | 5.39 | 25,564,584 | 3,951.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0539-de94eb1b.tf2.h5.log)) |
 | SCNet-101 | 21.67 | 6.04 | 44,565,416 | 7,204.24M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet101-0604-f1a7a36b.tf2.h5.log)) |
@@ -292,7 +292,7 @@ Some remarks:
 | DiCENet x1.75 | 31.76 | 11.84 | 3,264,932 | 201.26M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1184-0b337403.tf2.h5.log)) |
 | DiCENet x2.0 | 30.49 | 11.13 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1113-a597b5bc.tf2.h5.log)) |
 | HRNet-W18 Small V1 | 26.23 | 8.71 | 13,187,464 | 1,614.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0871-6ae644af.tf2.h5.log)) |
-| HRNet-W18 Small V2 | 25.72 | 8.05 | 15,597,464 | 2,618.54M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnet_w18_small_v2-0805-fcb8e218.tf2.h5.log)) |
+| HRNet-W18 Small V2 | 21.69 | 6.02 | 15,597,464 | 2,618.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0602-e9db4e0c.tf2.h5.log)) |
 | HRNetV2-W18 | 24.02 | 6.86 | 21,299,004 | 4,322.66M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w18-0686-71c614d7.tf2.h5.log)) |
 | HRNetV2-W30 | 22.31 | 6.06 | 37,712,220 | 8,156.14M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w30-0606-4883e345.tf2.h5.log)) |
 | HRNetV2-W32 | 22.32 | 6.07 | 41,232,680 | 8,973.31M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w32-0607-ef949840.tf2.h5.log)) |

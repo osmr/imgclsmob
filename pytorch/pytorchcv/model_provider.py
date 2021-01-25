@@ -155,7 +155,7 @@ from .models.quartznet import *
 # from .models.tresnet import *
 
 from .models.others.oth_dabnet import *
-from .models._dabnet import *
+from .models.dabnet import *
 
 __all__ = ['get_model']
 

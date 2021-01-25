@@ -201,6 +201,8 @@ def _calc_width(net):
 def _test():
     pretrained = False
 
+    in_size = (1024, 2048)
+
     models = [
         oth_dabnet_cityscapes,
     ]
@@ -209,11 +211,24 @@ def _test():
 
         net = model(pretrained=pretrained)
 
+        # net.eval()
+        # import numpy as np
+        # net.load_state_dict(
+        #     torch.load("/home/osemery/projects/imgclsmob_data/dabnet_cityscapes/DABNet_cityscapes_model.pth"))
+        # x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x.npy"))
+        # y = net(x)
+
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_dabnet_cityscapes or weight_count == 756643)
+
+        batch = 4
+        x = torch.randn(batch, 3, in_size[0], in_size[1])
+        y = net(x)
+        # y.sum().backward()
+        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

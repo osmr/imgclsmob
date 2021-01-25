@@ -9,7 +9,8 @@ __all__ = ['DABNet', 'dabnet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock
+from .common import conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,\
+    DualPathSequential
 
 
 class DwaConvBlock(nn.Module):
@@ -121,9 +122,9 @@ def dwa_conv3x3_block(channels,
         activation=activation)
 
 
-class DABUnit(nn.Module):
+class DABBlock(nn.Module):
     """
-    DABNet unit.
+    DABNet specific base block.
 
     Parameters:
     ----------
@@ -131,33 +132,41 @@ class DABUnit(nn.Module):
         Number of input/output channels.
     dilation : int
         Dilation value for a dilated branch in the unit.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  channels,
-                 dilation):
-        super(DABUnit, self).__init__()
+                 dilation,
+                 bn_eps):
+        super(DABBlock, self).__init__()
         mid_channels = channels // 2
 
         self.norm_activ1 = NormActivation(
             in_channels=channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(channels)))
         self.conv1 = conv3x3_block(
             in_channels=channels,
             out_channels=mid_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(mid_channels)))
 
         self.branches = Concurrent(stack=True)
         self.branches.add_module("branches1", dwa_conv3x3_block(
             channels=mid_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(mid_channels))))
         self.branches.add_module("branches2", dwa_conv3x3_block(
             channels=mid_channels,
             padding=dilation,
             dilation=dilation,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(mid_channels))))
 
         self.norm_activ2 = NormActivation(
             in_channels=mid_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(mid_channels)))
         self.conv2 = conv1x1(
             in_channels=mid_channels,
@@ -179,33 +188,9 @@ class DABUnit(nn.Module):
         return x
 
 
-class PoolDownBlock(nn.Module):
-    """
-    DABNet specific simple downsample block via pooling.
-
-    Parameters:
-    ----------
-    ratio : int
-        Number of downsamples.
-    """
-    def __init__(self,
-                 ratio):
-        super(PoolDownBlock, self).__init__()
-        self.pools = nn.Sequential()
-        for i in range(ratio):
-            self.pools.add_module("pool{}".format(i + 1), nn.AvgPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=1))
-
-    def forward(self, x):
-        x = self.pools(x)
-        return x
-
-
 class DownBlock(nn.Module):
     """
-    DABNet specific downsample block.
+    DABNet specific downsample block for the main branch.
 
     Parameters:
     ----------
@@ -213,39 +198,80 @@ class DownBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(DownBlock, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        if self.in_channels < self.out_channels:
-            channels = out_channels - in_channels
-        else:
-            channels = out_channels
+        self.expand = (in_channels < out_channels)
+        mid_channels = out_channels - in_channels if self.expand else out_channels
 
         self.conv = conv3x3(
             in_channels=in_channels,
-            out_channels=channels,
+            out_channels=mid_channels,
             stride=2)
-        self.pool = nn.MaxPool2d(
-            kernel_size=2,
-            stride=2)
+        if self.expand:
+            self.pool = nn.MaxPool2d(
+                kernel_size=2,
+                stride=2)
         self.norm_activ = NormActivation(
             in_channels=out_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
 
     def forward(self, x):
         y = self.conv(x)
 
-        if self.in_channels < self.out_channels:
+        if self.expand:
             z = self.pool(x)
             y = torch.cat((y, z), dim=1)
 
         y = self.norm_activ(y)
         return y
+
+
+class DABUnit(nn.Module):
+    """
+    DABNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of input channels.
+    dilations : list of int
+        Dilations for blocks.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 dilations,
+                 bn_eps):
+        super(DABUnit, self).__init__()
+        mid_channels = out_channels // 2
+
+        self.down = DownBlock(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            bn_eps=bn_eps)
+        self.blocks = nn.Sequential()
+        for i, dilation in enumerate(dilations):
+            self.blocks.add_module("block{}".format(i + 1), DABBlock(
+                channels=mid_channels,
+                dilation=dilation,
+                bn_eps=bn_eps))
+
+    def forward(self, x):
+        x = self.down(x)
+        y = self.blocks(x)
+        x = torch.cat((y, x), dim=1)
+        return x
 
 
 class DABStage(nn.Module):
@@ -254,50 +280,50 @@ class DABStage(nn.Module):
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    down_times : int
-        Number of downsamples for a simple downsampling.
+    x_channels : int
+        Number of input/output channels for x.
+    y_in_channels : int
+        Number of input channels for y.
+    y_out_channels : int
+        Number of output channels for y.
     dilations : list of int
-        Dilations for block.
+        Dilations for blocks.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 down_times,
-                 dilations):
+                 x_channels,
+                 y_in_channels,
+                 y_out_channels,
+                 dilations,
+                 bn_eps):
         super(DABStage, self).__init__()
-        self.use_block = (len(dilations) > 0)
+        self.use_unit = (len(dilations) > 0)
 
-        self.down1 = PoolDownBlock(down_times)
+        self.x_down = nn.AvgPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
 
-        if self.use_block:
-            self.down2 = DownBlock(
-                in_channels=in_channels + 3,
-                out_channels=out_channels)
-            self.block = nn.Sequential()
-            for i, dilation_i in enumerate(dilations):
-                self.block.add_module("unit{}".format(i + 1), DABUnit(
-                    channels=out_channels,
-                    dilation=dilation_i))
+        if self.use_unit:
+            self.unit = DABUnit(
+                in_channels=y_in_channels,
+                out_channels=(y_out_channels - x_channels),
+                dilations=dilations,
+                bn_eps=bn_eps)
 
-        channels1 = 2 * out_channels + 3
         self.norm_activ = NormActivation(
-            in_channels=channels1,
-            activation=(lambda: nn.PReLU(channels1)))
+            in_channels=y_out_channels,
+            bn_eps=bn_eps,
+            activation=(lambda: nn.PReLU(y_out_channels)))
 
-    def forward(self, x, y):
-        x = self.down1(x)
-        if self.use_block:
-            y = self.down2(y)
-            z = self.block(y)
-            x = torch.cat((z, y, x), dim=1)
-        else:
-            x = torch.cat((y, x), dim=1)
-        x = self.norm_activ(x)
-        return x
+    def forward(self, y, x):
+        x = self.x_down(x)
+        if self.use_unit:
+            y = self.unit(y)
+        y = torch.cat((y, x), dim=1)
+        y = self.norm_activ(y)
+        return y, x
 
 
 class DABInitBlock(nn.Module):
@@ -310,23 +336,29 @@ class DABInitBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(DABInitBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=2,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
         self.conv2 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
         self.conv3 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
 
     def forward(self, x):
@@ -343,6 +375,14 @@ class DABNet(nn.Module):
 
     Parameters:
     ----------
+    channels : list of int
+        Number of output channels for each unit (for y-branch).
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    dilations : list of int
+        Dilations for blocks.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     aux : bool, default False
         Whether to output an auxiliary result.
     fixed_size : bool, default False
@@ -355,6 +395,10 @@ class DABNet(nn.Module):
         Number of segmentation classes.
     """
     def __init__(self,
+                 channels,
+                 init_block_channels,
+                 dilations,
+                 bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
@@ -366,48 +410,49 @@ class DABNet(nn.Module):
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
         self.num_classes = num_classes
+        self.fixed_size = fixed_size
 
-        self.init_conv = DABInitBlock(
+        self.features = DualPathSequential(
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=0)
+        self.features.add_module("init_block", DABInitBlock(
             in_channels=in_channels,
-            out_channels=32)
+            out_channels=init_block_channels,
+            bn_eps=bn_eps))
+        y_in_channels = init_block_channels
 
-        self.stage1 = DABStage(
-            in_channels=3,
-            out_channels=16,
-            down_times=1,
-            dilations=[])
+        for i, (y_out_channels, dilations_i) in enumerate(zip(channels, dilations)):
+            self.features.add_module("stage{}".format(i + 1), DABStage(
+                x_channels=in_channels,
+                y_in_channels=y_in_channels,
+                y_out_channels=y_out_channels,
+                dilations=dilations_i,
+                bn_eps=bn_eps))
+            y_in_channels = y_out_channels
 
-        self.stage2 = DABStage(
-            in_channels=32,
-            out_channels=64,
-            down_times=2,
-            dilations=[2, 2, 2])
-
-        self.stage3 = DABStage(
-            in_channels=128,
-            out_channels=128,
-            down_times=3,
-            dilations=[4, 4, 8, 8, 16, 16])
-
-        in_channels = 2 * 128 + 3
         self.classifier = conv1x1(
-            in_channels=in_channels,
+            in_channels=y_in_channels,
             out_channels=num_classes)
 
         self.up = InterpolationBlock(
             scale_factor=8,
             align_corners=False)
 
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0)
+
     def forward(self, x):
-        y = self.init_conv(x)
-
-        y = self.stage1(x, y)
-        y = self.stage2(x, y)
-        y = self.stage3(x, y)
-
+        in_size = self.in_size if self.fixed_size else x.shape[2:]
+        y = self.features(x, x)
         y = self.classifier(y)
-        y = self.up(y, size=x.size()[2:])
-
+        y = self.up(y, size=in_size)
         return y
 
 
@@ -427,7 +472,17 @@ def get_dabnet(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = DABNet(**kwargs)
+    init_block_channels = 32
+    channels = [35, 131, 259]
+    dilations = [[], [2, 2, 2], [4, 4, 8, 8, 16, 16]]
+    bn_eps = 1e-3
+
+    net = DABNet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        dilations=dilations,
+        bn_eps=bn_eps,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -479,6 +534,12 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
+
+        # net.eval()
+        # import numpy as np
+        # net.load_state_dict(torch.load("/home/osemery/projects/imgclsmob_data/dabnet_cityscapes/dabnet_cityscapes.pth"))
+        # x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x.npy"))
+        # y = net(x)
 
         # net.train()
         net.eval()

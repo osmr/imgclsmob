@@ -524,8 +524,8 @@ def _calc_width(net):
 
 def _test():
     pretrained = False
-
     in_size = (1024, 2048)
+    classes = 19
 
     models = [
         dabnet_cityscapes,
@@ -533,7 +533,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size)
 
         # net.train()
         net.eval()
@@ -545,7 +545,7 @@ def _test():
         x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
         # y.sum().backward()
-        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
+        assert (tuple(y.size()) == (batch, classes, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

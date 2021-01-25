@@ -153,6 +153,7 @@ from .models.quartznet import *
 # from .models.others.oth_fastscnn import *
 
 from .models.regnetv import *
+from .models.dabnet import *
 
 __all__ = ['get_model']
 
@@ -1243,6 +1244,8 @@ _models = {
     'regnetv120': regnetv120,
     'regnetv160': regnetv160,
     'regnetv320': regnetv320,
+
+    'dabnet_cityscapes': dabnet_cityscapes,
 }
 
 

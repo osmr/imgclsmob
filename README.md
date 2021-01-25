@@ -169,7 +169,7 @@ Some remarks:
 | BiSeNet | e | e | e | - | - | e | [link](https://arxiv.org/abs/1808.00897) | - | 2018 |
 | DANet | C | C | C | - | - | C | [link](https://arxiv.org/abs/1809.02983) | [link](https://github.com/junfu1115/DANet) | 2018 |
 | Fast-SCNN | C | C | C | - | - | C | [link](https://arxiv.org/abs/1902.04502) | - | 2019 |
-| DABNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1907.11357) | [link](https://github.com/Reagan1311/DABNet) | 2019 |
+| DABNet | c | c | - | - | - | - | [link](https://arxiv.org/abs/1907.11357) | [link](https://github.com/Reagan1311/DABNet) | 2019 |
 
 ## Table of implemented object detection models
 

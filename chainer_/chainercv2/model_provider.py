@@ -129,6 +129,8 @@ from .models.jasper import *
 from .models.jasperdr import *
 from .models.quartznet import *
 
+from .models.dabnet import *
+
 __all__ = ['get_model']
 
 
@@ -1057,6 +1059,8 @@ _models = {
     'quartznet5x5': quartznet5x5,
     'quartznet10x5': quartznet10x5,
     'quartznet15x5': quartznet15x5,
+
+    'dabnet_cityscapes': dabnet_cityscapes,
 }
 
 

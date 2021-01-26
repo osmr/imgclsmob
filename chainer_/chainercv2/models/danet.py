@@ -1,5 +1,5 @@
 """
-    DANet for image segmentation, implemented in Gluon.
+    DANet for image segmentation, implemented in Chainer.
     Original paper: 'Dual Attention Network for Scene Segmentation,' https://arxiv.org/abs/1809.02983.
 """
 

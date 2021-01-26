@@ -87,6 +87,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.fastscnn import *
+from .models.dabnet import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
@@ -871,6 +872,8 @@ _models = {
     'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 
     'fastscnn_cityscapes': fastscnn_cityscapes,
+
+    'dabnet_cityscapes': dabnet_cityscapes,
 
     'sinet_cityscapes': sinet_cityscapes,
 

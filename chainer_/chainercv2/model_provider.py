@@ -109,6 +109,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.fastscnn import *
+from .models.dabnet import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
@@ -128,8 +129,6 @@ from .models.nvpattexp import *
 from .models.jasper import *
 from .models.jasperdr import *
 from .models.quartznet import *
-
-from .models.dabnet import *
 
 __all__ = ['get_model']
 
@@ -1006,6 +1005,8 @@ _models = {
 
     'fastscnn_cityscapes': fastscnn_cityscapes,
 
+    'dabnet_cityscapes': dabnet_cityscapes,
+
     'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
@@ -1059,8 +1060,6 @@ _models = {
     'quartznet5x5': quartznet5x5,
     'quartznet10x5': quartznet10x5,
     'quartznet15x5': quartznet15x5,
-
-    'dabnet_cityscapes': dabnet_cityscapes,
 }
 
 

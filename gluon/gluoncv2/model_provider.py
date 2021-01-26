@@ -120,6 +120,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.fastscnn import *
+from .models.dabnet import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
@@ -153,7 +154,6 @@ from .models.quartznet import *
 # from .models.others.oth_fastscnn import *
 
 from .models.regnetv import *
-from .models.dabnet import *
 
 __all__ = ['get_model']
 
@@ -1130,6 +1130,8 @@ _models = {
 
     'fastscnn_cityscapes': fastscnn_cityscapes,
 
+    'dabnet_cityscapes': dabnet_cityscapes,
+
     'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
@@ -1244,8 +1246,6 @@ _models = {
     'regnetv120': regnetv120,
     'regnetv160': regnetv160,
     'regnetv320': regnetv320,
-
-    'dabnet_cityscapes': dabnet_cityscapes,
 }
 
 

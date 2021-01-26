@@ -18,6 +18,7 @@ from inspect import isfunction
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as nn
+from tensorflow.python.keras import backend as K
 from tensorflow.python.framework import tensor_shape
 from tensorflow.python.keras import initializers
 from tensorflow.python.keras.engine.input_spec import InputSpec
@@ -221,6 +222,18 @@ class PReLU2(nn.PReLU):
         from tensorflow.python.keras.engine.input_spec import InputSpec
         self.input_spec = InputSpec(ndim=len(input_shape), axes=axes)
         self.built = True
+
+    def call(self, x):
+        if is_channels_first(self.data_format) and (len(x.shape.as_list()) == 4):
+            x = tf.transpose(x, perm=[0, 2, 3, 1])
+
+        pos = K.relu(x)
+        neg = -self.alpha * K.relu(-x)
+        x = pos + neg
+
+        if is_channels_first(self.data_format) and (len(x.shape.as_list()) == 4):
+            x = tf.transpose(x, perm=[0, 3, 1, 2])
+        return x
 
 
 class Tanh(nn.Layer):

@@ -72,6 +72,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
 - ICNet (['ICNet for Real-Time Semantic Segmentation on High-Resolution Images'](https://arxiv.org/abs/1704.08545))
 - Fast-SCNN (['Fast-SCNN: Fast Semantic Segmentation Network'](https://arxiv.org/abs/1902.04502))
+- DABNet (['DABNet: Depth-wise Asymmetric Bottleneck for Real-time Semantic Segmentation'](https://arxiv.org/abs/1907.11357))
 - BiSeNet (['BiSeNet: Bilateral Segmentation Network for Real-time Semantic Segmentation'](https://arxiv.org/abs/1808.00897))
 - DANet (['Dual Attention Network for Scene Segmentation'](https://arxiv.org/abs/1809.02983))
 - CenterNet (['Objects as Points'](https://arxiv.org/abs/1904.07850))

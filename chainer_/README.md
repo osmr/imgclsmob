@@ -439,7 +439,7 @@ Some remarks:
 | EfficientNet-Edge-Large-b* | 19.58 | 4.89 | 10,589,712 | 9,747.66M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.434/efficientnet_edge_large_b-0489-45f05958.npz.log)) |
 | MixNet-S | 23.77 | 7.05 | 4,134,606 | 260.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_s-0705-4822e76d.npz.log)) |
 | MixNet-M | 22.39 | 6.34 | 5,014,382 | 366.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_m-0634-2638a388.npz.log)) |
-| MixNet-L | 21.55 | 5.90 | 7,329,252 | 591.34M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.414/mixnet_l-0590-f942b4c5.npz.log)) |
+| MixNet-L | 21.43 | 5.59 | 7,329,252 | 591.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/mixnet_l-0559-ff6929ef.npz.log)) |
 | ResNet(A)-10 | 30.94 | 11.61 | 5,438,024 | 1,135.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.484/resneta10-1161-c28d6ca6.npz.log)) |
 | ResNet(A)-BC-14 | 27.72 | 9.57 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0957-84e05fea.npz.log)) |
 | ResNet(A)-18 | 25.40 | 8.05 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0805-f4088383.npz.log)) |

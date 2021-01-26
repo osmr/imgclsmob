@@ -254,7 +254,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | IBN(b)-ResNet-50 | 23.91 | 6.97 | 25,558,568 | 4,112.89M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibnb_resnet50-0697-0aea51d2.params.log)) |
 | IBN-ResNeXt-101 (32x4d) | 21.43 | 5.62 | 44,177,704 | 8,003.45M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnext101_32x4d-0562-05ddba79.params.log)) |
 | IBN-DenseNet-121 | 23.33 | 6.46 | 7,978,856 | 2,872.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0646-82ee3ff4.params.log)) |
-| IBN-DenseNet-169 | 23.78 | 6.82 | 14,149,480 | 3,403.89M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_densenet169-0682-6d7c48c5.params.log)) |
+| IBN-DenseNet-169 | 22.14 | 6.08 | 14,149,480 | 3,403.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0608-b509f339.params.log)) |
 | AirNet50-1x64d (r=2) | 22.48 | 6.21 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0621-347358cc.params.log)) |
 | AirNet50-1x64d (r=16) | 22.91 | 6.46 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0646-0b847b99.params.log)) |
 | AirNeXt50-32x4d (r=2) | 21.51 | 5.75 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0575-ab104fb5.params.log)) |
@@ -461,7 +461,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | EfficientNet-Edge-Large-b* | 19.50 | 4.77 | 10,589,712 | 9,747.58M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.434/efficientnet_edge_large_b-0477-055436da.params.log)) |
 | MixNet-S | 23.83 | 7.03 | 4,134,606 | 260.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_s-0703-135aa042.params.log)) |
 | MixNet-M | 22.37 | 6.31 | 5,014,382 | 366.05M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_m-0631-0881aba9.params.log)) |
-| MixNet-L | 21.53 | 6.03 | 7,329,252 | 590.45M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.414/mixnet_l-0603-0576f35d.params.log)) |
+| MixNet-L | 21.48 | 5.57 | 7,329,252 | 590.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/mixnet_l-0557-94cbf10c.params.log)) |
 | ResNet(A)-10 | 30.89 | 11.59 | 5,438,024 | 1,135.85M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.484/resneta10-1159-a66e01d9.params.log)) |
 | ResNet(A)-BC-14 | 27.75 | 9.56 | 10,084,168 | 1,721.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0956-6f8c3606.params.log)) |
 | ResNet(A)-18 | 25.38 | 8.02 | 11,708,744 | 2,062.22M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0802-225dd3ae.params.log)) |

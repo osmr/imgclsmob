@@ -216,7 +216,7 @@ Some remarks:
 | IBN(b)-ResNet-50 | 23.88 | 6.95 | 25,558,568 | 4,112.89M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/ibnb_resnet50-0695-7178cc50.tf2.h5.log)) |
 | IBN-ResNeXt-101 (32x4d) | 21.41 | 5.64 | 44,177,704 | 8,003.45M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/ibn_resnext101_32x4d-0564-c149beb5.tf2.h5.log)) |
 | IBN-DenseNet-121 | 23.34 | 6.47 | 7,978,856 | 2,872.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0647-830420b2.tf2.h5.log)) |
-| IBN-DenseNet-169 | 23.75 | 6.84 | 14,149,480 | 3,403.89M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/ibn_densenet169-0684-7152d6cc.tf2.h5.log)) |
+| IBN-DenseNet-169 | 22.13 | 6.07 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0607-74a97a40.tf2.h5.log)) |
 | AirNet50-1x64d (r=2) | 22.54 | 6.23 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r2-0623-6940f0e5.tf2.h5.log)) |
 | AirNet50-1x64d (r=16) | 22.89 | 6.50 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r16-0650-b7bb8662.tf2.h5.log)) |
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
@@ -412,7 +412,7 @@ Some remarks:
 | EfficientNet-Edge-Large-b* | 19.86 | 4.96 | 10,589,712 | 9,747.66M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.434/efficientnet_edge_large_b-0496-d72edce1.tf2.h5.log)) |
 | MixNet-S | 23.86 | 7.07 | 4,134,606 | 260.26M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_s-0707-f8ada6d8.tf2.h5.log)) |
 | MixNet-M | 22.39 | 6.32 | 5,014,382 | 366.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/mixnet_m-0632-6c91c967.tf2.h5.log)) |
-| MixNet-L | 21.57 | 6.01 | 7,329,252 | 590.45M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_l-0601-5c2ccc0c.tf2.h5.log)) |
+| MixNet-L | 21.44 | 5.56 | 7,329,252 | 590.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/mixnet_l-0556-1b72f9aa.tf2.h5.log)) |
 | ResNet(A)-10 | 30.89 | 11.61 | 5,438,024 | 1,135.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.484/resneta10-1161-208ecb25.tf2.h5.log)) |
 | ResNet(A)-BC-14 | 27.72 | 9.60 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0960-96153ace.tf2.h5.log)) |
 | ResNet(A)-18 | 25.40 | 8.04 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0804-aa3ba975.tf2.h5.log)) |

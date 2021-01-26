@@ -109,7 +109,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('ibnb_resnet50', '0686', 'e138995e6acda4b496375beac6d01cd7a9f79876', 'v0.0.127', 'IBN(b)-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibn_resnext101_32x4d', '0542', 'b5233c663a4d207d08c21107d6c951956e910be8', 'v0.0.127', 'IBN-ResNeXt-101 (32x4d)', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibn_densenet121', '0673', '0ea2c535382c7a3d92e712617d8405ba631c071f', 'v0.0.493', 'IBN-DenseNet-121', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('ibn_densenet169', '0651', '96dd755e0df8a54349278e0cd23a043a5554de08', 'v0.0.127', 'IBN-DenseNet-169', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
+    ('ibn_densenet169', '0619', 'ec2c0556f4fb2e2e51d49460095bf28259cb5d19', 'v0.0.500', 'IBN-DenseNet-169', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('airnet50_1x64d_r2', '0590', '3ec422128d17314124c02e3bb0f77e26777fb385', 'v0.0.120', 'AirNet50-1x64d (r=2)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
     ('airnet50_1x64d_r16', '0619', '090179e777f47057bedded22d669bf9f9ce3169c', 'v0.0.120', 'AirNet50-1x64d (r=16)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
     ('airnext50_32x4d_r2', '0551', 'c68156e5e446a1116b1b42bc94b3f881ab73fe92', 'v0.0.120', 'AirNeXt50-32x4d (r=2)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
@@ -315,7 +315,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('efficientnet_edge_large_b', '0491', 'd502326f9568f096491354a117f12562cf47e038', 'v0.0.434', 'EfficientNet-Edge-Large-b', '1905.11946', 'in1k', 300, 0.904, 90, '[rwightman/pyt...models]*'),  # noqa
     ('mixnet_s', '0717', 'ab2c4e37062e7ea34a2cdd112f9354d4e67a0fef', 'v0.0.493', 'MixNet-S', '1907.09595', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mixnet_m', '0647', '4d90d345a38ba5041ac5cae2921e07d1eca083b2', 'v0.0.493', 'MixNet-M', '1907.09595', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mixnet_l', '0582', '6cf2c97538d4173d9f6bc80a6ec299463df2d1f3', 'v0.0.414', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('mixnet_l', '0571', 'c686ba17fc6bca5f30ac596b37a7f95f2d4b6f30', 'v0.0.500', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resneta10', '1190', 'a066e5e07f13f8f2a67971931496d1c1ac09bbe1', 'v0.0.484', 'ResNet(A)-10', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetabc14b', '0990', 'bad51cb083aae58479112ad11a3fe9430346e185', 'v0.0.477', 'ResNet(A)-BC-14b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta18', '0831', 'e9f206f480c46b489fbd300fa77db31d740c4f3b', 'v0.0.486', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa

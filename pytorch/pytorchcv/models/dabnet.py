@@ -524,6 +524,7 @@ def _calc_width(net):
 
 def _test():
     pretrained = False
+    fixed_size = True
     in_size = (1024, 2048)
     classes = 19
 
@@ -533,7 +534,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, in_size=in_size)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
 
         # net.train()
         net.eval()

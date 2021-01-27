@@ -342,6 +342,8 @@ def conv3x3(in_channels,
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     bias : bool, default False
@@ -359,7 +361,10 @@ def conv3x3(in_channels,
 
 
 def depthwise_conv3x3(channels,
-                      stride):
+                      stride=1,
+                      padding=1,
+                      dilation=1,
+                      bias=False):
     """
     Depthwise convolution 3x3 layer.
 
@@ -367,17 +372,24 @@ def depthwise_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
     """
     return nn.Conv2d(
         in_channels=channels,
         out_channels=channels,
         kernel_size=3,
         stride=stride,
-        padding=1,
+        padding=padding,
+        dilation=dilation,
         groups=channels,
-        bias=False)
+        bias=bias)
 
 
 class ConvBlock(nn.Module):

@@ -9,7 +9,7 @@ __all__ = ['CGNet', 'cgnet_cityscapes']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
+from .common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
     DualPathSequential, InterpolationBlock, PReLU2
 
 

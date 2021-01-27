@@ -156,6 +156,9 @@ from .models.quartznet import *
 # from .models.tresnet import *
 # from .models.others.oth_dabnet import *
 
+from .models.others.oth_cgnet import *
+from .models._cgnet import *
+
 __all__ = ['get_model']
 
 
@@ -1148,6 +1151,9 @@ _models = {
     # 'tresnet_m': tresnet_m,
 
     # 'oth_dabnet_cityscapes': oth_dabnet_cityscapes,
+
+    'oth_cgnet_cityscapes': oth_cgnet_cityscapes,
+    'cgnet_cityscapes': cgnet_cityscapes,
 }
 
 

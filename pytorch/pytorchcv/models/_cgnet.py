@@ -10,90 +10,74 @@ import os
 import torch
 import torch.nn as nn
 from common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
-    InterpolationBlock
-
-
-class CGDownBlock(nn.Module):
-    """
-    the size of feature map divided 2, (H,W,C)---->(H/2, W/2, 2C)
-
-    args:
-       nIn: the channel of input feature map
-       nOut: the channel of output feature map, and nOut=2*nIn
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 dilation,
-                 se_reduction,
-                 bn_eps):
-        super(CGDownBlock, self).__init__()
-        mid_channels = 2 * out_channels
-
-        self.conv1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2,
-            bn_eps=bn_eps,
-            activation=(lambda: nn.PReLU(out_channels)))
-
-        self.branches = Concurrent()
-        self.branches.add_module("branches1", depthwise_conv3x3(channels=out_channels))
-        self.branches.add_module("branches2", depthwise_conv3x3(
-            channels=out_channels,
-            padding=dilation,
-            dilation=dilation))
-
-        self.norm_activ = NormActivation(
-            in_channels=mid_channels,
-            bn_eps=bn_eps,
-            activation=(lambda: nn.PReLU(mid_channels)))
-
-        self.conv2 = conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels)
-
-        self.se = SEBlock(
-            channels=out_channels,
-            reduction=se_reduction,
-            use_conv=False)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.branches(x)
-        x = self.norm_activ(x)
-        x = self.conv2(x)
-        x = self.se(x)
-        return x
+    DualPathSequential, InterpolationBlock
 
 
 class CGBlock(nn.Module):
+    """
+    CGNet block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of input channels.
+    dilation : int
+        Dilation value.
+    se_reduction : int
+        SE-block reduction value.
+    down : bool
+        Whether to downsample.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  dilation,
                  se_reduction,
+                 down,
                  bn_eps):
         super(CGBlock, self).__init__()
-        mid_channels = out_channels // 2
+        self.down = down
+        if self.down:
+            mid1_channels = out_channels
+            mid2_channels = 2 * out_channels
+        else:
+            mid1_channels = out_channels // 2
+            mid2_channels = out_channels
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            bn_eps=bn_eps,
-            activation=(lambda: nn.PReLU(mid_channels)))
+        if self.down:
+            self.conv1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=2,
+                bn_eps=bn_eps,
+                activation=(lambda: nn.PReLU(out_channels)))
+        else:
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid1_channels,
+                bn_eps=bn_eps,
+                activation=(lambda: nn.PReLU(mid1_channels)))
 
         self.branches = Concurrent()
-        self.branches.add_module("branches1", depthwise_conv3x3(channels=mid_channels))
+        self.branches.add_module("branches1", depthwise_conv3x3(channels=mid1_channels))
         self.branches.add_module("branches2", depthwise_conv3x3(
-            channels=mid_channels,
+            channels=mid1_channels,
             padding=dilation,
             dilation=dilation))
 
         self.norm_activ = NormActivation(
-            in_channels=out_channels,
+            in_channels=mid2_channels,
             bn_eps=bn_eps,
-            activation=(lambda: nn.PReLU(out_channels)))
+            activation=(lambda: nn.PReLU(mid2_channels)))
+
+        if self.down:
+            self.conv2 = conv1x1(
+                in_channels=mid2_channels,
+                out_channels=out_channels)
 
         self.se = SEBlock(
             channels=out_channels,
@@ -101,29 +85,16 @@ class CGBlock(nn.Module):
             use_conv=False)
 
     def forward(self, x):
-        identity = x
+        if not self.down:
+            identity = x
         x = self.conv1(x)
         x = self.branches(x)
         x = self.norm_activ(x)
+        if self.down:
+            x = self.conv2(x)
         x = self.se(x)
-        x += identity
-        return x
-
-
-class InputInjection(nn.Module):
-    def __init__(self,
-                 downsampling_ratio):
-        super(InputInjection, self).__init__()
-        self.pool = nn.ModuleList()
-        for i in range(0, downsampling_ratio):
-            self.pool.append(nn.AvgPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=1))
-
-    def forward(self, x):
-        for pool in self.pool:
-            x = pool(x)
+        if not self.down:
+            x += identity
         return x
 
 
@@ -137,6 +108,12 @@ class CGUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of input channels.
+    layers : int
+        Number of layers.
+    dilation : int
+        Dilation value.
+    se_reduction : int
+        SE-block reduction value.
     bn_eps : float
         Small float added to variance in Batch norm.
     """
@@ -150,11 +127,12 @@ class CGUnit(nn.Module):
         super(CGUnit, self).__init__()
         mid_channels = out_channels // 2
 
-        self.down = CGDownBlock(
+        self.down = CGBlock(
             in_channels=in_channels,
             out_channels=mid_channels,
             dilation=dilation,
             se_reduction=se_reduction,
+            down=True,
             bn_eps=bn_eps)
         self.blocks = nn.Sequential()
         for i in range(layers - 1):
@@ -163,6 +141,7 @@ class CGUnit(nn.Module):
                 out_channels=mid_channels,
                 dilation=dilation,
                 se_reduction=se_reduction,
+                down=False,
                 bn_eps=bn_eps))
 
     def forward(self, x):
@@ -184,8 +163,12 @@ class CGStage(nn.Module):
         Number of input channels for y.
     y_out_channels : int
         Number of output channels for y.
-    dilations : list of int
-        Dilations for blocks.
+    layers : int
+        Number of layers in the unit.
+    dilation : int
+        Dilation for blocks.
+    se_reduction : int
+        SE-block reduction value for blocks.
     bn_eps : float
         Small float added to variance in Batch norm.
     """
@@ -275,16 +258,43 @@ class CGInitBlock(nn.Module):
 
 class CGNet(nn.Module):
     """
-    This class defines the proposed Context Guided Network (CGNet) in this work.
+    CGNet model from 'CGNet: A Light-weight Context Guided Network for Semantic Segmentation,'
+    https://arxiv.org/abs/1811.08201.
 
-    args:
-      classes: number of classes in the dataset. Default is 19 for the cityscapes
-      M: the number of blocks in stage 2
-      N: the number of blocks in stage 3
+    Parameters:
+    ----------
+    layers : list of int
+        Number of layers for each unit.
+    channels : list of int
+        Number of output channels for each unit (for y-branch).
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    dilations : list of int
+        Dilations for each unit.
+    se_reductions : list of int
+        SE-block reduction value for each unit.
+    cut_x : list of int
+        Whether to concatenate with x-branch for each unit.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    aux : bool, default False
+        Whether to output an auxiliary result.
+    fixed_size : bool, default False
+        Whether to expect fixed spatial size of input image.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (1024, 2048)
+        Spatial size of the expected input image.
+    num_classes : int, default 19
+        Number of segmentation classes.
     """
     def __init__(self,
-                 init_block_channels,
                  layers,
+                 channels,
+                 init_block_channels,
+                 dilations,
+                 se_reductions,
+                 cut_x,
                  bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
@@ -299,75 +309,26 @@ class CGNet(nn.Module):
         self.num_classes = num_classes
         self.fixed_size = fixed_size
 
-        self.init_block = CGInitBlock(
+        self.features = DualPathSequential(
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=0)
+        self.features.add_module("init_block", CGInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            bn_eps=bn_eps)
+            bn_eps=bn_eps))
+        y_in_channels = init_block_channels
 
-        # self.sample1 = InputInjection(1)  # down-sample for Input Injection, factor=2
-        # self.sample2 = InputInjection(2)  # down-sample for Input Injiection, factor=4
-
-        # channels1 = 32 + 3
-        # self.b1 = NormActivation(
-        #     in_channels=channels1,
-        #     bn_eps=bn_eps,
-        #     activation=(lambda: nn.PReLU(channels1)))
-        y_in_channels = 32
-        y_out_channels = 32 + 3
-        self.stage1 = CGStage(
-            x_channels=in_channels,
-            y_in_channels=y_in_channels,
-            y_out_channels=y_out_channels,
-            layers=layers[0],
-            dilation=0,
-            se_reduction=0,
-            bn_eps=bn_eps)
-        y_in_channels = y_out_channels
-
-        # # stage 2
-        # self.level2_0 = CGDownBlock(32 + 3, 64, dilation_rate=2, reduction=8)
-        # self.level2 = nn.ModuleList()
-        # for i in range(layers[0] - 1):
-        #     self.level2.append(CGBlock(64, 64, dilation_rate=2, reduction=8))  # CG block
-        #
-        # channels1 = 128 + 3
-        # self.bn_prelu_2 = NormActivation(
-        #     in_channels=channels1,
-        #     bn_eps=bn_eps,
-        #     activation=(lambda: nn.PReLU(channels1)))
-        y_out_channels = 128 + 3
-        self.stage2 = CGStage(
-            x_channels=in_channels,
-            y_in_channels=y_in_channels,
-            y_out_channels=y_out_channels,
-            layers=layers[1],
-            dilation=2,
-            se_reduction=8,
-            bn_eps=bn_eps)
-        y_in_channels = y_out_channels
-
-        # # stage 3
-        # self.level3_0 = CGDownBlock(128 + 3, 128, dilation_rate=4, reduction=16)
-        # self.level3 = nn.ModuleList()
-        # for i in range(layers[1] - 1):
-        #     self.level3.append(CGBlock(128, 128, dilation_rate=4, reduction=16))  # CG block
-        #
-        # channels1 = 256
-        # self.bn_prelu_3 = NormActivation(
-        #     in_channels=channels1,
-        #     bn_eps=bn_eps,
-        #     activation=(lambda: nn.PReLU(channels1)))
-
-        y_out_channels = 256
-        self.stage3 = CGStage(
-            x_channels=0,
-            y_in_channels=y_in_channels,
-            y_out_channels=y_out_channels,
-            layers=layers[2],
-            dilation=4,
-            se_reduction=16,
-            bn_eps=bn_eps)
-        y_in_channels = y_out_channels
+        for i, (layers_i, y_out_channels) in enumerate(zip(layers, channels)):
+            self.features.add_module("stage{}".format(i + 1), CGStage(
+                x_channels=in_channels if cut_x[i] == 1 else 0,
+                y_in_channels=y_in_channels,
+                y_out_channels=y_out_channels,
+                layers=layers_i,
+                dilation=dilations[i],
+                se_reduction=se_reductions[i],
+                bn_eps=bn_eps))
+            y_in_channels = y_out_channels
 
         self.classifier = conv1x1(
             in_channels=y_in_channels,
@@ -388,36 +349,8 @@ class CGNet(nn.Module):
 
     def forward(self, x):
         in_size = self.in_size if self.fixed_size else x.shape[2:]
-
-        # stage 1
-        output0 = self.init_block(x)
-
-        # inp1 = self.sample1(x)
-        # output0_cat = self.b1(torch.cat([output0, inp1], 1))
-        output0_cat, inp1 = self.stage1(output0, x)
-
-        # inp2 = self.sample2(x)
-        # # stage 2
-        # output1_0 = self.level2_0(output0_cat)  # down-sampled
-        # for i, layer in enumerate(self.level2):
-        #     if i == 0:
-        #         output1 = layer(output1_0)
-        #     else:
-        #         output1 = layer(output1)
-        # output1_cat = self.bn_prelu_2(torch.cat([output1, output1_0, inp2], 1))
-        output1_cat, inp2 = self.stage2(output0_cat, inp1)
-
-        # stage 3
-        # output2_0 = self.level3_0(output1_cat)  # down-sampled
-        # for i, layer in enumerate(self.level3):
-        #     if i == 0:
-        #         output2 = layer(output2_0)
-        #     else:
-        #         output2 = layer(output2)
-        # output2_cat = self.bn_prelu_3(torch.cat([output2_0, output2], 1))
-        output2_cat, _ = self.stage3(output1_cat, inp2)
-
-        y = self.classifier(output2_cat)
+        y = self.features(x, x)
+        y = self.classifier(y)
         y = self.up(y, size=in_size)
         return y
 
@@ -439,16 +372,20 @@ def get_cgnet(model_name=None,
         Location for keeping the model parameters.
     """
     init_block_channels = 32
-    # channels = [35, 131, 259]
-    # dilations = [[], [2, 2, 2], [4, 4, 8, 8, 16, 16]]
     layers = [0, 3, 21]
+    channels = [35, 131, 256]
+    dilations = [0, 2, 4]
+    se_reductions = [0, 8, 16]
+    cut_x = [1, 1, 0]
     bn_eps = 1e-3
 
     net = CGNet(
-        # channels=channels,
-        init_block_channels=init_block_channels,
         layers=layers,
-        # dilations=dilations,
+        channels=channels,
+        init_block_channels=init_block_channels,
+        dilations=dilations,
+        se_reductions=se_reductions,
+        cut_x=cut_x,
         bn_eps=bn_eps,
         **kwargs)
 

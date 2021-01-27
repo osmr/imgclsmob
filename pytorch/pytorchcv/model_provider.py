@@ -1067,6 +1067,7 @@ _models = {
 
     'fastscnn_cityscapes': fastscnn_cityscapes,
 
+    'cgnet_cityscapes': cgnet_cityscapes,
     'dabnet_cityscapes': dabnet_cityscapes,
 
     'sinet_cityscapes': sinet_cityscapes,
@@ -1149,8 +1150,6 @@ _models = {
     # 'tresnet_m': tresnet_m,
 
     # 'oth_dabnet_cityscapes': oth_dabnet_cityscapes,
-
-    'cgnet_cityscapes': cgnet_cityscapes,
 }
 
 

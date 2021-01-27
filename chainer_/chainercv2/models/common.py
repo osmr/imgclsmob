@@ -385,7 +385,10 @@ def conv3x3(in_channels,
 
 
 def depthwise_conv3x3(channels,
-                      stride):
+                      stride=1,
+                      pad=1,
+                      dilate=1,
+                      use_bias=False):
     """
     Depthwise convolution 3x3 layer.
 
@@ -393,16 +396,23 @@ def depthwise_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
     """
     return L.Convolution2D(
         in_channels=channels,
         out_channels=channels,
         ksize=3,
         stride=stride,
-        pad=1,
-        nobias=True,
+        pad=pad,
+        nobias=(not use_bias),
+        dilate=dilate,
         groups=channels)
 
 

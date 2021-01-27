@@ -537,6 +537,7 @@ def _test():
     chainer.global_config.train = False
 
     pretrained = False
+    fixed_size = True
     in_size = (1024, 2048)
     classes = 19
 
@@ -546,7 +547,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, in_size=in_size)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != dabnet_cityscapes or weight_count == 756643)

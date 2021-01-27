@@ -402,13 +402,6 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
-        import numpy as np
-        net.load_state_dict(
-            torch.load("/home/osemery/projects/imgclsmob_data/cgnet_cityscapes/cgnet_cityscapes_raw.pth"))
-        x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x.npy"))
-        y = net(x)
-
         # net.train()
         net.eval()
         weight_count = _calc_width(net)

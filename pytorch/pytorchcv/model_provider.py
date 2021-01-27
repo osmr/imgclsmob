@@ -118,6 +118,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.fastscnn import *
+from .models.cgnet import *
 from .models.dabnet import *
 from .models.sinet import *
 from .models.bisenet import *
@@ -155,9 +156,6 @@ from .models.quartznet import *
 # from .models.others.oth_tresnet import *
 # from .models.tresnet import *
 # from .models.others.oth_dabnet import *
-
-from .models.others.oth_cgnet import *
-from .models.cgnet import *
 
 __all__ = ['get_model']
 
@@ -1152,7 +1150,6 @@ _models = {
 
     # 'oth_dabnet_cityscapes': oth_dabnet_cityscapes,
 
-    'oth_cgnet_cityscapes': oth_cgnet_cityscapes,
     'cgnet_cityscapes': cgnet_cityscapes,
 }
 

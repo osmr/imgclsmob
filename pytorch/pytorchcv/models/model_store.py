@@ -165,7 +165,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dpn131', '0548', '0c53e5b380137ccb789e932775e8bd8a811eeb3e', 'v0.0.17', 'DPN-131', '1707.01629', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('darknet_tiny', '1784', '4561e1ada619e33520d1f765b3321f7f8ea6196b', 'v0.0.69', 'DarkNet Tiny', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet_ref', '1718', '034595b49113ee23de72e36f7d8a3dbb594615f6', 'v0.0.64', 'DarkNet Ref', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('darknet53', '0564', 'b36bef6b297055dda3d17a3f79596511730e1963', 'v0.0.150', 'DarkNet-53', '1804.02767', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('darknet53', '0558', '8be575a04c1789c16b7fa6835919461bb5b174d1', 'v0.0.501', 'DarkNet-53', '1804.02767', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('irevnet301', '0841', '95dc8d94257bf16027edd7077b785a8676369fca', 'v0.0.251', 'i-RevNet-301', '1802.07088', 'in1k', 224, 0.875, 200, '[jhjacobsen/pytorch-i-revnet]'),  # noqa
     ('bagnet9', '2961', 'cab1179284e9749697f38c1c7e5f0e172be12c89', 'v0.0.255', 'BagNet-9', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('bagnet17', '1884', '6b2a100f8d14d4616709586483f625743ed04769', 'v0.0.255', 'BagNet-17', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa

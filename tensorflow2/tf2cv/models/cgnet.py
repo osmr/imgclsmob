@@ -10,8 +10,8 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
-    DualPathSequential, InterpolationBlock, SimpleSequential, is_channels_first, get_im_size, PReLU2, MaxPool2d,\
-    AvgPool2d, get_channel_axis
+    DualPathSequential, InterpolationBlock, SimpleSequential, is_channels_first, get_im_size, PReLU2, AvgPool2d,\
+    get_channel_axis
 
 
 class CGBlock(nn.Layer):

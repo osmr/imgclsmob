@@ -157,7 +157,7 @@ from .models.quartznet import *
 # from .models.others.oth_dabnet import *
 
 from .models.others.oth_cgnet import *
-from .models._cgnet import *
+from .models.cgnet import *
 
 __all__ = ['get_model']
 

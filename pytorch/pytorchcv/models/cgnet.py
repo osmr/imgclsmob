@@ -9,7 +9,7 @@ __all__ = ['CGNet', 'cgnet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
+from .common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
     DualPathSequential, InterpolationBlock
 
 
@@ -147,7 +147,7 @@ class CGUnit(nn.Module):
     def forward(self, x):
         x = self.down(x)
         y = self.blocks(x)
-        x = torch.cat((y, x), dim=1)
+        x = torch.cat((y, x), dim=1)  # NB: This differs from the original implementation.
         return x
 
 
@@ -440,6 +440,12 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
+
+        net.train()
+        import numpy as np
+        net.load_state_dict(torch.load("/home/osemery/projects/imgclsmob_data/cgnet_cityscapes/cgnet_cityscapes.pth"))
+        x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x.npy"))
+        y = net(x)
 
         # net.train()
         net.eval()

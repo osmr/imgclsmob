@@ -21,7 +21,7 @@ class FPEBlock(nn.Module):
                  dilation,
                  downsample=None,
                  stride=1,
-                 t=1,
+                 bottleneck_factor=1,
                  scales=4,
                  use_se=False):
         super(FPEBlock, self).__init__()
@@ -32,7 +32,7 @@ class FPEBlock(nn.Module):
 
         if in_channels % scales != 0:
             raise ValueError('Planes must be divisible by scales')
-        bottleneck_planes = in_channels * t
+        bottleneck_planes = in_channels * bottleneck_factor
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
@@ -61,14 +61,14 @@ class FPEBlock(nn.Module):
 
         y = self.conv1(x)
 
-        xs = torch.chunk(y, self.scales, 1)
+        xs = torch.chunk(y, chunks=self.scales, dim=1)
         ys = []
         for s in range(self.scales):
             if s == 0:
                 ys.append(self.conv2[s](xs[s]))
             else:
                 ys.append(self.conv2[s](xs[s] + ys[-1]))
-        y = torch.cat(ys, 1)
+        y = torch.cat(ys, dim=1)
 
         y = self.conv3(y)
 
@@ -156,13 +156,19 @@ class FPENet(nn.Module):
         self.inplanes = outplanes[0]
 
         self.layer1 = self._make_layer(outplanes[0], self.block_num[0], dilation=self.dilation,
-                                       stride=1, t=1, scales=scales, use_se=use_se)
+                                       stride=1, bottleneck_factor=1, scales=scales, use_se=use_se)
         self.layer2 = self._make_layer(outplanes[1], self.block_num[1], dilation=self.dilation,
-                                       stride=2, t=4, scales=scales, use_se=use_se)
+                                       stride=2, bottleneck_factor=4, scales=scales, use_se=use_se)
         self.layer3 = self._make_layer(outplanes[2], self.block_num[2], dilation=self.dilation,
-                                       stride=2, t=4, scales=scales, use_se=use_se)
-        self.meu1 = MEUBlock(64, 32, 64)
-        self.meu2 = MEUBlock(64, 16, 32)
+                                       stride=2, bottleneck_factor=4, scales=scales, use_se=use_se)
+        self.meu1 = MEUBlock(
+            in_channels_high=64,
+            in_channels_low=32,
+            out_channels=64)
+        self.meu2 = MEUBlock(
+            in_channels_high=64,
+            in_channels_low=16,
+            out_channels=32)
 
         self.classifier = conv1x1(
             in_channels=32,
@@ -178,31 +184,32 @@ class FPENet(nn.Module):
                     blocks,
                     dilation,
                     stride=1,
-                    t=1,
+                    bottleneck_factor=1,
                     scales=4,
                     use_se=False):
         downsample = None
         if stride != 1 or self.inplanes != planes:
-            downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes, stride),
-                nn.BatchNorm2d(planes),
-            )
+            downsample = conv1x1_block(
+                in_channels=self.inplanes,
+                out_channels=planes,
+                stride=stride,
+                activation=None)
 
         layers = []
         layers.append(FPEBlock(
-            self.inplanes,
-            planes,
+            in_channels=self.inplanes,
+            out_channels=planes,
             dilation=dilation,
             downsample=downsample,
             stride=stride,
-            t=t,
+            bottleneck_factor=bottleneck_factor,
             scales=scales,
             use_se=use_se))
         self.inplanes = planes
         for _ in range(1, blocks):
             layers.append(FPEBlock(
-                self.inplanes,
-                planes,
+                in_channels=self.inplanes,
+                out_channels=planes,
                 dilation=dilation,
                 scales=scales,
                 use_se=use_se))

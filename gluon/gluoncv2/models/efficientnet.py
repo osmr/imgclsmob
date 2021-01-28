@@ -19,7 +19,7 @@ from mxnet.gluon import nn, HybridBlock
 from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
 
-def calc_tf_padding(x,
+def calc_tf_padding(in_size,
                     kernel_size,
                     strides=1,
                     dilation=1):
@@ -28,8 +28,8 @@ def calc_tf_padding(x,
 
     Parameters:
     ----------
-    x : tensor
-        Input tensor.
+    in_size : tuple of 2 int
+        Spatial size of input image.
     kernel_size : int
         Convolution window size.
     strides : int, default 1
@@ -42,7 +42,7 @@ def calc_tf_padding(x,
     tuple of 4 int
         The size of the padding.
     """
-    height, width = x.shape[2:]
+    height, width = in_size
     oh = math.ceil(height / strides)
     ow = math.ceil(width / strides)
     pad_h = max((oh - 1) * strides + (kernel_size - 1) * dilation + 1 - height, 0)
@@ -71,6 +71,8 @@ class EffiDwsConvUnit(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    in_size : tuple of 2 int, default None
+        Spatial size of input image.
     """
     def __init__(self,
                  in_channels,
@@ -80,9 +82,11 @@ class EffiDwsConvUnit(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 in_size=None,
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
         self.tf_mode = tf_mode
+        self.in_size = in_size
         self.residual = (in_channels == out_channels) and (strides == 1)
 
         with self.name_scope():
@@ -108,7 +112,9 @@ class EffiDwsConvUnit(HybridBlock):
         if self.residual:
             identity = x
         if self.tf_mode:
-            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3), constant_value=0)
+            in_size = self.in_size if self.in_size is not None else x.shape[2:]
+            # assert (in_size == x.shape[2:])
+            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(in_size=in_size, kernel_size=3), constant_value=0)
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
@@ -143,6 +149,8 @@ class EffiInvResUnit(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    in_size : tuple of 2 int, default None
+        Spatial size of input image.
     """
     def __init__(self,
                  in_channels,
@@ -155,11 +163,13 @@ class EffiInvResUnit(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 in_size=None,
                  **kwargs):
         super(EffiInvResUnit, self).__init__(**kwargs)
         self.kernel_size = kernel_size
         self.strides = strides
         self.tf_mode = tf_mode
+        self.in_size = in_size
         self.residual = (in_channels == out_channels) and (strides == 1)
         self.use_se = se_factor > 0
         mid_channels = in_channels * exp_factor
@@ -197,8 +207,11 @@ class EffiInvResUnit(HybridBlock):
             identity = x
         x = self.conv1(x)
         if self.tf_mode:
-            x = F.pad(x, mode="constant",
-                      pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides),
+            in_size = self.in_size if self.in_size is not None else x.shape[2:]
+            # assert (in_size == x.shape[2:])
+            x = F.pad(x,
+                      mode="constant",
+                      pad_width=calc_tf_padding(in_size=in_size, kernel_size=self.kernel_size, strides=self.strides),
                       constant_value=0)
         x = self.conv2(x)
         if self.use_se:
@@ -227,8 +240,9 @@ class EffiInitBlock(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    in_size : tuple of 2 int, default None
+        Spatial size of input image.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -236,9 +250,11 @@ class EffiInitBlock(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 in_size=None,
                  **kwargs):
         super(EffiInitBlock, self).__init__(**kwargs)
         self.tf_mode = tf_mode
+        self.in_size = in_size
 
         with self.name_scope():
             self.conv = conv3x3_block(
@@ -252,7 +268,12 @@ class EffiInitBlock(HybridBlock):
 
     def hybrid_forward(self, F, x):
         if self.tf_mode:
-            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3, strides=2), constant_value=0)
+            in_size = self.in_size if self.in_size is not None else x.shape[2:]
+            # assert (in_size == x.shape[2:])
+            x = F.pad(x,
+                      mode="constant",
+                      pad_width=calc_tf_padding(in_size=in_size, kernel_size=3, strides=2),
+                      constant_value=0)
         x = self.conv(x)
         return x
 
@@ -280,6 +301,8 @@ class EfficientNet(HybridBlock):
         Fraction of the input units to drop. Must be a number between 0 and 1.
     tf_mode : bool, default False
         Whether to use TF-like mode.
+    fixed_size : bool, default True
+        Whether to expect fixed spatial size of input image.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -301,6 +324,7 @@ class EfficientNet(HybridBlock):
                  expansion_factors,
                  dropout_rate=0.2,
                  tf_mode=False,
+                 fixed_size=True,
                  bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  in_channels=3,
@@ -310,6 +334,7 @@ class EfficientNet(HybridBlock):
         super(EfficientNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
+        self.fixed_size = fixed_size
         activation = "swish"
 
         with self.name_scope():
@@ -320,8 +345,10 @@ class EfficientNet(HybridBlock):
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation,
-                tf_mode=tf_mode))
+                tf_mode=tf_mode,
+                in_size=in_size if fixed_size else None))
             in_channels = init_block_channels
+            in_size = (math.ceil(in_size[0] / 2), math.ceil(in_size[1] / 2))
             for i, channels_per_stage in enumerate(channels):
                 kernel_sizes_per_stage = kernel_sizes[i]
                 expansion_factors_per_stage = expansion_factors[i]
@@ -339,7 +366,8 @@ class EfficientNet(HybridBlock):
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,
-                                tf_mode=tf_mode))
+                                tf_mode=tf_mode,
+                                in_size=in_size if fixed_size else None))
                         else:
                             stage.add(EffiInvResUnit(
                                 in_channels=in_channels,
@@ -351,8 +379,11 @@ class EfficientNet(HybridBlock):
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,
-                                tf_mode=tf_mode))
+                                tf_mode=tf_mode,
+                                in_size=in_size if fixed_size else None))
                         in_channels = out_channels
+                        if strides > 1:
+                            in_size = (math.ceil(in_size[0] / 2), math.ceil(in_size[1] / 2))
                 self.features.add(stage)
             self.features.add(conv1x1_block(
                 in_channels=in_channels,
@@ -408,7 +439,6 @@ def get_efficientnet(version,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     if version == "b0":
         assert (in_size == (224, 224))
         depth_factor = 1.0
@@ -1021,11 +1051,22 @@ def efficientnet_b8c(in_size=(672, 672), **kwargs):
                             **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    return weight_count
+
+
+def _test():
     import mxnet as mx
 
     pretrained = False
+    fixed_size = True
 
     models = [
         efficientnet_b0,
@@ -1058,18 +1099,14 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, fixed_size=fixed_size)
 
         ctx = mx.cpu()
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        net.hybridize()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != efficientnet_b0 or weight_count == 5288548)
         assert (model != efficientnet_b1 or weight_count == 7794184)
@@ -1089,9 +1126,11 @@ def _test():
         assert (model != efficientnet_b6b or weight_count == 43040704)
         assert (model != efficientnet_b7b or weight_count == 66347960)
 
-        x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
+        batch = 4
+        classes = 1000
+        x = mx.nd.random.normal(shape=(batch, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (y.shape == (batch, classes))
 
 
 if __name__ == "__main__":

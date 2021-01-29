@@ -1,5 +1,5 @@
 """
-    FPENet for image segmentation, implemented in PyTorch.
+    FPENet for image segmentation, implemented in Gluon.
     Original paper: 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
 """
@@ -7,12 +7,12 @@
 __all__ = ['FPENet', 'fpenet_cityscapes']
 
 import os
-import torch
-import torch.nn as nn
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1, conv1x1_block, conv3x3_block, SEBlock, InterpolationBlock, MultiOutputSequential
 
 
-class FPEBlock(nn.Module):
+class FPEBlock(HybridBlock):
     """
     FPENet block.
 
@@ -28,28 +28,29 @@ class FPEBlock(nn.Module):
         assert (channels % len(dilations) == 0)
         mid_channels = channels // len(dilations)
 
-        self.blocks = nn.Sequential()
-        for i, dilation in enumerate(dilations):
-            self.blocks.add_module("block{}".format(i + 1), conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                groups=mid_channels,
-                dilation=dilation,
-                padding=dilation))
+        with self.name_scope():
+            self.blocks = nn.HybridSequential(prefix="")
+            for i, dilation in enumerate(dilations):
+                self.blocks.add(conv3x3_block(
+                    in_channels=mid_channels,
+                    out_channels=mid_channels,
+                    groups=mid_channels,
+                    dilation=dilation,
+                    padding=dilation))
 
-    def forward(self, x):
-        xs = torch.chunk(x, chunks=len(self.blocks._modules), dim=1)
+    def hybrid_forward(self, F, x):
+        xs = F.split(x, axis=1, num_outputs=len(self.blocks._children))
         ys = []
-        for bi, xsi in zip(self.blocks._modules.values(), xs):
+        for bi, xsi in zip(self.blocks._children.values(), xs):
             if len(ys) == 0:
                 ys.append(bi(xsi))
             else:
                 ys.append(bi(xsi + ys[-1]))
-        x = torch.cat(ys, dim=1)
+        x = F.concat(*ys, dim=1)
         return x
 
 
-class FPEUnit(nn.Module):
+class FPEUnit(HybridBlock):
     """
     FPENet unit.
 
@@ -59,7 +60,7 @@ class FPEUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     bottleneck_factor : int
         Bottleneck factor.
@@ -69,34 +70,35 @@ class FPEUnit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
+                 strides,
                  bottleneck_factor,
                  use_se):
         super(FPEUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
         self.use_se = use_se
         mid1_channels = in_channels * bottleneck_factor
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid1_channels,
-            stride=stride)
-        self.blocks = FPEBlock(channels=mid1_channels)
-        self.conv2 = conv1x1_block(
-            in_channels=mid1_channels,
-            out_channels=out_channels,
-            activation=None)
-        if self.use_se:
-            self.se = SEBlock(channels=out_channels)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
+        with self.name_scope():
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
+                out_channels=mid1_channels,
+                strides=strides)
+            self.blocks = FPEBlock(channels=mid1_channels)
+            self.conv2 = conv1x1_block(
+                in_channels=mid1_channels,
                 out_channels=out_channels,
-                stride=stride,
                 activation=None)
-        self.activ = nn.ReLU(inplace=True)
+            if self.use_se:
+                self.se = SEBlock(channels=out_channels)
+            if self.resize_identity:
+                self.identity_conv = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    activation=None)
+            self.activ = nn.Activation("relu")
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -111,7 +113,7 @@ class FPEUnit(nn.Module):
         return x
 
 
-class FPEStage(nn.Module):
+class FPEStage(HybridBlock):
     """
     FPENet unit.
 
@@ -134,30 +136,31 @@ class FPEStage(nn.Module):
         super(FPEStage, self).__init__()
         self.use_block = (layers > 1)
 
-        if self.use_block:
-            self.down = FPEUnit(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=2,
-                bottleneck_factor=4,
-                use_se=use_se)
-            self.blocks = nn.Sequential()
-            for i in range(layers - 1):
-                self.blocks.add_module("block{}".format(i + 1), FPEUnit(
-                    in_channels=out_channels,
+        with self.name_scope():
+            if self.use_block:
+                self.down = FPEUnit(
+                    in_channels=in_channels,
                     out_channels=out_channels,
-                    stride=1,
+                    strides=2,
+                    bottleneck_factor=4,
+                    use_se=use_se)
+                self.blocks = nn.HybridSequential(prefix="")
+                for i in range(layers - 1):
+                    self.blocks.add(FPEUnit(
+                        in_channels=out_channels,
+                        out_channels=out_channels,
+                        strides=1,
+                        bottleneck_factor=1,
+                        use_se=use_se))
+            else:
+                self.down = FPEUnit(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=1,
                     bottleneck_factor=1,
-                    use_se=use_se))
-        else:
-            self.down = FPEUnit(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=1,
-                bottleneck_factor=1,
-                use_se=use_se)
+                    use_se=use_se)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.down(x)
         if self.use_block:
             y = self.blocks(x)
@@ -165,7 +168,7 @@ class FPEStage(nn.Module):
         return x
 
 
-class MEUBlock(nn.Module):
+class MEUBlock(HybridBlock):
     """
     FPENet specific mutual embedding upsample (MEU) block.
 
@@ -177,56 +180,57 @@ class MEUBlock(nn.Module):
         Number of input channels for x_low.
     out_channels : int
         Number of output channels.
+    out_size : tuple of 2 int
+        Spatial size of output image.
     """
     def __init__(self,
                  in_channels_high,
                  in_channels_low,
-                 out_channels):
+                 out_channels,
+                 out_size):
         super(MEUBlock, self).__init__()
-        self.conv_high = conv1x1_block(
-            in_channels=in_channels_high,
-            out_channels=out_channels,
-            activation=None)
-        self.conv_low = conv1x1_block(
-            in_channels=in_channels_low,
-            out_channels=out_channels,
-            activation=None)
-        self.pool = nn.AdaptiveAvgPool2d(1)
-        self.conv_w_high = conv1x1(
-            in_channels=out_channels,
-            out_channels=out_channels)
-        self.conv_w_low = conv1x1(
-            in_channels=1,
-            out_channels=1)
-        self.sigmoid = nn.Sigmoid()
-        self.relu = nn.ReLU(inplace=True)
-        self.up = InterpolationBlock(
-            scale_factor=2,
-            align_corners=True)
+        with self.name_scope():
+            self.conv_high = conv1x1_block(
+                in_channels=in_channels_high,
+                out_channels=out_channels,
+                activation=None)
+            self.conv_low = conv1x1_block(
+                in_channels=in_channels_low,
+                out_channels=out_channels,
+                activation=None)
+            self.conv_w_high = conv1x1(
+                in_channels=out_channels,
+                out_channels=out_channels)
+            self.conv_w_low = conv1x1(
+                in_channels=1,
+                out_channels=1)
+            self.sigmoid = nn.Activation("sigmoid")
+            self.relu = nn.Activation("relu")
+            self.up = InterpolationBlock(scale_factor=2, out_size=out_size)
 
-    def forward(self, x_high, x_low):
+    def hybrid_forward(self, F, x_high, x_low):
         x_high = self.conv_high(x_high)
         x_low = self.conv_low(x_low)
 
-        w_high = self.pool(x_high)
+        w_high = F.contrib.AdaptiveAvgPooling2D(x_high, output_size=1)
         w_high = self.conv_w_high(w_high)
         w_high = self.relu(w_high)
         w_high = self.sigmoid(w_high)
 
-        w_low = x_low.mean(dim=1, keepdim=True)
+        w_low = x_low.mean(axis=1, keepdims=True)
         w_low = self.conv_w_low(w_low)
         w_low = self.sigmoid(w_low)
 
         x_high = self.up(x_high)
 
-        x_high = x_high * w_low
-        x_low = x_low * w_high
+        x_high = F.broadcast_mul(x_high, w_low)
+        x_low = F.broadcast_mul(x_low, w_high)
 
         out = x_high + x_low
         return out
 
 
-class FPENet(nn.Module):
+class FPENet(HybridBlock):
     """
     FPENet model from 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
@@ -273,52 +277,46 @@ class FPENet(nn.Module):
         self.num_classes = num_classes
         self.fixed_size = fixed_size
 
-        self.stem = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            stride=2)
-        in_channels = init_block_channels
-
-        self.encoder = MultiOutputSequential(return_last=False)
-        for i, (layers_i, out_channels) in enumerate(zip(layers, channels)):
-            stage = FPEStage(
+        with self.name_scope():
+            self.stem = conv3x3_block(
                 in_channels=in_channels,
-                out_channels=out_channels,
-                layers=layers_i,
-                use_se=use_se)
-            stage.do_output = True
-            self.encoder.add_module("stage{}".format(i + 1), stage)
-            in_channels = out_channels
+                out_channels=init_block_channels,
+                strides=2)
+            in_channels = init_block_channels
 
-        self.meu1 = MEUBlock(
-            in_channels_high=channels[-1],
-            in_channels_low=channels[-2],
-            out_channels=meu_channels[0])
-        self.meu2 = MEUBlock(
-            in_channels_high=meu_channels[0],
-            in_channels_low=channels[-3],
-            out_channels=meu_channels[1])
-        in_channels = meu_channels[1]
+            self.encoder = MultiOutputSequential(return_last=False)
+            for i, (layers_i, out_channels) in enumerate(zip(layers, channels)):
+                stage = FPEStage(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    layers=layers_i,
+                    use_se=use_se)
+                stage.do_output = True
+                self.encoder.add(stage)
+                in_channels = out_channels
 
-        self.classifier = conv1x1(
-            in_channels=in_channels,
-            out_channels=num_classes,
-            bias=True)
+            self.meu1 = MEUBlock(
+                in_channels_high=channels[-1],
+                in_channels_low=channels[-2],
+                out_channels=meu_channels[0],
+                out_size=((in_size[0] // 4, in_size[1] // 4) if fixed_size else None))
+            self.meu2 = MEUBlock(
+                in_channels_high=meu_channels[0],
+                in_channels_low=channels[-3],
+                out_channels=meu_channels[1],
+                out_size=((in_size[0] // 2, in_size[1] // 2) if fixed_size else None))
+            in_channels = meu_channels[1]
 
-        self.up = InterpolationBlock(
-            scale_factor=2,
-            align_corners=True)
+            self.classifier = conv1x1(
+                in_channels=in_channels,
+                out_channels=num_classes,
+                use_bias=True)
 
-        self._init_params()
+            self.up = InterpolationBlock(
+                scale_factor=2,
+                out_size=(in_size if fixed_size else None))
 
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.stem(x)
         y = self.encoder(x)
         x = self.meu1(y[2], y[1])
@@ -330,7 +328,8 @@ class FPENet(nn.Module):
 
 def get_fpenet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               ctx=cpu(),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create FPENet model with specific parameters.
@@ -341,7 +340,9 @@ def get_fpenet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     width = 16
@@ -362,11 +363,13 @@ def get_fpenet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx,
+            ignore_extra=True)
 
     return net
 
@@ -382,7 +385,9 @@ def fpenet_cityscapes(num_classes=19, **kwargs):
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_fpenet(num_classes=num_classes, model_name="fpenet_cityscapes", **kwargs)
@@ -390,17 +395,22 @@ def fpenet_cityscapes(num_classes=19, **kwargs):
 
 def _calc_width(net):
     import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    net_params = net.collect_params()
     weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
     return weight_count
 
 
 def _test():
-    pretrained = False
+    import mxnet as mx
 
+    pretrained = False
+    fixed_size = True
     in_size = (1024, 2048)
+    classes = 19
 
     models = [
         fpenet_cityscapes,
@@ -408,19 +418,21 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
 
-        # net.train()
-        net.eval()
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net.hybridize()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != fpenet_cityscapes or weight_count == 115125)
 
         batch = 4
-        x = torch.randn(batch, 3, in_size[0], in_size[1])
+        x = mx.nd.random.normal(shape=(batch, 3, in_size[0], in_size[1]), ctx=ctx)
         y = net(x)
-        # y.sum().backward()
-        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
+        assert (y.shape == (batch, classes, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

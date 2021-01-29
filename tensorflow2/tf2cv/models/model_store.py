@@ -91,7 +91,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('sepreresnetbc26b', '0640', 'a72bf8765efb1024bdd33eebe9920fd3e22d0bd6', 'v0.0.422', 'in1k', 0.875),
     ('sepreresnetbc38b', '0567', '17d10c63f096db1b7bfb59b6c6ffe14b9c669676', 'v0.0.422', 'in1k', 0.875),
     ('sepreresnet50b', '0531', '0882c0e9add4dad0304443fa8a704ee28c5e1c58', 'v0.0.461', 'in1k', 0.875),
-    ('seresnext50_32x4d', '0509', '4244900a583098a5fb6c174c834f44a7471305c2', 'v0.0.422', 'in1k', 0.875),
+    ('seresnext50_32x4d', '0499', '0249889b92a40fdb672409f7a488c74fd4d8796a', 'v0.0.502', 'in1k', 0.875),
     ('seresnext101_32x4d', '0459', '13a9b2fd699a3e25ee18d93a408dbaf3dee74428', 'v0.0.422', 'in1k', 0.875),
     ('seresnext101_64x4d', '0465', 'ec0a3b132256c8a7d0f92c45775d201a456f25fb', 'v0.0.422', 'in1k', 0.875),
     ('senet16', '0805', 'f5f576568d02a572be5276b0b64e71ce4d1c4531', 'v0.0.422', 'in1k', 0.875),

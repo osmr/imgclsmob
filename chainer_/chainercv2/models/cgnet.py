@@ -25,7 +25,7 @@ class CGBlock(Chain):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     dilate : int
         Dilation value.
     se_reduction : int
@@ -113,7 +113,7 @@ class CGUnit(Chain):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     layers : int
         Number of layers.
     dilate : int

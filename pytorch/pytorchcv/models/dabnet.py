@@ -242,7 +242,7 @@ class DABUnit(nn.Module):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     dilations : list of int
         Dilations for blocks.
     bn_eps : float

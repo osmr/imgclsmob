@@ -22,7 +22,7 @@ class CGBlock(HybridBlock):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     dilation : int
         Dilation value.
     se_reduction : int
@@ -121,7 +121,7 @@ class CGUnit(HybridBlock):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     layers : int
         Number of layers.
     dilation : int

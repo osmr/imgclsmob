@@ -292,7 +292,7 @@ class DABUnit(HybridBlock):
     in_channels : int
         Number of input channels.
     out_channels : int
-        Number of input channels.
+        Number of output channels.
     dilations : list of int
         Dilations for blocks.
     bn_epsilon : float

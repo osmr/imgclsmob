@@ -20,10 +20,17 @@ class FPEBlock(HybridBlock):
     ----------
     channels : int
         Number of input/output channels.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
-                 channels):
-        super(FPEBlock, self).__init__()
+                 channels,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(FPEBlock, self).__init__(**kwargs)
         dilations = [1, 2, 4, 8]
         assert (channels % len(dilations) == 0)
         mid_channels = channels // len(dilations)
@@ -36,7 +43,9 @@ class FPEBlock(HybridBlock):
                     out_channels=mid_channels,
                     groups=mid_channels,
                     dilation=dilation,
-                    padding=dilation))
+                    padding=dilation,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
 
     def hybrid_forward(self, F, x):
         xs = F.split(x, axis=1, num_outputs=len(self.blocks._children))
@@ -66,14 +75,21 @@ class FPEUnit(HybridBlock):
         Bottleneck factor.
     use_se : bool
         Whether to use SE-module.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  bottleneck_factor,
-                 use_se):
-        super(FPEUnit, self).__init__()
+                 use_se,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(FPEUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
         self.use_se = use_se
         mid1_channels = in_channels * bottleneck_factor
@@ -82,11 +98,15 @@ class FPEUnit(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid1_channels,
-                strides=strides)
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.blocks = FPEBlock(channels=mid1_channels)
             self.conv2 = conv1x1_block(
                 in_channels=mid1_channels,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
             if self.use_se:
                 self.se = SEBlock(channels=out_channels)
@@ -95,6 +115,8 @@ class FPEUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off,
                     activation=None)
             self.activ = nn.Activation("relu")
 
@@ -127,13 +149,20 @@ class FPEStage(HybridBlock):
         Number of layers.
     use_se : bool
         Whether to use SE-module.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  layers,
-                 use_se):
-        super(FPEStage, self).__init__()
+                 use_se,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(FPEStage, self).__init__(**kwargs)
         self.use_block = (layers > 1)
 
         with self.name_scope():
@@ -143,7 +172,9 @@ class FPEStage(HybridBlock):
                     out_channels=out_channels,
                     strides=2,
                     bottleneck_factor=4,
-                    use_se=use_se)
+                    use_se=use_se,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off)
                 self.blocks = nn.HybridSequential(prefix="")
                 for i in range(layers - 1):
                     self.blocks.add(FPEUnit(
@@ -151,14 +182,18 @@ class FPEStage(HybridBlock):
                         out_channels=out_channels,
                         strides=1,
                         bottleneck_factor=1,
-                        use_se=use_se))
+                        use_se=use_se,
+                        bn_use_global_stats=bn_use_global_stats,
+                        bn_cudnn_off=bn_cudnn_off))
             else:
                 self.down = FPEUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=1,
                     bottleneck_factor=1,
-                    use_se=use_se)
+                    use_se=use_se,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off)
 
     def hybrid_forward(self, F, x):
         x = self.down(x)
@@ -182,21 +217,32 @@ class MEUBlock(HybridBlock):
         Number of output channels.
     out_size : tuple of 2 int
         Spatial size of output image.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels_high,
                  in_channels_low,
                  out_channels,
-                 out_size):
-        super(MEUBlock, self).__init__()
+                 out_size,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(MEUBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv_high = conv1x1_block(
                 in_channels=in_channels_high,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
             self.conv_low = conv1x1_block(
                 in_channels=in_channels_low,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
             self.conv_w_high = conv1x1(
                 in_channels=out_channels,
@@ -247,6 +293,10 @@ class FPENet(HybridBlock):
         Number of output channels for MEU blocks.
     use_se : bool
         Whether to use SE-module.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     aux : bool, default False
         Whether to output an auxiliary result.
     fixed_size : bool, default False
@@ -264,12 +314,15 @@ class FPENet(HybridBlock):
                  init_block_channels,
                  meu_channels,
                  use_se,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
                  in_size=(1024, 2048),
-                 num_classes=19):
-        super(FPENet, self).__init__()
+                 num_classes=19,
+                 **kwargs):
+        super(FPENet, self).__init__(**kwargs)
         assert (aux is not None)
         assert (fixed_size is not None)
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
@@ -281,7 +334,9 @@ class FPENet(HybridBlock):
             self.stem = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                strides=2)
+                strides=2,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             in_channels = init_block_channels
 
             self.encoder = MultiOutputSequential(return_last=False)
@@ -290,7 +345,9 @@ class FPENet(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     layers=layers_i,
-                    use_se=use_se)
+                    use_se=use_se,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off)
                 stage.do_output = True
                 self.encoder.add(stage)
                 in_channels = out_channels
@@ -299,12 +356,16 @@ class FPENet(HybridBlock):
                 in_channels_high=channels[-1],
                 in_channels_low=channels[-2],
                 out_channels=meu_channels[0],
-                out_size=((in_size[0] // 4, in_size[1] // 4) if fixed_size else None))
+                out_size=((in_size[0] // 4, in_size[1] // 4) if fixed_size else None),
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.meu2 = MEUBlock(
                 in_channels_high=meu_channels[0],
                 in_channels_low=channels[-3],
                 out_channels=meu_channels[1],
-                out_size=((in_size[0] // 2, in_size[1] // 2) if fixed_size else None))
+                out_size=((in_size[0] // 2, in_size[1] // 2) if fixed_size else None),
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             in_channels = meu_channels[1]
 
             self.classifier = conv1x1(

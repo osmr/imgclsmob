@@ -1,5 +1,5 @@
 """
-    FPENet for image segmentation, implemented in PyTorch.
+    FPENet for image segmentation, implemented in TensorFlow.
     Original paper: 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
 """
@@ -7,12 +7,13 @@
 __all__ = ['FPENet', 'fpenet_cityscapes']
 
 import os
-import torch
-import torch.nn as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, SEBlock, InterpolationBlock, MultiOutputSequential
+import tensorflow as tf
+import tensorflow.keras.layers as nn
+from .common import conv1x1, conv1x1_block, conv3x3_block, SEBlock, InterpolationBlock, MultiOutputSequential,\
+    SimpleSequential, is_channels_first, get_channel_axis
 
 
-class FPEBlock(nn.Module):
+class FPEBlock(nn.Layer):
     """
     FPENet block.
 
@@ -20,36 +21,43 @@ class FPEBlock(nn.Module):
     ----------
     channels : int
         Number of input/output channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
-                 channels):
-        super(FPEBlock, self).__init__()
+                 channels,
+                 data_format="channels_last",
+                 **kwargs):
+        super(FPEBlock, self).__init__(**kwargs)
+        self.axis = get_channel_axis(data_format)
         dilations = [1, 2, 4, 8]
         assert (channels % len(dilations) == 0)
         mid_channels = channels // len(dilations)
 
-        self.blocks = nn.Sequential()
+        self.blocks = SimpleSequential(name="blocks")
         for i, dilation in enumerate(dilations):
-            self.blocks.add_module("block{}".format(i + 1), conv3x3_block(
+            self.blocks.add(conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 groups=mid_channels,
                 dilation=dilation,
-                padding=dilation))
+                padding=dilation,
+                data_format=data_format,
+                name="block{}".format(i + 1)))
 
-    def forward(self, x):
-        xs = torch.chunk(x, chunks=len(self.blocks._modules), dim=1)
+    def call(self, x, training=None):
+        xs = tf.split(x, num_or_size_splits=len(self.blocks.children), axis=self.axis)
         ys = []
-        for bi, xsi in zip(self.blocks._modules.values(), xs):
+        for bi, xsi in zip(self.blocks.children, xs):
             if len(ys) == 0:
-                ys.append(bi(xsi))
+                ys.append(bi(xsi, training=training))
             else:
-                ys.append(bi(xsi + ys[-1]))
-        x = torch.cat(ys, dim=1)
+                ys.append(bi(xsi + ys[-1], training=training))
+        x = tf.concat(ys, axis=self.axis)
         return x
 
 
-class FPEUnit(nn.Module):
+class FPEUnit(nn.Layer):
     """
     FPENet unit.
 
@@ -59,59 +67,75 @@ class FPEUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     bottleneck_factor : int
         Bottleneck factor.
     use_se : bool
         Whether to use SE-module.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
+                 strides,
                  bottleneck_factor,
-                 use_se):
-        super(FPEUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+                 use_se,
+                 data_format="channels_last",
+                 **kwargs):
+        super(FPEUnit, self).__init__(**kwargs)
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
         self.use_se = use_se
         mid1_channels = in_channels * bottleneck_factor
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid1_channels,
-            stride=stride)
-        self.block = FPEBlock(channels=mid1_channels)
+            strides=strides,
+            data_format=data_format,
+            name="conv1")
+        self.block = FPEBlock(
+            channels=mid1_channels,
+            data_format=data_format,
+            name="blocks")
         self.conv2 = conv1x1_block(
             in_channels=mid1_channels,
             out_channels=out_channels,
-            activation=None)
+            activation=None,
+            data_format=data_format,
+            name="conv2")
         if self.use_se:
-            self.se = SEBlock(channels=out_channels)
+            self.se = SEBlock(
+                channels=out_channels,
+                data_format=data_format,
+                name="se")
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
-                activation=None)
-        self.activ = nn.ReLU(inplace=True)
+                strides=strides,
+                activation=None,
+                data_format=data_format,
+                name="identity_conv")
+        self.activ = nn.ReLU()
 
-    def forward(self, x):
+    def call(self, x, training=None):
         if self.resize_identity:
-            identity = self.identity_conv(x)
+            identity = self.identity_conv(x, training=training)
         else:
             identity = x
-        x = self.conv1(x)
-        x = self.block(x)
-        x = self.conv2(x)
+        x = self.conv1(x, training=training)
+        x = self.block(x, training=training)
+        x = self.conv2(x, training=training)
         if self.use_se:
-            x = self.se(x)
+            x = self.se(x, training=training)
         x = x + identity
         x = self.activ(x)
         return x
 
 
-class FPEStage(nn.Module):
+class FPEStage(nn.Layer):
     """
     FPENet unit.
 
@@ -125,47 +149,57 @@ class FPEStage(nn.Module):
         Number of layers.
     use_se : bool
         Whether to use SE-module.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  layers,
-                 use_se):
-        super(FPEStage, self).__init__()
+                 use_se,
+                 data_format="channels_last",
+                 **kwargs):
+        super(FPEStage, self).__init__(**kwargs)
         self.use_block = (layers > 1)
 
         if self.use_block:
             self.down = FPEUnit(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=2,
+                strides=2,
                 bottleneck_factor=4,
-                use_se=use_se)
-            self.blocks = nn.Sequential()
+                use_se=use_se,
+                data_format=data_format,
+                name="down")
+            self.blocks = SimpleSequential(name="blocks")
             for i in range(layers - 1):
-                self.blocks.add_module("block{}".format(i + 1), FPEUnit(
+                self.blocks.add(FPEUnit(
                     in_channels=out_channels,
                     out_channels=out_channels,
-                    stride=1,
+                    strides=1,
                     bottleneck_factor=1,
-                    use_se=use_se))
+                    use_se=use_se,
+                    data_format=data_format,
+                    name="block{}".format(i + 1)))
         else:
             self.down = FPEUnit(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=1,
+                strides=1,
                 bottleneck_factor=1,
-                use_se=use_se)
+                use_se=use_se,
+                data_format=data_format,
+                name="down")
 
-    def forward(self, x):
-        x = self.down(x)
+    def call(self, x, training=None):
+        x = self.down(x, training=training)
         if self.use_block:
-            y = self.blocks(x)
+            y = self.blocks(x, training=training)
             x = x + y
         return x
 
 
-class MEUBlock(nn.Module):
+class MEUBlock(nn.Layer):
     """
     FPENet specific mutual embedding upsample (MEU) block.
 
@@ -177,45 +211,64 @@ class MEUBlock(nn.Module):
         Number of input channels for x_low.
     out_channels : int
         Number of output channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels_high,
                  in_channels_low,
-                 out_channels):
-        super(MEUBlock, self).__init__()
+                 out_channels,
+                 data_format="channels_last",
+                 **kwargs):
+        super(MEUBlock, self).__init__(**kwargs)
+        self.data_format = data_format
+        self.axis = get_channel_axis(data_format)
+
         self.conv_high = conv1x1_block(
             in_channels=in_channels_high,
             out_channels=out_channels,
-            activation=None)
+            activation=None,
+            data_format=data_format,
+            name="conv_high")
         self.conv_low = conv1x1_block(
             in_channels=in_channels_low,
             out_channels=out_channels,
-            activation=None)
-        self.pool = nn.AdaptiveAvgPool2d(1)
+            activation=None,
+            data_format=data_format,
+            name="conv_low")
+        self.pool = nn.GlobalAveragePooling2D(
+            data_format=data_format,
+            name="pool")
         self.conv_w_high = conv1x1(
             in_channels=out_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            data_format=data_format,
+            name="conv_w_high")
         self.conv_w_low = conv1x1(
             in_channels=1,
-            out_channels=1)
-        self.sigmoid = nn.Sigmoid()
-        self.relu = nn.ReLU(inplace=True)
+            out_channels=1,
+            data_format=data_format,
+            name="conv_w_low")
+        self.relu = nn.ReLU()
         self.up = InterpolationBlock(
             scale_factor=2,
-            align_corners=True)
+            data_format=data_format,
+            name="up")
 
-    def forward(self, x_high, x_low):
-        x_high = self.conv_high(x_high)
-        x_low = self.conv_low(x_low)
+    def call(self, x_high, x_low, training=None):
+        x_high = self.conv_high(x_high, training=training)
+        x_low = self.conv_low(x_low, training=training)
 
         w_high = self.pool(x_high)
+        axis = -1 if is_channels_first(self.data_format) else 1
+        w_high = tf.expand_dims(tf.expand_dims(w_high, axis=axis), axis=axis)
         w_high = self.conv_w_high(w_high)
         w_high = self.relu(w_high)
-        w_high = self.sigmoid(w_high)
+        w_high = tf.nn.sigmoid(w_high)
 
-        w_low = x_low.mean(dim=1, keepdim=True)
+        w_low = tf.math.reduce_mean(x_low, axis=self.axis, keepdims=True)
         w_low = self.conv_w_low(w_low)
-        w_low = self.sigmoid(w_low)
+        w_low = tf.nn.sigmoid(w_low)
 
         x_high = self.up(x_high)
 
@@ -226,7 +279,7 @@ class MEUBlock(nn.Module):
         return out
 
 
-class FPENet(nn.Module):
+class FPENet(tf.keras.Model):
     """
     FPENet model from 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
@@ -251,8 +304,10 @@ class FPENet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (1024, 2048)
         Spatial size of the expected input image.
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  layers,
@@ -264,65 +319,72 @@ class FPENet(nn.Module):
                  fixed_size=False,
                  in_channels=3,
                  in_size=(1024, 2048),
-                 num_classes=19):
-        super(FPENet, self).__init__()
+                 classes=19,
+                 data_format="channels_last",
+                 **kwargs):
+        super(FPENet, self).__init__(**kwargs)
         assert (aux is not None)
         assert (fixed_size is not None)
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         self.fixed_size = fixed_size
+        self.data_format = data_format
 
         self.stem = conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            stride=2)
+            strides=2,
+            data_format=data_format,
+            name="stem")
         in_channels = init_block_channels
 
-        self.encoder = MultiOutputSequential(return_last=False)
+        self.encoder = MultiOutputSequential(
+            return_last=False,
+            name="encoder")
         for i, (layers_i, out_channels) in enumerate(zip(layers, channels)):
             stage = FPEStage(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 layers=layers_i,
-                use_se=use_se)
+                use_se=use_se,
+                data_format=data_format,
+                name="stage{}".format(i + 1))
             stage.do_output = True
-            self.encoder.add_module("stage{}".format(i + 1), stage)
+            self.encoder.add(stage)
             in_channels = out_channels
 
         self.meu1 = MEUBlock(
             in_channels_high=channels[-1],
             in_channels_low=channels[-2],
-            out_channels=meu_channels[0])
+            out_channels=meu_channels[0],
+            data_format=data_format,
+            name="meu1")
         self.meu2 = MEUBlock(
             in_channels_high=meu_channels[0],
             in_channels_low=channels[-3],
-            out_channels=meu_channels[1])
+            out_channels=meu_channels[1],
+            data_format=data_format,
+            name="meu2")
         in_channels = meu_channels[1]
 
         self.classifier = conv1x1(
             in_channels=in_channels,
-            out_channels=num_classes,
-            bias=True)
+            out_channels=classes,
+            use_bias=True,
+            data_format=data_format,
+            name="classifier")
 
         self.up = InterpolationBlock(
             scale_factor=2,
-            align_corners=True)
+            data_format=data_format,
+            name="up")
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.stem(x)
-        y = self.encoder(x)
-        x = self.meu1(y[2], y[1])
-        x = self.meu2(x, y[0])
+    def call(self, x, training=None):
+        x = self.stem(x, training=training)
+        y = self.encoder(x, training=training)
+        x = self.meu1(y[2], y[1], training=training)
+        x = self.meu2(x, y[0], training=training)
         x = self.classifier(x)
         x = self.up(x)
         return x
@@ -330,7 +392,7 @@ class FPENet(nn.Module):
 
 def get_fpenet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root=os.path.join("~", ".tensorflow", "models"),
                **kwargs):
     """
     Create FPENet model with specific parameters.
@@ -341,7 +403,7 @@ def get_fpenet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     width = 16
@@ -362,45 +424,47 @@ def get_fpenet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
+        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
+            (1,) + net.in_size + (in_channels,)
+        net.build(input_shape=input_shape)
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            by_name=True,
+            skip_mismatch=True)
 
     return net
 
 
-def fpenet_cityscapes(num_classes=19, **kwargs):
+def fpenet_cityscapes(classes=19, **kwargs):
     """
     FPENet model for Cityscapes from 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
 
     Parameters:
     ----------
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_fpenet(num_classes=num_classes, model_name="fpenet_cityscapes", **kwargs)
-
-
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
+    return get_fpenet(classes=classes, model_name="fpenet_cityscapes", **kwargs)
 
 
 def _test():
-    pretrained = False
+    import numpy as np
+    import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
+    # data_format = "channels_first"
+    pretrained = False
     in_size = (1024, 2048)
+    classes = 19
 
     models = [
         fpenet_cityscapes,
@@ -408,19 +472,18 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
-        print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != fpenet_cityscapes or weight_count == 115125)
+        net = model(pretrained=pretrained, in_size=in_size, data_format=data_format)
 
         batch = 4
-        x = torch.randn(batch, 3, in_size[0], in_size[1])
+        x = tf.random.normal((batch, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
+                             (batch, in_size[0], in_size[1], 3))
         y = net(x)
-        # y.sum().backward()
-        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
+        assert (tuple(y.shape.as_list()) == (batch, classes, in_size[0], in_size[1]) if is_channels_first(data_format)
+                else tuple(y.shape.as_list()) == (batch, in_size[0], in_size[1], classes))
+
+        weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != fpenet_cityscapes or weight_count == 115125)
 
 
 if __name__ == "__main__":

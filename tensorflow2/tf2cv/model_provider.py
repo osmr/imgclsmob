@@ -92,6 +92,7 @@ from .models.dabnet import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
+from .models.fpenet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
@@ -883,6 +884,8 @@ _models = {
 
     'danet_resnetd50b_cityscapes': danet_resnetd50b_cityscapes,
     'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
+
+    'fpenet_cityscapes': fpenet_cityscapes,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 

@@ -171,7 +171,7 @@ Some remarks:
 | Fast-SCNN | C | C | C | - | - | C | [link](https://arxiv.org/abs/1902.04502) | - | 2019 |
 | CGNet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1811.08201) | [link](https://github.com/wutianyiRosun/CGNet) | 2018 |
 | DABNet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1907.11357) | [link](https://github.com/Reagan1311/DABNet) | 2019 |
-| FPENet | c | c | c | - | - | - | [link](https://arxiv.org/abs/1909.08599) | - | 2019 |
+| FPENet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1909.08599) | - | 2019 |
 
 ## Table of implemented object detection models
 

@@ -89,7 +89,7 @@ class FPEUnit(Chain):
                 in_channels=in_channels,
                 out_channels=mid1_channels,
                 stride=stride)
-            self.blocks = FPEBlock(channels=mid1_channels)
+            self.block = FPEBlock(channels=mid1_channels)
             self.conv2 = conv1x1_block(
                 in_channels=mid1_channels,
                 out_channels=out_channels,
@@ -110,7 +110,7 @@ class FPEUnit(Chain):
         else:
             identity = x
         x = self.conv1(x)
-        x = self.blocks(x)
+        x = self.block(x)
         x = self.conv2(x)
         if self.use_se:
             x = self.se(x)

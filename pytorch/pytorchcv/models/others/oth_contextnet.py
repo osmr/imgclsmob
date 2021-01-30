@@ -1,14 +1,9 @@
-##################################################################################
-#ContextNet: Exploring Context and Detail for Semantic Segmentation in Real-time
-#Paper-Link: https://arxiv.org/abs/1805.04554
-##################################################################################
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchsummary import summary
+# from torchsummary import summary
 
-__all__ = ["ContextNet"]
+__all__ = ["oth_ctxnet_cityscapes"]
 
 
 class Custom_Conv(nn.Module):
@@ -166,20 +161,20 @@ class Classifer(nn.Module):
 
 
 class ContextNet(nn.Module):
-    def __init__(self, classes, aux=False, **kwargs):
+    def __init__(self, num_classes, aux=False, **kwargs):
         super(ContextNet, self).__init__()
         self.aux = aux
         self.spatial_detail = Shallow_net(32, 64, 128)
         self.context_feature_extractor = Deep_net(32, [32, 32, 48, 64, 96, 128], [1, 6, 6, 6, 6, 6], [1, 1, 3, 3, 2, 2])
         self.feature_fusion = FeatureFusionModule(128, 128, 128)
-        self.classifier = Classifer(128, classes)
+        self.classifier = Classifer(128, num_classes)
         if self.aux:
             self.auxlayer = nn.Sequential(
                 nn.Conv2d(128, 32, 3, padding=1, bias=False),
                 nn.BatchNorm2d(32),
                 nn.ReLU(True),
                 nn.Dropout(0.1),
-                nn.Conv2d(32, classes, 1)
+                nn.Conv2d(32, num_classes, 1)
             )
 
     def forward(self, x):
@@ -209,8 +204,52 @@ class ContextNet(nn.Module):
         # return tuple(outputs)
 
 
-"""print layers and params of network"""
-if __name__ == '__main__':
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ContextNet(classes=19).to(device)
-    summary(model,(3,512,1024))
+# """print layers and params of network"""
+# if __name__ == '__main__':
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#     model = ContextNet(classes=19).to(device)
+#     summary(model,(3,512,1024))
+
+
+def oth_ctxnet_cityscapes(num_classes=19, pretrained=False, **kwargs):
+    net = ContextNet(num_classes=num_classes)
+    return net
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    pretrained = False
+
+    in_size = (1024, 2048)
+
+    models = [
+        oth_ctxnet_cityscapes,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_ctxnet_cityscapes or weight_count == 876563)
+
+        batch = 4
+        x = torch.randn(batch, 3, in_size[0], in_size[1])
+        y = net(x)
+        # y.sum().backward()
+        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
+
+
+if __name__ == "__main__":
+    _test()

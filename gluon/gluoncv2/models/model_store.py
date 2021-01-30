@@ -177,7 +177,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('dla60x', '0553', '58924af84faf6ac0d980b047ccb505619925d97d', 'v0.0.493'),
     ('dla60xc', '1074', '1b4e4048847e1ba060eb76538ee09e760f40be11', 'v0.0.289'),
     ('dla102', '0644', 'cadbb1cc5feb58497198aac2c8028c843a6d5a9f', 'v0.0.202'),
-    ('dla102x', '0602', '193568a7ab3c0a3b6702fcc3e326b7fef011f752', 'v0.0.202'),
+    ('dla102x', '0488', 'e29b7d264d6feb5dba03f910f0d4e1ac63890af1', 'v0.0.503'),
     ('dla102x2', '0553', '30c8f409240872053c5bb8523baeb274ba9da4ee', 'v0.0.202'),
     ('dla169', '0587', '4f3e6a6e604cc06ebcf63fc86cc5287399f32683', 'v0.0.202'),
     ('fishnet150', '0466', 'ed21862d14bb0a4e9d1723b7c639e455a7b141c0', 'v0.0.502'),

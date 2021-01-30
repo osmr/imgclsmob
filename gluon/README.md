@@ -325,7 +325,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-X-60 | 20.70 | 5.53 | 17,352,344 | 3,543.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0553-58924af8.params.log)) |
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |
 | DLA-102 | 22.87 | 6.44 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0644-cadbb1cc.params.log)) |
-| DLA-X-102 | 21.97 | 6.02 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x-0602-193568a7.params.log)) |
+| DLA-X-102 | 20.10 | 4.88 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0488-e29b7d26.params.log)) |
 | DLA-X2-102 | 21.12 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0553-30c8f409.params.log)) |
 | DLA-169 | 21.95 | 5.87 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0587-4f3e6a6e.params.log)) |
 | FishNet-150 | 19.15 | 4.66 | 24,959,400 | 6,435.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0466-ed21862d.params.log)) |

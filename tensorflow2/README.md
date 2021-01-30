@@ -283,7 +283,7 @@ Some remarks:
 | DLA-X-60 | 20.72 | 5.50 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0550-b692a226.tf2.h5.log)) |
 | DLA-X-60-C | 30.66 | 10.75 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla60xc-1075-a7850f03.tf2.h5.log)) |
 | DLA-102 | 22.84 | 6.43 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102-0643-2be886b2.tf2.h5.log)) |
-| DLA-X-102 | 21.95 | 6.02 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x-0602-46640eec.tf2.h5.log)) |
+| DLA-X-102 | 20.11 | 4.91 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0491-0a95e90b.tf2.h5.log)) |
 | DLA-X2-102 | 21.11 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x2-0553-06c93031.tf2.h5.log)) |
 | DLA-169 | 21.97 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla169-0590-e010166d.tf2.h5.log)) |
 | DiCENet x0.2 | 55.84 | 31.16 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3116-6fbe46e2.tf2.h5.log)) |

@@ -319,7 +319,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DLA-X-60 | 21.07 | 5.75 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0575-fae6dc6d.pth.log)) |
 | DLA-X-60-C | 30.98 | 10.91 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1091-0f6381f3.pth.log)) |
 | DLA-102 | 21.97 | 6.05 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0605-11df1322.pth.log)) |
-| DLA-X-102 | 21.49 | 5.77 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x-0577-58331655.pth.log)) |
+| DLA-X-102 | 20.13 | 5.02 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0502-e908f114.pth.log)) |
 | DLA-X2-102 | 20.55 | 5.36 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0536-07936111.pth.log)) |
 | DLA-169 | 21.29 | 5.66 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0566-ae0c6a82.pth.log)) |
 | FishNet-150 | 19.26 | 4.75 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0475-93e26daa.pth.log)) |

@@ -177,7 +177,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dla60x', '0575', 'fae6dc6d434d4cf0b52e5d4b3da13b5230d08c02', 'v0.0.493', 'DLA-X-60', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60xc', '1091', '0f6381f335e5bbb4c69b360be61a4a08e5c7a9de', 'v0.0.289', 'DLA-X-60-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102', '0605', '11df13220b44f51dc8c925fbd9fc334bc8d115b4', 'v0.0.202', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
-    ('dla102x', '0577', '58331655844f9d95bcf2bb90de6ac9cf3b66bd5e', 'v0.0.202', 'DLA-X-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
+    ('dla102x', '0502', 'e908f11494326e9b1b38c6bbef2d1a2fca93903a', 'v0.0.503', 'DLA-X-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102x2', '0536', '079361117045dc661b63ce4b14408d403bc91844', 'v0.0.202', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
     ('dla169', '0566', 'ae0c6a82acfaf9dc459ac5a032106c2727b71d4f', 'v0.0.202', 'DLA-169', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
     ('fishnet150', '0475', '93e26daaf570bc92b58f7421ab28c22ca405ad93', 'v0.0.502', 'FishNet-150', '', 'in1k', 224, 0.875, 200, ''),  # noqa

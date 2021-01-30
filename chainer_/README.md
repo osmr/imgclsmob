@@ -303,7 +303,7 @@ Some remarks:
 | DLA-X-60 | 20.70 | 5.54 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0554-4d757562.npz.log)) |
 | DLA-X-60-C | 30.70 | 10.76 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1076-4c418399.npz.log)) |
 | DLA-102 | 22.87 | 6.42 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0642-c4ee6dcb.npz.log)) |
-| DLA-X-102 | 21.93 | 5.99 | 26,309,272 | 5,884.94M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x-0599-7f83bc04.npz.log)) |
+| DLA-X-102 | 20.14 | 4.93 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0493-c42cba88.npz.log)) |
 | DLA-X2-102 | 21.11 | 5.54 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0554-6a27a094.npz.log)) |
 | DLA-169 | 21.99 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0590-96b692a8.npz.log)) |
 | FishNet-150 | 19.14 | 4.65 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0465-724e74fc.npz.log)) |

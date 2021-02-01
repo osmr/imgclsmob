@@ -174,7 +174,7 @@ def simplepose_mobile_resnet18_coco(pretrained_backbone=False, keypoints=17, dat
         Location for keeping the model parameters.
     """
     backbone = resnet18(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=512, keypoints=keypoints,
                                 model_name="simplepose_mobile_resnet18_coco", data_format=data_format, **kwargs)
 
@@ -198,7 +198,7 @@ def simplepose_mobile_resnet50b_coco(pretrained_backbone=False, keypoints=17, da
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                                 model_name="simplepose_mobile_resnet50b_coco", data_format=data_format, **kwargs)
 
@@ -222,7 +222,7 @@ def simplepose_mobile_mobilenet_w1_coco(pretrained_backbone=False, keypoints=17,
         Location for keeping the model parameters.
     """
     backbone = mobilenet_w1(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=1024, keypoints=keypoints,
                                 model_name="simplepose_mobile_mobilenet_w1_coco", data_format=data_format, **kwargs)
 
@@ -247,7 +247,7 @@ def simplepose_mobile_mobilenetv2b_w1_coco(pretrained_backbone=False, keypoints=
         Location for keeping the model parameters.
     """
     backbone = mobilenetv2b_w1(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=1280, keypoints=keypoints,
                                 model_name="simplepose_mobile_mobilenetv2b_w1_coco", data_format=data_format, **kwargs)
 
@@ -272,7 +272,7 @@ def simplepose_mobile_mobilenetv3_small_w1_coco(pretrained_backbone=False, keypo
         Location for keeping the model parameters.
     """
     backbone = mobilenetv3_small_w1(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=576, keypoints=keypoints,
                                 model_name="simplepose_mobile_mobilenetv3_small_w1_coco", data_format=data_format,
                                 **kwargs)
@@ -298,7 +298,7 @@ def simplepose_mobile_mobilenetv3_large_w1_coco(pretrained_backbone=False, keypo
         Location for keeping the model parameters.
     """
     backbone = mobilenetv3_large_w1(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=960, keypoints=keypoints,
                                 model_name="simplepose_mobile_mobilenetv3_large_w1_coco", data_format=data_format,
                                 **kwargs)

@@ -377,7 +377,7 @@ def centernet_resnet18_voc(pretrained_backbone=False, classes=20, data_format="c
         Location for keeping the model parameters.
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=512, classes=classes,
                          model_name="centernet_resnet18_voc", data_format=data_format, **kwargs)
 
@@ -401,7 +401,7 @@ def centernet_resnet18_coco(pretrained_backbone=False, classes=80, data_format="
         Location for keeping the model parameters.
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=512, classes=classes,
                          model_name="centernet_resnet18_coco", data_format=data_format, **kwargs)
 
@@ -425,7 +425,7 @@ def centernet_resnet50b_voc(pretrained_backbone=False, classes=20, data_format="
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
                          model_name="centernet_resnet50b_voc", data_format=data_format, **kwargs)
 
@@ -449,7 +449,7 @@ def centernet_resnet50b_coco(pretrained_backbone=False, classes=80, data_format=
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
                          model_name="centernet_resnet50b_coco", data_format=data_format, **kwargs)
 
@@ -473,7 +473,7 @@ def centernet_resnet101b_voc(pretrained_backbone=False, classes=20, data_format=
         Location for keeping the model parameters.
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
                          model_name="centernet_resnet101b_voc", data_format=data_format, **kwargs)
 
@@ -497,7 +497,7 @@ def centernet_resnet101b_coco(pretrained_backbone=False, classes=80, data_format
         Location for keeping the model parameters.
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
                          model_name="centernet_resnet101b_coco", data_format=data_format, **kwargs)
 

@@ -163,7 +163,7 @@ def simplepose_resnet18_coco(pretrained_backbone=False, keypoints=17, data_forma
         Location for keeping the model parameters.
     """
     backbone = resnet18(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=512, keypoints=keypoints,
                           model_name="simplepose_resnet18_coco", data_format=data_format, **kwargs)
 
@@ -187,7 +187,7 @@ def simplepose_resnet50b_coco(pretrained_backbone=False, keypoints=17, data_form
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet50b_coco", data_format=data_format, **kwargs)
 
@@ -211,7 +211,7 @@ def simplepose_resnet101b_coco(pretrained_backbone=False, keypoints=17, data_for
         Location for keeping the model parameters.
     """
     backbone = resnet101b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet101b_coco", data_format=data_format, **kwargs)
 
@@ -235,7 +235,7 @@ def simplepose_resnet152b_coco(pretrained_backbone=False, keypoints=17, data_for
         Location for keeping the model parameters.
     """
     backbone = resnet152b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet152b_coco", data_format=data_format, **kwargs)
 
@@ -259,7 +259,7 @@ def simplepose_resneta50b_coco(pretrained_backbone=False, keypoints=17, data_for
         Location for keeping the model parameters.
     """
     backbone = resneta50b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta50b_coco", data_format=data_format, **kwargs)
 
@@ -283,7 +283,7 @@ def simplepose_resneta101b_coco(pretrained_backbone=False, keypoints=17, data_fo
         Location for keeping the model parameters.
     """
     backbone = resneta101b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta101b_coco", data_format=data_format, **kwargs)
 
@@ -307,7 +307,7 @@ def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, data_fo
         Location for keeping the model parameters.
     """
     backbone = resneta152b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta152b_coco", data_format=data_format, **kwargs)
 

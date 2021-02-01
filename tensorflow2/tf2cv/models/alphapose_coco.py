@@ -162,7 +162,7 @@ def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, dat
         Location for keeping the model parameters.
     """
     backbone = fastseresnet101b(pretrained=pretrained_backbone, data_format=data_format).features
-    backbone._layers.pop()
+    del backbone.children[-1]
     return get_alphapose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                          model_name="alphapose_fastseresnet101b_coco", data_format=data_format, **kwargs)
 

@@ -305,7 +305,7 @@ def pspnet_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, data_
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_voc",
                       data_format=data_format, **kwargs)
 
@@ -332,7 +332,7 @@ def pspnet_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, data
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_voc",
                       data_format=data_format, **kwargs)
 
@@ -359,7 +359,7 @@ def pspnet_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, data
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_coco",
                       data_format=data_format, **kwargs)
 
@@ -386,7 +386,7 @@ def pspnet_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, dat
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_coco",
                       data_format=data_format, **kwargs)
 
@@ -413,7 +413,7 @@ def pspnet_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, d
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_ade20k",
                       data_format=data_format, **kwargs)
 
@@ -440,7 +440,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_ade20k",
                       data_format=data_format, **kwargs)
 
@@ -468,7 +468,7 @@ def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_cityscapes",
                       data_format=data_format, **kwargs)
 
@@ -496,7 +496,7 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=Tru
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes",
                       data_format=data_format, **kwargs)
 

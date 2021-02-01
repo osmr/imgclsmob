@@ -470,10 +470,10 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, classes=19, **kwarg
     """
     def backbone(**bb_kwargs):
         features_raw = resnet18(pretrained=pretrained_backbone, **bb_kwargs).features
-        features_raw._layers.pop()
+        del features_raw.children[-1]
         features = MultiOutputSequential(return_last=False, name="backbone")
-        features.add(features_raw._layers[0])
-        for i, stage in enumerate(features_raw._layers[1:]):
+        features.add(features_raw.children[0])
+        for i, stage in enumerate(features_raw.children[1:]):
             if i != 0:
                 stage.do_output = True
             features.add(stage)

@@ -324,7 +324,7 @@ def deeplabv3_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, da
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_voc",
                          data_format=data_format, **kwargs)
 
@@ -351,7 +351,7 @@ def deeplabv3_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, d
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_voc",
                          data_format=data_format, **kwargs)
 
@@ -378,7 +378,7 @@ def deeplabv3_resnetd152b_voc(pretrained_backbone=False, classes=21, aux=True, d
     """
     backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_voc",
                          data_format=data_format, **kwargs)
 
@@ -405,7 +405,7 @@ def deeplabv3_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, d
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_coco",
                          data_format=data_format, **kwargs)
 
@@ -432,7 +432,7 @@ def deeplabv3_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, 
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_coco",
                          data_format=data_format, **kwargs)
 
@@ -459,7 +459,7 @@ def deeplabv3_resnetd152b_coco(pretrained_backbone=False, classes=21, aux=True, 
     """
     backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_coco",
                          data_format=data_format, **kwargs)
 
@@ -487,7 +487,7 @@ def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_ade20k",
                          data_format=data_format, **kwargs)
 
@@ -515,7 +515,7 @@ def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=Tru
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_ade20k",
                          data_format=data_format, **kwargs)
 
@@ -543,7 +543,7 @@ def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=T
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_cityscapes",
                          data_format=data_format, **kwargs)
 
@@ -571,7 +571,7 @@ def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
-    backbone.children.pop()
+    del backbone.children[-1]
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_cityscapes",
                          data_format=data_format, **kwargs)
 

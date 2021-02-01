@@ -62,7 +62,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnetbc38b', '0657', '9e523bb92dc592ee576a6bb73a328dc024bdc967', 'v0.0.348', 'PreResNet-BC-38b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet50', '0647', '222ca73b021f893b925c15e24ea2a6bc0fdf2546', 'v0.0.330', 'PreResNet-50', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet50b', '0655', '8b60378ee3aed878d27a2b4a9ddc596a812c7649', 'v0.0.307', 'PreResNet-50b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet101', '0591', '4bacff796e113562e1dfdf71cfa7c6ed33e0ba86', 'v0.0.2', 'PreResNet-101', '1603.05027', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('preresnet101', '0563', '8ec82f7d697b7329aea2c95b399093e9cb2b1114', 'v0.0.504', 'PreResNet-101', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101b', '0556', '76bfe6d020b55f163e77de6b1c27be6b0bed8b7b', 'v0.0.351', 'PreResNet-101b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152', '0555', 'c842a030abbcc21a0f2a9a8299fc42204897a611', 'v0.0.14', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('preresnet152b', '0516', 'f3805f4b8c845798b711171ad6632bcf56259844', 'v0.0.386', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa

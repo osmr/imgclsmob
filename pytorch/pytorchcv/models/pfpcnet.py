@@ -43,7 +43,7 @@ class PFPCNet(nn.Module):
         self.in_size = in_size
         self.vertices = vertices
 
-        self.features = nn.Sequential()
+        self.encoder = nn.Sequential()
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
@@ -54,7 +54,7 @@ class PFPCNet(nn.Module):
                     use_bn=use_bn,
                     stride=stride))
                 in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
+            self.encoder.add_module("stage{}".format(i + 1), stage)
 
         self.decoder = nn.Sequential()
         self.decoder.add_module("dropout", nn.Dropout(p=0.2))
@@ -75,7 +75,7 @@ class PFPCNet(nn.Module):
                     init.constant_(module.bias, 0)
 
     def forward(self, x):
-        x = self.features(x)
+        x = self.encoder(x)
         x = x.view(x.size(0), -1)
         x = self.decoder(x)
         x = x.view(x.size(0), -1, 3)

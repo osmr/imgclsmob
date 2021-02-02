@@ -1,17 +1,17 @@
 """
-    VisemeNet for speech-driven facial animation, implemented in Gluon.
+    VisemeNet for speech-driven facial animation, implemented in PyTorch.
     Original paper: 'VisemeNet: Audio-Driven Animator-Centric Speech Animation,' https://arxiv.org/abs/1805.09488.
 """
 
 __all__ = ['VisemeNet', 'visemenet20']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, rnn, HybridBlock
+import torch
+import torch.nn as nn
 from .common import DenseBlock
 
 
-class VisemeDenseBranch(HybridBlock):
+class VisemeDenseBranch(nn.Module):
     """
     VisemeNet dense branch.
 
@@ -24,30 +24,27 @@ class VisemeDenseBranch(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 out_channels_list,
-                 **kwargs):
-        super(VisemeDenseBranch, self).__init__(**kwargs)
-        with self.name_scope():
-            self.branch = nn.HybridSequential(prefix="")
-            with self.branch.name_scope():
-                for out_channels in out_channels_list[:-1]:
-                    self.branch.add(DenseBlock(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        use_bias=True,
-                        use_bn=True))
-                    in_channels = out_channels
-            self.final_fc = nn.Dense(
-                units=out_channels_list[-1],
-                in_units=in_channels)
+                 out_channels_list):
+        super(VisemeDenseBranch, self).__init__()
+        self.branch = nn.Sequential()
+        for i, out_channels in enumerate(out_channels_list[:-1]):
+            self.branch.add_module("block{}".format(i + 1), DenseBlock(
+                in_features=in_channels,
+                out_features=out_channels,
+                bias=True,
+                use_bn=True))
+            in_channels = out_channels
+        self.final_fc = nn.Linear(
+            in_features=in_channels,
+            out_features=out_channels_list[-1])
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.branch(x)
         y = self.final_fc(x)
         return y, x
 
 
-class VisemeRnnBranch(HybridBlock):
+class VisemeRnnBranch(nn.Module):
     """
     VisemeNet RNN branch.
 
@@ -66,27 +63,25 @@ class VisemeRnnBranch(HybridBlock):
                  in_channels,
                  out_channels_list,
                  rnn_num_layers,
-                 dropout_rate,
-                 **kwargs):
-        super(VisemeRnnBranch, self).__init__(**kwargs)
-        with self.name_scope():
-            self.rnn = rnn.LSTM(
-                hidden_size=out_channels_list[0],
-                num_layers=rnn_num_layers,
-                dropout=dropout_rate,
-                input_size=in_channels)
-            self.fc_branch = VisemeDenseBranch(
-                in_channels=out_channels_list[0],
-                out_channels_list=out_channels_list[1:])
+                 dropout_rate):
+        super(VisemeRnnBranch, self).__init__()
+        self.rnn = nn.LSTM(
+            input_size=in_channels,
+            hidden_size=out_channels_list[0],
+            num_layers=rnn_num_layers,
+            dropout=dropout_rate)
+        self.fc_branch = VisemeDenseBranch(
+            in_channels=out_channels_list[0],
+            out_channels_list=out_channels_list[1:])
 
-    def hybrid_forward(self, F, x):
-        x = self.rnn(x)
+    def forward(self, x):
+        x, _ = self.rnn(x)
         x = x[:, -1, :]
         y, _ = self.fc_branch(x)
         return y
 
 
-class VisemeNet(HybridBlock):
+class VisemeNet(nn.Module):
     """
     VisemeNet model from 'VisemeNet: Audio-Driven Animator-Centric Speech Animation,' https://arxiv.org/abs/1805.09488.
 
@@ -117,9 +112,8 @@ class VisemeNet(HybridBlock):
                  num_landmarks=76,
                  num_phonemes=21,
                  num_visemes=20,
-                 dropout_rate=0.5,
-                 **kwargs):
-        super(VisemeNet, self).__init__(**kwargs)
+                 dropout_rate=0.5):
+        super(VisemeNet, self).__init__()
         stage1_rnn_hidden_size = 256
         stage1_fc_mid_channels = 256
         stage2_rnn_in_features = (audio_features + num_landmarks + stage1_fc_mid_channels) * \
@@ -127,58 +121,54 @@ class VisemeNet(HybridBlock):
         self.audio_window_size = audio_window_size
         self.stage2_window_size = stage2_window_size
 
-        with self.name_scope():
-            self.stage1_rnn = rnn.LSTM(
-                hidden_size=stage1_rnn_hidden_size,
-                num_layers=3,
-                dropout=dropout_rate,
-                input_size=audio_features)
-            self.lm_branch = VisemeDenseBranch(
-                in_channels=(stage1_rnn_hidden_size + num_face_ids),
-                out_channels_list=[stage1_fc_mid_channels, num_landmarks])
-            self.ph_branch = VisemeDenseBranch(
-                in_channels=(stage1_rnn_hidden_size + num_face_ids),
-                out_channels_list=[stage1_fc_mid_channels, num_phonemes])
+        self.stage1_rnn = nn.LSTM(
+            input_size=audio_features,
+            hidden_size=stage1_rnn_hidden_size,
+            num_layers=3,
+            dropout=dropout_rate)
+        self.lm_branch = VisemeDenseBranch(
+            in_channels=(stage1_rnn_hidden_size + num_face_ids),
+            out_channels_list=[stage1_fc_mid_channels, num_landmarks])
+        self.ph_branch = VisemeDenseBranch(
+            in_channels=(stage1_rnn_hidden_size + num_face_ids),
+            out_channels_list=[stage1_fc_mid_channels, num_phonemes])
 
-            self.cls_branch = VisemeRnnBranch(
-                in_channels=stage2_rnn_in_features,
-                out_channels_list=[256, 200, num_visemes],
-                rnn_num_layers=1,
-                dropout_rate=dropout_rate)
-            self.reg_branch = VisemeRnnBranch(
-                in_channels=stage2_rnn_in_features,
-                out_channels_list=[256, 200, 100, num_visemes],
-                rnn_num_layers=3,
-                dropout_rate=dropout_rate)
-            self.jali_branch = VisemeRnnBranch(
-                in_channels=stage2_rnn_in_features,
-                out_channels_list=[128, 200, 2],
-                rnn_num_layers=3,
-                dropout_rate=dropout_rate)
+        self.cls_branch = VisemeRnnBranch(
+            in_channels=stage2_rnn_in_features,
+            out_channels_list=[256, 200, num_visemes],
+            rnn_num_layers=1,
+            dropout_rate=dropout_rate)
+        self.reg_branch = VisemeRnnBranch(
+            in_channels=stage2_rnn_in_features,
+            out_channels_list=[256, 200, 100, num_visemes],
+            rnn_num_layers=3,
+            dropout_rate=dropout_rate)
+        self.jali_branch = VisemeRnnBranch(
+            in_channels=stage2_rnn_in_features,
+            out_channels_list=[128, 200, 2],
+            rnn_num_layers=3,
+            dropout_rate=dropout_rate)
 
-    def hybrid_forward(self, F, x, pid):
-        y = self.stage1_rnn(x)
+    def forward(self, x, pid):
+        y, _ = self.stage1_rnn(x)
         y = y[:, -1, :]
-        y = F.concat(y, pid, dim=1)
+        y = torch.cat((y, pid), dim=1)
 
         lm, _ = self.lm_branch(y)
         lm += pid
 
         ph, ph1 = self.ph_branch(y)
 
-        z = F.concat(lm, ph1, dim=1)
+        z = torch.cat((lm, ph1), dim=1)
 
-        z2 = F.concat(z, x[:, self.audio_window_size // 2, :], dim=1)
+        z2 = torch.cat((z, x[:, self.audio_window_size // 2, :]), dim=1)
         n_net2_input = z2.shape[1]
-        z2 = F.concat(
-            F.zeros((self.stage2_window_size // 2, n_net2_input)),
-            z2,
-            dim=0)
-        z = F.stack(
-            *[z2[i:i + self.stage2_window_size].reshape(
+        z2 = torch.cat((torch.zeros((self.stage2_window_size // 2, n_net2_input)), z2), dim=0)
+        z = torch.stack(
+            [z2[i:i + self.stage2_window_size].reshape(
                 (self.audio_window_size, n_net2_input * self.stage2_window_size // self.audio_window_size))
               for i in range(z2.shape[0] - self.stage2_window_size)],
-            axis=0)
+            dim=0)
         cls = self.cls_branch(z)
         reg = self.reg_branch(z)
         jali = self.jali_branch(z)
@@ -188,8 +178,7 @@ class VisemeNet(HybridBlock):
 
 def get_visemenet(model_name=None,
                   pretrained=False,
-                  ctx=cpu(),
-                  root=os.path.join("~", ".mxnet", "models"),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create VisemeNet model with specific parameters.
@@ -200,9 +189,7 @@ def get_visemenet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     net = VisemeNet(
@@ -211,12 +198,11 @@ def get_visemenet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -230,9 +216,7 @@ def visemenet20(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_visemenet(model_name="visemenet20", **kwargs)
@@ -240,17 +224,15 @@ def visemenet20(**kwargs):
 
 def _calc_width(net):
     import numpy as np
-    net_params = net.collect_params()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
+    for param in net_params:
+        weight_count += np.prod(param.size())
     return weight_count
 
 
 def _test():
-    import mxnet as mx
+    import torch
 
     pretrained = False
 
@@ -262,11 +244,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        # net.hybridize()
+        # net.train()
+        net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != visemenet20 or weight_count == 14574303)
@@ -277,8 +256,8 @@ def _test():
         num_face_ids = 76
         num_visemes = 20
 
-        x = mx.nd.random.normal(shape=(batch, audio_window_size, audio_features), ctx=ctx)
-        pid = mx.nd.full(shape=(batch, num_face_ids), val=3, ctx=ctx)
+        x = torch.randn(batch, audio_window_size, audio_features)
+        pid = torch.full(size=(batch, num_face_ids), fill_value=3)
         y1, y2, y3 = net(x, pid)
         assert (y1.shape[0] == y2.shape[0] == y3.shape[0])
         assert (y1.shape[1] == y2.shape[1] == num_visemes)

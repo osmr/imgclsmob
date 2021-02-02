@@ -778,7 +778,7 @@ def _test():
 
         net = model(pretrained=pretrained, data_format=data_format)
 
-        batch = 14
+        batch = 4
         x = tf.random.normal((batch, 3, 224, 224) if is_channels_first(data_format) else (batch, 224, 224, 3))
         y = net(x)
         assert (tuple(y.shape.as_list()) == (batch, 1000))

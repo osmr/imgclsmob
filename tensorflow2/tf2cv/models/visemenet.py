@@ -193,10 +193,7 @@ class VisemeNet(tf.keras.Model):
 
         z2 = tf.concat([z, x[:, self.audio_window_size // 2, :]], axis=1)
         n_net2_input = z2.shape[1]
-        z2 = tf.concat(
-            [tf.zeros((self.stage2_window_size // 2, n_net2_input)),
-            z2],
-            axis=0)
+        z2 = tf.concat([tf.zeros((self.stage2_window_size // 2, n_net2_input)), z2], axis=0)
         z = tf.stack(
             [tf.reshape(
                 z2[i:i + self.stage2_window_size],

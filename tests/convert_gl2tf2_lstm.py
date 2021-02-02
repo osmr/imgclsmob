@@ -3,23 +3,39 @@ import tensorflow as tf
 import tensorflow.keras.layers as nn
 
 
+def _calc_width(net):
+    import numpy as np
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    return weight_count
+
+
 class TF2Model(tf.keras.Model):
 
     def __init__(self,
-                 data_format="channels_last",
                  **kwargs):
         super(TF2Model, self).__init__(**kwargs)
-        self.rnn = nn.LSTM(
+        # self.rnn = nn.LSTM(
+        #     units=100,
+        #     dropout=0.2,
+        #     name="rnn")
+        self.rnn = nn.RNN([nn.LSTMCell(
             units=100,
-            data_format=data_format,
-            name="rnn")
+            dropout=0.2,
+            unit_forget_bias=False,
+            name="rnn{}".format(i)
+        ) for i in range(2)])
 
     def call(self, x):
         x = self.rnn(x)
         return x
 
 
-def gl_calc(gl_w, x):
+def gl_calc():
     import mxnet as mx
 
     class GluonModel(mx.gluon.HybridBlock):
@@ -31,7 +47,9 @@ def gl_calc(gl_w, x):
             with self.name_scope():
                 self.rnn = mx.gluon.rnn.LSTM(
                     hidden_size=100,
-                    num_layers=2)
+                    num_layers=2,
+                    dropout=0.2,
+                    input_size=80)
 
         def hybrid_forward(self, F, x):
             x = self.rnn(x)
@@ -43,17 +61,24 @@ def gl_calc(gl_w, x):
 
     gl_model = GluonModel()
 
-    # ctx = mx.cpu()
+    # # ctx = mx.cpu()
+    # ctx = mx.gpu(0)
+    # gl_params = gl_model._collect_params_with_prefix()
+    # # gl_w = np.transpose(tf2_w, axes=(3, 2, 0, 1))
+    # gl_params['conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
+    # # gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
+    #
+    # gl_x = mx.nd.array(x, ctx)
+    # gl_y = gl_model(gl_x).asnumpy()
+
     ctx = mx.gpu(0)
+    gl_x = mx.nd.zeros((3, 7, 80), ctx)
+    gl_model.initialize(ctx=ctx)
+    gl_model(gl_x)
     gl_params = gl_model._collect_params_with_prefix()
-    # gl_w = np.transpose(tf2_w, axes=(3, 2, 0, 1))
-    gl_params['conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
-    # gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
+    _calc_width(gl_model)
 
-    gl_x = mx.nd.array(x, ctx)
-    gl_y = gl_model(gl_x).asnumpy()
-
-    return gl_y
+    return gl_model
 
 
 def main():
@@ -64,6 +89,15 @@ def main():
 
     success = True
     for i in range(10):
+        tf2_model = TF2Model()
+        batch_size = 1
+        input_shape = (3, 7, 80)
+        tf2_model(tf.random.normal(input_shape))
+        dst_param_keys = [v.name for v in tf2_model.weights]
+        dst_params = {v.name: v for v in tf2_model.weights}
+
+        gl_calc()
+
         gl_w = np.random.randn(64, 3, 7, 7).astype(np.float32)
         # tf2_w = np.random.randn(7, 7, 3, 64).astype(np.float32)
         b = np.random.randn(64, ).astype(np.float32)

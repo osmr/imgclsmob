@@ -81,8 +81,8 @@ class VisemeRnnBranch(nn.Layer):
         self.rnn = nn.RNN([nn.LSTMCell(
             units=out_channels_list[0],
             dropout=dropout_rate,
-            name="rnn"
-        ) for _ in range(rnn_num_layers)])
+            name="rnn{}".format(i + 1)
+        ) for i in range(rnn_num_layers)])
         self.fc_branch = VisemeDenseBranch(
             in_channels=out_channels_list[0],
             out_channels_list=out_channels_list[1:],
@@ -143,8 +143,8 @@ class VisemeNet(tf.keras.Model):
         self.stage1_rnn = nn.RNN([nn.LSTMCell(
             units=stage1_rnn_hidden_size,
             dropout=dropout_rate,
-            name="stage1_rnn"
-        ) for _ in range(3)])
+            name="stage1_rnn{}".format(i + 1)
+        ) for i in range(3)])
 
         self.lm_branch = VisemeDenseBranch(
             in_channels=(stage1_rnn_hidden_size + num_face_ids),

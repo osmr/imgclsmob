@@ -23,10 +23,15 @@ class TF2Model(tf.keras.Model):
         #     units=100,
         #     dropout=0.2,
         #     name="rnn")
-        self.rnn = nn.RNN([nn.LSTMCell(
-            units=100,
-            dropout=0.2,
-            unit_forget_bias=False,
+        # self.rnn = nn.RNN([nn.LSTMCell(
+        #     units=100,
+        #     dropout=0.2,
+        #     unit_forget_bias=False,
+        #     name="rnn{}".format(i)
+        # ) for i in range(2)])
+        self.rnn = nn.RNN([tf.compat.v1.nn.rnn_cell.LSTMCell(
+            num_units=100,
+            use_peepholes=False,
             name="rnn{}".format(i)
         ) for i in range(2)])
 

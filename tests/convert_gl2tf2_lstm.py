@@ -75,7 +75,7 @@ def gl_calc():
     gl_x = mx.nd.zeros((3, 7, 80), ctx)
     gl_model.initialize(ctx=ctx)
     gl_model(gl_x)
-    gl_params = gl_model._collect_params_with_prefix()
+    # gl_params = gl_model._collect_params_with_prefix()
     _calc_width(gl_model)
 
     return gl_model
@@ -89,14 +89,14 @@ def main():
 
     success = True
     for i in range(10):
-        tf2_model = TF2Model()
-        batch_size = 1
-        input_shape = (3, 7, 80)
-        tf2_model(tf.random.normal(input_shape))
-        dst_param_keys = [v.name for v in tf2_model.weights]
-        dst_params = {v.name: v for v in tf2_model.weights}
-
-        gl_calc()
+        # tf2_model = TF2Model()
+        # batch_size = 1
+        # input_shape = (3, 7, 80)
+        # tf2_model(tf.random.normal(input_shape))
+        # dst_param_keys = [v.name for v in tf2_model.weights]
+        # dst_params = {v.name: v for v in tf2_model.weights}
+        #
+        # gl_calc()
 
         gl_w = np.random.randn(64, 3, 7, 7).astype(np.float32)
         # tf2_w = np.random.randn(7, 7, 3, 64).astype(np.float32)

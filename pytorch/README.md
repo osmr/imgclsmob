@@ -207,7 +207,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | PreResNet-50b | 22.51 | 6.55 | 25,549,480 | 4,107.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.307/preresnet50b-0655-8b60378e.pth.log)) |
 | PreResNet-101 | 20.81 | 5.63 | 44,541,608 | 7,595.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.504/preresnet101-0563-8ec82f7d.pth.log)) |
 | PreResNet-101b | 21.04 | 5.56 | 44,541,608 | 7,827.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0556-76bfe6d0.pth.log)) |
-| PreResNet-152 | 20.94 | 5.55 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.14/preresnet152-0555-c842a030.pth.log)) |
+| PreResNet-152 | 20.36 | 5.19 | 60,185,256 | 11,319.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/preresnet152-0519-b27d3f15.pth.log)) |
 | PreResNet-152b | 20.14 | 5.16 | 60,185,256 | 11,551.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.386/preresnet152b-0516-f3805f4b.pth.log)) |
 | PreResNet-200b | 21.33 | 5.88 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.45/preresnet200b-0588-f7104ff3.pth.log)) |
 | PreResNet-269b | 20.92 | 5.81 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0581-1a7878bb.pth.log)) |
@@ -234,7 +234,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | SE-PreResNet-BC-26b | 23.22 | 6.60 | 17,388,424 | 2,357.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0660-f750b2f5.pth.log)) |
 | SE-PreResNet-BC-38b | 21.60 | 5.78 | 24,019,064 | 3,236.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0578-12827fcd.pth.log)) |
 | SE-PreResNet-50b | 20.85 | 5.49 | 28,080,472 | 4,113.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0549-4628a07d.pth.log)) |
-| SE-ResNeXt-50 (32x4d) | 19.86 | 5.13 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/seresnext50_32x4d-0513-d46261dd.pth.log)) |
+| SE-ResNeXt-50 (32x4d) | 18.94 | 4.51 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0451-52029a7f.pth.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.22 | 4.80 | 48,955,416 | 8,012.73M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_32x4d-0480-4f6479f0.pth.log)) |
 | SE-ResNeXt-101 (64x4d) | 19.28 | 4.76 | 88,232,984 | 15,509.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0476-da806109.pth.log)) |
 | SENet-16 | 25.65 | 8.20 | 31,366,168 | 5,081.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0820-373aeafd.pth.log)) |
@@ -319,7 +319,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DLA-60 | 21.47 | 5.70 | 22,036,632 | 4,255.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/dla60-0570-f8ea80aa.pth.log)) |
 | DLA-X-60 | 21.07 | 5.75 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0575-fae6dc6d.pth.log)) |
 | DLA-X-60-C | 30.98 | 10.91 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1091-0f6381f3.pth.log)) |
-| DLA-102 | 21.97 | 6.05 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0605-11df1322.pth.log)) |
+| DLA-102 | 20.69 | 5.37 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0537-fdabf0c3.pth.log)) |
 | DLA-X-102 | 20.13 | 5.02 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0502-e908f114.pth.log)) |
 | DLA-X2-102 | 20.55 | 5.36 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0536-07936111.pth.log)) |
 | DLA-169 | 21.29 | 5.66 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0566-ae0c6a82.pth.log)) |
@@ -347,7 +347,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | HRNetV2-W48 | 20.69 | 5.48 | 77,469,864 | 17,345.39M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0548-40f98610.pth.log)) |
 | HRNetV2-W64 | 20.53 | 5.35 | 128,059,944 | 28,976.42M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0535-5961efd0.pth.log)) |
 | VoVNet-39 | 21.71 | 5.64 | 22,600,296 | 7,086.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0564-63bfa613.pth.log)) |
-| VoVNet-57 | 22.27 | 6.28 | 36,640,296 | 8,943.09M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet57-0628-99f8a0c8.pth.log)) |
+| VoVNet-57 | 20.33 | 5.18 | 36,640,296 | 8,943.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0518-c080e471.pth.log)) |
 | SelecSLS-42b | 21.93 | 6.11 | 32,458,248 | 2,980.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0611-acff1e8b.pth.log)) |
 | SelecSLS-60 | 20.35 | 5.29 | 30,670,768 | 3,591.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/selecsls60-0529-1e1b05bc.pth.log)) |
 | SelecSLS-60b | 20.85 | 5.59 | 32,774,064 | 3,629.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0559-a0e7b4ef.pth.log)) |

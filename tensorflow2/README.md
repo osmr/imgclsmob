@@ -173,7 +173,7 @@ Some remarks:
 | PreResNet-50b | 22.37 | 6.34 | 25,549,480 | 4,107.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet50b-0634-711227b1.tf2.h5.log)) |
 | PreResNet-101 | 20.59 | 5.36 | 44,541,608 | 7,595.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.504/preresnet101-0536-2a62fe0a.tf2.h5.log)) |
 | PreResNet-101b | 20.86 | 5.39 | 44,541,608 | 7,827.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet101b-0539-54d23aff.tf2.h5.log)) |
-| PreResNet-152 | 20.71 | 5.32 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet152-0532-0ad4b58f.tf2.h5.log)) |
+| PreResNet-152 | 20.22 | 5.06 | 60,185,256 | 11,319.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/preresnet152-0506-b7e26eca.tf2.h5.log)) |
 | PreResNet-152b | 19.86 | 5.00 | 60,185,256 | 11,551.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet152b-0500-119062d9.tf2.h5.log)) |
 | PreResNet-200b | 21.07 | 5.63 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet200b-0563-2f9c761d.tf2.h5.log)) |
 | PreResNet-269b | 20.75 | 5.57 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet269b-0557-7003b3c4.tf2.h5.log)) |
@@ -200,7 +200,7 @@ Some remarks:
 | SE-PreResNet-BC-26b | 22.95 | 6.40 | 17,388,424 | 2,357.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnetbc26b-0640-a72bf876.tf2.h5.log)) |
 | SE-PreResNet-BC-38b | 21.44 | 5.67 | 24,019,064 | 3,236.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnetbc38b-0567-17d10c63.tf2.h5.log)) |
 | SE-PreResNet-50b | 20.71 | 5.31 | 28,080,472 | 4,113.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0531-0882c0e9.tf2.h5.log)) |
-| SE-ResNeXt-50 (32x4d) | 19.86 | 4.99 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/seresnext50_32x4d-0499-0249889b.tf2.h5.log)) |
+| SE-ResNeXt-50 (32x4d) | 18.73 | 4.34 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0434-c265c58c.tf2.h5.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.01 | 4.59 | 48,955,416 | 8,012.73M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnext101_32x4d-0459-13a9b2fd.tf2.h5.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.96 | 4.65 | 88,232,984 | 15,509.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnext101_64x4d-0465-ec0a3b13.tf2.h5.log)) |
 | SENet-16 | 25.37 | 8.05 | 31,366,168 | 5,081.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/senet16-0805-f5f57656.tf2.h5.log)) |
@@ -282,7 +282,7 @@ Some remarks:
 | DLA-60 | 21.26 | 5.53 | 22,036,632 | 4,255.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/dla60-0553-61a8f4e7.tf2.h5.log)) |
 | DLA-X-60 | 20.72 | 5.50 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0550-b692a226.tf2.h5.log)) |
 | DLA-X-60-C | 30.66 | 10.75 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla60xc-1075-a7850f03.tf2.h5.log)) |
-| DLA-102 | 22.84 | 6.43 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102-0643-2be886b2.tf2.h5.log)) |
+| DLA-102 | 20.57 | 5.17 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-9bebb44b.tf2.h5.log)) |
 | DLA-X-102 | 20.11 | 4.91 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0491-0a95e90b.tf2.h5.log)) |
 | DLA-X2-102 | 21.11 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x2-0553-06c93031.tf2.h5.log)) |
 | DLA-169 | 21.97 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla169-0590-e010166d.tf2.h5.log)) |
@@ -304,7 +304,7 @@ Some remarks:
 | HRNetV2-W48 | 21.42 | 5.81 | 77,469,864 | 17,344.29M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w48-0581-3af4ed57.tf2.h5.log)) |
 | HRNetV2-W64 | 21.10 | 5.53 | 128,059,944 | 28,974.95M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/hrnetv2_w64-0553-aede8def.tf2.h5.log)) |
 | VoVNet-39 | 23.75 | 6.94 | 22,600,296 | 7,086.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0694-ae8d6df0.tf2.h5.log)) |
-| VoVNet-57 | 25.65 | 8.12 | 36,640,296 | 8,943.09M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet57-0812-0977958a.tf2.h5.log)) |
+| VoVNet-57 | 22.42 | 6.23 | 36,640,296 | 8,943.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0623-16133ef5.tf2.h5.log)) |
 | SelecSLS-42b | 21.79 | 5.98 | 32,458,248 | 2,980.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0598-6003cd2d.tf2.h5.log)) |
 | SelecSLS-60 | 20.17 | 5.13 | 30,670,768 | 3,591.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/selecsls60-0513-1f2a07e4.tf2.h5.log)) |
 | SelecSLS-60b | 20.61 | 5.38 | 32,774,064 | 3,629.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0538-5e4cdf65.tf2.h5.log)) |

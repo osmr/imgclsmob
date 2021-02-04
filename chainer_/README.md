@@ -196,7 +196,7 @@ Some remarks:
 | PreResNet-50b | 22.31 | 6.34 | 25,549,480 | 4,107.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.307/preresnet50b-0634-605b0eec.npz.log)) |
 | PreResNet-101 | 20.58 | 5.34 | 44,541,608 | 7,595.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.504/preresnet101-0534-b4e33e60.npz.log)) |
 | PreResNet-101b | 20.87 | 5.38 | 44,541,608 | 7,827.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0538-b502bf25.npz.log)) |
-| PreResNet-152 | 20.73 | 5.30 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.23/preresnet152-0530-021d99dc.npz.log)) |
+| PreResNet-152 | 20.19 | 5.05 | 60,185,256 | 11,319.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/preresnet152-0505-6b58212e.npz.log)) |
 | PreResNet-152b | 19.87 | 5.00 | 60,185,256 | 11,551.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.386/preresnet152b-0500-bf54acd9.npz.log)) |
 | PreResNet-200b | 21.03 | 5.60 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.45/preresnet200b-0560-f79bd952.npz.log)) |
 | PreResNet-269b | 20.73 | 5.58 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0558-e2e491e1.npz.log)) |
@@ -223,7 +223,7 @@ Some remarks:
 | SE-PreResNet-BC-26b | 22.93 | 6.38 | 17,388,424 | 2,357.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0638-e8393574.npz.log)) |
 | SE-PreResNet-BC-38b | 21.46 | 5.66 | 24,019,064 | 3,236.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0566-4b9ce096.npz.log)) |
 | SE-PreResNet-50b | 20.75 | 5.31 | 28,080,472 | 4,113.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0531-fde03b26.npz.log)) |
-| SE-ResNeXt-50 (32x4d) | 19.82 | 5.02 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/seresnext50_32x4d-0502-5220e14a.npz.log)) |
+| SE-ResNeXt-50 (32x4d) | 18.73 | 4.35 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0435-52a11b61.npz.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.03 | 4.59 | 48,955,416 | 8,012.73M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_32x4d-0459-df43a39e.npz.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.98 | 4.68 | 88,232,984 | 15,509.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0468-ae28d0b4.npz.log)) |
 | SENet-16 | 25.39 | 8.07 | 31,366,168 | 5,081.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0807-f45aa3ff.npz.log)) |
@@ -302,7 +302,7 @@ Some remarks:
 | DLA-60 | 21.26 | 5.54 | 22,036,632 | 4,255.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/dla60-0554-740881ca.npz.log)) |
 | DLA-X-60 | 20.70 | 5.54 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0554-4d757562.npz.log)) |
 | DLA-X-60-C | 30.70 | 10.76 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1076-4c418399.npz.log)) |
-| DLA-102 | 22.87 | 6.42 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0642-c4ee6dcb.npz.log)) |
+| DLA-102 | 20.54 | 5.18 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0518-ebbfedd7.npz.log)) |
 | DLA-X-102 | 20.14 | 4.93 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0493-c42cba88.npz.log)) |
 | DLA-X2-102 | 21.11 | 5.54 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0554-6a27a094.npz.log)) |
 | DLA-169 | 21.99 | 5.90 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0590-96b692a8.npz.log)) |
@@ -330,7 +330,7 @@ Some remarks:
 | HRNetV2-W48 | 21.40 | 5.81 | 77,469,864 | 17,345.39M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0581-d8e905a2.npz.log)) |
 | HRNetV2-W64 | 21.10 | 5.53 | 128,059,944 | 28,976.42M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0553-4d8859ee.npz.log)) |
 | VoVNet-39 | 21.49 | 5.53 | 22,600,296 | 7,086.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0553-6a8b6783.npz.log)) |
-| VoVNet-57 | 23.00 | 6.62 | 36,640,296 | 8,943.09M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet57-0662-aa34e6d0.npz.log)) |
+| VoVNet-57 | 20.16 | 5.12 | 36,640,296 | 8,943.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0512-beb31bd5.npz.log)) |
 | SelecSLS-42b | 21.74 | 6.01 | 32,458,248 | 2,980.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0601-d89a5042.npz.log)) |
 | SelecSLS-60 | 20.18 | 5.14 | 30,670,768 | 3,591.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/selecsls60-0514-637c2506.npz.log)) |
 | SelecSLS-60b | 20.60 | 5.38 | 32,774,064 | 3,629.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0538-f9f8d657.npz.log)) |

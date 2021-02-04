@@ -64,7 +64,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnet50b', '0655', '8b60378ee3aed878d27a2b4a9ddc596a812c7649', 'v0.0.307', 'PreResNet-50b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101', '0563', '8ec82f7d697b7329aea2c95b399093e9cb2b1114', 'v0.0.504', 'PreResNet-101', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101b', '0556', '76bfe6d020b55f163e77de6b1c27be6b0bed8b7b', 'v0.0.351', 'PreResNet-101b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet152', '0555', 'c842a030abbcc21a0f2a9a8299fc42204897a611', 'v0.0.14', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('preresnet152', '0519', 'b27d3f1532266df3d8f91e3d4a18152ce8b2afb6', 'v0.0.505', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152b', '0516', 'f3805f4b8c845798b711171ad6632bcf56259844', 'v0.0.386', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet200b', '0588', 'f7104ff306ed5de2c27f3c855051c22bda167981', 'v0.0.45', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, '[tornadomeet/ResNet]'),  # noqa
     ('preresnet269b', '0581', '1a7878bb10923b22bda58d7935dfa6e5e8a7b67d', 'v0.0.239', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, '[soeaver/mxnet-model]'),  # noqa
@@ -91,7 +91,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('sepreresnetbc26b', '0660', 'f750b2f588a27620b30c86f0060a41422d4a0f75', 'v0.0.399', 'SE-PreResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnetbc38b', '0578', '12827fcd3c8c1a8c8ba1d109e85ffa67e7ab306a', 'v0.0.409', 'SE-PreResNet-BC-38b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet50b', '0549', '4628a07d7dd92c775868dffd33fd6e3e7522c261', 'v0.0.461', 'SE-PreResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnext50_32x4d', '0513', 'd46261dd176789d093f8d55b2e7ab33fe47de3a7', 'v0.0.502', 'SE-ResNeXt-50 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnext50_32x4d', '0451', '52029a7f6170873b2d50a7016fba053e98183f7b', 'v0.0.505', 'SE-ResNeXt-50 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext101_32x4d', '0480', '4f6479f0801a92d35a256a47e5c11a97b3555016', 'v0.0.418', 'SE-ResNeXt-101 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('seresnext101_64x4d', '0476', 'da806109a2346be16f2b3b9aa60aa8f52bc6a1fa', 'v0.0.418', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('senet16', '0820', '373aeafdc994c3e03bf483a9fa3ecb152353722a', 'v0.0.341', 'SENet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -176,7 +176,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dla60', '0570', 'f8ea80aa6155591c1082b3caaa0815d164ae2259', 'v0.0.494', 'DLA-60', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60x', '0575', 'fae6dc6d434d4cf0b52e5d4b3da13b5230d08c02', 'v0.0.493', 'DLA-X-60', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla60xc', '1091', '0f6381f335e5bbb4c69b360be61a4a08e5c7a9de', 'v0.0.289', 'DLA-X-60-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dla102', '0605', '11df13220b44f51dc8c925fbd9fc334bc8d115b4', 'v0.0.202', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
+    ('dla102', '0537', 'fdabf0c31bd2e359ee9a8374b6a42d1396093cf1', 'v0.0.505', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102x', '0502', 'e908f11494326e9b1b38c6bbef2d1a2fca93903a', 'v0.0.503', 'DLA-X-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102x2', '0536', '079361117045dc661b63ce4b14408d403bc91844', 'v0.0.202', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
     ('dla169', '0566', 'ae0c6a82acfaf9dc459ac5a032106c2727b71d4f', 'v0.0.202', 'DLA-169', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
@@ -204,7 +204,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnetv2_w48', '0548', '40f986102a5650bae90d62c459781704626bd890', 'v0.0.421', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w64', '0535', '5961efd0e93740184a582ed4e00de445c91447b9', 'v0.0.421', 'HRNetV2-W64', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('vovnet39', '0564', '63bfa613870b37bd4fb5b71412e7875392aa4f66', 'v0.0.493', 'VoVNet-39', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('vovnet57', '0628', '99f8a0c8958de38e89194014a08e312205bb3e1e', 'v0.0.431', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, '[stigma0617/VoVNet.pytorch]'),  # noqa
+    ('vovnet57', '0518', 'c080e47169a176043f298b1e909ddd8776d5aa76', 'v0.0.505', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls42b', '0611', 'acff1e8b36428719059eec4b60c7b2c045a54d8e', 'v0.0.493', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls60', '0529', '1e1b05bc1432fe7c4a8bac26278c16f7486a498f', 'v0.0.496', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls60b', '0559', 'a0e7b4effe66dc58c76d22a7647dfce7f3639c33', 'v0.0.495', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa

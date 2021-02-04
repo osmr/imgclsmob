@@ -211,7 +211,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-50b | 22.36 | 6.32 | 25,549,480 | 4,107.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.307/preresnet50b-0632-951de2dc.params.log)) |
 | PreResNet-101 | 20.60 | 5.34 | 44,541,608 | 7,595.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.504/preresnet101-0534-ea9a1724.params.log)) |
 | PreResNet-101b | 20.85 | 5.40 | 44,541,608 | 7,827.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0540-3839a473.params.log)) |
-| PreResNet-152 | 20.70 | 5.32 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.14/preresnet152-0532-31505f71.params.log)) |
+| PreResNet-152 | 20.23 | 5.05 | 60,185,256 | 11,319.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/preresnet152-0505-e1689235.params.log)) |
 | PreResNet-152b | 19.90 | 5.00 | 60,185,256 | 11,551.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.386/preresnet152b-0500-6929c862.params.log)) |
 | PreResNet-200b | 21.10 | 5.64 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.45/preresnet200b-0564-38f849a6.params.log)) |
 | PreResNet-269b | 20.71 | 5.56 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0556-f386e3e7.params.log)) |
@@ -238,7 +238,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-PreResNet-BC-26b | 22.95 | 6.36 | 17,388,424 | 2,355.57M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0636-33c94c9d.params.log)) |
 | SE-PreResNet-BC-38b | 21.42 | 5.63 | 24,019,064 | 3,233.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0563-d8f0fbd3.params.log)) |
 | SE-PreResNet-50b | 20.67 | 5.32 | 28,080,472 | 4,110.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0532-5b620ff7.params.log)) |
-| SE-ResNeXt-50 (32x4d) | 19.85 | 4.98 | 27,559,896 | 4,258.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/seresnext50_32x4d-0498-c0c1c1f9.params.log)) |
+| SE-ResNeXt-50 (32x4d) | 18.74 | 4.33 | 27,559,896 | 4,258.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0433-d74d1d0a.params.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.07 | 4.60 | 48,955,416 | 8,008.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_32x4d-0460-6cb1ee64.params.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.98 | 4.66 | 88,232,984 | 15,505.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0466-15e16730.params.log)) |
 | SENet-16 | 25.34 | 8.06 | 31,366,168 | 5,080.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0806-ba268021.params.log)) |
@@ -324,7 +324,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-60 | 21.27 | 5.54 | 22,036,632 | 4,255.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/dla60-0554-88b141c4.params.log)) |
 | DLA-X-60 | 20.70 | 5.53 | 17,352,344 | 3,543.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0553-58924af8.params.log)) |
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |
-| DLA-102 | 22.87 | 6.44 | 33,268,888 | 7,190.95M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102-0644-cadbb1cc.params.log)) |
+| DLA-102 | 20.58 | 5.17 | 33,268,888 | 7,190.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-0e5d954c.params.log)) |
 | DLA-X-102 | 20.10 | 4.88 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0488-e29b7d26.params.log)) |
 | DLA-X2-102 | 21.12 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0553-30c8f409.params.log)) |
 | DLA-169 | 21.95 | 5.87 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0587-4f3e6a6e.params.log)) |
@@ -352,7 +352,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | HRNetV2-W48 | 21.41 | 5.78 | 77,469,864 | 17,344.29M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0578-8823f844.params.log)) |
 | HRNetV2-W64 | 21.08 | 5.52 | 128,059,944 | 28,974.95M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0552-3d8ef6e5.params.log)) |
 | VoVNet-39 | 21.54 | 5.48 | 22,600,296 | 7,086.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0548-20b60ee6.params.log)) |
-| VoVNet-57 | 22.95 | 6.60 | 36,640,296 | 8,943.09M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet57-0660-f4f3ed33.params.log)) |
+| VoVNet-57 | 20.14 | 5.10 | 36,640,296 | 8,943.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0510-ed3cad77.params.log)) |
 | SelecSLS-42b | 21.72 | 5.96 | 32,458,248 | 2,980.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0596-f5a35c74.params.log)) |
 | SelecSLS-60 | 20.20 | 5.11 | 30,670,768 | 3,591.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/selecsls60-0511-960edec5.params.log)) |
 | SelecSLS-60b | 20.62 | 5.37 | 32,774,064 | 3,629.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0537-7f83801b.params.log)) |

@@ -131,15 +131,16 @@ class Lookahead(nn.Module):
 
 class DeepSpeech(nn.Module):
     def __init__(self,
-                 hidden_size,
-                 hidden_layers,
-                 rnn_type,
-                 lookahead_context,
-                 num_classes,
-                 sample_rate,
-                 window_size):
+                 hidden_size=1024,
+                 hidden_layers=5,
+                 rnn_type=nn.modules.rnn.LSTM,
+                 lookahead_context=None,
+                 num_classes=29,
+                 sample_rate=16000,
+                 window_size=0.02,
+                 bidirectional=True):
         super().__init__()
-        self.bidirectional = False
+        self.bidirectional = bidirectional
 
         self.conv = MaskConv(nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=(41, 11), stride=(2, 2), padding=(20, 5)),
@@ -247,7 +248,7 @@ def _test():
 
     pretrained = False
     audio_features = 120
-    num_classes = 11
+    num_classes = 29
 
     models = [
         oth_deepspeech,
@@ -270,7 +271,7 @@ def _test():
 
         batch = 4
         seq_len = np.random.randint(60, 150)
-        x = torch.randn(batch, audio_features, seq_len)
+        x = torch.randn(batch, 1, audio_features, seq_len)
         y = net(x)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, num_classes))

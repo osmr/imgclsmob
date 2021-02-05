@@ -2,14 +2,14 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'SelectableDense',
-           'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block',
-           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'NormActivation',
-           'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock',
-           'saconv3x3_block', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
+__all__ = ['round_channels', 'Identity', 'BreakBlock', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer',
+           'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
+           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent',
+           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -51,6 +51,23 @@ class Identity(nn.Module):
 
     def forward(self, x):
         return x
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
+
+
+class BreakBlock(nn.Module):
+    """
+    Break coonnection block for hourglass.
+    """
+    def __init__(self):
+        super(BreakBlock, self).__init__()
+
+    def forward(self, x):
+        return None
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
 
 
 class Swish(nn.Module):
@@ -571,6 +588,7 @@ def conv5x5_block(in_channels,
                   dilation=1,
                   groups=1,
                   bias=False,
+                  use_bn=True,
                   bn_eps=1e-5,
                   activation=(lambda: nn.ReLU(inplace=True))):
     """
@@ -592,6 +610,8 @@ def conv5x5_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
@@ -606,6 +626,7 @@ def conv5x5_block(in_channels,
         dilation=dilation,
         groups=groups,
         bias=bias,
+        use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation)
 
@@ -614,8 +635,11 @@ def conv7x7_block(in_channels,
                   out_channels,
                   stride=1,
                   padding=3,
+                  dilation=1,
+                  groups=1,
                   bias=False,
                   use_bn=True,
+                  bn_eps=1e-5,
                   activation=(lambda: nn.ReLU(inplace=True))):
     """
     7x7 version of the standard convolution block.
@@ -630,10 +654,16 @@ def conv7x7_block(in_channels,
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 3
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
@@ -643,8 +673,11 @@ def conv7x7_block(in_channels,
         kernel_size=7,
         stride=stride,
         padding=padding,
+        dilation=dilation,
+        groups=groups,
         bias=bias,
         use_bn=use_bn,
+        bn_eps=bn_eps,
         activation=activation)
 
 
@@ -1832,7 +1865,7 @@ class ParametricConcurrent(nn.Sequential):
 
 class Hourglass(nn.Module):
     """
-    A hourglass block.
+    A hourglass module.
 
     Parameters:
     ----------
@@ -1855,7 +1888,7 @@ class Hourglass(nn.Module):
                  return_first_skip=False):
         super(Hourglass, self).__init__()
         self.depth = len(down_seq)
-        assert (merge_type in ["add"])
+        assert (merge_type in ["cat", "add"])
         assert (len(up_seq) == self.depth)
         assert (len(skip_seq) in (self.depth, self.depth + 1))
         self.merge_type = merge_type
@@ -1865,6 +1898,14 @@ class Hourglass(nn.Module):
         self.down_seq = down_seq
         self.up_seq = up_seq
         self.skip_seq = skip_seq
+
+    def _merge(self, x, y):
+        if y is not None:
+            if self.merge_type == "cat":
+                x = torch.cat((x, y), dim=1)
+            elif self.merge_type == "add":
+                x = x + y
+        return x
 
     def forward(self, x, **kwargs):
         y = None
@@ -1877,8 +1918,7 @@ class Hourglass(nn.Module):
                 y = down_outs[self.depth - i]
                 skip_module = self.skip_seq[self.depth - i]
                 y = skip_module(y)
-                if (y is not None) and (self.merge_type == "add"):
-                    x = x + y
+                x = self._merge(x, y)
             if i != len(down_outs) - 1:
                 if (i == 0) and self.extra_skip:
                     skip_module = self.skip_seq[self.depth]

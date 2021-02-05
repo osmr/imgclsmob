@@ -40,6 +40,20 @@ def round_channels(channels,
     return rounded_channels
 
 
+class BreakBlock(HybridBlock):
+    """
+    Break coonnection block for hourglass.
+    """
+    def __init__(self, prefix=None, params=None):
+        super(BreakBlock, self).__init__(prefix=prefix, params=params)
+
+    def hybrid_forward(self, F, x):
+        return None
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
+
+
 class ReLU6(HybridBlock):
     """
     ReLU6 activation layer.

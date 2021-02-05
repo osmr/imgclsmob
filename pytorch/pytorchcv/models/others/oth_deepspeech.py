@@ -58,14 +58,6 @@ class MaskConv(nn.Module):
         return x, lengths
 
 
-class InferenceBatchSoftmax(nn.Module):
-    def forward(self, input_):
-        if not self.training:
-            return F.softmax(input_, dim=-1)
-        else:
-            return input_
-
-
 class BatchRNN(nn.Module):
     def __init__(self,
                  input_size,
@@ -187,7 +179,6 @@ class DeepSpeech(nn.Module):
         self.fc = nn.Sequential(
             SequenceWise(fully_connected),
         )
-        self.inference_softmax = InferenceBatchSoftmax()
 
     def _get_seq_lens(self, input_length):
         """
@@ -202,7 +193,9 @@ class DeepSpeech(nn.Module):
                 seq_len = ((seq_len + 2 * m.padding[1] - m.dilation[1] * (m.kernel_size[1] - 1) - 1) // m.stride[1] + 1)
         return seq_len.int()
 
-    def forward(self, x, lengths):
+    def forward(self,
+                x,
+                lengths):
         lengths = lengths.cpu().int()
         output_lengths = self._get_seq_lens(lengths)
         x, _ = self.conv(x, output_lengths)
@@ -219,17 +212,12 @@ class DeepSpeech(nn.Module):
 
         x = self.fc(x)
         x = x.transpose(0, 1)
-        # identity in training mode, softmax in eval mode
-        x = self.inference_softmax(x)
         return x, output_lengths
 
 
-def oth_deepspeech(**kwargs):
-    net = DeepSpeech(
-        num_classes=None,
-        sample_rate=None,
-        window_size=None
-    )
+def oth_deepspeech(pretrained=False, **kwargs):
+    assert (pretrained is not None)
+    net = DeepSpeech(**kwargs)
     return net
 
 
@@ -247,7 +235,7 @@ def _test():
     import torch
 
     pretrained = False
-    audio_features = 120
+    audio_features = 41 * 4
     num_classes = 29
 
     models = [
@@ -258,9 +246,7 @@ def _test():
 
         net = model(
             # in_channels=audio_features,
-            # num_classes=num_classes,
-            feat_in=audio_features,
-            vocab_size=num_classes,
+            num_classes=num_classes,
             pretrained=pretrained)
 
         # net.train()
@@ -270,11 +256,14 @@ def _test():
         # assert (model != oth_deepspeech or weight_count == 6710915)
 
         batch = 4
-        seq_len = np.random.randint(60, 150)
+        seq_len = np.random.randint(400, 500)
         x = torch.randn(batch, 1, audio_features, seq_len)
-        y = net(x)
+        lengths = torch.full(size=(batch,), fill_value=400, dtype=torch.int64)
+        ys = net(x, lengths)
+        y = ys[0]
         # y.sum().backward()
-        assert (tuple(y.size())[:2] == (batch, num_classes))
+        assert (tuple(y.size())[0] == batch)
+        assert (tuple(y.size())[2] == num_classes)
 
 
 if __name__ == "__main__":

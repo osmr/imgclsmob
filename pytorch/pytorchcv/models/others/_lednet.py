@@ -10,51 +10,134 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, NormActivation,\
-    InterpolationBlock, Hourglass, BreakBlock
+    ConvBlock, ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
 
 
-def split(x):
-    c = int(x.size()[1])
-    c1 = round(c * 0.5)
-    x1 = x[:, :c1, :, :].contiguous()
-    x2 = x[:, c1:, :, :].contiguous()
+class AsymConvBlock(nn.Module):
+    """
+    Asymmetric separable convolution block.
 
-    return x1, x2
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    kernel_size : int
+        Convolution window size.
+    padding : int
+        Padding value for convolution layer.
+    dilation : int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    lw_use_bn : bool, default True
+        Whether to use BatchNorm layer (leftwise convolution block).
+    rw_use_bn : bool, default True
+        Whether to use BatchNorm layer (rightwise convolution block).
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    lw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the leftwise convolution block.
+    rw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the rightwise convolution block.
+    """
+    def __init__(self,
+                 channels,
+                 kernel_size,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 lw_use_bn=True,
+                 rw_use_bn=True,
+                 bn_eps=1e-5,
+                 lw_activation=(lambda: nn.ReLU(inplace=True)),
+                 rw_activation=(lambda: nn.ReLU(inplace=True))):
+        super(AsymConvBlock, self).__init__()
+        self.lw_conv = ConvBlock(
+            in_channels=channels,
+            out_channels=channels,
+            kernel_size=(kernel_size, 1),
+            stride=1,
+            padding=(padding, 0),
+            dilation=(dilation, 1),
+            groups=groups,
+            bias=bias,
+            use_bn=lw_use_bn,
+            bn_eps=bn_eps,
+            activation=lw_activation)
+        self.rw_conv = ConvBlock(
+            in_channels=channels,
+            out_channels=channels,
+            kernel_size=(1, kernel_size),
+            stride=1,
+            padding=(0, padding),
+            dilation=(1, dilation),
+            groups=groups,
+            bias=bias,
+            use_bn=rw_use_bn,
+            bn_eps=bn_eps,
+            activation=rw_activation)
+
+    def forward(self, x):
+        x = self.lw_conv(x)
+        x = self.rw_conv(x)
+        return x
 
 
-def channel_shuffle(x,
-                    groups):
-    batchsize, num_channels, height, width = x.data.size()
-    
-    channels_per_group = num_channels // groups
-    
-    # reshape
-    x = x.view(batchsize, groups, channels_per_group, height, width)
-    
-    x = torch.transpose(x, 1, 2).contiguous()
-    
-    # flatten
-    x = x.view(batchsize, -1, height, width)
-    
-    return x
-    
+def asym_conv3x3_block(channels,
+                       padding=1,
+                       **kwargs):
+    """
+    3x3 asymmetric separable convolution block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    padding : int, default 1
+        Padding value for convolution layer.
+    dilation : int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    lw_use_bn : bool, default True
+        Whether to use BatchNorm layer (leftwise convolution block).
+    rw_use_bn : bool, default True
+        Whether to use BatchNorm layer (rightwise convolution block).
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    lw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the leftwise convolution block.
+    rw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the rightwise convolution block.
+    """
+    return AsymConvBlock(
+        channels=channels,
+        kernel_size=3,
+        padding=padding,
+        **kwargs)
+
 
 class DownBlock(nn.Module):
     def __init__(self,
-                 in_channel,
-                 out_channel,
+                 in_channels,
+                 out_channels,
                  bn_eps=1e-3):
         super(DownBlock, self).__init__()
         self.pool = nn.MaxPool2d(
             kernel_size=2,
             stride=2)
         self.conv = conv3x3(
-            in_channels=in_channel,
-            out_channels=(out_channel - in_channel),
+            in_channels=in_channels,
+            out_channels=(out_channels - in_channels),
             stride=2,
             bias=True)
         self.norm_activ1 = NormActivation(
-            in_channels=out_channel,
+            in_channels=out_channels,
             bn_eps=bn_eps)
 
     def forward(self, x):
@@ -70,131 +153,74 @@ class DownBlock(nn.Module):
         return x
 
 
-class SsNbtBlock(nn.Module):
+class LEDBlock(nn.Module):
     def __init__(self,
-                 chann,
-                 dropprob,
-                 dilated,
+                 channels,
+                 dilation,
+                 dropout_rate,
                  bn_eps=1e-3):
-        super().__init__()
+        super(LEDBlock, self).__init__()
+        self.use_dropout = (dropout_rate != 0.0)
 
-        oup_inc = chann // 2
-        
-        # dw
-        self.conv3x1_1_l = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(3, 1),
-            stride=1,
-            padding=(1, 0),
-            bias=True)
-
-        self.conv1x3_1_l = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(1, 3),
-            stride=1,
-            padding=(0, 1),
-            bias=True)
-
-        self.bn1_l = nn.BatchNorm2d(oup_inc, eps=bn_eps)
-
-        self.conv3x1_2_l = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(3, 1),
-            stride=1,
-            padding=(1 * dilated, 0),
+        self.conv1 = asym_conv3x3_block(
+            channels=channels,
             bias=True,
-            dilation=(dilated, 1))
-
-        self.conv1x3_2_l = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(1, 3),
-            stride=1,
-            padding=(0, 1 * dilated),
+            lw_use_bn=False,
+            bn_eps=bn_eps)
+        self.conv2 = asym_conv3x3_block(
+            channels=channels,
+            padding=dilation,
+            dilation=dilation,
             bias=True,
-            dilation=(1, dilated))
+            lw_use_bn=False,
+            bn_eps=bn_eps,
+            rw_activation=None)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
 
-        self.bn2_l = nn.BatchNorm2d(oup_inc, eps=bn_eps)
-        
-        # dw
-        self.conv3x1_1_r = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(3, 1),
-            stride=1,
-            padding=(1, 0),
-            bias=True)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        return x
 
-        self.conv1x3_1_r = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(1, 3),
-            stride=1,
-            padding=(0, 1),
-            bias=True)
 
-        self.bn1_r = nn.BatchNorm2d(oup_inc, eps=bn_eps)
+class LEDUnit(nn.Module):
+    def __init__(self,
+                 channels,
+                 dropout_rate,
+                 dilation,
+                 bn_eps):
+        super(LEDUnit, self).__init__()
+        mid_channels = channels // 2
 
-        self.conv3x1_2_r = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(3, 1),
-            stride=1,
-            padding=(1 * dilated, 0),
-            bias=True,
-            dilation=(dilated, 1))
+        self.left_branch = LEDBlock(
+            channels=mid_channels,
+            dilation=dilation,
+            dropout_rate=dropout_rate,
+            bn_eps=bn_eps)
+        self.right_branch = LEDBlock(
+            channels=mid_channels,
+            dilation=dilation,
+            dropout_rate=dropout_rate,
+            bn_eps=bn_eps)
+        self.activ = nn.ReLU(inplace=True)
+        self.shuffle = ChannelShuffle(
+            channels=channels,
+            groups=2)
 
-        self.conv1x3_2_r = nn.Conv2d(
-            in_channels=oup_inc,
-            out_channels=oup_inc,
-            kernel_size=(1, 3),
-            stride=1,
-            padding=(0, 1 * dilated),
-            bias=True,
-            dilation=(1, dilated))
-
-        self.bn2_r = nn.BatchNorm2d(oup_inc, eps=bn_eps)
-        
-        self.relu = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout2d(dropprob)       
-        
     def forward(self, x):
         identity = x
-        x1, x2 = split(x)
+        x1, x2 = torch.chunk(x, chunks=2, dim=1)
 
-        output1 = self.conv3x1_1_l(x1)
-        output1 = self.relu(output1)
-        output1 = self.conv1x3_1_l(output1)
-        output1 = self.bn1_l(output1)
-        output1 = self.relu(output1)
+        x1 = self.left_branch(x1)
+        x2 = self.right_branch(x2)
 
-        output1 = self.conv3x1_2_l(output1)
-        output1 = self.relu(output1)
-        output1 = self.conv1x3_2_l(output1)
-        output1 = self.bn2_l(output1)
-    
-        output2 = self.conv1x3_1_r(x2)
-        output2 = self.relu(output2)
-        output2 = self.conv3x1_1_r(output2)
-        output2 = self.bn1_r(output2)
-        output2 = self.relu(output2)
-
-        output2 = self.conv1x3_2_r(output2)
-        output2 = self.relu(output2)
-        output2 = self.conv3x1_2_r(output2)
-        output2 = self.bn2_r(output2)
-
-        if self.dropout.p != 0:
-            output1 = self.dropout(output1)
-            output2 = self.dropout(output2)
-
-        x = torch.cat((output1, output2), dim=1)
+        x = torch.cat((x1, x2), dim=1)
         x = x + identity
-        x = F.relu(x, inplace=True)
-        x = channel_shuffle(x, groups=2)
+        x = self.activ(x)
+        x = self.shuffle(x)
         return x
 
 
@@ -208,26 +234,26 @@ class Encoder(nn.Module):
         self.layers = nn.ModuleList()
 
         for x in range(0, 3):
-            self.layers.append(SsNbtBlock(32, 0.03, 1))
+            self.layers.append(LEDUnit(channels=32, dropout_rate=0.03, dilation=1, bn_eps=bn_eps))
         
         self.layers.append(DownBlock(32, 64))
 
         for x in range(0, 2):
-            self.layers.append(SsNbtBlock(64, 0.03, 1))
+            self.layers.append(LEDUnit(channels=64, dropout_rate=0.03, dilation=1, bn_eps=bn_eps))
   
         self.layers.append(DownBlock(64, 128))
 
         for x in range(0, 1):    
-            self.layers.append(SsNbtBlock(128, 0.3, 1))
-            self.layers.append(SsNbtBlock(128, 0.3, 2))
-            self.layers.append(SsNbtBlock(128, 0.3, 5))
-            self.layers.append(SsNbtBlock(128, 0.3, 9))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=1, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=2, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=5, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=9, bn_eps=bn_eps))
             
         for x in range(0, 1):    
-            self.layers.append(SsNbtBlock(128, 0.3, 2))
-            self.layers.append(SsNbtBlock(128, 0.3, 5))
-            self.layers.append(SsNbtBlock(128, 0.3, 9))
-            self.layers.append(SsNbtBlock(128, 0.3, 17))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=2, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=5, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=9, bn_eps=bn_eps))
+            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=17, bn_eps=bn_eps))
                     
     def forward(self, x):
         x = self.initial_block(x)

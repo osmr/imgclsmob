@@ -164,44 +164,59 @@ def process_fwk(prep_info_dict,
     else:
         raise ValueError("Unknown framework: {}".format(dst_framework))
 
-    dst_raw_log_file_path = os.path.join(dst_dir_path, "train.log")
-    shutil.copy2(log_file_path, dst_raw_log_file_path)
+    post_proc_log_files = [f for f in os.listdir(dst_dir_path) if f.endswith(".{}.log".format(dst_model_file_ext))]
+    assert (len(post_proc_log_files) in [0, 1])
 
-    dst_raw_model_file_path = os.path.join(dst_dir_path, "{}.{}".format(model_name, dst_model_file_ext))
+    if len(post_proc_log_files) == 0:
+        dst_raw_log_file_path = os.path.join(dst_dir_path, "train.log")
+        shutil.copy2(log_file_path, dst_raw_log_file_path)
 
-    if dst_framework == "gluon":
-        shutil.copy2(model_file_path, dst_raw_model_file_path)
-    else:
-        command = "python3 convert_models.py --src-fwk=gluon --dst-fwk={dst_framework} --src-model={model_name}" \
-                  " --dst-model={model_name} --src-params={model_file_path} --dst-params={dst_raw_model_file_path}" \
-                  " --save-dir={dst_dir_path}"
+        dst_raw_model_file_path = os.path.join(dst_dir_path, "{}.{}".format(model_name, dst_model_file_ext))
+
+        if dst_framework == "gluon":
+            shutil.copy2(model_file_path, dst_raw_model_file_path)
+        else:
+            command = "python3 convert_models.py --src-fwk=gluon --dst-fwk={dst_framework} --src-model={model_name}" \
+                      " --dst-model={model_name} --src-params={model_file_path}" \
+                      " --dst-params={dst_raw_model_file_path} --save-dir={dst_dir_path}"
+            subprocess.call([command.format(
+                dst_framework=dst_framework,
+                model_name=model_name,
+                model_file_path=model_file_path,
+                dst_raw_model_file_path=dst_raw_model_file_path,
+                dst_dir_path=dst_dir_path)], shell=True)
+
+        command = "python3 {eval_script}.py --model={model_name} --resume={dst_raw_model_file_path}" \
+                  " --save-dir={dst_dir_path} --num-gpus={num_gpus} --batch-size=100 -j=4 {calc_flops}"
         subprocess.call([command.format(
-            dst_framework=dst_framework,
+            eval_script=eval_script,
             model_name=model_name,
-            model_file_path=model_file_path,
             dst_raw_model_file_path=dst_raw_model_file_path,
-            dst_dir_path=dst_dir_path)], shell=True)
+            dst_dir_path=dst_dir_path,
+            num_gpus=num_gpus,
+            calc_flops=calc_flops)], shell=True)
 
-    command = "python3 {eval_script}.py --model={model_name} --resume={dst_raw_model_file_path}" \
-              " --save-dir={dst_dir_path} --num-gpus={num_gpus} --batch-size=100 -j=4 {calc_flops}"
-    subprocess.call([command.format(
-        eval_script=eval_script,
-        model_name=model_name,
-        dst_raw_model_file_path=dst_raw_model_file_path,
-        dst_dir_path=dst_dir_path,
-        num_gpus=num_gpus,
-        calc_flops=calc_flops)], shell=True)
+        if dst_framework == "gluon":
+            shutil.copy2(dst_raw_log_file_path, log_file_path)
 
-    if dst_framework == "gluon":
-        shutil.copy2(dst_raw_log_file_path, log_file_path)
-
-    top5_err, sha1_value = post_process(
-        dst_dir_path=dst_dir_path,
-        model_name=model_name,
-        model_file_path=dst_raw_model_file_path,
-        log_file_path=dst_raw_log_file_path,
-        dst_model_file_ext=dst_model_file_ext,
-        log_line_num=log_line_num)
+        top5_err, sha1_value = post_process(
+            dst_dir_path=dst_dir_path,
+            model_name=model_name,
+            model_file_path=dst_raw_model_file_path,
+            log_file_path=dst_raw_log_file_path,
+            dst_model_file_ext=dst_model_file_ext,
+            log_line_num=log_line_num)
+    else:
+        model_name1, top5_err, sha1_short = post_proc_log_files[0].split(".")[0].split("-")
+        assert (model_name1 == model_name)
+        dst_model_file_name = "{}-{}-{}.{}".format(model_name, top5_err, sha1_short, dst_model_file_ext)
+        dst_model_file_path = os.path.join(dst_dir_path, dst_model_file_name)
+        dst_zip_model_file_path = dst_model_file_path + ".zip"
+        assert os.path.exists(dst_zip_model_file_path)
+        with zipfile.ZipFile(dst_zip_model_file_path, "r") as zf:
+            zf.extract(dst_model_file_name, dst_dir_path)
+        sha1_value = calc_sha1(dst_model_file_path)
+        os.remove(dst_model_file_path)
 
     prep_info_dict["Type"].append(dst_framework)
     prep_info_dict["Top5"].append(top5_err)

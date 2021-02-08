@@ -226,7 +226,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | SE-ResNet-BC-38b | 21.60 | 5.95 | 24,026,616 | 3,238.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.374/seresnetbc38b-0595-03671c05.pth.log)) |
 | SE-ResNet-50 | 21.22 | 5.75 | 28,088,024 | 3,883.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.441/seresnet50-0575-004bfde4.pth.log)) |
 | SE-ResNet-50b | 20.79 | 5.39 | 28,088,024 | 4,115.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.387/seresnet50b-0539-459e6871.pth.log)) |
-| SE-ResNet-101 | 21.88 | 5.89 | 49,326,872 | 7,602.76M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.11/seresnet101-0589-5e6e831b.pth.log)) |
+| SE-ResNet-101 | 19.77 | 4.92 | 49,326,872 | 7,602.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/seresnet101-0492-21336620.pth.log)) |
 | SE-ResNet-101b | 19.70 | 4.87 | 49,326,872 | 7,839.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0487-b83a20fd.pth.log)) |
 | SE-ResNet-152 | 21.48 | 5.76 | 66,821,848 | 11,328.52M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.11/seresnet152-0576-814cf72e.pth.log)) |
 | SE-PreResNet-10 | 34.03 | 13.38 | 5,461,668 | 894.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.377/sepreresnet10-1338-935ed560.pth.log)) |
@@ -296,7 +296,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 291.52M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1006-3574d874.pth.log)) |
 | PeleeNet | 29.41 | 10.04 | 2,802,248 | 514.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/peleenet-1004-5107a95d.pth.log)) |
 | WRN-50-2 | 22.53 | 6.41 | 68,849,128 | 11,405.42M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0641-83897ab9.pth.log)) |
-| DRN-C-26 | 24.86 | 7.55 | 21,126,584 | 16,993.90M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0755-35405bd5.pth.log)) |
+| DRN-C-26 | 24.61 | 7.23 | 21,126,584 | 16,993.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/drnc26-0723-e7306483.pth.log)) |
 | DRN-C-42 | 22.94 | 6.57 | 31,234,744 | 25,093.75M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0657-7c99c460.pth.log)) |
 | DRN-C-58 | 21.73 | 6.01 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0601-70ec1f56.pth.log)) |
 | DRN-D-22 | 24.86 | 7.58 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0758-02cb44bd.pth.log)) |
@@ -339,7 +339,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DiCENet x2.0 | 28.95 | 10.19 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1019-44e2153f.pth.log)) |
 | HRNet-W18 Small V1 | 26.48 | 9.01 | 13,187,464 | 1,615.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0901-30023064.pth.log)) |
 | HRNet-W18 Small V2 | 21.93 | 6.18 | 15,597,464 | 2,618.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0618-ef7b1fe4.pth.log)) |
-| HRNetV2-W18 | 23.24 | 6.56 | 21,299,004 | 4,323.07M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0656-78b1f85b.pth.log)) |
+| HRNetV2-W18 | 20.20 | 5.12 | 21,299,004 | 4,323.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/hrnetv2_w18-0512-9d2b7fbf.pth.log)) |
 | HRNetV2-W30 | 21.80 | 5.78 | 37,712,220 | 8,156.82M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w30-0578-839e57eb.pth.log)) |
 | HRNetV2-W32 | 21.55 | 5.81 | 41,232,680 | 8,974.04M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w32-0581-bef9ada0.pth.log)) |
 | HRNetV2-W40 | 21.07 | 5.53 | 57,557,160 | 12,752.26M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w40-0553-e4b5a38a.pth.log)) |

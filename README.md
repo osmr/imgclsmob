@@ -173,6 +173,7 @@ Some remarks:
 | DABNet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1907.11357) | [link](https://github.com/Reagan1311/DABNet) | 2019 |
 | FPENet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1909.08599) | - | 2019 |
 | ContextNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1805.04554) | - | 2018 |
+| LEDNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1905.02423) | - | 2019 |
 
 ## Table of implemented object detection models
 

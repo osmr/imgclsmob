@@ -4,13 +4,14 @@
     https://arxiv.org/abs/1905.02423.
 """
 
-__all__ = ['LEDNet', 'oth_lednet_cityscapes']
+__all__ = ['LEDNet', 'lednet_cityscapes']
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, NormActivation,\
-    ConvBlock, ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
+from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,\
+    ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
 
 
 class AsymConvBlock(nn.Module):
@@ -86,8 +87,7 @@ class AsymConvBlock(nn.Module):
         return x
 
 
-def asym_conv3x3_block(channels,
-                       padding=1,
+def asym_conv3x3_block(padding=1,
                        **kwargs):
     """
     3x3 asymmetric separable convolution block.
@@ -116,18 +116,33 @@ def asym_conv3x3_block(channels,
         Activation function after the rightwise convolution block.
     """
     return AsymConvBlock(
-        channels=channels,
         kernel_size=3,
         padding=padding,
         **kwargs)
 
 
-class DownBlock(nn.Module):
+class LEDDownBlock(nn.Module):
+    """
+    LEDNet specific downscale block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    correct_size_mistmatch : bool
+        Whether to correct downscaled sizes of images.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_eps=1e-3):
-        super(DownBlock, self).__init__()
+                 correct_size_mismatch,
+                 bn_eps):
+        super(LEDDownBlock, self).__init__()
+        self.correct_size_mismatch = correct_size_mismatch
         self.pool = nn.MaxPool2d(
             kernel_size=2,
             stride=2)
@@ -136,7 +151,7 @@ class DownBlock(nn.Module):
             out_channels=(out_channels - in_channels),
             stride=2,
             bias=True)
-        self.norm_activ1 = NormActivation(
+        self.norm_activ = NormActivation(
             in_channels=out_channels,
             bn_eps=bn_eps)
 
@@ -144,22 +159,37 @@ class DownBlock(nn.Module):
         y1 = self.pool(x)
         y2 = self.conv(x)
 
-        diff_h = y2.size()[2] - y1.size()[2]
-        diff_w = y2.size()[3] - y1.size()[3]
-        y1 = F.pad(y1, pad=(diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2))
+        if self.correct_size_mismatch:
+            diff_h = y2.size()[2] - y1.size()[2]
+            diff_w = y2.size()[3] - y1.size()[3]
+            y1 = F.pad(y1, pad=(diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2))
 
         x = torch.cat((y2, y1), dim=1)
-        x = self.norm_activ1(x)
+        x = self.norm_activ(x)
         return x
 
 
-class LEDBlock(nn.Module):
+class LEDBranch(nn.Module):
+    """
+    LEDNet encoder branch.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    dilation : int
+        Dilation value for convolution layer.
+    dropout_rate : float
+        Parameter of Dropout layer. Faction of the input units to drop.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
     def __init__(self,
                  channels,
                  dilation,
                  dropout_rate,
-                 bn_eps=1e-3):
-        super(LEDBlock, self).__init__()
+                 bn_eps):
+        super(LEDBranch, self).__init__()
         self.use_dropout = (dropout_rate != 0.0)
 
         self.conv1 = asym_conv3x3_block(
@@ -187,20 +217,34 @@ class LEDBlock(nn.Module):
 
 
 class LEDUnit(nn.Module):
+    """
+    LEDNet encoder unit (Split-Shuffle-non-bottleneck).
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    dilation : int
+        Dilation value for convolution layer.
+    dropout_rate : float
+        Parameter of Dropout layer. Faction of the input units to drop.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
     def __init__(self,
                  channels,
-                 dropout_rate,
                  dilation,
+                 dropout_rate,
                  bn_eps):
         super(LEDUnit, self).__init__()
         mid_channels = channels // 2
 
-        self.left_branch = LEDBlock(
+        self.left_branch = LEDBranch(
             channels=mid_channels,
             dilation=dilation,
             dropout_rate=dropout_rate,
             bn_eps=bn_eps)
-        self.right_branch = LEDBlock(
+        self.right_branch = LEDBranch(
             channels=mid_channels,
             dilation=dilation,
             dropout_rate=dropout_rate,
@@ -212,53 +256,15 @@ class LEDUnit(nn.Module):
 
     def forward(self, x):
         identity = x
-        x1, x2 = torch.chunk(x, chunks=2, dim=1)
 
+        x1, x2 = torch.chunk(x, chunks=2, dim=1)
         x1 = self.left_branch(x1)
         x2 = self.right_branch(x2)
-
         x = torch.cat((x1, x2), dim=1)
+
         x = x + identity
         x = self.activ(x)
         x = self.shuffle(x)
-        return x
-
-
-class Encoder(nn.Module):
-    def __init__(self,
-                 num_classes,
-                 bn_eps=1e-3):
-        super().__init__()
-        self.initial_block = DownBlock(3, 32)
-
-        self.layers = nn.ModuleList()
-
-        for x in range(0, 3):
-            self.layers.append(LEDUnit(channels=32, dropout_rate=0.03, dilation=1, bn_eps=bn_eps))
-        
-        self.layers.append(DownBlock(32, 64))
-
-        for x in range(0, 2):
-            self.layers.append(LEDUnit(channels=64, dropout_rate=0.03, dilation=1, bn_eps=bn_eps))
-  
-        self.layers.append(DownBlock(64, 128))
-
-        for x in range(0, 1):    
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=1, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=2, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=5, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=9, bn_eps=bn_eps))
-            
-        for x in range(0, 1):    
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=2, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=5, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=9, bn_eps=bn_eps))
-            self.layers.append(LEDUnit(channels=128, dropout_rate=0.3, dilation=17, bn_eps=bn_eps))
-                    
-    def forward(self, x):
-        x = self.initial_block(x)
-        for layer in self.layers:
-            x = layer(x)
         return x
 
 
@@ -408,7 +414,38 @@ class APN(nn.Module):
 
 
 class LEDNet(nn.Module):
+    """
+    LEDNet model from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic Segmentation,'
+    https://arxiv.org/abs/1905.02423.
+
+    Parameters:
+    ----------
+    channels : list of int
+        Number of output channels for each unit.
+    dilations : list of int
+        Dilations for units.
+    dropout_rates : list of list of int
+        Dropout rates for each unit in encoder.
+    correct_size_mistmatch : bool
+        Whether to correct downscaled sizes of images in encoder.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    aux : bool, default False
+        Whether to output an auxiliary result.
+    fixed_size : bool, default False
+        Whether to expect fixed spatial size of input image.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (1024, 2048)
+        Spatial size of the expected input image.
+    num_classes : int, default 19
+        Number of segmentation classes.
+    """
     def __init__(self,
+                 channels,
+                 dilations,
+                 dropout_rates,
+                 correct_size_mismatch=False,
                  bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
@@ -423,14 +460,31 @@ class LEDNet(nn.Module):
         self.num_classes = num_classes
         self.fixed_size = fixed_size
 
-        self.encoder = Encoder(
-            num_classes,
-            bn_eps=bn_eps)
+        self.encoder = nn.Sequential()
+        for i, dilations_per_stage in enumerate(dilations):
+            out_channels = channels[i]
+            dropout_rate = dropout_rates[i]
+            stage = nn.Sequential()
+            for j, dilation in enumerate(dilations_per_stage):
+                if j == 0:
+                    stage.add_module("unit{}".format(j + 1), LEDDownBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        correct_size_mismatch=correct_size_mismatch,
+                        bn_eps=bn_eps))
+                    in_channels = out_channels
+                else:
+                    stage.add_module("unit{}".format(j + 1), LEDUnit(
+                        channels=in_channels,
+                        dilation=dilation,
+                        dropout_rate=dropout_rate,
+                        bn_eps=bn_eps))
+            self.encoder.add_module("stage{}".format(i + 1), stage)
         self.apn = APN(
-            in_channels=128,
+            in_channels=in_channels,
             out_channels=num_classes,
             bn_eps=bn_eps,
-            in_size=(in_size[0] // 8, in_size[1] // 8))
+            in_size=(in_size[0] // 8, in_size[1] // 8) if fixed_size else None)
         self.up = InterpolationBlock(
             scale_factor=8,
             align_corners=True)
@@ -442,10 +496,61 @@ class LEDNet(nn.Module):
         return x
 
 
-def oth_lednet_cityscapes(num_classes=19, pretrained=False, **kwargs):
+def get_lednet(model_name=None,
+               pretrained=False,
+               root=os.path.join("~", ".torch", "models"),
+               **kwargs):
+    """
+    Create LEDNet model with specific parameters.
+
+    Parameters:
+    ----------
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    channels = [32, 64, 128]
+    dilations = [[0, 1, 1, 1], [0, 1, 1], [0, 1, 2, 5, 9, 2, 5, 9, 17]]
+    dropout_rates = [0.03, 0.03, 0.3]
     bn_eps = 1e-3
-    net = LEDNet(num_classes=num_classes, bn_eps=bn_eps)
+
+    net = LEDNet(
+        channels=channels,
+        dilations=dilations,
+        dropout_rates=dropout_rates,
+        bn_eps=bn_eps,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
     return net
+
+
+def lednet_cityscapes(num_classes=19, **kwargs):
+    """
+    LEDNet model for Cityscapes from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic
+    Segmentation,' https://arxiv.org/abs/1905.02423.
+
+    Parameters:
+    ----------
+    num_classes : int, default 19
+        Number of segmentation classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_lednet(num_classes=num_classes, model_name="lednet_cityscapes", **kwargs)
 
 
 def _calc_width(net):
@@ -459,28 +564,31 @@ def _calc_width(net):
 
 def _test():
     pretrained = False
-
+    fixed_size = True
+    correct_size_mismatch = False
     in_size = (1024, 2048)
+    classes = 19
 
     models = [
-        oth_lednet_cityscapes,
+        lednet_cityscapes,
     ]
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size,
+                    correct_size_mismatch=correct_size_mismatch)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_lednet_cityscapes or weight_count == 922821)
+        assert (model != lednet_cityscapes or weight_count == 922821)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
         # y.sum().backward()
-        assert (tuple(y.size()) == (batch, 19, in_size[0], in_size[1]))
+        assert (tuple(y.size()) == (batch, classes, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

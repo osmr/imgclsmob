@@ -458,7 +458,7 @@ class LEDNet(Chain):
         Number of input channels.
     in_size : tuple of two ints, default (1024, 2048)
         Spatial size of the expected input image.
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
     """
     def __init__(self,
@@ -471,13 +471,13 @@ class LEDNet(Chain):
                  fixed_size=False,
                  in_channels=3,
                  in_size=(1024, 2048),
-                 num_classes=19):
+                 classes=19):
         super(LEDNet, self).__init__()
         assert (aux is not None)
         assert (fixed_size is not None)
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         self.fixed_size = fixed_size
 
         with self.init_scope():
@@ -505,7 +505,7 @@ class LEDNet(Chain):
                     setattr(self.encoder, "stage{}".format(i + 1), stage)
             self.apn = APN(
                 in_channels=in_channels,
-                out_channels=num_classes,
+                out_channels=classes,
                 bn_eps=bn_eps,
                 in_size=(in_size[0] // 8, in_size[1] // 8) if fixed_size else None)
             self.up = InterpolationBlock(
@@ -560,21 +560,21 @@ def get_lednet(model_name=None,
     return net
 
 
-def lednet_cityscapes(num_classes=19, **kwargs):
+def lednet_cityscapes(classes=19, **kwargs):
     """
     LEDNet model for Cityscapes from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic
     Segmentation,' https://arxiv.org/abs/1905.02423.
 
     Parameters:
     ----------
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_lednet(num_classes=num_classes, model_name="lednet_cityscapes", **kwargs)
+    return get_lednet(classes=classes, model_name="lednet_cityscapes", **kwargs)
 
 
 def _test():

@@ -2,8 +2,8 @@
     Common routines for models in TensorFlow 2.0.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'ReLU6',
-           'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
+__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'BreakBlock',
+           'ReLU6', 'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
            'BatchNorm', 'InstanceNorm', 'IBN', 'Conv1d', 'Conv2d', 'SelectableDense', 'DenseBlock', 'ConvBlock1d',
            'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
@@ -136,6 +136,20 @@ def interpolate_im(x,
     if is_channels_first(data_format):
         x = tf.transpose(x, perm=[0, 3, 1, 2])
     return x
+
+
+class BreakBlock(nn.Layer):
+    """
+    Break coonnection block for hourglass.
+    """
+    def __init__(self, **kwargs):
+        super(BreakBlock, self).__init__(**kwargs)
+
+    def call(self, x):
+        return None
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
 
 
 class ReLU6(nn.Layer):
@@ -3225,6 +3239,8 @@ class Hourglass(nn.Layer):
         Type of concatenation of up and skip outputs.
     return_first_skip : bool, default False
         Whether return the first skip connection output. Used in ResAttNet.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  down_seq,
@@ -3232,19 +3248,29 @@ class Hourglass(nn.Layer):
                  skip_seq,
                  merge_type="add",
                  return_first_skip=False,
+                 data_format="channels_last",
                  **kwargs):
         super(Hourglass, self).__init__(**kwargs)
         self.depth = len(down_seq)
-        assert (merge_type in ["add"])
+        assert (merge_type in ["cat", "add"])
         assert (len(up_seq) == self.depth)
         assert (len(skip_seq) in (self.depth, self.depth + 1))
         self.merge_type = merge_type
         self.return_first_skip = return_first_skip
         self.extra_skip = (len(skip_seq) == self.depth + 1)
+        self.axis = get_channel_axis(data_format)
 
         self.down_seq = down_seq
         self.up_seq = up_seq
         self.skip_seq = skip_seq
+
+    def _merge(self, x, y):
+        if y is not None:
+            if self.merge_type == "cat":
+                x = tf.concat([x, y], axis=self.axis)
+            elif self.merge_type == "add":
+                x = x + y
+        return x
 
     def call(self, x, training=None):
         y = None
@@ -3257,8 +3283,7 @@ class Hourglass(nn.Layer):
                 y = down_outs[self.depth - i]
                 skip_module = self.skip_seq[self.depth - i]
                 y = skip_module(y, training=training)
-                if (y is not None) and (self.merge_type == "add"):
-                    x = x + y
+                x = self._merge(x, y)
             if i != len(down_outs) - 1:
                 if (i == 0) and self.extra_skip:
                     skip_module = self.skip_seq[self.depth]

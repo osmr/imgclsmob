@@ -143,6 +143,7 @@ class LEDDownBlock(nn.Module):
                  bn_eps):
         super(LEDDownBlock, self).__init__()
         self.correct_size_mismatch = correct_size_mismatch
+
         self.pool = nn.MaxPool2d(
             kernel_size=2,
             stride=2)
@@ -366,19 +367,19 @@ class APN(nn.Module):
             stride=2,
             bias=True,
             bn_eps=bn_eps))
-        down_seq.add_module("down3", nn.Sequential(
-            conv3x3_block(
-                in_channels=att_out_channels,
-                out_channels=att_out_channels,
-                stride=2,
-                bias=True,
-                bn_eps=bn_eps),
-            conv3x3_block(
-                in_channels=att_out_channels,
-                out_channels=att_out_channels,
-                bias=True,
-                bn_eps=bn_eps)
-        ))
+        down3_subseq = nn.Sequential()
+        down3_subseq.add_module("conv1", conv3x3_block(
+            in_channels=att_out_channels,
+            out_channels=att_out_channels,
+            stride=2,
+            bias=True,
+            bn_eps=bn_eps))
+        down3_subseq.add_module("conv2", conv3x3_block(
+            in_channels=att_out_channels,
+            out_channels=att_out_channels,
+            bias=True,
+            bn_eps=bn_eps))
+        down_seq.add_module("down3", down3_subseq)
 
         up_seq = nn.Sequential()
         up = InterpolationBlock(scale_factor=2)

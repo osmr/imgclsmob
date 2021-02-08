@@ -2,14 +2,15 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalAvgPool2D', 'SelectableDense',
-           'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block',
-           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2',
-           'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'SimpleSequential',
-           'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
-           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten',
-           'AdaptiveAvgPool2D', 'NormActivation', 'InterpolationBlock', 'HeatmapMaxDetBlock']
+__all__ = ['round_channels', 'BreakBlock', 'ReLU6', 'HSwish', 'get_activation_layer', 'GlobalAvgPool2D',
+           'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
+           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block',
+           'PixelShuffle', 'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'AdaptiveAvgPool2D', 'NormActivation',
+           'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 from functools import partial
@@ -43,6 +44,20 @@ def round_channels(channels,
     if float(rounded_channels) < 0.9 * channels:
         rounded_channels += divisor
     return rounded_channels
+
+
+class BreakBlock(Chain):
+    """
+    Break coonnection block for hourglass.
+    """
+    def __init__(self):
+        super(BreakBlock, self).__init__()
+
+    def __call__(self, x):
+        return None
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
 
 
 class ReLU6(Chain):
@@ -1775,7 +1790,7 @@ class Hourglass(Chain):
                  return_first_skip=False):
         super(Hourglass, self).__init__()
         self.depth = len(down_seq)
-        assert (merge_type in ["add"])
+        assert (merge_type in ["cat", "add"])
         assert (len(up_seq) == self.depth)
         assert (len(skip_seq) in (self.depth, self.depth + 1))
         self.merge_type = merge_type
@@ -1786,6 +1801,14 @@ class Hourglass(Chain):
             self.down_seq = down_seq
             self.up_seq = up_seq
             self.skip_seq = skip_seq
+
+    def _merge(self, x, y):
+        if y is not None:
+            if self.merge_type == "cat":
+                x = F.concat((x, y), axis=1)
+            elif self.merge_type == "add":
+                x = x + y
+        return x
 
     def __call__(self, x):
         y = None
@@ -1799,8 +1822,7 @@ class Hourglass(Chain):
                 y = down_outs[self.depth - i]
                 skip_module = self.skip_seq.el(self.depth - i)
                 y = skip_module(y)
-                if (y is not None) and (self.merge_type == "add"):
-                    x = x + y
+                x = self._merge(x, y)
             if i != len(down_outs) - 1:
                 if (i == 0) and self.extra_skip:
                     skip_module = self.skip_seq.el(self.depth)

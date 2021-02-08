@@ -2,14 +2,14 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'Softmax',
+__all__ = ['round_channels', 'BreakBlock', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'Softmax',
            'SelectableDense', 'BatchNormExtra', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
-           'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
-           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN', 'DualPathSequential',
-           'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass',
-           'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
+           'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block',
+           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN',
+           'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction

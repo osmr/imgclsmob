@@ -126,6 +126,7 @@ from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
 from .models.fpenet import *
+from .models.lednet import *
 
 from .models.superpointnet import *
 
@@ -1143,6 +1144,8 @@ _models = {
     'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
 
     'fpenet_cityscapes': fpenet_cityscapes,
+
+    'lednet_cityscapes': lednet_cityscapes,
 
     'superpointnet': superpointnet,
 

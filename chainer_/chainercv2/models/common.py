@@ -647,6 +647,7 @@ def conv7x7_block(in_channels,
                   pad=3,
                   use_bias=False,
                   use_bn=True,
+                  bn_eps=1e-5,
                   activation=(lambda: F.relu)):
     """
     7x7 version of the standard convolution block.
@@ -665,6 +666,8 @@ def conv7x7_block(in_channels,
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
     """
@@ -676,6 +679,7 @@ def conv7x7_block(in_channels,
         pad=pad,
         use_bias=use_bias,
         use_bn=use_bn,
+        bn_eps=bn_eps,
         activation=activation)
 
 

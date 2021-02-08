@@ -188,7 +188,11 @@ class LEDDownBlock(HybridBlock):
         if self.correct_size_mismatch:
             diff_h = y2.size()[2] - y1.size()[2]
             diff_w = y2.size()[3] - y1.size()[3]
-            y1 = F.pad(y1, pad=(diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2))
+            y1 = F.pad(
+                y1,
+                mode="constant",
+                pad_width=(0, 0, 0, 0, diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2),
+                constant_value=0)
 
         x = F.concat(y2, y1, dim=1)
         x = self.norm_activ(x)
@@ -352,8 +356,8 @@ class PoolingBranch(HybridBlock):
                  down_size,
                  **kwargs):
         super(PoolingBranch, self).__init__(**kwargs)
-        self.down_size = down_size
         self.in_size = in_size
+        self.down_size = down_size
 
         with self.name_scope():
             self.conv = conv1x1_block(

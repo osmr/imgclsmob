@@ -126,6 +126,7 @@ from .models.danet import *
 from .models.fpenet import *
 from .models.contextnet import *
 from .models.lednet import *
+from .models.esnet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *

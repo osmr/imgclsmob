@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1905.02423.
 """
 
-__all__ = ['LEDNet', 'lednet_cityscapes']
+__all__ = ['LEDNet', 'lednet_cityscapes', 'AsymConvBlock', 'LEDDownBlock']
 
 import os
 import torch

@@ -1774,22 +1774,33 @@ class Concurrent(nn.Sequential):
         The axis on which to concatenate the outputs.
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
+    merge_type : str, default None
+        Type of branch merging.
     """
     def __init__(self,
                  axis=1,
-                 stack=False):
+                 stack=False,
+                 merge_type=None):
         super(Concurrent, self).__init__()
+        assert (merge_type in ["cat", "stack", "sum"])
         self.axis = axis
-        self.stack = stack
+        if merge_type is not None:
+            self.merge_type = merge_type
+        else:
+            self.merge_type = "stack" if stack else "cat"
 
     def forward(self, x):
         out = []
         for module in self._modules.values():
             out.append(module(x))
-        if self.stack:
+        if self.merge_type == "stack":
             out = torch.stack(tuple(out), dim=self.axis)
-        else:
+        if self.merge_type == "cat":
             out = torch.cat(tuple(out), dim=self.axis)
+        if self.merge_type == "sum":
+            out = torch.stack(tuple(out), dim=self.axis).sum(self.axis)
+        else:
+            raise NotImplementedError()
         return out
 
 

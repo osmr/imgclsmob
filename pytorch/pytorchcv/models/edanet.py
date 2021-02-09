@@ -2,17 +2,15 @@
     EDANet for image segmentation, implemented in PyTorch.
     Original paper: 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1809.06323.
-    : https://github.com/shaoyuanlo/EDANet
 """
 
+__all__ = ['EDANet', 'edanet_cityscapes']
+
+import os
 import torch
 import torch.nn as nn
-from common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, ConvBlock, NormActivation, Concurrent,\
-    InterpolationBlock, DualPathSequential
-from lednet import asym_conv3x3_block
-
-
-__all__ = ["EDANet"]
+from .common import conv1x1, conv3x3, conv1x1_block, NormActivation, InterpolationBlock
+from .lednet import asym_conv3x3_block
 
 
 class DownBlock(nn.Module):
@@ -157,33 +155,36 @@ class EDAUnit(nn.Module):
         return x
 
 
-class EDAStage(nn.Module):
+class EDANet(nn.Module):
+    """
+    EDANet model from 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic Segmentation,'
+    https://arxiv.org/abs/1809.06323.
+
+    Parameters:
+    ----------
+    channels : list of int
+        Number of output channels for the first unit of each stage.
+    dilations : list of list of int
+        Dilations for blocks.
+    growth_rate : int
+        Growth rate for numbers of output channels for each non-first unit.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    aux : bool, default False
+        Whether to output an auxiliary result.
+    fixed_size : bool, default False
+        Whether to expect fixed spatial size of input image.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (1024, 2048)
+        Spatial size of the expected input image.
+    num_classes : int, default 19
+        Number of segmentation classes.
+    """
     def __init__(self,
-                 in_channels,
-                 num_dense_layer,
+                 channels,
                  dilations,
                  growth_rate,
-                 bn_eps):
-        super().__init__()
-        _in_channels = in_channels
-        modules = []
-        for i in range(num_dense_layer):
-            modules.append(EDAUnit(
-                in_channels=_in_channels,
-                out_channels=(_in_channels + growth_rate),
-                dilation=dilations[i],
-                dropout_rate=0.02,
-                bn_eps=bn_eps))
-            _in_channels += growth_rate
-        self.residual_dense_layers = nn.Sequential(*modules)
-
-    def forward(self, x):
-        x = self.residual_dense_layers(x)
-        return x
-
-
-class EDANet(nn.Module):
-    def __init__(self,
                  bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
@@ -197,48 +198,31 @@ class EDANet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
         self.fixed_size = fixed_size
+        dropout_rate = 0.02
 
-        self.layers = nn.ModuleList()
-
-        channels = [15, 60]
-
-        out_channels = channels[0]
-        self.layers.append(DownBlock(
-            in_channels=3,
-            out_channels=out_channels,
-            bn_eps=bn_eps))
-
-        in_channels = out_channels
-        out_channels = channels[1]
-        self.layers.append(DownBlock(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps))
-
-        # EDA Block1
-        self.layers.append(EDAStage(
-            in_channels=60,
-            num_dense_layer=5,
-            dilations=[1, 1, 1, 2, 2],
-            growth_rate=40,
-            bn_eps=bn_eps))
-
-        # DownsamplerBlock3
-        self.layers.append(DownBlock(
-            in_channels=260,
-            out_channels=130,
-            bn_eps=bn_eps))
-
-        # # EDA Block2
-        self.layers.append(EDAStage(
-            in_channels=130,
-            num_dense_layer=8,
-            dilations=[2, 2, 4, 4, 8, 8, 16, 16],
-            growth_rate=40,
-            bn_eps=bn_eps))
+        self.features = nn.Sequential()
+        for i, dilations_per_stage in enumerate(dilations):
+            out_channels = channels[i]
+            stage = nn.Sequential()
+            for j, dilation in enumerate(dilations_per_stage):
+                if j == 0:
+                    stage.add_module("unit{}".format(j + 1), DownBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        bn_eps=bn_eps))
+                else:
+                    out_channels += growth_rate
+                    stage.add_module("unit{}".format(j + 1), EDAUnit(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        dilation=dilation,
+                        dropout_rate=dropout_rate,
+                        bn_eps=bn_eps))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
 
         self.head = conv1x1(
-            in_channels=450,
+            in_channels=in_channels,
             out_channels=num_classes,
             bias=True)
 
@@ -246,18 +230,77 @@ class EDANet(nn.Module):
             scale_factor=8,
             align_corners=True)
 
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        x = self.head(x)
+        self._init_params()
 
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.head(x)
         x = self.up(x)
         return x
 
 
-def oth_edanet_cityscapes(num_classes=19, pretrained=False, **kwargs):
+def get_edanet(model_name=None,
+               pretrained=False,
+               root=os.path.join("~", ".torch", "models"),
+               **kwargs):
+    """
+    Create EDANet model with specific parameters.
+
+    Parameters:
+    ----------
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    channels = [15, 60, 130, 450]
+    dilations = [[0], [0, 1, 1, 1, 2, 2], [0, 2, 2, 4, 4, 8, 8, 16, 16]]
+    growth_rate = 40
     bn_eps = 1e-3
-    return EDANet(num_classes=num_classes, bn_eps=bn_eps, **kwargs)
+
+    net = EDANet(
+        channels=channels,
+        dilations=dilations,
+        growth_rate=growth_rate,
+        bn_eps=bn_eps,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
+
+
+def edanet_cityscapes(num_classes=19, **kwargs):
+    """
+    EDANet model for Cityscapes from 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic
+    Segmentation,' https://arxiv.org/abs/1809.06323.
+
+    Parameters:
+    ----------
+    num_classes : int, default 19
+        Number of segmentation classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_edanet(num_classes=num_classes, model_name="edanet_cityscapes", **kwargs)
 
 
 def _calc_width(net):
@@ -271,23 +314,23 @@ def _calc_width(net):
 
 def _test():
     pretrained = False
-    # fixed_size = True
+    fixed_size = True
     in_size = (1024, 2048)
     classes = 19
 
     models = [
-        oth_edanet_cityscapes,
+        edanet_cityscapes,
     ]
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_edanet_cityscapes or weight_count == 689485)
+        assert (model != edanet_cityscapes or weight_count == 689485)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

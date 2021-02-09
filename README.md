@@ -175,6 +175,7 @@ Some remarks:
 | ContextNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1805.04554) | - | 2018 |
 | LEDNet | c | c | c | - | - | c | [link](https://arxiv.org/abs/1905.02423) | - | 2019 |
 | ESDNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1906.09826) | - | 2019 |
+| EDANet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1809.06323) | [link](https://github.com/shaoyuanlo/EDANet) | 2018 |
 
 ## Table of implemented object detection models
 

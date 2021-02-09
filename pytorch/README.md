@@ -106,6 +106,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - ContextNet (['ContextNet: Exploring Context and Detail for Semantic Segmentation in Real-time'](https://arxiv.org/abs/1805.04554))
 - LEDNet (['LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic Segmentation'](https://arxiv.org/abs/1905.02423))
 - ESNet (['ESNet: An Efficient Symmetric Network for Real-time Semantic Segmentation'](https://arxiv.org/abs/1906.09826))
+- EDANet (['Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic Segmentation'](https://arxiv.org/abs/1809.06323))
 - CenterNet (['Objects as Points'](https://arxiv.org/abs/1904.07850))
 - LFFD (['LFFD: A Light and Fast Face Detector for Edge Devices'](https://arxiv.org/abs/1904.10633))
 - AlphaPose (['RMPE: Regional Multi-person Pose Estimation'](https://arxiv.org/abs/1612.00137))

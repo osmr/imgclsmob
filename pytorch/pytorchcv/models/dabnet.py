@@ -379,7 +379,7 @@ class DABNet(nn.Module):
         Number of output channels for each unit (for y-branch).
     init_block_channels : int
         Number of output channels for the initial unit.
-    dilations : list of int
+    dilations : list of list of int
         Dilations for blocks.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.

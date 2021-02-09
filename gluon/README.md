@@ -265,7 +265,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | CBAM-ResNet-50 | 23.02 | 6.38 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.125/cbam_resnet50-0638-78be5665.params.log)) |
 | SCNet-50 | 20.53 | 5.11 | 25,564,584 | 3,951.01M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0511-359d35d0.params.log)) |
 | SCNet-101 | 19.21 | 4.46 | 44,565,416 | 7,204.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/scnet101-0446-bc5cade0.params.log)) |
-| SCNet(A)-50 | 19.56 | 4.63 | 25,583,816 | 4,715.79M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0463-4b2031a8.params.log)) |
+| SCNet(A)-50 | 19.01 | 4.59 | 25,583,816 | 4,715.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/scneta50-0459-c1f6f028.params.log)) |
 | RegNetX-200MF | 29.91 | 10.38 | 2,684,792 | 203.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.475/regnetx002-1038-7800b310.params.log)) |
 | RegNetX-400MF | 26.25 | 8.55 | 5,157,512 | 403.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.479/regnetx004-0855-b933a72f.params.log)) |
 | RegNetX-600MF | 24.71 | 7.56 | 6,196,040 | 608.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx006-0756-d41aa087.params.log)) |
@@ -328,7 +328,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-102 | 20.58 | 5.17 | 33,268,888 | 7,190.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-0e5d954c.params.log)) |
 | DLA-X-102 | 20.10 | 4.88 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0488-e29b7d26.params.log)) |
 | DLA-X2-102 | 21.12 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla102x2-0553-30c8f409.params.log)) |
-| DLA-169 | 21.95 | 5.87 | 53,389,720 | 11,593.20M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla169-0587-4f3e6a6e.params.log)) |
+| DLA-169 | 19.61 | 4.83 | 53,389,720 | 11,593.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0483-916bcd08.params.log)) |
 | FishNet-150 | 19.15 | 4.66 | 24,959,400 | 6,435.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0466-ed21862d.params.log)) |
 | ESPNetv2 x0.5 | 43.61 | 21.07 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2107-f2e17f0a.params.log)) |
 | ESPNetv2 x1.0 | 35.33 | 14.27 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1427-538f31fb.params.log)) |

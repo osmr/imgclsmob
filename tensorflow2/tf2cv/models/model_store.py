@@ -176,7 +176,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('dla102', '0517', '9bebb44b573356606e41cf16c2f1b3298e39106b', 'v0.0.505', 'in1k', 0.875),
     ('dla102x', '0491', '0a95e90b8ecddd10ee5d1cfa3f2029176c499b81', 'v0.0.503', 'in1k', 0.875),
     ('dla102x2', '0553', '06c930313e017f2ef9596d9259f0029d399f563a', 'v0.0.427', 'in1k', 0.875),
-    ('dla169', '0590', 'e010166d75cd6603a94f006f0dbf5a4d9185bf07', 'v0.0.427', 'in1k', 0.875),
+    ('dla169', '0481', '39a0a5d70ad9207179ddb46879e849e18538edc2', 'v0.0.509', 'in1k', 0.875),
     ('dicenet_wd5', '3116', '6fbe46e2756bbaab61bd772532135fc1e10138ba', 'v0.0.497', 'in1k', 0.875),
     ('dicenet_wd2', '2429', 'fbf5fc52022b6ee4b3b553ead1661ed2519e0e9c', 'v0.0.497', 'in1k', 0.875),
     ('dicenet_w3d4', '1701', 'bc4388085c48ef271540250825551764cce33b8b', 'v0.0.497', 'in1k', 0.875),

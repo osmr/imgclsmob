@@ -128,6 +128,7 @@ from .models.contextnet import *
 from .models.lednet import *
 from .models.esnet import *
 from .models.edanet import *
+from .models.enet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
@@ -1092,6 +1093,8 @@ _models = {
     'esnet_cityscapes': esnet_cityscapes,
 
     'edanet_cityscapes': edanet_cityscapes,
+
+    'enet_cityscapes': enet_cityscapes,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 

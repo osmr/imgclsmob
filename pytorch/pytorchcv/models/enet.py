@@ -4,51 +4,32 @@
     https://arxiv.org/abs/1606.02147.
 """
 
+__all__ = ['ENet', 'enet_cityscapes']
+
+import os
 import torch
 import torch.nn as nn
-from common import ConvBlock, AsymConvBlock, DeconvBlock, NormActivation, conv1x1_block
-
-
-class InitBlock(nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 padding,
-                 bias,
-                 bn_eps,
-                 activation):
-        super(InitBlock, self).__init__()
-        self.main_branch = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=(out_channels - in_channels),
-            kernel_size=kernel_size,
-            stride=2,
-            padding=padding,
-            bias=bias)
-        self.ext_branch = nn.MaxPool2d(
-            kernel_size=kernel_size,
-            stride=2,
-            padding=padding)
-        self.norm_activ = NormActivation(
-            in_channels=out_channels,
-            bn_eps=bn_eps,
-            activation=activation)
-
-    def forward(self, x):
-        x1 = self.main_branch(x)
-        x2 = self.ext_branch(x)
-        x = torch.cat((x1, x2), dim=1)
-        x = self.norm_activ(x)
-        return x
+from .common import ConvBlock, AsymConvBlock, DeconvBlock, NormActivation, conv1x1_block
 
 
 class DownBlock(nn.Module):
+    """
+    ENet downscale block.
+
+    Parameters:
+    ----------
+    ext_channels : int
+        Number of extra channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  ext_channels,
                  kernel_size,
                  padding):
-        super().__init__()
+        super(DownBlock, self).__init__()
         self.ext_channels = ext_channels
 
         self.pool = nn.MaxPool2d(
@@ -66,11 +47,23 @@ class DownBlock(nn.Module):
 
 
 class UpBlock(nn.Module):
+    """
+    ENet upscale block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bias : bool
+        Whether the layer uses a bias vector.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  bias):
-        super().__init__()
+        super(UpBlock, self).__init__()
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -85,6 +78,34 @@ class UpBlock(nn.Module):
 
 
 class ENetUnit(nn.Module):
+    """
+    ENet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_asym_convs : bool
+        Whether to use asymmetric convolution blocks.
+    dropout_rate : float
+        Parameter of Dropout layer. Faction of the input units to drop.
+    bias : bool
+        Whether the layer uses a bias vector.
+    activation : function or str or None
+        Activation function or name of activation function.
+    downs : bool
+        Whether to downscale or upscale.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -97,7 +118,7 @@ class ENetUnit(nn.Module):
                  activation,
                  down,
                  bottleneck_factor=4):
-        super().__init__()
+        super(ENetUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels)
         self.down = down
         mid_channels = in_channels // bottleneck_factor
@@ -201,6 +222,32 @@ class ENetUnit(nn.Module):
 
 
 class ENetStage(nn.Module):
+    """
+    ENet stage.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_sizes : list of int
+        Kernel sizes.
+    paddings : list of int
+        Padding values.
+    dilations : list of int
+        Dilation values.
+    use_asym_convs : list of int
+        Whether to use asymmetric convolution blocks.
+    dropout_rate : float
+        Parameter of Dropout layer. Faction of the input units to drop.
+    bias : bool
+        Whether the layer uses a bias vector.
+    activation : function or str or None
+        Activation function or name of activation function.
+    downs : bool
+        Whether to downscale or upscale.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -212,7 +259,7 @@ class ENetStage(nn.Module):
                  bias,
                  activation,
                  down):
-        super().__init__()
+        super(ENetStage, self).__init__()
         self.down = down
 
         units = nn.Sequential()
@@ -249,44 +296,123 @@ class ENetStage(nn.Module):
             return x
 
 
-class ENet(nn.Module):
+class ENetInitBlock(nn.Module):
+    """
+    ENet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+        Padding value for convolution layer.
+    bias : bool
+        Whether the layer uses a bias vector.
+    activation : function or str or None
+        Activation function or name of activation function.
+    """
     def __init__(self,
-                 bn_eps=1e-5,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 padding,
+                 bias,
+                 activation):
+        super(ENetInitBlock, self).__init__()
+        self.main_branch = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=(out_channels - in_channels),
+            kernel_size=kernel_size,
+            stride=2,
+            padding=padding,
+            bias=bias)
+        self.ext_branch = nn.MaxPool2d(
+            kernel_size=kernel_size,
+            stride=2,
+            padding=padding)
+        self.norm_activ = NormActivation(
+            in_channels=out_channels,
+            activation=activation)
+
+    def forward(self, x):
+        x1 = self.main_branch(x)
+        x2 = self.ext_branch(x)
+        x = torch.cat((x1, x2), dim=1)
+        x = self.norm_activ(x)
+        return x
+
+
+class ENet(nn.Module):
+    """
+    ENet model from 'ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation,'
+    https://arxiv.org/abs/1606.02147.
+
+    Parameters:
+    ----------
+    channels : list of int
+        Number of output channels for the first unit of each stage.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    kernel_sizes : list of list of int
+        Kernel sizes for each unit.
+    paddings : list of list of int
+        Padding values for each unit.
+    dilations : list of list of int
+        Dilation values for each unit.
+    use_asym_convs : list of list of int
+        Whether to use asymmetric convolution blocks for each unit.
+    dropout_rates : list of float
+        Parameter of dropout layer for each stage.
+    downs : list of int
+        Whether to downscale or upscale in each stage.
+    aux : bool, default False
+        Whether to output an auxiliary result.
+    fixed_size : bool, default False
+        Whether to expect fixed spatial size of input image.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (1024, 2048)
+        Spatial size of the expected input image.
+    num_classes : int, default 19
+        Number of segmentation classes.
+    """
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 kernel_sizes,
+                 paddings,
+                 dilations,
+                 use_asym_convs,
+                 dropout_rates,
+                 downs,
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
                  in_size=(1024, 2048),
                  num_classes=19):
-        super().__init__()
+        super(ENet, self).__init__()
         assert (aux is not None)
         assert (fixed_size is not None)
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
         self.num_classes = num_classes
         self.fixed_size = fixed_size
-
         bias = False
         encoder_activation = (lambda: nn.PReLU(1))
         decoder_activation = (lambda: nn.ReLU(inplace=True))
 
-        out_channels = 16
-        self.steam = InitBlock(
+        self.steam = ENetInitBlock(
             in_channels=in_channels,
-            out_channels=out_channels,
+            out_channels=init_block_channels,
             kernel_size=3,
             padding=1,
             bias=bias,
-            bn_eps=bn_eps,
             activation=encoder_activation)
-        in_channels = out_channels
-
-        channels = [64, 128, 64, 16]
-        kernel_sizes = [[3, 3, 3, 3, 3], [3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3], [3, 3, 3], [3, 3]]
-        paddings = [[1, 1, 1, 1, 1], [1, 1, 2, 2, 4, 1, 8, 2, 16, 1, 2, 2, 4, 1, 8, 2, 16], [1, 1, 1], [1, 1]]
-        dilations = [[1, 1, 1, 1, 1], [1, 1, 2, 1, 4, 1, 8, 1, 16, 1, 2, 1, 4, 1, 8, 1, 16], [1, 1, 1], [1, 1]]
-        use_asym_convs = [[0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0], [0, 0]]
-        dropout_rates = [0.01, 0.1, 0.1, 0.1]
-        downs = [1, 1, 0, 0]
+        in_channels = init_block_channels
 
         for i, channels_per_stage in enumerate(channels):
             setattr(self, "stage{}".format(i + 1), ENetStage(
@@ -303,13 +429,22 @@ class ENet(nn.Module):
             in_channels = channels_per_stage
 
         self.head = nn.ConvTranspose2d(
-            in_channels,
-            num_classes,
+            in_channels=in_channels,
+            out_channels=num_classes,
             kernel_size=3,
             stride=2,
             padding=1,
             output_padding=1,
             bias=False)
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.steam(x)
@@ -321,8 +456,69 @@ class ENet(nn.Module):
         return x
 
 
-def oth_enet_cityscapes(num_classes=19, pretrained=False, **kwargs):
-    return ENet(num_classes=num_classes, **kwargs)
+def get_enet(model_name=None,
+             pretrained=False,
+             root=os.path.join("~", ".torch", "models"),
+             **kwargs):
+    """
+    Create ENet model with specific parameters.
+
+    Parameters:
+    ----------
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    channels = [64, 128, 64, 16]
+    kernel_sizes = [[3, 3, 3, 3, 3], [3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3], [3, 3, 3], [3, 3]]
+    paddings = [[1, 1, 1, 1, 1], [1, 1, 2, 2, 4, 1, 8, 2, 16, 1, 2, 2, 4, 1, 8, 2, 16], [1, 1, 1], [1, 1]]
+    dilations = [[1, 1, 1, 1, 1], [1, 1, 2, 1, 4, 1, 8, 1, 16, 1, 2, 1, 4, 1, 8, 1, 16], [1, 1, 1], [1, 1]]
+    use_asym_convs = [[0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0], [0, 0]]
+    dropout_rates = [0.01, 0.1, 0.1, 0.1]
+    downs = [1, 1, 0, 0]
+    init_block_channels = 16
+
+    net = ENet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        kernel_sizes=kernel_sizes,
+        paddings=paddings,
+        dilations=dilations,
+        use_asym_convs=use_asym_convs,
+        dropout_rates=dropout_rates,
+        downs=downs,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
+
+
+def enet_cityscapes(num_classes=19, **kwargs):
+    """
+    ENet model for Cityscapes from 'ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation,'
+    https://arxiv.org/abs/1606.02147.
+
+    Parameters:
+    ----------
+    num_classes : int, default 19
+        Number of segmentation classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_enet(num_classes=num_classes, model_name="enet_cityscapes", **kwargs)
 
 
 def _calc_width(net):
@@ -336,29 +532,23 @@ def _calc_width(net):
 
 def _test():
     pretrained = False
-    # fixed_size = True
+    fixed_size = True
     in_size = (1024, 2048)
     classes = 19
 
     models = [
-        oth_enet_cityscapes,
+        enet_cityscapes,
     ]
 
     for model in models:
 
-        # from torchsummary import summary
-        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # model = ENet(num_classes=19).to(device)
-        # summary(model, (3, 512, 1024))
-
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size, fixed_size=fixed_size)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != oth_enet_cityscapes or weight_count == 360422)
-        assert (model != oth_enet_cityscapes or weight_count == 358060)
+        assert (model != enet_cityscapes or weight_count == 358060)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

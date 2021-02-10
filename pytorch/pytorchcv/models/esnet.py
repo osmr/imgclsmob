@@ -9,8 +9,8 @@ __all__ = ['ESNet', 'esnet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import DeconvBlock, Concurrent
-from .lednet import AsymConvBlock, LEDDownBlock
+from .common import AsymConvBlock, DeconvBlock, Concurrent
+from .lednet import LEDDownBlock
 
 
 def deconv3x3_block(padding=1,

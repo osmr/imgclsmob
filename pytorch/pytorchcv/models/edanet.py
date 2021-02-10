@@ -9,8 +9,7 @@ __all__ = ['EDANet', 'edanet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv3x3, conv1x1_block, NormActivation, InterpolationBlock
-from .lednet import asym_conv3x3_block
+from .common import conv1x1, conv3x3, conv1x1_block, asym_conv3x3_block, NormActivation, InterpolationBlock
 
 
 class DownBlock(nn.Module):

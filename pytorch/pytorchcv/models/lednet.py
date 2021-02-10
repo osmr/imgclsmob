@@ -4,121 +4,14 @@
     https://arxiv.org/abs/1905.02423.
 """
 
-__all__ = ['LEDNet', 'lednet_cityscapes', 'AsymConvBlock', 'asym_conv3x3_block', 'LEDDownBlock']
+__all__ = ['LEDNet', 'lednet_cityscapes', 'LEDDownBlock']
 
 import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,\
-    ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
-
-
-class AsymConvBlock(nn.Module):
-    """
-    Asymmetric separable convolution block.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    kernel_size : int
-        Convolution window size.
-    padding : int
-        Padding value for convolution layer.
-    dilation : int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    lw_use_bn : bool, default True
-        Whether to use BatchNorm layer (leftwise convolution block).
-    rw_use_bn : bool, default True
-        Whether to use BatchNorm layer (rightwise convolution block).
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    lw_activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function after the leftwise convolution block.
-    rw_activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function after the rightwise convolution block.
-    """
-    def __init__(self,
-                 channels,
-                 kernel_size,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 lw_use_bn=True,
-                 rw_use_bn=True,
-                 bn_eps=1e-5,
-                 lw_activation=(lambda: nn.ReLU(inplace=True)),
-                 rw_activation=(lambda: nn.ReLU(inplace=True))):
-        super(AsymConvBlock, self).__init__()
-        self.lw_conv = ConvBlock(
-            in_channels=channels,
-            out_channels=channels,
-            kernel_size=(kernel_size, 1),
-            stride=1,
-            padding=(padding, 0),
-            dilation=(dilation, 1),
-            groups=groups,
-            bias=bias,
-            use_bn=lw_use_bn,
-            bn_eps=bn_eps,
-            activation=lw_activation)
-        self.rw_conv = ConvBlock(
-            in_channels=channels,
-            out_channels=channels,
-            kernel_size=(1, kernel_size),
-            stride=1,
-            padding=(0, padding),
-            dilation=(1, dilation),
-            groups=groups,
-            bias=bias,
-            use_bn=rw_use_bn,
-            bn_eps=bn_eps,
-            activation=rw_activation)
-
-    def forward(self, x):
-        x = self.lw_conv(x)
-        x = self.rw_conv(x)
-        return x
-
-
-def asym_conv3x3_block(padding=1,
-                       **kwargs):
-    """
-    3x3 asymmetric separable convolution block.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    padding : int, default 1
-        Padding value for convolution layer.
-    dilation : int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    lw_use_bn : bool, default True
-        Whether to use BatchNorm layer (leftwise convolution block).
-    rw_use_bn : bool, default True
-        Whether to use BatchNorm layer (rightwise convolution block).
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    lw_activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function after the leftwise convolution block.
-    rw_activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function after the rightwise convolution block.
-    """
-    return AsymConvBlock(
-        kernel_size=3,
-        padding=padding,
-        **kwargs)
+from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, asym_conv3x3_block,\
+    NormActivation, ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
 
 
 class LEDDownBlock(nn.Module):

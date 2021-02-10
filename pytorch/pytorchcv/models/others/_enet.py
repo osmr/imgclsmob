@@ -198,53 +198,55 @@ class ENetUnit(nn.Module):
             return x, max_indices
         else:
             return x
-        # return x, max_indices
 
 
 class ENetStage(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 padding,
-                 dilation,
-                 use_asym_conv,
+                 kernel_sizes,
+                 paddings,
+                 dilations,
+                 use_asym_convs,
                  dropout_rate,
                  bias,
                  activation,
-                 down,
-                 layers):
+                 down):
         super().__init__()
-        self.scale_unit = ENetUnit(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            dilation=dilation,
-            use_asym_conv=use_asym_conv,
-            dropout_rate=dropout_rate,
-            bias=bias,
-            activation=activation,
-            down=down)
+        self.down = down
 
-        self.units = nn.Sequential()
-        for i in range(1, layers):
-            self.units.add_module("unit{}".format(i + 1), ENetUnit(
-                in_channels=out_channels,
+        units = nn.Sequential()
+        for i, kernel_size in enumerate(kernel_sizes):
+            unit = ENetUnit(
+                in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
-                padding=padding,
-                dilation=dilation,
-                use_asym_conv=use_asym_conv,
+                padding=paddings[i],
+                dilation=dilations[i],
+                use_asym_conv=(use_asym_convs[i] == 1),
                 dropout_rate=dropout_rate,
                 bias=bias,
                 activation=activation,
-                down=down))
+                down=down)
+            if i == 0:
+                self.scale_unit = unit
+            else:
+                units.add_module("unit{}".format(i + 1), unit)
+            in_channels = out_channels
+        self.units = units
 
-    def forward(self, x):
-        x, max_indices = self.scale_unit(x)
+    def forward(self, x, max_indices=None):
+        if self.down:
+            x, max_indices = self.scale_unit(x)
+        else:
+            x = self.scale_unit(x, max_indices)
+
         x = self.units(x)
-        return x, max_indices
+
+        if self.down:
+            return x, max_indices
+        else:
+            return x
 
 
 class ENet(nn.Module):
@@ -268,7 +270,7 @@ class ENet(nn.Module):
         decoder_activation = (lambda: nn.ReLU(inplace=True))
 
         out_channels = 16
-        self.initial_block = InitBlock(
+        self.steam = InitBlock(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=3,
@@ -278,335 +280,30 @@ class ENet(nn.Module):
             activation=encoder_activation)
         in_channels = out_channels
 
-        layers = [5]
-        channels = [64]
-        kernel_sizes = [3]
-        dilations = [1]
-        use_asym_convs = [0]
-        dropout_rates = [0.01]
+        channels = [64, 128, 64, 16]
+        kernel_sizes = [[3, 3, 3, 3, 3], [3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3], [3, 3, 3], [3, 3]]
+        paddings = [[1, 1, 1, 1, 1], [1, 1, 2, 2, 4, 1, 8, 2, 16, 1, 2, 2, 4, 1, 8, 2, 16], [1, 1, 1], [1, 1]]
+        dilations = [[1, 1, 1, 1, 1], [1, 1, 2, 1, 4, 1, 8, 1, 16, 1, 2, 1, 4, 1, 8, 1, 16], [1, 1, 1], [1, 1]]
+        use_asym_convs = [[0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0], [0, 0]]
+        dropout_rates = [0.01, 0.1, 0.1, 0.1]
+        downs = [1, 1, 0, 0]
 
-        self.stage1 = ENetStage(
-            in_channels=in_channels,
-            out_channels=channels[0],
-            kernel_size=kernel_sizes[0],
-            padding=dilations[0],
-            dilation=dilations[0],
-            use_asym_conv=(use_asym_convs[0] == 1),
-            dropout_rate=dropout_rates[0],
-            bias=bias,
-            activation=encoder_activation,
-            down=True,
-            layers=layers[0])
+        for i, channels_per_stage in enumerate(channels):
+            setattr(self, "stage{}".format(i + 1), ENetStage(
+                in_channels=in_channels,
+                out_channels=channels_per_stage,
+                kernel_sizes=kernel_sizes[i],
+                paddings=paddings[i],
+                dilations=dilations[i],
+                use_asym_convs=use_asym_convs[i],
+                dropout_rate=dropout_rates[i],
+                bias=bias,
+                activation=(encoder_activation if downs[i] == 1 else decoder_activation),
+                down=(downs[i] == 1)))
+            in_channels = channels_per_stage
 
-        # # Stage 1 - Encoder
-        # self.downsample1_0 = ENetUnit(
-        #     in_channels=16,
-        #     out_channels=64,
-        #     kernel_size=3,
-        #     padding=1,
-        #     dilation=1,
-        #     use_asym_conv=False,
-        #     dropout_rate=0.01,
-        #     bias=bias,
-        #     activation=encoder_activation,
-        #     down=True)
-        # self.regular1_1 = ENetUnit(
-        #     in_channels=64,
-        #     out_channels=64,
-        #     kernel_size=3,
-        #     padding=1,
-        #     dilation=1,
-        #     use_asym_conv=False,
-        #     dropout_rate=0.01,
-        #     bias=bias,
-        #     activation=encoder_activation,
-        #     down=True)
-        # self.regular1_2 = ENetUnit(
-        #     in_channels=64,
-        #     out_channels=64,
-        #     kernel_size=3,
-        #     padding=1,
-        #     dilation=1,
-        #     use_asym_conv=False,
-        #     dropout_rate=0.01,
-        #     bias=bias,
-        #     activation=encoder_activation,
-        #     down=True)
-        # self.regular1_3 = ENetUnit(
-        #     in_channels=64,
-        #     out_channels=64,
-        #     kernel_size=3,
-        #     padding=1,
-        #     dilation=1,
-        #     use_asym_conv=False,
-        #     dropout_rate=0.01,
-        #     bias=bias,
-        #     activation=encoder_activation,
-        #     down=True)
-        # self.regular1_4 = ENetUnit(
-        #     in_channels=64,
-        #     out_channels=64,
-        #     kernel_size=3,
-        #     padding=1,
-        #     dilation=1,
-        #     use_asym_conv=False,
-        #     dropout_rate=0.01,
-        #     bias=bias,
-        #     activation=encoder_activation,
-        #     down=True)
-
-        # Stage 2 - Encoder
-        self.downsample2_0 = ENetUnit(
-            in_channels=64,
-            out_channels=128,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.regular2_1 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated2_2 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=2,
-            dilation=2,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.asymmetric2_3 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=5,
-            padding=2,
-            dilation=1,
-            use_asym_conv=True,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated2_4 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=4,
-            dilation=4,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.regular2_5 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated2_6 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=8,
-            dilation=8,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.asymmetric2_7 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=5,
-            padding=2,
-            dilation=1,
-            use_asym_conv=True,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated2_8 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=16,
-            dilation=16,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-
-        # Stage 3 - Encoder
-        self.regular3_0 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated3_1 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            dilation=2,
-            padding=2,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.asymmetric3_2 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=5,
-            padding=2,
-            dilation=1,
-            use_asym_conv=True,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated3_3 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=4,
-            dilation=4,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.regular3_4 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated3_5 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=8,
-            dilation=8,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.asymmetric3_6 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=5,
-            padding=2,
-            dilation=1,
-            use_asym_conv=True,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-        self.dilated3_7 = ENetUnit(
-            in_channels=128,
-            out_channels=128,
-            kernel_size=3,
-            padding=16,
-            dilation=16,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=encoder_activation,
-            down=True)
-
-        # Stage 4 - Decoder
-        self.upsample4_0 = ENetUnit(
-            in_channels=128,
-            out_channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=decoder_activation,
-            down=False)
-        self.regular4_1 = ENetUnit(
-            in_channels=64,
-            out_channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=decoder_activation,
-            down=False)
-        self.regular4_2 = ENetUnit(
-            in_channels=64,
-            out_channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=decoder_activation,
-            down=False)
-
-        # Stage 5 - Decoder
-        self.upsample5_0 = ENetUnit(
-            in_channels=64,
-            out_channels=16,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=decoder_activation,
-            down=False)
-        self.regular5_1 = ENetUnit(
-            in_channels=16,
-            out_channels=16,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.1,
-            bias=bias,
-            activation=decoder_activation,
-            down=False)
-
-        self.transposed_conv = nn.ConvTranspose2d(
-            16,
+        self.head = nn.ConvTranspose2d(
+            in_channels,
             num_classes,
             kernel_size=3,
             stride=2,
@@ -614,56 +311,15 @@ class ENet(nn.Module):
             output_padding=1,
             bias=False)
 
-        self.project_layer = nn.Conv2d(
-            128,
-            num_classes,
-            1,
-            bias=False)
-
     def forward(self, x):
-        # Initial block
-        x = self.initial_block(x)
+        x = self.steam(x)
 
-        # # Stage 1 - Encoder
-        # x, max_indices1_0 = self.downsample1_0(x)
-        # x = self.regular1_1(x)
-        # x = self.regular1_2(x)
-        # x = self.regular1_3(x)
-        # x = self.regular1_4(x)
+        x, max_indices1 = self.stage1(x)
+        x, max_indices2 = self.stage2(x)
+        x = self.stage3(x, max_indices2)
+        x = self.stage4(x, max_indices1)
 
-        x, max_indices1_0 = self.stage1(x)
-
-        # Stage 2 - Encoder
-        x, max_indices2_0 = self.downsample2_0(x)
-        x = self.regular2_1(x)
-        x = self.dilated2_2(x)
-        x = self.asymmetric2_3(x)
-        x = self.dilated2_4(x)
-        x = self.regular2_5(x)
-        x = self.dilated2_6(x)
-        x = self.asymmetric2_7(x)
-        x = self.dilated2_8(x)
-
-        # Stage 3 - Encoder
-        x = self.regular3_0(x)
-        x = self.dilated3_1(x)
-        x = self.asymmetric3_2(x)
-        x = self.dilated3_3(x)
-        x = self.regular3_4(x)
-        x = self.dilated3_5(x)
-        x = self.asymmetric3_6(x)
-        x = self.dilated3_7(x)
-
-        # Stage 4 - Decoder
-        x = self.upsample4_0(x, max_indices2_0)
-        x = self.regular4_1(x)
-        x = self.regular4_2(x)
-
-        # Stage 5 - Decoder
-        x = self.upsample5_0(x, max_indices1_0)
-        x = self.regular5_1(x)
-        x = self.transposed_conv(x)
-
+        x = self.head(x)
         return x
 
 
@@ -704,7 +360,7 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         # assert (model != oth_enet_cityscapes or weight_count == 360422)
-        assert (model != oth_enet_cityscapes or weight_count == 360492)
+        assert (model != oth_enet_cityscapes or weight_count == 358060)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

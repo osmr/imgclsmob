@@ -43,65 +43,6 @@ class InitBlock(nn.Module):
         return x
 
 
-class BottleneckUnit(nn.Module):
-    def __init__(self,
-                 channels,
-                 kernel_size,
-                 padding,
-                 dilation,
-                 use_asym_conv,
-                 dropout_rate,
-                 bias,
-                 activation,
-                 bottleneck_factor=4):
-        super(BottleneckUnit, self).__init__()
-        mid_channels = channels // bottleneck_factor
-
-        self.conv1 = conv1x1_block(
-            in_channels=channels,
-            out_channels=mid_channels,
-            bias=bias,
-            activation=activation)
-        if use_asym_conv:
-            self.conv2 = AsymConvBlock(
-                channels=mid_channels,
-                kernel_size=kernel_size,
-                padding=padding,
-                dilation=dilation,
-                bias=bias,
-                lw_activation=activation,
-                rw_activation=activation)
-        else:
-            self.conv2 = ConvBlock(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                kernel_size=kernel_size,
-                stride=1,
-                padding=padding,
-                dilation=dilation,
-                bias=bias,
-                activation=activation)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=channels,
-            bias=bias,
-            activation=activation)
-        self.dropout = nn.Dropout2d(p=dropout_rate)
-        self.activ = activation()
-
-    def forward(self, x):
-        identity = x
-
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.dropout(x)
-
-        x = x + identity
-        x = self.activ(x)
-        return x
-
-
 class DownBlock(nn.Module):
     def __init__(self,
                  ext_channels,
@@ -143,23 +84,50 @@ class UpBlock(nn.Module):
         return x
 
 
-class DownBottleneckUnit(nn.Module):
+class ENetUnit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  padding,
                  dilation,
+                 use_asym_conv,
                  dropout_rate,
                  bias,
                  activation,
-                 down=True,
+                 down,
                  bottleneck_factor=4):
         super().__init__()
+        self.resize_identity = (in_channels != out_channels)
         self.down = down
         mid_channels = in_channels // bottleneck_factor
 
-        if self.down:
+        if not self.resize_identity:
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bias=bias,
+                activation=activation)
+            if use_asym_conv:
+                self.conv2 = AsymConvBlock(
+                    channels=mid_channels,
+                    kernel_size=kernel_size,
+                    padding=padding,
+                    dilation=dilation,
+                    bias=bias,
+                    lw_activation=activation,
+                    rw_activation=activation)
+            else:
+                self.conv2 = ConvBlock(
+                    in_channels=mid_channels,
+                    out_channels=mid_channels,
+                    kernel_size=kernel_size,
+                    stride=1,
+                    padding=padding,
+                    dilation=dilation,
+                    bias=bias,
+                    activation=activation)
+        elif self.down:
             self.identity_block = DownBlock(
                 ext_channels=(out_channels - in_channels),
                 kernel_size=kernel_size,
@@ -211,7 +179,9 @@ class DownBottleneckUnit(nn.Module):
         self.activ = activation()
 
     def forward(self, x, max_indices=None):
-        if self.down:
+        if not self.resize_identity:
+            identity = x
+        elif self.down:
             identity, max_indices = self.identity_block(x)
         else:
             identity = self.identity_block(x, max_indices)
@@ -224,346 +194,417 @@ class DownBottleneckUnit(nn.Module):
         x = x + identity
         x = self.activ(x)
 
-        if self.down:
+        if self.resize_identity and self.down:
             return x, max_indices
         else:
             return x
+        # return x, max_indices
 
 
-class UpBottleneckUnit(nn.Module):
+class ENetStage(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  padding,
                  dilation,
+                 use_asym_conv,
                  dropout_rate,
                  bias,
                  activation,
-                 bottleneck_factor=4):
+                 down,
+                 layers):
         super().__init__()
-        mid_channels = in_channels // bottleneck_factor
-
-        self.identity_block = UpBlock(
+        self.scale_unit = ENetUnit(
             in_channels=in_channels,
             out_channels=out_channels,
-            bias=bias)
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            bias=bias,
-            activation=activation)
-        self.conv2 = DeconvBlock(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
             kernel_size=kernel_size,
-            stride=2,
             padding=padding,
-            out_padding=1,
             dilation=dilation,
+            use_asym_conv=use_asym_conv,
+            dropout_rate=dropout_rate,
             bias=bias,
-            activation=activation)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bias=bias,
-            activation=activation)
-        self.dropout = nn.Dropout2d(p=dropout_rate)
-        self.activ = activation()
+            activation=activation,
+            down=down)
 
-    def forward(self, x, max_indices):
-        identity = self.identity_block(x, max_indices)
+        self.units = nn.Sequential()
+        for i in range(1, layers):
+            self.units.add_module("unit{}".format(i + 1), ENetUnit(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                dilation=dilation,
+                use_asym_conv=use_asym_conv,
+                dropout_rate=dropout_rate,
+                bias=bias,
+                activation=activation,
+                down=down))
 
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.dropout(x)
-
-        x = x + identity
-        x = self.activ(x)
-        return x
+    def forward(self, x):
+        x, max_indices = self.scale_unit(x)
+        x = self.units(x)
+        return x, max_indices
 
 
 class ENet(nn.Module):
     def __init__(self,
                  bn_eps=1e-5,
-                 num_classes=19,
-                 encoder_relu=False,
-                 decoder_relu=True):
+                 aux=False,
+                 fixed_size=False,
+                 in_channels=3,
+                 in_size=(1024, 2048),
+                 num_classes=19):
         super().__init__()
+        assert (aux is not None)
+        assert (fixed_size is not None)
+        assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
+        self.in_size = in_size
+        self.num_classes = num_classes
+        self.fixed_size = fixed_size
+
         bias = False
+        encoder_activation = (lambda: nn.PReLU(1))
+        decoder_activation = (lambda: nn.ReLU(inplace=True))
 
-        if encoder_relu:
-            encoder_activation = (lambda: nn.ReLU(inplace=True))
-        else:
-            encoder_activation = (lambda: nn.PReLU(1))
-
-        if decoder_relu:
-            decoder_activation = (lambda: nn.ReLU(inplace=True))
-        else:
-            decoder_activation = (lambda: nn.PReLU(1))
-
+        out_channels = 16
         self.initial_block = InitBlock(
-            in_channels=3,
-            out_channels=16,
+            in_channels=in_channels,
+            out_channels=out_channels,
             kernel_size=3,
             padding=1,
             bias=bias,
             bn_eps=bn_eps,
             activation=encoder_activation)
+        in_channels = out_channels
 
-        # Stage 1 - Encoder
-        self.downsample1_0 = DownBottleneckUnit(
-            in_channels=16,
-            out_channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            dropout_rate=0.01,
+        layers = [5]
+        channels = [64]
+        kernel_sizes = [3]
+        dilations = [1]
+        use_asym_convs = [0]
+        dropout_rates = [0.01]
+
+        self.stage1 = ENetStage(
+            in_channels=in_channels,
+            out_channels=channels[0],
+            kernel_size=kernel_sizes[0],
+            padding=dilations[0],
+            dilation=dilations[0],
+            use_asym_conv=(use_asym_convs[0] == 1),
+            dropout_rate=dropout_rates[0],
             bias=bias,
-            activation=encoder_activation)
-        self.regular1_1 = BottleneckUnit(
-            channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.01,
-            bias=bias,
-            activation=encoder_activation)
-        self.regular1_2 = BottleneckUnit(
-            channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.01,
-            bias=bias,
-            activation=encoder_activation)
-        self.regular1_3 = BottleneckUnit(
-            channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.01,
-            bias=bias,
-            activation=encoder_activation)
-        self.regular1_4 = BottleneckUnit(
-            channels=64,
-            kernel_size=3,
-            padding=1,
-            dilation=1,
-            use_asym_conv=False,
-            dropout_rate=0.01,
-            bias=bias,
-            activation=encoder_activation)
+            activation=encoder_activation,
+            down=True,
+            layers=layers[0])
+
+        # # Stage 1 - Encoder
+        # self.downsample1_0 = ENetUnit(
+        #     in_channels=16,
+        #     out_channels=64,
+        #     kernel_size=3,
+        #     padding=1,
+        #     dilation=1,
+        #     use_asym_conv=False,
+        #     dropout_rate=0.01,
+        #     bias=bias,
+        #     activation=encoder_activation,
+        #     down=True)
+        # self.regular1_1 = ENetUnit(
+        #     in_channels=64,
+        #     out_channels=64,
+        #     kernel_size=3,
+        #     padding=1,
+        #     dilation=1,
+        #     use_asym_conv=False,
+        #     dropout_rate=0.01,
+        #     bias=bias,
+        #     activation=encoder_activation,
+        #     down=True)
+        # self.regular1_2 = ENetUnit(
+        #     in_channels=64,
+        #     out_channels=64,
+        #     kernel_size=3,
+        #     padding=1,
+        #     dilation=1,
+        #     use_asym_conv=False,
+        #     dropout_rate=0.01,
+        #     bias=bias,
+        #     activation=encoder_activation,
+        #     down=True)
+        # self.regular1_3 = ENetUnit(
+        #     in_channels=64,
+        #     out_channels=64,
+        #     kernel_size=3,
+        #     padding=1,
+        #     dilation=1,
+        #     use_asym_conv=False,
+        #     dropout_rate=0.01,
+        #     bias=bias,
+        #     activation=encoder_activation,
+        #     down=True)
+        # self.regular1_4 = ENetUnit(
+        #     in_channels=64,
+        #     out_channels=64,
+        #     kernel_size=3,
+        #     padding=1,
+        #     dilation=1,
+        #     use_asym_conv=False,
+        #     dropout_rate=0.01,
+        #     bias=bias,
+        #     activation=encoder_activation,
+        #     down=True)
 
         # Stage 2 - Encoder
-        self.downsample2_0 = DownBottleneckUnit(
+        self.downsample2_0 = ENetUnit(
             in_channels=64,
             out_channels=128,
             kernel_size=3,
             padding=1,
             dilation=1,
+            use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.regular2_1 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.regular2_1 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated2_2 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated2_2 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=2,
             dilation=2,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.asymmetric2_3 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.asymmetric2_3 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=5,
             padding=2,
             dilation=1,
             use_asym_conv=True,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated2_4 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated2_4 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=4,
             dilation=4,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.regular2_5 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.regular2_5 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated2_6 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated2_6 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=8,
             dilation=8,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.asymmetric2_7 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.asymmetric2_7 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=5,
             padding=2,
             dilation=1,
             use_asym_conv=True,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated2_8 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated2_8 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=16,
             dilation=16,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
+            activation=encoder_activation,
+            down=True)
 
         # Stage 3 - Encoder
-        self.regular3_0 = BottleneckUnit(
-            channels=128,
+        self.regular3_0 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated3_1 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated3_1 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             dilation=2,
             padding=2,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.asymmetric3_2 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.asymmetric3_2 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=5,
             padding=2,
             dilation=1,
             use_asym_conv=True,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated3_3 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated3_3 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=4,
             dilation=4,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.regular3_4 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.regular3_4 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated3_5 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated3_5 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=8,
             dilation=8,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.asymmetric3_6 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.asymmetric3_6 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=5,
             padding=2,
             dilation=1,
             use_asym_conv=True,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
-        self.dilated3_7 = BottleneckUnit(
-            channels=128,
+            activation=encoder_activation,
+            down=True)
+        self.dilated3_7 = ENetUnit(
+            in_channels=128,
+            out_channels=128,
             kernel_size=3,
             padding=16,
             dilation=16,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=encoder_activation)
+            activation=encoder_activation,
+            down=True)
 
         # Stage 4 - Decoder
-        self.upsample4_0 = UpBottleneckUnit(
+        self.upsample4_0 = ENetUnit(
             in_channels=128,
             out_channels=64,
             kernel_size=3,
             padding=1,
             dilation=1,
+            use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=decoder_activation)
-        self.regular4_1 = BottleneckUnit(
-            channels=64,
+            activation=decoder_activation,
+            down=False)
+        self.regular4_1 = ENetUnit(
+            in_channels=64,
+            out_channels=64,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=decoder_activation)
-        self.regular4_2 = BottleneckUnit(
-            channels=64,
+            activation=decoder_activation,
+            down=False)
+        self.regular4_2 = ENetUnit(
+            in_channels=64,
+            out_channels=64,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=decoder_activation)
+            activation=decoder_activation,
+            down=False)
 
         # Stage 5 - Decoder
-        self.upsample5_0 = UpBottleneckUnit(
+        self.upsample5_0 = ENetUnit(
             in_channels=64,
             out_channels=16,
             kernel_size=3,
             padding=1,
             dilation=1,
+            use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=decoder_activation)
-        self.regular5_1 = BottleneckUnit(
-            channels=16,
+            activation=decoder_activation,
+            down=False)
+        self.regular5_1 = ENetUnit(
+            in_channels=16,
+            out_channels=16,
             kernel_size=3,
             padding=1,
             dilation=1,
             use_asym_conv=False,
             dropout_rate=0.1,
             bias=bias,
-            activation=decoder_activation)
+            activation=decoder_activation,
+            down=False)
+
         self.transposed_conv = nn.ConvTranspose2d(
             16,
             num_classes,
@@ -583,12 +624,14 @@ class ENet(nn.Module):
         # Initial block
         x = self.initial_block(x)
 
-        # Stage 1 - Encoder
-        x, max_indices1_0 = self.downsample1_0(x)
-        x = self.regular1_1(x)
-        x = self.regular1_2(x)
-        x = self.regular1_3(x)
-        x = self.regular1_4(x)
+        # # Stage 1 - Encoder
+        # x, max_indices1_0 = self.downsample1_0(x)
+        # x = self.regular1_1(x)
+        # x = self.regular1_2(x)
+        # x = self.regular1_3(x)
+        # x = self.regular1_4(x)
+
+        x, max_indices1_0 = self.stage1(x)
 
         # Stage 2 - Encoder
         x, max_indices2_0 = self.downsample2_0(x)

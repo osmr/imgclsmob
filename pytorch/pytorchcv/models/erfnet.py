@@ -191,10 +191,10 @@ class ERFNet(nn.Module):
         return x
 
 
-def get_enet(model_name=None,
-             pretrained=False,
-             root=os.path.join("~", ".torch", "models"),
-             **kwargs):
+def get_erfnet(model_name=None,
+               pretrained=False,
+               root=os.path.join("~", ".torch", "models"),
+               **kwargs):
     """
     Create ERFNet model with specific parameters.
 
@@ -246,7 +246,7 @@ def erfnet_cityscapes(num_classes=19, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_enet(num_classes=num_classes, model_name="erfnet_cityscapes", **kwargs)
+    return get_erfnet(num_classes=num_classes, model_name="erfnet_cityscapes", **kwargs)
 
 
 def _calc_width(net):

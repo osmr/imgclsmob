@@ -140,7 +140,7 @@ class ERFNet(nn.Module):
                         unit = ENetMixDownBlock(
                             in_channels=in_channels,
                             out_channels=out_channels,
-                            bias=True,
+                            bias=bias,
                             bn_eps=bn_eps,
                             correct_size_mismatch=correct_size_mismatch)
                     else:
@@ -148,7 +148,7 @@ class ERFNet(nn.Module):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             stride=2,
-                            bias=True,
+                            bias=bias,
                             bn_eps=bn_eps)
                 else:
                     unit = FCU(

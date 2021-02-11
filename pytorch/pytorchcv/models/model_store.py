@@ -64,7 +64,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnet50b', '0655', '8b60378ee3aed878d27a2b4a9ddc596a812c7649', 'v0.0.307', 'PreResNet-50b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101', '0563', '8ec82f7d697b7329aea2c95b399093e9cb2b1114', 'v0.0.504', 'PreResNet-101', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101b', '0556', '76bfe6d020b55f163e77de6b1c27be6b0bed8b7b', 'v0.0.351', 'PreResNet-101b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet152', '0519', 'b27d3f1532266df3d8f91e3d4a18152ce8b2afb6', 'v0.0.505', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('preresnet152', '0464', 'baeb6c5208310ab7c919fc0da3c20267471a8fa1', 'v0.0.510', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152b', '0516', 'f3805f4b8c845798b711171ad6632bcf56259844', 'v0.0.386', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet200b', '0588', 'f7104ff306ed5de2c27f3c855051c22bda167981', 'v0.0.45', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, '[tornadomeet/ResNet]'),  # noqa
     ('preresnet269b', '0581', '1a7878bb10923b22bda58d7935dfa6e5e8a7b67d', 'v0.0.239', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, '[soeaver/mxnet-model]'),  # noqa
@@ -74,7 +74,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnext26_32x2d', '0887', 'c3bd130747909a8c89546f3b3f5ce08bb4f55731', 'v0.0.373', 'ResNeXt-26 (32x2d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext26_32x4d', '0746', '1011ac35e30d753b79f0600a5376c87a37b67a61', 'v0.0.332', 'ResNeXt-26 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext50_32x4d', '0560', 'd7976503d13734114364e0dfef1d22f6d76546d9', 'v0.0.498', 'ResNeXt-50 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnext101_32x4d', '0523', '279a3189c6fed46dd12c2ee210bc6a493f629c76', 'v0.0.417', 'ResNeXt-101 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('resnext101_32x4d', '0439', '7d3d6e511b864fb36282b540b574486e6d2a0807', 'v0.0.510', 'ResNeXt-101 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext101_64x4d', '0509', '2af0b82274bbcf5ee75575c58c3dd6a4a292b0ae', 'v0.0.417', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('seresnet10', '1202', '8dace12e6aaac68d3c272f52b2513a5b40a4f959', 'v0.0.486', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet18', '0961', '022123a5e88c9917e63165f5b5a7808a606d452a', 'v0.0.355', 'SE-ResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa

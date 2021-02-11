@@ -177,6 +177,7 @@ Some remarks:
 | ESDNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1906.09826) | - | 2019 |
 | EDANet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1809.06323) | [link](https://github.com/shaoyuanlo/EDANet) | 2018 |
 | ENet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1606.02147) | - | 2016 |
+| ERFNet | - | c | - | - | - | - | [link](http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf) | - | 2017 |
 
 ## Table of implemented object detection models
 

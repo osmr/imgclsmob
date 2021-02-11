@@ -6,11 +6,11 @@ __all__ = ['round_channels', 'Identity', 'BreakBlock', 'Swish', 'HSigmoid', 'HSw
            'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
            'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'AsymConvBlock', 'asym_conv3x3_block', 'DeconvBlock', 'NormActivation', 'InterpolationBlock',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock',
-           'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent',
-           'Flatten', 'HeatmapMaxDetBlock']
+           'AsymConvBlock', 'asym_conv3x3_block', 'DeconvBlock', 'deconv3x3_block', 'NormActivation',
+           'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock',
+           'saconv3x3_block', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1276,6 +1276,46 @@ class DeconvBlock(nn.Module):
         if self.activate:
             x = self.activ(x)
         return x
+
+
+def deconv3x3_block(padding=1,
+                    out_padding=1,
+                    **kwargs):
+    """
+    3x3 version of the deconvolution block with batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the deconvolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for deconvolution layer.
+    ext_padding : tuple/list of 4 int, default None
+        Extra padding value for deconvolution layer.
+    out_padding : int or tuple/list of 2 int, default 1
+        Output padding value for deconvolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for deconvolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return DeconvBlock(
+        kernel_size=3,
+        padding=padding,
+        out_padding=out_padding,
+        **kwargs)
 
 
 class NormActivation(nn.Module):

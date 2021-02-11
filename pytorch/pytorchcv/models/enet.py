@@ -4,17 +4,18 @@
     https://arxiv.org/abs/1606.02147.
 """
 
-__all__ = ['ENet', 'enet_cityscapes']
+__all__ = ['ENet', 'enet_cityscapes', 'ENetMixDownBlock']
 
 import os
 import torch
 import torch.nn as nn
-from .common import ConvBlock, AsymConvBlock, DeconvBlock, NormActivation, conv1x1_block
+import torch.nn.functional as F
+from .common import conv3x3, ConvBlock, AsymConvBlock, DeconvBlock, NormActivation, conv1x1_block
 
 
-class DownBlock(nn.Module):
+class ENetMaxDownBlock(nn.Module):
     """
-    ENet downscale block.
+    ENet specific max-pooling downscale block.
 
     Parameters:
     ----------
@@ -29,7 +30,7 @@ class DownBlock(nn.Module):
                  ext_channels,
                  kernel_size,
                  padding):
-        super(DownBlock, self).__init__()
+        super(ENetMaxDownBlock, self).__init__()
         self.ext_channels = ext_channels
 
         self.pool = nn.MaxPool2d(
@@ -46,7 +47,7 @@ class DownBlock(nn.Module):
         return x, max_indices
 
 
-class UpBlock(nn.Module):
+class ENetUpBlock(nn.Module):
     """
     ENet upscale block.
 
@@ -63,7 +64,7 @@ class UpBlock(nn.Module):
                  in_channels,
                  out_channels,
                  bias):
-        super(UpBlock, self).__init__()
+        super(ENetUpBlock, self).__init__()
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -149,7 +150,7 @@ class ENetUnit(nn.Module):
                     bias=bias,
                     activation=activation)
         elif self.down:
-            self.identity_block = DownBlock(
+            self.identity_block = ENetMaxDownBlock(
                 ext_channels=(out_channels - in_channels),
                 kernel_size=kernel_size,
                 padding=padding)
@@ -172,7 +173,7 @@ class ENetUnit(nn.Module):
                 bias=bias,
                 activation=activation)
         else:
-            self.identity_block = UpBlock(
+            self.identity_block = ENetUpBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 bias=bias)
@@ -296,9 +297,9 @@ class ENetStage(nn.Module):
             return x
 
 
-class ENetInitBlock(nn.Module):
+class ENetMixDownBlock(nn.Module):
     """
-    ENet specific initial block.
+    ENet specific mixed downscale block, used as an initial block.
 
     Parameters:
     ----------
@@ -306,42 +307,48 @@ class ENetInitBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
-        Padding value for convolution layer.
-    bias : bool
+    bias : bool, default False
         Whether the layer uses a bias vector.
-    activation : function or str or None
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+    correct_size_mistmatch : bool, default False
+        Whether to correct downscaled sizes of images.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 padding,
-                 bias,
-                 activation):
-        super(ENetInitBlock, self).__init__()
-        self.main_branch = nn.Conv2d(
+                 bias=False,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True)),
+                 correct_size_mismatch=False):
+        super(ENetMixDownBlock, self).__init__()
+        self.correct_size_mismatch = correct_size_mismatch
+
+        self.pool = nn.MaxPool2d(
+            kernel_size=2,
+            stride=2)
+        self.conv = conv3x3(
             in_channels=in_channels,
             out_channels=(out_channels - in_channels),
-            kernel_size=kernel_size,
             stride=2,
-            padding=padding,
             bias=bias)
-        self.ext_branch = nn.MaxPool2d(
-            kernel_size=kernel_size,
-            stride=2,
-            padding=padding)
         self.norm_activ = NormActivation(
             in_channels=out_channels,
+            bn_eps=bn_eps,
             activation=activation)
 
     def forward(self, x):
-        x1 = self.main_branch(x)
-        x2 = self.ext_branch(x)
-        x = torch.cat((x1, x2), dim=1)
+        y1 = self.pool(x)
+        y2 = self.conv(x)
+
+        if self.correct_size_mismatch:
+            diff_h = y2.size()[2] - y1.size()[2]
+            diff_w = y2.size()[3] - y1.size()[3]
+            y1 = F.pad(y1, pad=(diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2))
+
+        x = torch.cat((y2, y1), dim=1)
         x = self.norm_activ(x)
         return x
 
@@ -369,6 +376,10 @@ class ENet(nn.Module):
         Parameter of dropout layer for each stage.
     downs : list of int
         Whether to downscale or upscale in each stage.
+    correct_size_mistmatch : bool
+        Whether to correct downscaled sizes of images in encoder.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     aux : bool, default False
         Whether to output an auxiliary result.
     fixed_size : bool, default False
@@ -389,6 +400,8 @@ class ENet(nn.Module):
                  use_asym_convs,
                  dropout_rates,
                  downs,
+                 correct_size_mismatch=False,
+                 bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
@@ -405,13 +418,13 @@ class ENet(nn.Module):
         encoder_activation = (lambda: nn.PReLU(1))
         decoder_activation = (lambda: nn.ReLU(inplace=True))
 
-        self.steam = ENetInitBlock(
+        self.stem = ENetMixDownBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            kernel_size=3,
-            padding=1,
             bias=bias,
-            activation=encoder_activation)
+            bn_eps=bn_eps,
+            activation=encoder_activation,
+            correct_size_mismatch=correct_size_mismatch)
         in_channels = init_block_channels
 
         for i, channels_per_stage in enumerate(channels):
@@ -447,7 +460,7 @@ class ENet(nn.Module):
                     nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
-        x = self.steam(x)
+        x = self.stem(x)
         x, max_indices1 = self.stage1(x)
         x, max_indices2 = self.stage2(x)
         x = self.stage3(x, max_indices2)

@@ -9,108 +9,9 @@ __all__ = ['ESNet', 'esnet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import AsymConvBlock, DeconvBlock, Concurrent
-from .lednet import LEDDownBlock
-
-
-def deconv3x3_block(padding=1,
-                    out_padding=1,
-                    **kwargs):
-    """
-    3x3 version of the deconvolution block with batch normalization and activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the deconvolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for deconvolution layer.
-    ext_padding : tuple/list of 4 int, default None
-        Extra padding value for deconvolution layer.
-    out_padding : int or tuple/list of 2 int, default 1
-        Output padding value for deconvolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for deconvolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    """
-    return DeconvBlock(
-        kernel_size=3,
-        padding=padding,
-        out_padding=out_padding,
-        **kwargs)
-
-
-class FCU(nn.Module):
-    """
-    Factorized convolution unit.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    kernel_size : int
-        Convolution window size.
-    dilation : int
-        Dilation value for convolution layer.
-    dropout_rate : float
-        Parameter of Dropout layer. Faction of the input units to drop.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    """
-    def __init__(self,
-                 channels,
-                 kernel_size,
-                 dilation,
-                 dropout_rate,
-                 bn_eps):
-        super(FCU, self).__init__()
-        self.use_dropout = (dropout_rate != 0.0)
-        padding = (kernel_size - 1) // 2 * dilation
-
-        self.conv1 = AsymConvBlock(
-            channels=channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            bias=True,
-            lw_use_bn=False,
-            bn_eps=bn_eps)
-        self.conv2 = AsymConvBlock(
-            channels=channels,
-            kernel_size=kernel_size,
-            padding=padding,
-            dilation=dilation,
-            bias=True,
-            lw_use_bn=False,
-            bn_eps=bn_eps,
-            rw_activation=None)
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=dropout_rate)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        identity = x
-
-        x = self.conv1(x)
-        x = self.conv2(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-
-        x = x + identity
-        x = self.activ(x)
-        return x
+from .common import AsymConvBlock, deconv3x3_block, Concurrent
+from .enet import ENetMixDownBlock
+from .erfnet import FCU
 
 
 class PFCUBranch(nn.Module):
@@ -268,11 +169,12 @@ class ESNet(nn.Module):
             stage = nn.Sequential()
             for j in range(layers_per_stage):
                 if j == 0:
-                    stage.add_module("unit{}".format(j + 1), LEDDownBlock(
+                    stage.add_module("unit{}".format(j + 1), ENetMixDownBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        correct_size_mismatch=correct_size_mismatch,
-                        bn_eps=bn_eps))
+                        bias=True,
+                        bn_eps=bn_eps,
+                        correct_size_mismatch=correct_size_mismatch))
                     in_channels = out_channels
                 elif i != len(layers[0]) - 1:
                     stage.add_module("unit{}".format(j + 1), FCU(

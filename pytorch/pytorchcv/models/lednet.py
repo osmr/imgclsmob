@@ -4,63 +4,14 @@
     https://arxiv.org/abs/1905.02423.
 """
 
-__all__ = ['LEDNet', 'lednet_cityscapes', 'LEDDownBlock']
+__all__ = ['LEDNet', 'lednet_cityscapes']
 
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, asym_conv3x3_block,\
-    NormActivation, ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
-
-
-class LEDDownBlock(nn.Module):
-    """
-    LEDNet specific downscale block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    correct_size_mistmatch : bool
-        Whether to correct downscaled sizes of images.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 correct_size_mismatch,
-                 bn_eps):
-        super(LEDDownBlock, self).__init__()
-        self.correct_size_mismatch = correct_size_mismatch
-
-        self.pool = nn.MaxPool2d(
-            kernel_size=2,
-            stride=2)
-        self.conv = conv3x3(
-            in_channels=in_channels,
-            out_channels=(out_channels - in_channels),
-            stride=2,
-            bias=True)
-        self.norm_activ = NormActivation(
-            in_channels=out_channels,
-            bn_eps=bn_eps)
-
-    def forward(self, x):
-        y1 = self.pool(x)
-        y2 = self.conv(x)
-
-        if self.correct_size_mismatch:
-            diff_h = y2.size()[2] - y1.size()[2]
-            diff_w = y2.size()[3] - y1.size()[3]
-            y1 = F.pad(y1, pad=(diff_w // 2, diff_w - diff_w // 2, diff_h // 2, diff_h - diff_h // 2))
-
-        x = torch.cat((y2, y1), dim=1)
-        x = self.norm_activ(x)
-        return x
+from .common import conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, asym_conv3x3_block, ChannelShuffle,\
+    InterpolationBlock, Hourglass, BreakBlock
+from .enet import ENetMixDownBlock
 
 
 class LEDBranch(nn.Module):
@@ -361,11 +312,12 @@ class LEDNet(nn.Module):
             stage = nn.Sequential()
             for j, dilation in enumerate(dilations_per_stage):
                 if j == 0:
-                    stage.add_module("unit{}".format(j + 1), LEDDownBlock(
+                    stage.add_module("unit{}".format(j + 1), ENetMixDownBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        correct_size_mismatch=correct_size_mismatch,
-                        bn_eps=bn_eps))
+                        bias=True,
+                        bn_eps=bn_eps,
+                        correct_size_mismatch=correct_size_mismatch))
                     in_channels = out_channels
                 else:
                     stage.add_module("unit{}".format(j + 1), LEDUnit(

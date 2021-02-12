@@ -1943,9 +1943,9 @@ class Concurrent(nn.Sequential):
             out.append(module(x))
         if self.merge_type == "stack":
             out = torch.stack(tuple(out), dim=self.axis)
-        if self.merge_type == "cat":
+        elif self.merge_type == "cat":
             out = torch.cat(tuple(out), dim=self.axis)
-        if self.merge_type == "sum":
+        elif self.merge_type == "sum":
             out = torch.stack(tuple(out), dim=self.axis).sum(self.axis)
         else:
             raise NotImplementedError()

@@ -1,7 +1,7 @@
 """
     SQNet for image segmentation, implemented in PyTorch.
     Original paper: 'Speeding up Semantic Segmentation for Autonomous Driving,'
-    https://https://openreview.net/pdf?id=S1uHiFyyg.
+    https://openreview.net/pdf?id=S1uHiFyyg.
 """
 
 __all__ = ['SQNet', 'sqnet_cityscapes']
@@ -168,7 +168,7 @@ class SQNetUpStage(nn.Module):
 class SQNet(nn.Module):
     """
     SQNet model from 'Speeding up Semantic Segmentation for Autonomous Driving,'
-    https://https://openreview.net/pdf?id=S1uHiFyyg.
+    https://openreview.net/pdf?id=S1uHiFyyg.
 
     Parameters:
     ----------
@@ -327,7 +327,7 @@ def get_sqnet(model_name=None,
 def sqnet_cityscapes(num_classes=19, **kwargs):
     """
     SQNet model for Cityscapes from 'Speeding up Semantic Segmentation for Autonomous Driving,'
-    https://https://openreview.net/pdf?id=S1uHiFyyg.
+    https://openreview.net/pdf?id=S1uHiFyyg.
 
     Parameters:
     ----------

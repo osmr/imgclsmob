@@ -451,8 +451,6 @@ def fastscnn_cityscapes(num_classes=19, aux=True, **kwargs):
 
     Parameters:
     ----------
-    pretrained_backbone : bool, default False
-        Whether to load the pretrained weights for feature extractor.
     num_classes : int, default 19
         Number of segmentation classes.
     aux : bool, default True

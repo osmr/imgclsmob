@@ -9,8 +9,8 @@ __all__ = ['LinkNet', 'linknet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from torchvision.models import resnet
 from .common import conv1x1_block, conv3x3_block, deconv3x3_block, Hourglass, Identity
+from .resnet import resnet18
 
 
 class DecoderStage(nn.Module):
@@ -110,6 +110,10 @@ class LinkNet(nn.Module):
 
     Parameters:
     ----------
+    backbone : nn.Sequential
+        Feature extractor.
+    backbone_out_channels : int
+        Number of output channels form feature extractor.
     channels : list of int
         Number of output channels for the first unit of each stage.
     dilations : list of list of int
@@ -132,6 +136,8 @@ class LinkNet(nn.Module):
         Number of segmentation classes.
     """
     def __init__(self,
+                 backbone,
+                 backbone_out_channels,
                  channels,
                  strides,
                  output_paddings,
@@ -141,7 +147,7 @@ class LinkNet(nn.Module):
                  in_size=(1024, 2048),
                  num_classes=19):
         super(LinkNet, self).__init__()
-        assert (in_channels is not None)
+        assert (in_channels == 3)
         assert (aux is not None)
         assert (fixed_size is not None)
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
@@ -150,21 +156,14 @@ class LinkNet(nn.Module):
         self.fixed_size = fixed_size
         bias = False
 
-        backbone = resnet.resnet18(pretrained=False)
-
-        self.stem = nn.Sequential(
-            backbone.conv1,
-            backbone.bn1,
-            backbone.relu,
-            backbone.maxpool
-        )
-        in_channels = 512
+        self.stem = backbone.init_block
+        in_channels = backbone_out_channels
 
         down_seq = nn.Sequential()
-        down_seq.add_module("down1", backbone.layer1)
-        down_seq.add_module("down2", backbone.layer2)
-        down_seq.add_module("down3", backbone.layer3)
-        down_seq.add_module("down4", backbone.layer4)
+        down_seq.add_module("down1", backbone.stage1)
+        down_seq.add_module("down2", backbone.stage2)
+        down_seq.add_module("down3", backbone.stage3)
+        down_seq.add_module("down4", backbone.stage4)
 
         up_seq = nn.Sequential()
         skip_seq = nn.Sequential()
@@ -204,7 +203,9 @@ class LinkNet(nn.Module):
         return x
 
 
-def get_linknet(model_name=None,
+def get_linknet(backbone,
+                backbone_out_channels,
+                model_name=None,
                 pretrained=False,
                 root=os.path.join("~", ".torch", "models"),
                 **kwargs):
@@ -213,6 +214,10 @@ def get_linknet(model_name=None,
 
     Parameters:
     ----------
+    backbone : nn.Sequential
+        Feature extractor.
+    backbone_out_channels : int
+        Number of output channels form feature extractor.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -225,6 +230,8 @@ def get_linknet(model_name=None,
     output_paddings = [1, 1, 1, 0]
 
     net = LinkNet(
+        backbone=backbone,
+        backbone_out_channels=backbone_out_channels,
         channels=channels,
         strides=strides,
         output_paddings=output_paddings,
@@ -242,13 +249,15 @@ def get_linknet(model_name=None,
     return net
 
 
-def linknet_cityscapes(num_classes=19, **kwargs):
+def linknet_cityscapes(pretrained_backbone=False, num_classes=19, **kwargs):
     """
     LinkNet model for Cityscapes from 'LinkNet: Exploiting Encoder Representations for Efficient Semantic Segmentation,'
     https://arxiv.org/abs/1707.03718.
 
     Parameters:
     ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
     num_classes : int, default 19
         Number of segmentation classes.
     pretrained : bool, default False
@@ -256,7 +265,11 @@ def linknet_cityscapes(num_classes=19, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_linknet(num_classes=num_classes, model_name="linknet_cityscapes", **kwargs)
+    backbone = resnet18(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    backbone_out_channels = 512
+    return get_linknet(backbone=backbone, backbone_out_channels=backbone_out_channels, num_classes=num_classes,
+                       model_name="linknet_cityscapes", **kwargs)
 
 
 def _calc_width(net):

@@ -181,6 +181,7 @@ Some remarks:
 | LinkNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1707.03718) | - | 2017 |
 | SegNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1511.00561) | - | 2015 |
 | U-Net | - | c | - | - | - | - | [link](https://arxiv.org/abs/1505.04597) | - | 2015 |
+| SQNet | - | c | - | - | - | - | [link](https://https://openreview.net/pdf?id=S1uHiFyyg) | - | 2016 |
 
 ## Table of implemented object detection models
 

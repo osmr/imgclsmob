@@ -148,7 +148,7 @@ class UNet(nn.Module):
 
     Parameters:
     ----------
-    channels : list of int
+    channels : list of list of int
         Number of output channels for each stage in encoder and decoder.
     init_block_channels : int
         Number of output channels for the initial unit.

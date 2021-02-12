@@ -209,10 +209,10 @@ def _test():
 
     for model in models:
 
-        from torchsummary import summary
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        net = SQNet(num_classes=19).to(device)
-        summary(net, (3, 512, 1024))
+        # from torchsummary import summary
+        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # net = SQNet(num_classes=19).to(device)
+        # summary(net, (3, 512, 1024))
 
         net = model(pretrained=pretrained)
 

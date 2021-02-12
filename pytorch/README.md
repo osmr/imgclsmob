@@ -112,6 +112,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - LinkNet (['LinkNet: Exploiting Encoder Representations for Efficient Semantic Segmentation'](https://arxiv.org/abs/1707.03718))
 - SegNet (['SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation'](https://arxiv.org/abs/1511.00561))
 - U-Net (['U-Net: Convolutional Networks for Biomedical Image Segmentation'](https://arxiv.org/abs/1505.04597))
+- SQNet (['Speeding up Semantic Segmentation for Autonomous Driving'](https://https://openreview.net/pdf?id=S1uHiFyyg))
 - CenterNet (['Objects as Points'](https://arxiv.org/abs/1904.07850))
 - LFFD (['LFFD: A Light and Fast Face Detector for Edge Devices'](https://arxiv.org/abs/1904.10633))
 - AlphaPose (['RMPE: Regional Multi-person Pose Estimation'](https://arxiv.org/abs/1612.00137))

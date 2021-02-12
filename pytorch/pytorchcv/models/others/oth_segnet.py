@@ -1,15 +1,7 @@
-##################################################################################
-#SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation
-#Paper-Link: https://arxiv.org/pdf/1511.00561.pdf
-##################################################################################
-
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
-
-
 
 __all__ = ["SegNet"]
 

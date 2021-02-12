@@ -180,6 +180,7 @@ Some remarks:
 | ERFNet | - | c | - | - | - | - | [link](http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf) | - | 2017 |
 | LinkNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1707.03718) | - | 2017 |
 | SegNet | - | c | - | - | - | - | [link](https://arxiv.org/abs/1511.00561) | - | 2015 |
+| U-Net | - | c | - | - | - | - | [link](https://arxiv.org/abs/1505.04597) | - | 2015 |
 
 ## Table of implemented object detection models
 

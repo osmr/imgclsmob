@@ -1,3 +1,9 @@
+"""
+    ERFNet for image segmentation, implemented in PyTorch.
+    Original paper: 'ERFNet: Efficient Residual Factorized ConvNet for Real-time Semantic Segmentation,'
+    http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -131,6 +131,7 @@ from .models.edanet import *
 from .models.enet import *
 from .models.erfnet import *
 from .models.linknet import *
+from .models.segnet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
@@ -1101,6 +1102,8 @@ _models = {
     'erfnet_cityscapes': erfnet_cityscapes,
 
     'linknet_cityscapes': linknet_cityscapes,
+
+    'segnet_cityscapes': segnet_cityscapes,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 

@@ -469,7 +469,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet(A)-BC-14 | 27.75 | 9.56 | 10,084,168 | 1,721.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0956-6f8c3606.params.log)) |
 | ResNet(A)-18 | 25.38 | 8.02 | 11,708,744 | 2,062.22M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0802-225dd3ae.params.log)) |
 | ResNet(A)-50b | 20.78 | 5.34 | 25,576,264 | 4,352.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/resneta50b-0534-28eff48a.params.log)) |
-| ResNet(A)-101b | 19.46 | 4.87 | 44,568,392 | 8,072.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta101b-0487-fad05e57.params.log)) |
+| ResNet(A)-101b | 19.66 | 4.86 | 44,568,392 | 8,072.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.511/resneta101b-0486-72b0e38f.params.log)) |
 | ResNet(A)-152b | 19.38 | 4.65 | 60,212,040 | 11,796.78M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta152b-0465-05f96c54.params.log)) |
 | ResNet(D)-50b | 20.79 | 5.49 | 25,680,808 | 20,496.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0549-17d6004b.params.log)) |
 | ResNet(D)-101b | 19.49 | 4.61 | 44,672,936 | 35,391.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0461-fead1bcb.params.log)) |

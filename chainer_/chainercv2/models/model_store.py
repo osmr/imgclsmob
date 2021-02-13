@@ -313,7 +313,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('resnetabc14b', '0957', '84e05fea22df04a711a8d60ee69bdfd676b10648', 'v0.0.477'),
     ('resneta18', '0805', 'f4088383363f90f2da8ef4e422d2d44dada566cf', 'v0.0.486'),
     ('resneta50b', '0537', '204eb60edce7da09c28bb469a7d91422b1d08c71', 'v0.0.492'),
-    ('resneta101b', '0491', '5c892558fdf39f4f182ca03628825b00cc3af7f0', 'v0.0.452'),
+    ('resneta101b', '0491', 'dafa3f525f3f7d4fe0ea1be6138a2cda65a1e5d9', 'v0.0.511'),
     ('resneta152b', '0467', 'd7e00a1b09390ceda24edbce89f8421097b6a741', 'v0.0.452'),
     ('resnetd50b', '0550', '7ba88f0436b3fa598520424bb463ac985ffb0caf', 'v0.0.296'),
     ('resnetd101b', '0460', 'b90f971e4514345fb885de95165ddcc4e6610234', 'v0.0.296'),

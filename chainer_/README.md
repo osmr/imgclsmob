@@ -447,7 +447,7 @@ Some remarks:
 | ResNet(A)-BC-14 | 27.72 | 9.57 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0957-84e05fea.npz.log)) |
 | ResNet(A)-18 | 25.40 | 8.05 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0805-f4088383.npz.log)) |
 | ResNet(A)-50b | 20.85 | 5.37 | 25,576,264 | 4,352.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/resneta50b-0537-204eb60e.npz.log)) |
-| ResNet(A)-101b | 19.52 | 4.91 | 44,568,392 | 8,072.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta101b-0491-5c892558.npz.log)) |
+| ResNet(A)-101b | 19.65 | 4.91 | 44,568,392 | 8,072.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.511/resneta101b-0491-dafa3f52.npz.log)) |
 | ResNet(A)-152b | 19.41 | 4.67 | 60,212,040 | 11,796.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta152b-0467-d7e00a1b.npz.log)) |
 | ResNet(D)-50b | 20.80 | 5.50 | 25,680,808 | 20,497.60M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0550-7ba88f04.npz.log)) |
 | ResNet(D)-101b | 19.49 | 4.60 | 44,672,936 | 35,392.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0460-b90f971e.npz.log)) |

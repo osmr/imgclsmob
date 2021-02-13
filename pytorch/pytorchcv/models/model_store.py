@@ -320,7 +320,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnetabc14b', '0990', 'bad51cb083aae58479112ad11a3fe9430346e185', 'v0.0.477', 'ResNet(A)-BC-14b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta18', '0831', 'e9f206f480c46b489fbd300fa77db31d740c4f3b', 'v0.0.486', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0556', '7cedbb3bd808c0644b4afe1d52e7dad6abd33516', 'v0.0.492', 'ResNet(A)-50b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
-    ('resneta101b', '0503', '80d275397837e8f40908cdb4b2cc3e427a1196ee', 'v0.0.452', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
+    ('resneta101b', '0507', '962c37d5bcb5f8addd506b2902007dfcc1391ac6', 'v0.0.511', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta152b', '0482', '9b55f86f63c7402c0093903883e114a9f4809061', 'v0.0.452', 'ResNet(A)-152b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd50b', '0565', 'ec03d815c0f016c6517ed7b4b40126af46ceb8a4', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd101b', '0473', 'f851c920ec1fe4f729d339c933535d038bf2903c', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa

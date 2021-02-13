@@ -247,7 +247,7 @@ Some remarks:
 | RegNetY-1.6GF | 21.25 | 5.69 | 11,202,430 | 1,629.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnety016-0569-285f4f57.tf2.h5.log)) |
 | RegNetY-3.2GF | 18.31 | 4.11 | 19,436,338 | 3,199.15M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety032-0411-7fde6bb0.tf2.h5.log)) |
 | RegNetY-4.0GF | 19.55 | 4.68 | 20,646,656 | 3,999.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/regnety040-0468-5df9e764.tf2.h5.log)) |
-| RegNetY-6.4GF | 20.11 | 5.11 | 30,583,252 | 6,388.91M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety064-0511-f7aeb8a8.tf2.h5.log)) |
+| RegNetY-6.4GF | 19.07 | 4.46 | 30,583,252 | 6,388.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.512/regnety064-0446-58f09867.tf2.h5.log)) |
 | RegNetY-8.0GF | 20.04 | 5.08 | 39,180,068 | 7,996.54M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety080-0508-f6b8907d.tf2.h5.log)) |
 | RegNetY-12GF | 19.65 | 4.82 | 51,822,544 | 12,132.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety120-0482-ff6070da.tf2.h5.log)) |
 | RegNetY-16GF | 19.66 | 4.97 | 83,590,140 | 15,944.53M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety160-0497-239036d5.tf2.h5.log)) |

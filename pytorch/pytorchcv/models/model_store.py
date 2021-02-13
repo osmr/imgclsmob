@@ -137,7 +137,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety016', '0581', 'b45eccd6d1a80dc6e5608abd89c79db7547f2735', 'v0.0.486', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety032', '0404', 'cb3314864b68dfd2e0037928a3b635c81f86ccb2', 'v0.0.473', 'RegNetY-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety040', '0470', '052d76810aca2267e217a219d600299acc171c40', 'v0.0.494', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety064', '0523', '494ac81bb4bb1e9528b54f751907e3f2c32ba50e', 'v0.0.473', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety064', '0458', '0e191432038ca845d4ba7aaf2e3caf53290edd74', 'v0.0.512', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety080', '0513', 'c69743cd3e6f38d0b6ef366496b95a04b71b2912', 'v0.0.473', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety120', '0492', 'ba4fb43d03c1ad4bc94d6a3ae8a240a4c081c6f7', 'v0.0.473', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety160', '0503', '2c0ad1f9aad67a79390af3f5ef3dfc70fc8b517d', 'v0.0.473', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

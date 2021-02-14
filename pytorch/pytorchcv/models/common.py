@@ -1930,7 +1930,7 @@ class Concurrent(nn.Sequential):
                  stack=False,
                  merge_type=None):
         super(Concurrent, self).__init__()
-        assert (merge_type in ["cat", "stack", "sum"])
+        assert (merge_type is None) or (merge_type in ["cat", "stack", "sum"])
         self.axis = axis
         if merge_type is not None:
             self.merge_type = merge_type

@@ -248,9 +248,9 @@ class ESPNet_Encoder(nn.Module):
     '''
     This class defines the ESPNet-C network in the paper
     '''
-    def __init__(self, classes=19, p=5, q=3):
+    def __init__(self, num_classes=19, p=5, q=3):
         '''
-        :param classes: number of classes in the dataset. Default is 20 for the cityscapes
+        :param num_classes: number of classes in the dataset. Default is 20 for the cityscapes
         :param p: depth multiplier
         :param q: depth multiplier
         '''
@@ -273,7 +273,7 @@ class ESPNet_Encoder(nn.Module):
             self.level3.append(DilatedParllelResidualBlockB(128 , 128)) # ESPblock
         self.b3 = BR(256)
 
-        self.classifier = C(256, classes, 1, 1)
+        self.classifier = C(256, num_classes, 1, 1)
 
     def forward(self, input):
         '''
@@ -394,6 +394,10 @@ def oth_espnet_cityscapes(num_classes=19, pretrained=False, **kwargs):
     return ESPNet(num_classes=num_classes, **kwargs)
 
 
+def oth_espnetc_cityscapes(num_classes=19, pretrained=False, **kwargs):
+    return ESPNet_Encoder(num_classes=num_classes, **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -411,6 +415,7 @@ def _test():
 
     models = [
         oth_espnet_cityscapes,
+        # oth_espnetc_cityscapes,
     ]
 
     for model in models:
@@ -427,6 +432,7 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_espnet_cityscapes or weight_count == 201542)
+        assert (model != oth_espnetc_cityscapes or weight_count == 210889)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

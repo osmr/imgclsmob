@@ -9,8 +9,46 @@ __all__ = ['ESPNet', 'espnet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from common import conv1x1, conv3x3_block, NormActivation
+from common import conv1x1, conv3x3_block, NormActivation, DeconvBlock
 from espcnet import ESPCNet, ESPBlock
+
+
+class ESPFinalBlock(nn.Module):
+    """
+    ESPNet final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_eps):
+        super(ESPFinalBlock, self).__init__()
+        self.conv = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            bn_eps=bn_eps,
+            activation=(lambda: nn.PReLU(out_channels)))
+        self.deconv = nn.ConvTranspose2d(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            kernel_size=2,
+            stride=2,
+            padding=0,
+            output_padding=0,
+            bias=False)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.deconv(x)
+        return x
 
 
 class ESPNet(ESPCNet):
@@ -77,12 +115,6 @@ class ESPNet(ESPCNet):
             in_channels=channels[1],
             out_channels=num_classes)
 
-        self.conv = conv3x3_block(
-            in_channels=(channels[0] + num_classes),
-            out_channels=num_classes,
-            bn_eps=bn_eps,
-            activation=(lambda: nn.PReLU(num_classes)))
-
         self.up1 = nn.Sequential(nn.ConvTranspose2d(
             in_channels=num_classes,
             out_channels=num_classes,
@@ -92,40 +124,30 @@ class ESPNet(ESPCNet):
             output_padding=0,
             bias=False))
 
-        self.combine_l2_l3 = nn.Sequential(
-            NormActivation(
-                in_channels=(2 * num_classes),
-                bn_eps=bn_eps,
-                activation=(lambda: nn.PReLU(2 * num_classes))),
-            ESPBlock(
+        self.up2 = nn.Sequential()
+        self.up2.add_module("block1", NormActivation(
+            in_channels=(2 * num_classes),
+            bn_eps=bn_eps,
+            activation=(lambda: nn.PReLU(2 * num_classes))))
+        self.up2.add_module("block2", ESPBlock(
                 in_channels=(2 * num_classes),
                 out_channels=num_classes,
                 downsample=False,
                 residual=False,
                 bn_eps=bn_eps))
-
-        self.up2 = nn.Sequential(
-            nn.ConvTranspose2d(
-                in_channels=num_classes,
-                out_channels=num_classes,
-                kernel_size=2,
-                stride=2,
-                padding=0,
-                output_padding=0,
-                bias=False),
-            NormActivation(
-                in_channels=num_classes,
-                bn_eps=bn_eps,
-                activation=(lambda: nn.PReLU(num_classes))))
-
-        self.decoder_head = nn.ConvTranspose2d(
+        self.up2.add_module("block3", DeconvBlock(
             in_channels=num_classes,
             out_channels=num_classes,
             kernel_size=2,
             stride=2,
             padding=0,
-            output_padding=0,
-            bias=False)
+            bn_eps=bn_eps,
+            activation=(lambda: nn.PReLU(num_classes))))
+
+        self.decoder_head = ESPFinalBlock(
+            in_channels=(channels[0] + num_classes),
+            out_channels=num_classes,
+            bn_eps=bn_eps)
 
         self._init_params()
 
@@ -146,9 +168,9 @@ class ESPNet(ESPCNet):
         v1 = self.skip1(yh)
         z1 = self.up1(v1)
         v2 = self.skip2(y2)
-        z2 = self.up2(self.combine_l2_l3(torch.cat([v2, z1], 1)))
-        z = self.conv(torch.cat([z2, y1], 1))
-
+        z2 = torch.cat((v2, z1), dim=1)
+        z2 = self.up2(z2)
+        z = torch.cat((z2, y1), dim=1)
         z = self.decoder_head(z)
         return z
 
@@ -170,7 +192,7 @@ def get_espnet(model_name=None,
         Location for keeping the model parameters.
     """
     init_block_channels = 16
-    layers = [0, 6, 4]
+    layers = [0, 3, 4]
     channels = [19, 131, 256]
     cut_x = [1, 1, 0]
     bn_eps = 1e-3
@@ -239,7 +261,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != espnet_cityscapes or weight_count == 201542)
+        assert (model != espnet_cityscapes or weight_count == 201542)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

@@ -58,6 +58,8 @@ class ESPBlock(nn.Module):
         Whether to downsample image.
     residual : bool
         Whether to use residual connection.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,

@@ -152,7 +152,7 @@ def process_fwk(prep_info_dict,
     elif dst_framework == "chainer":
         dst_model_file_ext = "npz"
         eval_script = "eval_ch"
-        num_gpus = 0
+        num_gpus = 1
         calc_flops = ""
         log_line_num = -2
     elif dst_framework == "tf2":

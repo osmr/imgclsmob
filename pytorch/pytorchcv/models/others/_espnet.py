@@ -14,7 +14,8 @@ from common import NormActivation, conv1x1, conv3x3, conv1x1_block, conv3x3_bloc
 class DownSamplerB(nn.Module):
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super().__init__()
         n = int(out_channels / 5)
         n1 = out_channels - 4 * n
@@ -47,8 +48,10 @@ class DownSamplerB(nn.Module):
             out_channels=n,
             padding=16,
             dilation=16)
-        self.bn = nn.BatchNorm2d(out_channels, eps=1e-3)
-        self.act = nn.PReLU(out_channels)
+        self.morm_activ = NormActivation(
+            in_channels=out_channels,
+            bn_eps=bn_eps,
+            activation=(lambda: nn.PReLU(out_channels)))
 
     def forward(self, x):
         x = self.c1(x)
@@ -66,8 +69,7 @@ class DownSamplerB(nn.Module):
         add4 = add3 + d16
 
         x = torch.cat([d1, add1, add2, add3, add4], 1)
-        x = self.bn(x)
-        x = self.act(x)
+        x = self.morm_activ(x)
         return x
 
 
@@ -75,22 +77,22 @@ class DilatedParllelResidualBlockB(nn.Module):
     '''
     This class defines the ESP block, which is based on the following principle
         Reduce ---> Split ---> Transform --> Merge
-    '''
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 add=True,
-                 bn_eps=1e-3):
-        '''
         :param in_channels: number of input channels
         :param out_channels: number of output channels
         :param add: if true, add a residual connection through identity operation. You can use projection too as
                 in ResNet paper, but we avoid to use it if the dimensions are not the same because we do not want to
                 increase the module complexity
-        '''
+    '''
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 add,
+                 bn_eps):
         super().__init__()
+        self.add = add
         n = int(out_channels / 5)  #K=5,
         n1 = out_channels - 4 * n  #(N-(K-1)INT(N/K)) for dilation rate of 2^0, for producing an output feature map of channel=nOut
+
         self.c1 = conv1x1(
             in_channels=in_channels,
             out_channels=n)  #the point-wise convolutions with 1x1 help in reducing the computation, channel=c
@@ -121,21 +123,22 @@ class DilatedParllelResidualBlockB(nn.Module):
             out_channels=n,
             padding=16,
             dilation=16)  # dilation rate of 2^4
-        self.bn = NormActivation(
+        self.morm_activ = NormActivation(
             in_channels=out_channels,
             bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
-        self.add = add
 
     def forward(self, x):
+        identity = x
+
         # reduce
-        output1 = self.c1(x)
+        x = self.c1(x)
         # split and transform
-        d1 = self.d1(output1)
-        d2 = self.d2(output1)
-        d4 = self.d4(output1)
-        d8 = self.d8(output1)
-        d16 = self.d16(output1)
+        d1 = self.d1(x)
+        d2 = self.d2(x)
+        d4 = self.d4(x)
+        d8 = self.d8(x)
+        d16 = self.d16(x)
 
         # Using hierarchical feature fusion (HFF) to ease the gridding artifacts which is introduced 
         # by the large effective receptive filed of the ESP module 
@@ -145,13 +148,13 @@ class DilatedParllelResidualBlockB(nn.Module):
         add4 = add3 + d16
 
         #merge
-        combine = torch.cat([d1, add1, add2, add3, add4], 1)
+        x = torch.cat([d1, add1, add2, add3, add4], 1)
 
         # if residual version
         if self.add:
-            combine = x + combine
-        output = self.bn(combine)
-        return output
+            x = x + identity
+        x = self.morm_activ(x)
+        return x
 
 
 class InputProjectionA(nn.Module):
@@ -185,7 +188,7 @@ class InputProjectionA(nn.Module):
         return x
 
 
-class ESPNet_Encoder(nn.Module):
+class ESPNetC(nn.Module):
     '''
     This class defines the ESPNet-C network in the paper
         :param num_classes: number of classes in the dataset. Default is 20 for the cityscapes
@@ -193,10 +196,10 @@ class ESPNet_Encoder(nn.Module):
         :param q: depth multiplier
     '''
     def __init__(self,
-                 num_classes,
-                 p,
-                 q,
-                 bn_eps):
+                 num_classes=19,
+                 p=5,
+                 q=3,
+                 bn_eps=1e-03):
         super().__init__()
         self.level1 = conv3x3_block(
             in_channels=3,
@@ -212,25 +215,34 @@ class ESPNet_Encoder(nn.Module):
             bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(16 + 3)))
         self.level2_0 = DownSamplerB(
-            16 + 3,
-            64)  # Downsample Block, feature map size divided 2,    1/4
+            in_channels=(16 + 3),
+            out_channels=64,
+            bn_eps=bn_eps)  # Downsample Block, feature map size divided 2,    1/4
 
         self.level2 = nn.ModuleList()
         for i in range(0, p):
             self.level2.append(DilatedParllelResidualBlockB(
-                64,
-                64))  #ESP block
+                in_channels=64,
+                out_channels=64,
+                add=True,
+                bn_eps=bn_eps))  # ESP block
         self.b2 = NormActivation(
             in_channels=(128 + 3),
             bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(128 + 3)))
 
         self.level3_0 = DownSamplerB(
-            128 + 3,
-            128) #Downsample Block, feature map size divided 2,   1/8
+            in_channels=128 + 3,
+            out_channels=128,
+            bn_eps=bn_eps)  # Downsample Block, feature map size divided 2,   1/8
         self.level3 = nn.ModuleList()
         for i in range(0, q):
-            self.level3.append(DilatedParllelResidualBlockB(128 , 128)) # ESPblock
+            self.level3.append(DilatedParllelResidualBlockB(
+                in_channels=128,
+                out_channels=128,
+                add=True,
+                bn_eps=bn_eps))  # ESPblock
+
         self.b3 = NormActivation(
             in_channels=256,
             bn_eps=bn_eps,
@@ -267,7 +279,6 @@ class ESPNet_Encoder(nn.Module):
 
         classifier = self.classifier(output2_cat)
 
-        #return classifier
         out = F.upsample(classifier, x.size()[2:], mode='bilinear')   #Upsample score map, factor=8
         return out
 
@@ -286,14 +297,14 @@ class ESPNet(nn.Module):
                  q=3,
                  bn_eps=1e-03):
         super().__init__()
-        self.encoder = ESPNet_Encoder(
+        encoder = ESPNetC(
             num_classes=num_classes,
             p=p,
             q=q,
             bn_eps=bn_eps)
         # load the encoder modules
         self.en_modules = []
-        for i, m in enumerate(self.encoder.children()):
+        for i, m in enumerate(encoder.children()):
             self.en_modules.append(m)
 
         # light-weight decoder
@@ -321,15 +332,17 @@ class ESPNet(nn.Module):
                 bn_eps=bn_eps,
                 activation=(lambda: nn.PReLU(2 * num_classes))),
             DilatedParllelResidualBlockB(
-                2 * num_classes,
-                num_classes,
-                add=False))
+                in_channels=(2 * num_classes),
+                out_channels=num_classes,
+                add=False,
+                bn_eps=bn_eps))
 
         self.up_l2 = nn.Sequential(
             nn.ConvTranspose2d(
                 num_classes,
                 num_classes,
-                2, stride=2,
+                2,
+                stride=2,
                 padding=0,
                 output_padding=0,
                 bias=False),
@@ -388,6 +401,10 @@ def espnet_cityscapes(num_classes=19, pretrained=False, **kwargs):
     return ESPNet(num_classes=num_classes, **kwargs)
 
 
+def espnetc_cityscapes(num_classes=19, pretrained=False, **kwargs):
+    return ESPNetC(num_classes=num_classes, **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -404,7 +421,8 @@ def _test():
     classes = 19
 
     models = [
-        espnet_cityscapes,
+        # espnet_cityscapes,
+        espnetc_cityscapes,
     ]
 
     for model in models:
@@ -415,7 +433,8 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != espnet_cityscapes or weight_count == 201542)
+        # assert (model != espnet_cityscapes or weight_count == 201542)
+        assert (model != espnetc_cityscapes or weight_count == 210889)
 
         batch = 4
         x = torch.randn(batch, 3, in_size[0], in_size[1])

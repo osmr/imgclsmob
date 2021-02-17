@@ -266,7 +266,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | AirNet50-1x64d (r=16) | 22.11 | 6.19 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0619-090179e7.pth.log)) |
 | AirNeXt50-32x4d (r=2) | 20.87 | 5.51 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0551-c68156e5.pth.log)) |
 | BAM-ResNet-50 | 20.91 | 5.47 | 25,915,099 | 4,196.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0547-a04adf3c.pth.log)) |
-| CBAM-ResNet-50 | 22.38 | 6.05 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.125/cbam_resnet50-0605-a1172fe6.pth.log)) |
+| CBAM-ResNet-50 | 20.59 | 5.24 | 28,089,624 | 4,116.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.514/cbam_resnet50-0524-f824c591.pth.log)) |
 | SCNet-50 | 21.22 | 5.47 | 25,564,584 | 3,951.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0547-18741240.pth.log)) |
 | SCNet-101 | 19.91 | 4.84 | 44,565,416 | 7,204.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/scnet101-0484-13801569.pth.log)) |
 | SCNet(A)-50 | 19.53 | 4.68 | 25,583,816 | 4,715.84M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0468-eb3c25d6.pth.log)) |

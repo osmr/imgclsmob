@@ -224,7 +224,7 @@ Some remarks:
 | AirNet50-1x64d (r=16) | 22.89 | 6.50 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r16-0650-b7bb8662.tf2.h5.log)) |
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
 | BAM-ResNet-50 | 20.60 | 5.37 | 25,915,099 | 4,196.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0537-a9720e15.tf2.h5.log)) |
-| CBAM-ResNet-50 | 22.96 | 6.39 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/cbam_resnet50-0639-1d0bdb0e.tf2.h5.log)) |
+| CBAM-ResNet-50 | 20.38 | 5.14 | 28,089,624 | 4,116.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.514/cbam_resnet50-0514-55f01862.tf2.h5.log)) |
 | SCNet-50 | 21.18 | 5.39 | 25,564,584 | 3,951.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0539-de94eb1b.tf2.h5.log)) |
 | SCNet-101 | 19.82 | 4.73 | 44,565,416 | 7,204.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/scnet101-0473-61bd73af.tf2.h5.log)) |
 | SCNet(A)-50 | 19.61 | 4.65 | 25,583,816 | 4,715.84M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0465-c1f8f295.tf2.h5.log)) |

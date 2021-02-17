@@ -107,7 +107,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('airnet50_1x64d_r16', '0650', '95da530f61ae4b0dda4b52c88f37bbc7cc674a03', 'v0.0.120'),
     ('airnext50_32x4d_r2', '0573', '160860f7a1750d759c36e6000080c839cda7ac56', 'v0.0.120'),
     ('bam_resnet50', '0535', 'e2069bb5c18d2dca451688615bc0197a3387e441', 'v0.0.499'),
-    ('cbam_resnet50', '0640', 'b2314d9778b321fad2ecf3b350969038236deb96', 'v0.0.125'),
+    ('cbam_resnet50', '0513', 'ccc1f844910b90ee442af01e8fb7005f61c707d9', 'v0.0.514'),
     ('scnet50', '0535', 'f0ef9a4c4d2b3202c5f73fa3f0a129f3a5baba63', 'v0.0.493'),
     ('scnet101', '0464', '7b1574415a93dc6d3ad66dfd494d99cceec925a6', 'v0.0.507'),
     ('scneta50', '0466', 'e90cf3c5fb3dacdb2945a8cfa7fdb096fc5bafd2', 'v0.0.472'),

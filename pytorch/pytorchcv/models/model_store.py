@@ -114,7 +114,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('airnet50_1x64d_r16', '0619', '090179e777f47057bedded22d669bf9f9ce3169c', 'v0.0.120', 'AirNet50-1x64d (r=16)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
     ('airnext50_32x4d_r2', '0551', 'c68156e5e446a1116b1b42bc94b3f881ab73fe92', 'v0.0.120', 'AirNeXt50-32x4d (r=2)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
     ('bam_resnet50', '0547', 'a04adf3c93f56836509f66668aa90360c9688eb8', 'v0.0.499', 'BAM-ResNet-50', '1807.06514', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('cbam_resnet50', '0605', 'a1172fe679622224dcc88c00020936ad381806fb', 'v0.0.125', 'CBAM-ResNet-50', '1807.06521', 'in1k', 224, 0.875, 200, '[Jongchan/attention-module]'),  # noqa
+    ('cbam_resnet50', '0524', 'f824c591846ecdef0d499a3a9cbdb101c6c688a1', 'v0.0.514', 'CBAM-ResNet-50', '1807.06521', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('scnet50', '0547', '18741240886d8e260c228027f3ac44fc1c741f90', 'v0.0.493', 'SCNet-50', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('scnet101', '0484', '13801569a6e07724ebc998d3face11c9b867288b', 'v0.0.507', 'SCNet-101', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('scneta50', '0468', 'eb3c25d6c9c8b6c0815a724d798b9b5a2b27ce34', 'v0.0.472', 'SCNet(A)-50', '', 'in1k', 224, 0.875, 200, '[MCG-NKU/SCNet]'),  # noqa

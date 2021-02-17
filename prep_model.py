@@ -97,7 +97,14 @@ def post_process(dst_dir_path,
     """
     with open(log_file_path, "r") as f:
         log_file_tail = f.read().splitlines()[log_line_num]
-    top5_err = re.findall(r"\d+\.\d+", re.findall(r", err-top5=\d+\.\d+", log_file_tail)[0])[0].split(".")[1]
+    err5_str = re.findall(r", err-top5=\d+\.\d+", log_file_tail)
+    if len(err5_str) != 0:
+        top5_err = re.findall(r"\d+\.\d+", err5_str[0])[0].split(".")[1]
+    else:
+        with open(log_file_path, "r") as f:
+            log_file_tail = f.read().splitlines()[log_line_num - 1]
+        err5_str = re.findall(r", err-top5=\d+\.\d+", log_file_tail)
+        top5_err = re.findall(r"\d+\.\d+", err5_str[0])[0].split(".")[1]
 
     sha1_value = calc_sha1(model_file_path)
 

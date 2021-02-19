@@ -126,7 +126,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx032', '0592', '75dc82ab5cbc1b715444b8336b5178580bd6d7d9', 'v0.0.492', 'RegNetX-3.2GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx040', '0488', 'b891108c3dd4594ae0d6ecb91ad7be3d2d96878d', 'v0.0.495', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx064', '0502', 'c4247c938a0aad2a5ee29d84e336c41be0448c34', 'v0.0.513', 'RegNetX-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnetx080', '0551', 'e8d5baaac129477540ef4614fcb45cafd9173851', 'v0.0.473', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx080', '0486', '1d94db030638ab1dd01c644be700a14e5d05ca74', 'v0.0.515', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx120', '0538', '5eb7ad44af359b980da57a849e93973dcfe2646f', 'v0.0.473', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx160', '0517', '27653d34da3b42c6a868fb2a3ad404107bdeacda', 'v0.0.473', 'RegNetX-16GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx320', '0494', '54a1c651c4a248af6fc64f34fce27ede65b32785', 'v0.0.473', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

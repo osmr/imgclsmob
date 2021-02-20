@@ -290,7 +290,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | RegNetY-3.2GF | 18.04 | 4.04 | 19,436,338 | 3,199.15M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety032-0404-cb331486.pth.log)) |
 | RegNetY-4.0GF | 19.56 | 4.70 | 20,646,656 | 3,999.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.494/regnety040-0470-052d7681.pth.log)) |
 | RegNetY-6.4GF | 19.03 | 4.56 | 30,583,252 | 6,388.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnety064-0456-bff39135.pth.log)) |
-| RegNetY-8.0GF | 20.18 | 5.13 | 39,180,068 | 7,996.54M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety080-0513-c69743cd.pth.log)) |
+| RegNetY-8.0GF | 18.91 | 4.48 | 39,180,068 | 7,996.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0448-c084bf6a.pth.log)) |
 | RegNetY-12GF | 19.68 | 4.92 | 51,822,544 | 12,132.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety120-0492-ba4fb43d.pth.log)) |
 | RegNetY-16GF | 19.76 | 5.03 | 83,590,140 | 15,944.53M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety160-0503-2c0ad1f9.pth.log)) |
 | RegNetY-32GF | 19.32 | 4.74 | 145,046,770 | 32,317.66M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety320-0474-643155eb.pth.log)) |

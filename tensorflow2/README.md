@@ -156,7 +156,7 @@ Some remarks:
 | ResNet-101 | 20.52 | 5.18 | 44,549,160 | 7,597.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/resnet101-0518-64320ac1.tf2.h5.log)) |
 | ResNet-101b | 20.25 | 5.11 | 44,549,160 | 7,830.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet101b-0511-e3076227.tf2.h5.log)) |
 | ResNet-152 | 19.82 | 4.89 | 60,192,808 | 11,321.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.506/resnet152-0489-71c6f9cb.tf2.h5.log)) |
-| ResNet-152b | 19.60 | 4.80 | 60,192,808 | 11,554.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet152b-0480-b77f1e2c.tf2.h5.log)) |
+| ResNet-152b | 18.85 | 4.31 | 60,192,808 | 11,554.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.517/resnet152b-0431-b41ec90e.tf2.h5.log)) |
 | PreResNet-10 | 34.71 | 14.02 | 5,417,128 | 894.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet10-1402-541bf0e1.tf2.h5.log)) |
 | PreResNet-12 | 33.63 | 13.20 | 5,491,112 | 1,126.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet12-1320-349c0df4.tf2.h5.log)) |
 | PreResNet-14 | 32.29 | 12.24 | 5,786,536 | 1,358.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/preresnet14-1224-194b8762.tf2.h5.log)) |

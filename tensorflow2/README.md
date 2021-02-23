@@ -221,7 +221,7 @@ Some remarks:
 | IBN-DenseNet-121 | 23.34 | 6.47 | 7,978,856 | 2,872.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0647-830420b2.tf2.h5.log)) |
 | IBN-DenseNet-169 | 22.13 | 6.07 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0607-74a97a40.tf2.h5.log)) |
 | AirNet50-1x64d (r=2) | 22.54 | 6.23 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r2-0623-6940f0e5.tf2.h5.log)) |
-| AirNet50-1x64d (r=16) | 22.89 | 6.50 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r16-0650-b7bb8662.tf2.h5.log)) |
+| AirNet50-1x64d (r=16) | 21.12 | 5.50 | 25,714,952 | 4,399.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.519/airnet50_1x64d_r16-0550-9500236c.tf2.h5.log)) |
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
 | BAM-ResNet-50 | 20.60 | 5.37 | 25,915,099 | 4,196.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0537-a9720e15.tf2.h5.log)) |
 | CBAM-ResNet-50 | 20.38 | 5.14 | 28,089,624 | 4,116.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.514/cbam_resnet50-0514-55f01862.tf2.h5.log)) |

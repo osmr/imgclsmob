@@ -259,7 +259,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | IBN-DenseNet-121 | 23.33 | 6.46 | 7,978,856 | 2,872.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0646-82ee3ff4.params.log)) |
 | IBN-DenseNet-169 | 22.14 | 6.08 | 14,149,480 | 3,403.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0608-b509f339.params.log)) |
 | AirNet50-1x64d (r=2) | 22.48 | 6.21 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0621-347358cc.params.log)) |
-| AirNet50-1x64d (r=16) | 22.91 | 6.46 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0646-0b847b99.params.log)) |
+| AirNet50-1x64d (r=16) | 21.11 | 5.44 | 25,714,952 | 4,399.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.519/airnet50_1x64d_r16-0544-09a9f13b.params.log)) |
 | AirNeXt50-32x4d (r=2) | 21.51 | 5.75 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0575-ab104fb5.params.log)) |
 | BAM-ResNet-50 | 20.59 | 5.38 | 25,915,099 | 4,196.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0538-fa612c3d.params.log)) |
 | CBAM-ResNet-50 | 20.33 | 5.13 | 28,089,624 | 4,116.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.514/cbam_resnet50-0513-29de4161.params.log)) |

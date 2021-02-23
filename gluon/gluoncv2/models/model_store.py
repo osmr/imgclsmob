@@ -110,7 +110,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('ibn_densenet121', '0646', '82ee3ff44fd308107ec07d759c52a99e94af7041', 'v0.0.493'),
     ('ibn_densenet169', '0608', 'b509f33947b2f205f03e49ce2d5ee87855bbf708', 'v0.0.500'),
     ('airnet50_1x64d_r2', '0621', '347358cc4a3ac727784665e8113cd11bfa79c606', 'v0.0.120'),
-    ('airnet50_1x64d_r16', '0646', '0b847b998253ba22409eed4b939ec2158928a33f', 'v0.0.120'),
+    ('airnet50_1x64d_r16', '0544', '09a9f13b9d5f3e27eb26271070cc4bf8dd72cf9f', 'v0.0.519'),
     ('airnext50_32x4d_r2', '0575', 'ab104fb5225b17836d523a525903db254f5fdd99', 'v0.0.120'),
     ('bam_resnet50', '0538', 'fa612c3da552cd26094634c359413db69d0ef97b', 'v0.0.499'),
     ('cbam_resnet50', '0513', '29de416140f2e556e68c99b97491cd47ec1ceff1', 'v0.0.514'),

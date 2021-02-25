@@ -260,7 +260,7 @@ Some remarks:
 | DenseNet-169 | 22.13 | 6.06 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet169-0606-f708dc33.tf2.h5.log)) |
 | DenseNet-201 | 21.57 | 5.91 | 20,013,928 | 4,347.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.426/densenet201-0591-450c6568.tf2.h5.log)) |
 | PeleeNet | 29.39 | 9.82 | 2,802,248 | 514.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.496/peleenet-0982-5f84bad2.tf2.h5.log)) |
-| WRN-50-2 | 22.10 | 6.14 | 68,849,128 | 11,405.42M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/wrn50_2-0614-bea17aa9.tf2.h5.log)) |
+| WRN-50-2 | 22.03 | 6.08 | 68,849,128 | 11,405.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/wrn50_2-0608-646ef77e.tf2.h5.log)) |
 | DRN-C-26 | 24.36 | 7.10 | 21,126,584 | 16,993.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/drnc26-0710-4797ca29.tf2.h5.log)) |
 | DRN-C-42 | 23.74 | 6.93 | 31,234,744 | 25,093.75M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc42-0693-52dd6028.tf2.h5.log)) |
 | DRN-C-58 | 22.36 | 6.26 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc58-0626-e5c7be89.tf2.h5.log)) |
@@ -285,7 +285,7 @@ Some remarks:
 | DLA-X-60-C | 30.66 | 10.75 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla60xc-1075-a7850f03.tf2.h5.log)) |
 | DLA-102 | 20.57 | 5.17 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-9bebb44b.tf2.h5.log)) |
 | DLA-X-102 | 20.11 | 4.91 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0491-0a95e90b.tf2.h5.log)) |
-| DLA-X2-102 | 21.11 | 5.53 | 41,282,200 | 9,340.61M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla102x2-0553-06c93031.tf2.h5.log)) |
+| DLA-X2-102 | 19.20 | 4.69 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0469-d7a43ba5.tf2.h5.log)) |
 | DLA-169 | 19.61 | 4.81 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0481-39a0a5d7.tf2.h5.log)) |
 | DiCENet x0.2 | 55.84 | 31.16 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3116-6fbe46e2.tf2.h5.log)) |
 | DiCENet x0.5 | 48.32 | 24.29 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2429-fbf5fc52.tf2.h5.log)) |

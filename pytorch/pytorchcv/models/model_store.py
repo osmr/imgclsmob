@@ -152,7 +152,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('condensenet74_c4_g4', '0828', '5ba550494cae7081d12c14b02b2a02365539d377', 'v0.0.4', 'CondenseNet-74 (C=G=4)', '1711.09224', 'in1k', 224, 0.875, 200, '[ShichenLiu/CondenseNet]'),  # noqa
     ('condensenet74_c8_g8', '1006', '3574d874fefc3307f241690bad51f20e61be1542', 'v0.0.4', 'CondenseNet-74 (C=G=8)', '1711.09224', 'in1k', 224, 0.875, 200, '[ShichenLiu/CondenseNet]'),  # noqa
     ('peleenet', '1004', '5107a95d09d062cb152986169aa5b6f8f08afa47', 'v0.0.496', 'PeleeNet', '1804.06882', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('wrn50_2', '0641', '83897ab9f015f6f988e51108e12518b08e1819dd', 'v0.0.113', 'WRN-50-2', '1605.07146', 'in1k', 224, 0.875, 200, '[szagoruyko/functional-zoo]'),  # noqa
+    ('wrn50_2', '0626', '1e67b96cbfabe9a3717a8257ac8bf9d6ebc9d2cf', 'v0.0.520', 'WRN-50-2', '1605.07146', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('drnc26', '0723', 'e7306483781db61f71302eda6769d7d9fd126bf6', 'v0.0.508', 'DRN-C-26', '1705.09914', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('drnc42', '0657', '7c99c4608a9a5e5f073f657b92f258ba4ba5ac77', 'v0.0.116', 'DRN-C-42', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnc58', '0601', '70ec1f56c23da863628d126a6ed0ad10f037a2ac', 'v0.0.116', 'DRN-C-58', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
@@ -178,7 +178,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dla60xc', '1091', '0f6381f335e5bbb4c69b360be61a4a08e5c7a9de', 'v0.0.289', 'DLA-X-60-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102', '0537', 'fdabf0c31bd2e359ee9a8374b6a42d1396093cf1', 'v0.0.505', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102x', '0502', 'e908f11494326e9b1b38c6bbef2d1a2fca93903a', 'v0.0.503', 'DLA-X-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dla102x2', '0536', '079361117045dc661b63ce4b14408d403bc91844', 'v0.0.202', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, '[ucbdrive/dla]'),  # noqa
+    ('dla102x2', '0480', 'f4e49d04e49217fc4a43791f7f43a4b9805c34f0', 'v0.0.520', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla169', '0497', '197249175809f7d02165cb86486554934f5791fe', 'v0.0.509', 'DLA-169', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fishnet150', '0475', '93e26daaf570bc92b58f7421ab28c22ca405ad93', 'v0.0.502', 'FishNet-150', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('espnetv2_wd2', '2015', 'd234781f81e5d1b5ae6070fc851e3f7bb860b9fd', 'v0.0.238', 'ESPNetv2 x0.5', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa

@@ -239,7 +239,7 @@ Some remarks:
 | ResNeSt(A)-269 | 16.40 | 3.36 | 110,929,480 | 46,012.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0336-933dbe64.npz.log)) |
 | AirNet50-1x64d (r=2) | 22.46 | 6.20 | 27,425,864 | 4,772.11M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0620-b6a9359d.npz.log)) |
 | AirNet50-1x64d (r=16) | 21.11 | 5.47 | 25,714,952 | 4,399.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.519/airnet50_1x64d_r16-0547-6d3d6db4.npz.log)) |
-| AirNeXt50-32x4d (r=2) | 21.50 | 5.73 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0573-160860f7.npz.log)) |
+| AirNeXt50-32x4d (r=2) | 19.81 | 5.03 | 27,604,296 | 5,339.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.521/airnext50_32x4d_r2-0503-2bb8e4fc.npz.log)) |
 | BAM-ResNet-50 | 20.58 | 5.35 | 25,915,099 | 4,196.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/bam_resnet50-0535-e2069bb5.npz.log)) |
 | CBAM-ResNet-50 | 20.32 | 5.13 | 28,089,624 | 4,116.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.514/cbam_resnet50-0513-ccc1f844.npz.log)) |
 | SCNet-50 | 21.03 | 5.35 | 25,564,584 | 3,951.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/scnet50-0535-f0ef9a4c.npz.log)) |

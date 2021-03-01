@@ -65,7 +65,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnet101', '0563', '8ec82f7d697b7329aea2c95b399093e9cb2b1114', 'v0.0.504', 'PreResNet-101', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet101b', '0556', '76bfe6d020b55f163e77de6b1c27be6b0bed8b7b', 'v0.0.351', 'PreResNet-101b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152', '0464', 'baeb6c5208310ab7c919fc0da3c20267471a8fa1', 'v0.0.510', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet152b', '0516', 'f3805f4b8c845798b711171ad6632bcf56259844', 'v0.0.386', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('preresnet152b', '0459', '42c9fbcfe4e92463497fa4c2d0b007a191c6c043', 'v0.0.523', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet200b', '0588', 'f7104ff306ed5de2c27f3c855051c22bda167981', 'v0.0.45', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, '[tornadomeet/ResNet]'),  # noqa
     ('preresnet269b', '0581', '1a7878bb10923b22bda58d7935dfa6e5e8a7b67d', 'v0.0.239', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, '[soeaver/mxnet-model]'),  # noqa
     ('resnext14_16x4d', '1248', '35ffac2a26374e71b6bf4bc9f90b7a1a1dd47e7d', 'v0.0.370', 'ResNeXt-14 (16x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa

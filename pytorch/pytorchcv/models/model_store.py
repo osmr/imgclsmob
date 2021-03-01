@@ -96,7 +96,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('seresnext101_64x4d', '0476', 'da806109a2346be16f2b3b9aa60aa8f52bc6a1fa', 'v0.0.418', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('senet16', '0820', '373aeafdc994c3e03bf483a9fa3ecb152353722a', 'v0.0.341', 'SENet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet28', '0598', '27165b63696061e57c141314d44732aa65f807a8', 'v0.0.356', 'SENet-28', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('senet154', '0461', '6512228c820897cd09f877527a553ca99d673956', 'v0.0.13', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('senet154', '0455', '95dbccbe56dc93c4544e6d1c6673f09425a4cee2', 'v0.0.522', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnestabc14', '0647', '0c3d9e34aebf0dee0dbcbb937eb54f2a7fc8f64a', 'v0.0.493', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta18', '0707', 'efca5a69587dcdff3aa5d3d7cbd621d082299e27', 'v0.0.489', 'ResNeSt(A)-18', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnestabc26', '0476', '7d97b20648e1f38454e6f5b1fe796c8eaf6e7e74', 'v0.0.495', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -110,7 +110,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('ibn_resnext101_32x4d', '0542', 'b5233c663a4d207d08c21107d6c951956e910be8', 'v0.0.127', 'IBN-ResNeXt-101 (32x4d)', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibn_densenet121', '0673', '0ea2c535382c7a3d92e712617d8405ba631c071f', 'v0.0.493', 'IBN-DenseNet-121', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibn_densenet169', '0619', 'ec2c0556f4fb2e2e51d49460095bf28259cb5d19', 'v0.0.500', 'IBN-DenseNet-169', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('airnet50_1x64d_r2', '0590', '3ec422128d17314124c02e3bb0f77e26777fb385', 'v0.0.120', 'AirNet50-1x64d (r=2)', '', 'in1k', 224, 0.875, 200, '[soeaver/AirNet-PyTorch]'),  # noqa
+    ('airnet50_1x64d_r2', '0532', '398445f4059b5505e2fd5b7338fe174960f8571a', 'v0.0.522', 'AirNet50-1x64d (r=2)', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('airnet50_1x64d_r16', '0560', 'd46d344b7e4216d43dc83659afd265d11cf3e05e', 'v0.0.519', 'AirNet50-1x64d (r=16)', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('airnext50_32x4d_r2', '0515', '85f13273529e6c4192a790fc55dafa7f022376f4', 'v0.0.521', 'AirNeXt50-32x4d (r=2)', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bam_resnet50', '0547', 'a04adf3c93f56836509f66668aa90360c9688eb8', 'v0.0.499', 'BAM-ResNet-50', '1807.06514', 'in1k', 224, 0.875, 200, ''),  # noqa

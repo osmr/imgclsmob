@@ -66,7 +66,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnet101b', '0556', '76bfe6d020b55f163e77de6b1c27be6b0bed8b7b', 'v0.0.351', 'PreResNet-101b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152', '0464', 'baeb6c5208310ab7c919fc0da3c20267471a8fa1', 'v0.0.510', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152b', '0459', '42c9fbcfe4e92463497fa4c2d0b007a191c6c043', 'v0.0.523', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet200b', '0588', 'f7104ff306ed5de2c27f3c855051c22bda167981', 'v0.0.45', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, '[tornadomeet/ResNet]'),  # noqa
+    ('preresnet200b', '0510', '9f0e7f011c83f91c17d29d9165dc887beb65efff', 'v0.0.524', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet269b', '0581', '1a7878bb10923b22bda58d7935dfa6e5e8a7b67d', 'v0.0.239', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, '[soeaver/mxnet-model]'),  # noqa
     ('resnext14_16x4d', '1248', '35ffac2a26374e71b6bf4bc9f90b7a1a1dd47e7d', 'v0.0.370', 'ResNeXt-14 (16x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext14_32x2d', '1281', '14521186b8c78c7c07f3904360839f22c180f65e', 'v0.0.371', 'ResNeXt-14 (32x2d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -139,7 +139,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety040', '0470', '052d76810aca2267e217a219d600299acc171c40', 'v0.0.494', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety064', '0456', 'bff39135d55313cb424adeb8bb4b22db7fea09ba', 'v0.0.513', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety080', '0448', 'c084bf6a0ee2f7722396622fb7865ee0c19b7244', 'v0.0.516', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety120', '0492', 'ba4fb43d03c1ad4bc94d6a3ae8a240a4c081c6f7', 'v0.0.473', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety120', '0461', '6ce18cad1da06571d0d9e6eaaf04fe14360f1354', 'v0.0.524', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety160', '0503', '2c0ad1f9aad67a79390af3f5ef3dfc70fc8b517d', 'v0.0.473', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety320', '0474', '643155ebbf529baf5c36d0894ebba86bdf789cc8', 'v0.0.473', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('pyramidnet101_a360', '0543', '7f1747f84b83b504ece3eb2bc3924d36343358ad', 'v0.0.507', 'PyramidNet-101 (a=360)', '1610.02915', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -321,7 +321,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resneta18', '0831', 'e9f206f480c46b489fbd300fa77db31d740c4f3b', 'v0.0.486', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0556', '7cedbb3bd808c0644b4afe1d52e7dad6abd33516', 'v0.0.492', 'ResNet(A)-50b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta101b', '0507', '962c37d5bcb5f8addd506b2902007dfcc1391ac6', 'v0.0.511', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
-    ('resneta152b', '0482', '9b55f86f63c7402c0093903883e114a9f4809061', 'v0.0.452', 'ResNet(A)-152b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
+    ('resneta152b', '0441', 'c4b9bc9af946b25fd37de8cf4c58bdb0066dfeae', 'v0.0.524', 'ResNet(A)-152b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd50b', '0565', 'ec03d815c0f016c6517ed7b4b40126af46ceb8a4', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd101b', '0473', 'f851c920ec1fe4f729d339c933535d038bf2903c', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd152b', '0482', '112e216da50eb20d52c509a28c97b05ef819cefe', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa

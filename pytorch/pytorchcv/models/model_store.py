@@ -92,7 +92,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('sepreresnetbc38b', '0578', '12827fcd3c8c1a8c8ba1d109e85ffa67e7ab306a', 'v0.0.409', 'SE-PreResNet-BC-38b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet50b', '0549', '4628a07d7dd92c775868dffd33fd6e3e7522c261', 'v0.0.461', 'SE-PreResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext50_32x4d', '0451', '52029a7f6170873b2d50a7016fba053e98183f7b', 'v0.0.505', 'SE-ResNeXt-50 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnext101_32x4d', '0480', '4f6479f0801a92d35a256a47e5c11a97b3555016', 'v0.0.418', 'SE-ResNeXt-101 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('seresnext101_32x4d', '0476', '2a3b9d3bd5e54cd235f92adcdc1d8c3cb94dd18a', 'v0.0.525', 'SE-ResNeXt-101 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext101_64x4d', '0476', 'da806109a2346be16f2b3b9aa60aa8f52bc6a1fa', 'v0.0.418', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('senet16', '0820', '373aeafdc994c3e03bf483a9fa3ecb152353722a', 'v0.0.341', 'SENet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet28', '0598', '27165b63696061e57c141314d44732aa65f807a8', 'v0.0.356', 'SENet-28', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -140,7 +140,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety064', '0456', 'bff39135d55313cb424adeb8bb4b22db7fea09ba', 'v0.0.513', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety080', '0448', 'c084bf6a0ee2f7722396622fb7865ee0c19b7244', 'v0.0.516', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety120', '0461', '6ce18cad1da06571d0d9e6eaaf04fe14360f1354', 'v0.0.524', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety160', '0503', '2c0ad1f9aad67a79390af3f5ef3dfc70fc8b517d', 'v0.0.473', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety160', '0498', '66977a8621f5c32259fb26e56b5679f12da46472', 'v0.0.525', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety320', '0474', '643155ebbf529baf5c36d0894ebba86bdf789cc8', 'v0.0.473', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('pyramidnet101_a360', '0543', '7f1747f84b83b504ece3eb2bc3924d36343358ad', 'v0.0.507', 'PyramidNet-101 (a=360)', '1610.02915', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('diracnet18v2', '1170', 'e06737707a1f5a5c7fe4e57da92ed890b034cb9a', 'v0.0.111', 'DiracNetV2-18', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa
@@ -197,7 +197,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnet_w18_small_v1', '0901', '300230646c0796b7ba20954a9245803ecac4cdf0', 'v0.0.492', 'HRNet-W18 Small V1', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnet_w18_small_v2', '0618', 'ef7b1fe4e206cadaad6a59faef1e0bc6104da825', 'v0.0.499', 'HRNet-W18 Small V2', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w18', '0512', '9d2b7fbfb4a0efd878172ec8f81d517ba347a6a2', 'v0.0.508', 'HRNetV2-W18', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('hrnetv2_w30', '0578', '839e57ebc3018be3d793e5c5ce1a6655347427b7', 'v0.0.421', 'HRNetV2-W30', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
+    ('hrnetv2_w30', '0521', '73d7e48d2006d86c50d03ed24c92277b77fb5146', 'v0.0.525', 'HRNetV2-W30', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w32', '0581', 'bef9ada0e564bdc1645f80ff69a713b2bc47cfba', 'v0.0.421', 'HRNetV2-W32', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w40', '0553', 'e4b5a38af98c811c10d1b536f4fe48eb20d37e31', 'v0.0.421', 'HRNetV2-W40', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w44', '0563', '9321bfd82f7f02a789dc054ac079706f0e8784c4', 'v0.0.421', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa

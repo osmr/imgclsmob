@@ -1,9 +1,9 @@
 import logging
 import os
 import cupy
-from chainer import cuda
 from chainer import using_config, Variable
 from chainer.function import no_backprop_mode
+from chainer.backends import cuda
 from chainer.backends.cuda import to_cpu
 from chainer.serializers import load_npz
 from .chainercv2.model_provider import get_model
@@ -17,7 +17,7 @@ from .metrics.hpe_metrics import CocoHpeOksApMetric
 def prepare_ch_context(num_gpus):
     use_gpus = (num_gpus > 0)
     if use_gpus:
-        cuda.get_device(0).use()
+        cuda.get_device_from_id(0).use()
         # try:
         #     import cupy
         #     cuda.get_device(0).use()
@@ -31,7 +31,6 @@ class Predictor(object):
     Model predictor with preprocessing.
 
     Parameters:
-    ----------
     ----------
     model : Chain
         Base model.

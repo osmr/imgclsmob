@@ -139,7 +139,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety040', '0470', '052d76810aca2267e217a219d600299acc171c40', 'v0.0.494', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety064', '0456', 'bff39135d55313cb424adeb8bb4b22db7fea09ba', 'v0.0.513', 'RegNetY-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety080', '0448', 'c084bf6a0ee2f7722396622fb7865ee0c19b7244', 'v0.0.516', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety120', '0461', '6ce18cad1da06571d0d9e6eaaf04fe14360f1354', 'v0.0.524', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety120', '0442', 'bf25956032eb6d98134a8e8b0e4640324cc92e59', 'v0.0.526', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety160', '0498', '66977a8621f5c32259fb26e56b5679f12da46472', 'v0.0.525', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety320', '0474', '643155ebbf529baf5c36d0894ebba86bdf789cc8', 'v0.0.473', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('pyramidnet101_a360', '0543', '7f1747f84b83b504ece3eb2bc3924d36343358ad', 'v0.0.507', 'PyramidNet-101 (a=360)', '1610.02915', 'in1k', 224, 0.875, 200, ''),  # noqa

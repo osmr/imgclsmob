@@ -250,7 +250,7 @@ Some remarks:
 | RegNetY-6.4GF | 18.96 | 4.42 | 30,583,252 | 6,388.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnety064-0442-d7aaab23.tf2.h5.log)) |
 | RegNetY-8.0GF | 18.77 | 4.39 | 39,180,068 | 7,996.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0439-e9b5f16a.tf2.h5.log)) |
 | RegNetY-12GF | 18.49 | 4.29 | 51,822,544 | 12,132.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.526/regnety120-0429-1d6a27ba.tf2.h5.log)) |
-| RegNetY-16GF | 20.25 | 4.83 | 83,590,140 | 15,944.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/regnety160-0483-97624901.tf2.h5.log)) |
+| RegNetY-16GF | 18.67 | 4.29 | 83,590,140 | 15,944.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/regnety160-0429-5a9e1191.tf2.h5.log)) |
 | RegNetY-32GF | 19.10 | 4.58 | 145,046,770 | 32,317.66M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety320-0458-b9ceda18.tf2.h5.log)) |
 | PyramidNet-101 (a=360) | 20.42 | 5.20 | 42,455,070 | 8,743.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-a0d72160.tf2.h5.log)) |
 | DiracNetV2-18 | 30.59 | 11.13 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet18v2-1113-4d687b74.tf2.h5.log)) |
@@ -293,7 +293,7 @@ Some remarks:
 | DiCENet x1.0 | 35.47 | 14.39 | 1,805,604 | 82.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/dicenet_w1-1439-675507ad.tf2.h5.log)) |
 | DiCENet x1.25 | 33.66 | 12.86 | 2,162,888 | 111.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/dicenet_w5d4-1286-353f46cc.tf2.h5.log)) |
 | DiCENet x1.5 | 31.34 | 11.73 | 2,652,200 | 151.81M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/dicenet_w3d2-1173-2d5ba3eb.tf2.h5.log)) |
-| DiCENet x1.75 | 31.76 | 11.84 | 3,264,932 | 201.26M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1184-0b337403.tf2.h5.log)) |
+| DiCENet x1.75 | 30.74 | 11.31 | 3,264,932 | 201.26M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/dicenet_w7d8-1131-00845959.tf2.h5.log)) |
 | DiCENet x2.0 | 30.49 | 11.13 | 3,979,044 | 257.95M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1113-a597b5bc.tf2.h5.log)) |
 | HRNet-W18 Small V1 | 26.23 | 8.71 | 13,187,464 | 1,614.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0871-6ae644af.tf2.h5.log)) |
 | HRNet-W18 Small V2 | 21.69 | 6.02 | 15,597,464 | 2,618.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0602-e9db4e0c.tf2.h5.log)) |

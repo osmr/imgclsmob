@@ -288,7 +288,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetY-6.4GF | 18.95 | 4.45 | 30,583,252 | 6,386.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnety064-0445-8ae16f97.params.log)) |
 | RegNetY-8.0GF | 18.78 | 4.36 | 39,180,068 | 7,994.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0436-4cd7fc61.params.log)) |
 | RegNetY-12GF | 18.51 | 4.31 | 51,822,544 | 12,129.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.526/regnety120-0431-effa35b6.params.log)) |
-| RegNetY-16GF | 20.23 | 4.82 | 83,590,140 | 15,941.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/regnety160-0482-b46554c0.params.log)) |
+| RegNetY-16GF | 18.63 | 4.30 | 83,590,140 | 15,941.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/regnety160-0430-82731569.params.log)) |
 | RegNetY-32GF | 19.10 | 4.58 | 145,046,770 | 32,313.76M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety320-0458-900b9591.params.log)) |
 | PyramidNet-101 (a=360) | 20.41 | 5.20 | 42,455,070 | 8,743.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-3a98a2bf.params.log)) |
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
@@ -341,7 +341,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DiCENet x1.0 | 35.02 | 14.11 | 1,805,604 | 81.96M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/dicenet_w1-1411-93e2e0df.params.log)) |
 | DiCENet x1.25 | 33ю11 | 12.51 | 2,162,888 | 111.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/dicenet_w5d4-1251-71073760.params.log)) |
 | DiCENet x1.5 | 31.00 | 11.44 | 2,652,200 | 151.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/dicenet_w3d2-1144-bb2a902d.params.log)) |
-| DiCENet x1.75 | 30.54 | 11.21 | 3,264,932 | 200.87M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w7d8-1121-be69a971.params.log)) |
+| DiCENet x1.75 | 30.08 | 10.81 | 3,264,932 | 200.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/dicenet_w7d8-1081-37b9276b.params.log)) |
 | DiCENet x2.0 | 29.93 | 10.58 | 3,979,044 | 257.49M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w2-1058-66980b52.params.log)) |
 | HRNet-W18 Small V1 | 26.20 | 8.73 | 13,187,464 | 1,614.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/hrnet_w18_small_v1-0873-1060c1c5.params.log)) |
 | HRNet-W18 Small V2 | 21.71 | 6.02 | 15,597,464 | 2,618.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0602-1f319e1b.params.log)) |

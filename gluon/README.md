@@ -326,7 +326,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-X-60 | 20.70 | 5.53 | 17,352,344 | 3,543.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0553-58924af8.params.log)) |
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |
 | DLA-102 | 20.58 | 5.17 | 33,268,888 | 7,190.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-0e5d954c.params.log)) |
-| DLA-X-102 | 20.10 | 4.88 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0488-e29b7d26.params.log)) |
+| DLA-X-102 | 19.59 | 4.70 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0470-ea82787c.params.log)) |
 | DLA-X2-102 | 19.24 | 4.67 | 41,282,200 | 9,340.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0467-f9a11862.params.log)) |
 | DLA-169 | 19.61 | 4.83 | 53,389,720 | 11,593.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0483-916bcd08.params.log)) |
 | FishNet-150 | 19.15 | 4.66 | 24,959,400 | 6,435.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0466-ed21862d.params.log)) |
@@ -347,7 +347,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | HRNet-W18 Small V2 | 21.71 | 6.02 | 15,597,464 | 2,618.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0602-1f319e1b.params.log)) |
 | HRNetV2-W18 | 20.15 | 5.00 | 21,299,004 | 4,322.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/hrnetv2_w18-0500-0a700902.params.log)) |
 | HRNetV2-W30 | 20.30 | 5.08 | 37,712,220 | 8,156.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/hrnetv2_w30-0508-eb6afc49.params.log)) |
-| HRNetV2-W32 | 22.27 | 6.07 | 41,232,680 | 8,973.31M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w32-0607-e68bcf90.params.log)) |
+| HRNetV2-W32 | 19.94 | 4.96 | 41,232,680 | 8,973.31M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/hrnetv2_w32-0496-9c6c47dc.params.log)) |
 | HRNetV2-W40 | 21.72 | 5.71 | 57,557,160 | 12,751.34M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w40-0571-60aa3b9d.params.log)) |
 | HRNetV2-W44 | 21.73 | 5.92 | 67,064,984 | 14,945.95M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w44-0592-ff313e29.params.log)) |
 | HRNetV2-W48 | 21.41 | 5.78 | 77,469,864 | 17,344.29M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0578-8823f844.params.log)) |

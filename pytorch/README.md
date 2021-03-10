@@ -329,7 +329,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DLA-X-60 | 21.07 | 5.75 | 17,352,344 | 3,543.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/dla60x-0575-fae6dc6d.pth.log)) |
 | DLA-X-60-C | 30.98 | 10.91 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1091-0f6381f3.pth.log)) |
 | DLA-102 | 20.69 | 5.37 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0537-fdabf0c3.pth.log)) |
-| DLA-X-102 | 20.13 | 5.02 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.503/dla102x-0502-e908f114.pth.log)) |
+| DLA-X-102 | 19.70 | 4.88 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0488-b1727759.pth.log)) |
 | DLA-X2-102 | 19.39 | 4.80 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0480-f4e49d04.pth.log)) |
 | DLA-169 | 19.76 | 4.97 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0497-19724917.pth.log)) |
 | FishNet-150 | 19.26 | 4.75 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0475-93e26daa.pth.log)) |
@@ -350,7 +350,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | HRNet-W18 Small V2 | 21.93 | 6.18 | 15,597,464 | 2,618.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.499/hrnet_w18_small_v2-0618-ef7b1fe4.pth.log)) |
 | HRNetV2-W18 | 20.20 | 5.12 | 21,299,004 | 4,323.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/hrnetv2_w18-0512-9d2b7fbf.pth.log)) |
 | HRNetV2-W30 | 20.35 | 5.21 | 37,712,220 | 8,156.82M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/hrnetv2_w30-0521-73d7e48d.pth.log)) |
-| HRNetV2-W32 | 21.55 | 5.81 | 41,232,680 | 8,974.04M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w32-0581-bef9ada0.pth.log)) |
+| HRNetV2-W32 | 19.96 | 5.06 | 41,232,680 | 8,974.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/hrnetv2_w32-0506-4aaf8a21.pth.log)) |
 | HRNetV2-W40 | 21.07 | 5.53 | 57,557,160 | 12,752.26M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w40-0553-e4b5a38a.pth.log)) |
 | HRNetV2-W44 | 21.11 | 5.63 | 67,064,984 | 14,946.96M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w44-0563-9321bfd8.pth.log)) |
 | HRNetV2-W48 | 20.69 | 5.48 | 77,469,864 | 17,345.39M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0548-40f98610.pth.log)) |

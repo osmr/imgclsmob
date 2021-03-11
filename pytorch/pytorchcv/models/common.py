@@ -1353,7 +1353,7 @@ class InterpolationBlock(nn.Module):
 
     Parameters:
     ----------
-    scale_factor : float
+    scale_factor : int
         Multiplier for spatial size.
     out_size : tuple of 2 int, default None
         Spatial size of the output tensor for the bilinear interpolation operation.
@@ -1396,7 +1396,7 @@ class InterpolationBlock(nn.Module):
         if self.out_size is not None:
             return self.out_size
         if self.up:
-            return tuple(s * self.scale_factor for s in x.shape[2:])
+            return tuple(int(s * self.scale_factor) for s in x.shape[2:])
         else:
             return tuple(s // self.scale_factor for s in x.shape[2:])
 

@@ -230,11 +230,11 @@ class ICNet(nn.Module):
             out_channels=channels[0])
 
         self.branch2 = MultiOutputSequential()
-        self.branch2.add_module("down1", InterpolationBlock(scale_factor=0.5))
+        self.branch2.add_module("down1", InterpolationBlock(scale_factor=2, up=False))
         backbones[0].do_output = True
         self.branch2.add_module("backbones1", backbones[0])
 
-        self.branch2.add_module("down2", InterpolationBlock(scale_factor=0.5))
+        self.branch2.add_module("down2", InterpolationBlock(scale_factor=2, up=False))
         self.branch2.add_module("backbones2", backbones[1])
         self.branch2.add_module("psp", PSPBlock(
             in_channels=backbones_out_channels[1],

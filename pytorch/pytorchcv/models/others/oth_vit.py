@@ -46,11 +46,10 @@ class MLP(nn.Module):
     def __init__(self,
                  channels,
                  mid_channels,
-                 activation,
                  dropout_rate):
         super().__init__()
         self.fc1 = nn.Linear(channels, mid_channels)
-        self.activ = activation()
+        self.activ = nn.GELU()
         self.fc2 = nn.Linear(mid_channels, channels)
         self.dropout = nn.Dropout(dropout_rate)
 
@@ -67,29 +66,28 @@ class Block(nn.Module):
     def __init__(self,
                  dim,
                  num_heads,
-                 mlp_ratio=4.,
-                 qkv_bias=False,
-                 qk_scale=None,
-                 drop=0.,
-                 attn_drop=0.,
-                 act_layer=nn.GELU,
+                 mlp_ratio,
+                 qkv_bias,
+                 qk_scale,
+                 dropout_rate,
+                 att_dropout_rate,
                  norm_layer=nn.LayerNorm):
         super().__init__()
+        mlp_hidden_dim = int(dim * mlp_ratio)
+
         self.norm1 = norm_layer(dim)
         self.att = Attention(
             dim=dim,
             num_heads=num_heads,
             qkv_bias=qkv_bias,
             qk_scale=qk_scale,
-            attn_drop=attn_drop,
-            proj_drop=drop)
+            attn_drop=att_dropout_rate,
+            proj_drop=dropout_rate)
         self.norm2 = norm_layer(dim)
-        mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = MLP(
             channels=dim,
             mid_channels=mlp_hidden_dim,
-            activation=act_layer,
-            dropout_rate=drop)
+            dropout_rate=dropout_rate)
 
     def forward(self, x):
         x = x + self.att(self.norm1(x))
@@ -127,8 +125,8 @@ class VisionTransformer(nn.Module):
         mlp_ratio (int): ratio of mlp hidden dim to embedding dim
         qkv_bias (bool): enable bias for qkv if True
         qk_scale (float): override default qk scale of head_dim ** -0.5 if set
-        drop_rate (float): dropout rate
-        attn_drop_rate (float): attention dropout rate
+        dropout_rate (float): dropout rate
+        att_dropout_rate (float): attention dropout rate
         norm_layer: (nn.Module): normalization layer
     """
 
@@ -143,8 +141,8 @@ class VisionTransformer(nn.Module):
                  mlp_ratio=4.,
                  qkv_bias=True,
                  qk_scale=None,
-                 drop_rate=0.,
-                 attn_drop_rate=0.,
+                 dropout_rate=0.,
+                 att_dropout_rate=0.,
                  norm_layer=None):
         super().__init__()
         # assert (representation_size is None)
@@ -161,7 +159,7 @@ class VisionTransformer(nn.Module):
 
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim))
-        self.pos_drop = nn.Dropout(p=drop_rate)
+        self.pos_drop = nn.Dropout(p=dropout_rate)
 
         self.blocks = nn.Sequential()
         for i in range(depth):
@@ -171,8 +169,8 @@ class VisionTransformer(nn.Module):
                 mlp_ratio=mlp_ratio,
                 qkv_bias=qkv_bias,
                 qk_scale=qk_scale,
-                drop=drop_rate,
-                attn_drop=attn_drop_rate,
+                dropout_rate=dropout_rate,
+                att_dropout_rate=att_dropout_rate,
                 norm_layer=norm_layer))
 
         self.norm = norm_layer(embed_dim)

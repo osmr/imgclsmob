@@ -214,7 +214,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-101b | 20.85 | 5.40 | 44,541,608 | 7,827.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0540-3839a473.params.log)) |
 | PreResNet-152 | 19.17 | 4.46 | 60,185,256 | 11,319.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.510/preresnet152-0446-3b41bd93.params.log)) |
 | PreResNet-152b | 19.01 | 4.38 | 60,185,256 | 11,551.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.523/preresnet152b-0438-ebf71d02.params.log)) |
-| PreResNet-200b | 19.66 | 4.88 | 64,666,280 | 15,068.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.524/preresnet200b-0488-dffb926f.params.log)) |
+| PreResNet-200b | 18.96 | 4.46 | 64,666,280 | 15,068.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.529/preresnet200b-0446-70135e66.params.log)) |
 | PreResNet-269b | 20.71 | 5.56 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0556-f386e3e7.params.log)) |
 | ResNeXt-14 (16x4d) | 31.66 | 12.23 | 7,127,336 | 1,045.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.370/resnext14_16x4d-1223-1f8072e8.params.log)) |
 | ResNeXt-14 (32x2d) | 32.16 | 12.47 | 7,029,416 | 1,031.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.371/resnext14_32x2d-1247-2ca8cc25.params.log)) |
@@ -240,7 +240,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-PreResNet-BC-38b | 21.42 | 5.63 | 24,019,064 | 3,233.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0563-d8f0fbd3.params.log)) |
 | SE-PreResNet-50b | 20.67 | 5.32 | 28,080,472 | 4,110.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0532-5b620ff7.params.log)) |
 | SE-ResNeXt-50 (32x4d) | 18.74 | 4.33 | 27,559,896 | 4,258.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0433-d74d1d0a.params.log)) |
-| SE-ResNeXt-101 (32x4d) | 19.34 | 4.58 | 48,955,416 | 8,008.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/seresnext101_32x4d-0458-30eecd54.params.log)) |
+| SE-ResNeXt-101 (32x4d) | 19.06 | 4.44 | 48,955,416 | 8,008.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.529/seresnext101_32x4d-0444-3c89aec5.params.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.98 | 4.66 | 88,232,984 | 15,505.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0466-15e16730.params.log)) |
 | SENet-16 | 25.34 | 8.06 | 31,366,168 | 5,080.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0806-ba268021.params.log)) |
 | SENet-28 | 21.68 | 5.91 | 36,453,768 | 5,731.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.356/senet28-0591-d5297a35.params.log)) |

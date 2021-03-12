@@ -1,4 +1,5 @@
 # Computer vision models on Chainer
+# Computer vision models on Chainer
 
 [![PyPI](https://img.shields.io/pypi/v/chainercv2.svg)](https://pypi.python.org/pypi/chainercv2)
 [![Downloads](https://pepy.tech/badge/chainercv2)](https://pepy.tech/project/chainercv2)
@@ -199,7 +200,7 @@ Some remarks:
 | PreResNet-101b | 20.87 | 5.38 | 44,541,608 | 7,827.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0538-b502bf25.npz.log)) |
 | PreResNet-152 | 19.16 | 4.47 | 60,185,256 | 11,319.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.510/preresnet152-0447-f62a6bc8.npz.log)) |
 | PreResNet-152b | 19.00 | 4.38 | 60,185,256 | 11,551.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.523/preresnet152b-0438-50121ca1.npz.log)) |
-| PreResNet-200b | 19.65 | 4.90 | 64,666,280 | 15,068.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.524/preresnet200b-0490-9330a356.npz.log)) |
+| PreResNet-200b | 18.96 | 4.46 | 64,666,280 | 15,068.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.529/preresnet200b-0446-f44d47e8.npz.log)) |
 | PreResNet-269b | 20.73 | 5.58 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0558-e2e491e1.npz.log)) |
 | ResNeXt-14 (16x4d) | 31.63 | 12.26 | 7,127,336 | 1,045.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.370/resnext14_16x4d-1226-80d9a331.npz.log)) |
 | ResNeXt-14 (32x2d) | 32.13 | 12.49 | 7,029,416 | 1,031.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.371/resnext14_32x2d-1249-892f96a4.npz.log)) |
@@ -225,7 +226,7 @@ Some remarks:
 | SE-PreResNet-BC-38b | 21.46 | 5.66 | 24,019,064 | 3,236.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0566-4b9ce096.npz.log)) |
 | SE-PreResNet-50b | 20.75 | 5.31 | 28,080,472 | 4,113.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0531-fde03b26.npz.log)) |
 | SE-ResNeXt-50 (32x4d) | 18.73 | 4.35 | 27,559,896 | 4,261.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0435-52a11b61.npz.log)) |
-| SE-ResNeXt-101 (32x4d) | 19.40 | 4.60 | 48,955,416 | 8,012.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.525/seresnext101_32x4d-0460-22aca06b.npz.log)) |
+| SE-ResNeXt-101 (32x4d) | 19.06 | 4.45 | 48,955,416 | 8,012.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.529/seresnext101_32x4d-0445-fd8f34d6.npz.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.98 | 4.68 | 88,232,984 | 15,509.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0468-ae28d0b4.npz.log)) |
 | SENet-16 | 25.39 | 8.07 | 31,366,168 | 5,081.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0807-f45aa3ff.npz.log)) |
 | SENet-28 | 21.65 | 5.91 | 36,453,768 | 5,732.71M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.356/senet28-0591-7e7bf250.npz.log)) |

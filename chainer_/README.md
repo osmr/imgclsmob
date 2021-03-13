@@ -208,7 +208,7 @@ Some remarks:
 | ResNeXt-26 (32x2d) | 26.32 | 8.49 | 9,924,136 | 1,461.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.373/resnext26_32x2d-0849-58d86996.npz.log)) |
 | ResNeXt-26 (32x4d) | 23.91 | 7.19 | 15,389,480 | 2,488.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.332/resnext26_32x4d-0719-62ca5090.npz.log)) |
 | ResNeXt-50 (32x4d) | 20.84 | 5.46 | 25,028,904 | 4,255.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/resnext50_32x4d-0546-d1e20cc5.npz.log)) |
-| ResNeXt-101 (32x4d) | 18.54 | 4.20 | 44,177,704 | 8,003.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.510/resnext101_32x4d-0420-a8e1396e.npz.log)) |
+| ResNeXt-101 (32x4d) | 18.51 | 4.16 | 44,177,704 | 8,003.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/resnext101_32x4d-0416-ec66f27f.npz.log)) |
 | ResNeXt-101 (64x4d) | 19.31 | 4.85 | 83,455,272 | 15,500.27M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext101_64x4d-0485-b3c1a220.npz.log)) |
 | SE-ResNet-10 | 31.41 | 11.70 | 5,463,332 | 894.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/seresnet10-1170-2b3424cb.npz.log)) |
 | SE-ResNet-18 | 27.96 | 9.23 | 11,778,592 | 1,820.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.355/seresnet18-0923-b0931abe.npz.log)) |
@@ -219,7 +219,7 @@ Some remarks:
 | SE-ResNet-50b | 20.56 | 5.30 | 28,088,024 | 4,115.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.387/seresnet50b-0530-1ac3bf50.npz.log)) |
 | SE-ResNet-101 | 19.59 | 4.74 | 49,326,872 | 7,602.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/seresnet101-0474-828aaed6.npz.log)) |
 | SE-ResNet-101b | 19.48 | 4.63 | 49,326,872 | 7,839.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0463-97cc55c3.npz.log)) |
-| SE-ResNet-152 | 21.46 | 5.77 | 66,821,848 | 11,328.52M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.24/seresnet152-0577-a089ba52.npz.log)) |
+| SE-ResNet-152 | 19.94 | 4.99 | 66,821,848 | 11,328.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/seresnet152-0499-9be4deeb.npz.log)) |
 | SE-PreResNet-10 | 33.63 | 13.11 | 5,461,668 | 894.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.377/sepreresnet10-1311-5e38607c.npz.log)) |
 | SE-PreResNet-18 | 27.72 | 9.39 | 11,776,928 | 1,821.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.380/sepreresnet18-0939-a78ded77.npz.log)) |
 | SE-PreResNet-BC-26b | 22.93 | 6.38 | 17,388,424 | 2,357.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0638-e8393574.npz.log)) |
@@ -234,7 +234,7 @@ Some remarks:
 | ResNeSt(A)-BC-14 | 22.28 | 6.33 | 10,611,688 | 2,767.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/resnestabc14-0633-a76f3b83.npz.log)) |
 | ResNeSt(A)-18 | 23.43 | 6.94 | 12,763,784 | 2,587.50M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.489/resnesta18-0694-4ecaf0b7.npz.log)) |
 | ResNeSt(A)-BC-26 | 19.59 | 4.69 | 17,069,448 | 3,646.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/resnestabc26-0469-14cb6ca5.npz.log)) |
-| ResNeSt(A)-50 | 18.88 | 4.52 | 27,483,240 | 5,403.11M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta50-0452-8cfddfdb.npz.log)) |
+| ResNeSt(A)-50 | 18.98 | 4.40 | 27,483,240 | 5,403.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/resnesta50-0440-f3a4a191.npz.log)) |
 | ResNeSt(A)-101 | 17.73 | 4.00 | 48,275,016 | 10,247.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta101-0400-bd2efb42.npz.log)) |
 | ResNeSt(A)-200 | 16.81 | 3.39 | 70,201,544 | 22,857.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta200-0339-b521427b.npz.log)) |
 | ResNeSt(A)-269 | 16.40 | 3.36 | 110,929,480 | 46,012.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0336-933dbe64.npz.log)) |
@@ -256,7 +256,7 @@ Some remarks:
 | RegNetX-6.4GF | 19.64 | 4.81 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnetx064-0481-06504640.npz.log)) |
 | RegNetX-8.0GF | 19.62 | 4.67 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0467-3618e40b.npz.log)) |
 | RegNetX-12GF | 20.29 | 5.24 | 46,106,056 | 12,124.22M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0524-50b59d58.npz.log)) |
-| RegNetX-16GF | 19.97 | 5.04 | 54,278,536 | 15,986.64M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx160-0504-10fd49b1.npz.log)) |
+| RegNetX-16GF | 19.62 | 4.74 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/regnetx160-0474-ca36a68b.npz.log)) |
 | RegNetX-32GF | 19.57 | 4.87 | 107,811,560 | 31,790.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0487-caa9632a.npz.log)) |
 | RegNetY-200MF | 28.50 | 9.55 | 3,162,996 | 203.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0955-5ba3e62c.npz.log)) |
 | RegNetY-400MF | 24.84 | 7.52 | 4,344,144 | 410.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0752-e30b7c27.npz.log)) |
@@ -289,7 +289,7 @@ Some remarks:
 | DRN-D-54 | 22.08 | 6.23 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0623-31e8eeb8.npz.log)) |
 | DRN-D-105 | 21.32 | 5.84 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0584-c0d7657b.npz.log)) |
 | DPN-68 | 22.93 | 6.56 | 12,611,602 | 2,351.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.310/dpn68-0656-bf9b72e9.npz.log)) |
-| DPN-98 | 20.80 | 5.53 | 61,570,728 | 11,716.51M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn98-0553-9cd57335.npz.log)) |
+| DPN-98 | 19.70 | 5.15 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/dpn98-0515-fbb00476.npz.log)) |
 | DPN-131 | 20.04 | 5.23 | 79,254,504 | 16,076.15M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn131-0523-e3721599.npz.log)) |
 | DarkNet Tiny | 40.33 | 17.46 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-b04fa463.npz.log)) |
 | DarkNet Ref | 38.09 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1671-b2d5721f.npz.log)) |

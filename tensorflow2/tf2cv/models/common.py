@@ -2610,18 +2610,18 @@ class SABlock(nn.Layer):
 
     def call(self, x, training=None):
         x_shape = x.get_shape().as_list()
-        batch = x_shape[0]
+        # batch = x_shape[0]
         if is_channels_first(self.data_format):
             channels = x_shape[1]
             height = x_shape[2]
             width = x_shape[3]
-            x = tf.reshape(x, shape=(batch, self.radix, channels // self.radix, height, width))
+            x = tf.reshape(x, shape=(-1, self.radix, channels // self.radix, height, width))
             w = tf.math.reduce_sum(x, axis=1)
         else:
             height = x_shape[1]
             width = x_shape[2]
             channels = x_shape[3]
-            x = tf.reshape(x, shape=(batch, height, width, self.radix, channels // self.radix))
+            x = tf.reshape(x, shape=(-1, height, width, self.radix, channels // self.radix))
             w = tf.math.reduce_sum(x, axis=-2)
 
         w = self.pool(w)
@@ -2632,13 +2632,13 @@ class SABlock(nn.Layer):
         w = self.bn(w, training=training)
         w = self.activ(w)
         w = self.conv2(w) if self.use_conv else self.fc2(w)
-        w = tf.reshape(w, shape=(batch, self.groups, self.radix, -1))
+        w = tf.reshape(w, shape=(-1, self.groups, self.radix, channels // self.groups // self.radix))
         w = tf.transpose(w, perm=(0, 2, 1, 3))
         w = self.softmax(w)
         if is_channels_first(self.data_format):
-            w = tf.reshape(w, shape=(batch, self.radix, -1, 1, 1))
+            w = tf.reshape(w, shape=(-1, self.radix, channels // self.radix, 1, 1))
         else:
-            w = tf.reshape(w, shape=(batch, 1, 1, self.radix, -1))
+            w = tf.reshape(w, shape=(-1, 1, 1, self.radix, channels // self.radix))
         x = x * w
         if is_channels_first(self.data_format):
             x = tf.math.reduce_sum(x, axis=1)

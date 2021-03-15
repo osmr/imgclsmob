@@ -85,7 +85,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('seresnet50b', '0539', '459e6871e944d1c7102ee9c055ea428b8d9a168c', 'v0.0.387', 'SE-ResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101', '0492', '213366202f6bc5f35c56ddf59665d67f7ff942ec', 'v0.0.508', 'SE-ResNet-101', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101b', '0487', 'b83a20fd2ad9a32e0fe5cb3daef45aac03ea3194', 'v0.0.460', 'SE-ResNet-101b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnet152', '0509', '33d60709cfb7944240c29b3bb15157caea257f04', 'v0.0.530', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet152', '0490', '42d92d12cb867565eb625fa06ff29a7f175e20db', 'v0.0.531', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet10', '1338', '935ed56009a64c893153cdba8e4a4f87f7184e71', 'v0.0.377', 'SE-PreResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet18', '0963', 'c065cd9e1c026d0529526cfc945c137bade6f0c7', 'v0.0.380', 'SE-PreResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnetbc26b', '0660', 'f750b2f588a27620b30c86f0060a41422d4a0f75', 'v0.0.399', 'SE-PreResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -100,7 +100,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnestabc14', '0647', '0c3d9e34aebf0dee0dbcbb937eb54f2a7fc8f64a', 'v0.0.493', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta18', '0707', 'efca5a69587dcdff3aa5d3d7cbd621d082299e27', 'v0.0.489', 'ResNeSt(A)-18', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnestabc26', '0476', '7d97b20648e1f38454e6f5b1fe796c8eaf6e7e74', 'v0.0.495', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnesta50', '0449', '53f0f6a132fbbbcda429bb416e3f8397be0c8c13', 'v0.0.530', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnesta50', '0449', '8ebaf2c7ee098e60bf9426c21d49a21bc00fa8d0', 'v0.0.531', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta101', '0403', '61e147732069b54ed4da4b342b1b8526a0e9df54', 'v0.0.465', 'ResNeSt(A)-101', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta200', '0339', '6dc300871b186950ee64fd28bb168f7fb4a036e3', 'v0.0.465', 'ResNeSt(A)-200', '2004.08955', 'in1k', 256, 0.875, 150, ''),  # noqa
     ('resnesta269', '0338', '6a555ce85eb177299eb43747cf019a50d3a143c1', 'v0.0.465', 'ResNeSt(A)-269', '2004.08955', 'in1k', 320, 0.875, 100, ''),  # noqa

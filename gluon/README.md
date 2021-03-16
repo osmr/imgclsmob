@@ -276,7 +276,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetX-6.4GF | 19.69 | 4.84 | 26,209,256 | 6,490.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnetx064-0484-94225eb7.params.log)) |
 | RegNetX-8.0GF | 19.62 | 4.66 | 39,572,648 | 8,017.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0466-4086910a.params.log)) |
 | RegNetX-12GF | 20.34 | 5.22 | 46,106,056 | 12,124.16M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0522-22c6c138.params.log)) |
-| RegNetX-16GF | 19.60 | 4.74 | 54,278,536 | 15,986.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/regnetx160-0474-a1174530.params.log)) |
+| RegNetX-16GF | 19.12 | 4.56 | 54,278,536 | 15,986.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0456-941840a3.params.log)) |
 | RegNetX-32GF | 19.57 | 4.89 | 107,811,560 | 31,790.18M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0489-80ef5db7.params.log)) |
 | RegNetY-200MF | 28.50 | 9.53 | 3,162,996 | 203.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0953-b37fcac0.params.log)) |
 | RegNetY-400MF | 24.85 | 7.47 | 4,344,144 | 409.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0747-5626bdf4.params.log)) |
@@ -310,8 +310,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DRN-D-54 | 22.05 | 6.27 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0627-87d44c87.params.log)) |
 | DRN-D-105 | 21.31 | 5.81 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0581-ab12d662.params.log)) |
 | DPN-68 | 22.87 | 6.58 | 12,611,602 | 2,351.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.310/dpn68-0658-07251919.params.log)) |
-| DPN-98 | 19.68 | 5.13 | 61,570,728 | 11,716.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/dpn98-0513-6ec5d288.params.log)) |
-| DPN-131 | 20.03 | 5.22 | 79,254,504 | 16,076.15M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0522-35ac2f82.params.log)) |
+| DPN-98 | 18.60 | 4.37 | 61,570,728 | 11,716.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/dpn98-0437-76f5d8f1.params.log)) |
+| DPN-131 | 19.93 | 5.13 | 79,254,504 | 16,076.15M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/dpn131-0513-b8e1acc4.params.log)) |
 | DarkNet Tiny | 40.31 | 17.46 | 1,042,104 | 500.85M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-16501793.params.log)) |
 | DarkNet Ref | 38.00 | 16.68 | 7,319,416 | 367.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1668-3011b4e1.params.log)) |
 | DarkNet-53 | 21.27 | 5.50 | 41,609,928 | 7,133.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0550-1d0b4f62.params.log)) |
@@ -469,7 +469,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet(A)-BC-14 | 27.75 | 9.56 | 10,084,168 | 1,721.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0956-6f8c3606.params.log)) |
 | ResNet(A)-18 | 25.38 | 8.02 | 11,708,744 | 2,062.22M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/resneta18-0802-225dd3ae.params.log)) |
 | ResNet(A)-50b | 20.78 | 5.34 | 25,576,264 | 4,352.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/resneta50b-0534-28eff48a.params.log)) |
-| ResNet(A)-101b | 19.66 | 4.86 | 44,568,392 | 8,072.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.511/resneta101b-0486-72b0e38f.params.log)) |
+| ResNet(A)-101b | 18.98 | 4.42 | 44,568,392 | 8,072.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/resneta101b-0442-cdf5f7ac.params.log)) |
 | ResNet(A)-152b | 18.58 | 4.24 | 60,212,040 | 11,796.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.524/resneta152b-0424-deaaaabf.params.log)) |
 | ResNet(D)-50b | 20.79 | 5.49 | 25,680,808 | 20,496.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0549-17d6004b.params.log)) |
 | ResNet(D)-101b | 19.49 | 4.61 | 44,672,936 | 35,391.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0461-fead1bcb.params.log)) |

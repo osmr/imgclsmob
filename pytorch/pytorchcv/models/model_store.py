@@ -128,7 +128,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx064', '0502', 'c4247c938a0aad2a5ee29d84e336c41be0448c34', 'v0.0.513', 'RegNetX-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx080', '0486', '1d94db030638ab1dd01c644be700a14e5d05ca74', 'v0.0.515', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx120', '0538', '5eb7ad44af359b980da57a849e93973dcfe2646f', 'v0.0.473', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnetx160', '0487', 'c65e0a7bfb6232e5d619243e0c3de2b3078bbee0', 'v0.0.530', 'RegNetX-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnetx160', '0477', 'bd9f3534c727d3e69c410b1909253cce4815385e', 'v0.0.532', 'RegNetX-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx320', '0494', '54a1c651c4a248af6fc64f34fce27ede65b32785', 'v0.0.473', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety002', '0980', '57f04168f284797b799d624d906f5d38dcf23177', 'v0.0.476', 'RegNetY-200MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety004', '0769', '8c36573f17d3ef2ab8770be2593e94d714b035d7', 'v0.0.481', 'RegNetY-400MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -161,8 +161,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('drnd54', '0586', 'bfdc1f8826027b247e2757be45b176b3b91b9ea3', 'v0.0.116', 'DRN-D-54', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnd105', '0548', 'a643f4dcf9e4b69eab06b76e54ce22169f837592', 'v0.0.116', 'DRN-D-105', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('dpn68', '0679', 'a33c98c783cbf93cca4cc9ce1584da50a6b12077', 'v0.0.310', 'DPN-68', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dpn98', '0526', 'e8ceea999bc52c4ccfdd0f35fd03ea5bbde1d387', 'v0.0.530', 'DPN-98', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dpn131', '0548', '0c53e5b380137ccb789e932775e8bd8a811eeb3e', 'v0.0.17', 'DPN-131', '1707.01629', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('dpn98', '0455', '5e8582e77807ce5068772bf801abd4f85a812bc2', 'v0.0.532', 'DPN-98', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('dpn131', '0528', 'a71569b5f939b6d6b9e56297ec1344ebf196e114', 'v0.0.532', 'DPN-131', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet_tiny', '1784', '4561e1ada619e33520d1f765b3321f7f8ea6196b', 'v0.0.69', 'DarkNet Tiny', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet_ref', '1718', '034595b49113ee23de72e36f7d8a3dbb594615f6', 'v0.0.64', 'DarkNet Ref', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet53', '0558', '8be575a04c1789c16b7fa6835919461bb5b174d1', 'v0.0.501', 'DarkNet-53', '1804.02767', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -320,7 +320,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnetabc14b', '0990', 'bad51cb083aae58479112ad11a3fe9430346e185', 'v0.0.477', 'ResNet(A)-BC-14b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta18', '0831', 'e9f206f480c46b489fbd300fa77db31d740c4f3b', 'v0.0.486', 'ResNet(A)-18', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0556', '7cedbb3bd808c0644b4afe1d52e7dad6abd33516', 'v0.0.492', 'ResNet(A)-50b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
-    ('resneta101b', '0507', '962c37d5bcb5f8addd506b2902007dfcc1391ac6', 'v0.0.511', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
+    ('resneta101b', '0453', '0f342545d0ef4f215efc391fd24fa395b2573a1d', 'v0.0.532', 'ResNet(A)-101b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta152b', '0441', 'c4b9bc9af946b25fd37de8cf4c58bdb0066dfeae', 'v0.0.524', 'ResNet(A)-152b', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd50b', '0565', 'ec03d815c0f016c6517ed7b4b40126af46ceb8a4', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resnetd101b', '0473', 'f851c920ec1fe4f729d339c933535d038bf2903c', 'v0.0.296', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa

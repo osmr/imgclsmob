@@ -83,7 +83,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('seresnetbc38b', '0575', '18fcfcc1fee078382ad957e0f7d139ff596732e7', 'v0.0.422', 'in1k', 0.875),
     ('seresnet50', '0560', 'f1b84c8de0d25bbd4e92fcaefd9dd5012fa74bc4', 'v0.0.441', 'in1k', 0.875),
     ('seresnet50b', '0533', '256002c3b489d5b685ee1ab6b62303d7768c5816', 'v0.0.422', 'in1k', 0.875),
-    ('seresnet101', '0475', '935a5b7eb944497f4e1364ec0963565a5e7b0589', 'v0.0.508', 'in1k', 0.875),
+    ('seresnet101', '0440', '8d2f638235dc0f72bec4aff216e4e247f2264751', 'v0.0.533', 'in1k', 0.875),
     ('seresnet101b', '0464', 'a10be1d25d3112825e7b77277d6c56eb276dc799', 'v0.0.460', 'in1k', 0.875),
     ('seresnet152', '0469', 'e69979a21abc744381e8b8638affcdaa381306ef', 'v0.0.531', 'in1k', 0.875),
     ('sepreresnet10', '1309', 'af20d06c486dc97cff0f6d9bc52a7c7458040514', 'v0.0.422', 'in1k', 0.875),

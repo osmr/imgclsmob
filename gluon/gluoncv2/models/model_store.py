@@ -162,7 +162,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('drnd105', '0581', 'ab12d66220c1bbf4af5c33db78aaafc9f0d9bd5a', 'v0.0.116'),
     ('dpn68', '0658', '07251919c08640c94375670cbc5f0fbc312ed59b', 'v0.0.310'),
     ('dpn98', '0437', '76f5d8f173bf8096299b3384fcc5d83fe2096a8b', 'v0.0.532'),
-    ('dpn131', '0477', 'e814a53cc6cddc0b6f2a11393a88c44723a8ec0c', 'v0.0.532'),
+    ('dpn131', '0477', 'e814a53cc6cddc0b6f2a11393a88c44723a8ec0c', 'v0.0.534'),
     ('darknet_tiny', '1746', '16501793621fbcb137f2dfb901760c1f621fa5ec', 'v0.0.69'),
     ('darknet_ref', '1668', '3011b4e14b629f80da54ab57bef305d588f748ab', 'v0.0.64'),
     ('darknet53', '0550', '1d0b4f620071d544a3a1ccbe437267b8925ecc63', 'v0.0.501'),

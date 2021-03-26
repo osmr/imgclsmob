@@ -277,7 +277,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | RegNetX-1.6GF | 22.44 | 6.37 | 9,190,136 | 1,618.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnetx016-0637-6de8a97b.pth.log)) |
 | RegNetX-3.2GF | 21.48 | 5.92 | 15,296,552 | 3,199.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/regnetx032-0592-75dc82ab.pth.log)) |
 | RegNetX-4.0GF | 19.69 | 4.88 | 22,118,248 | 3,986.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0488-b891108c.pth.log)) |
-| RegNetX-6.4GF | 20.13 | 5.02 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnetx064-0502-c4247c93.pth.log)) |
+| RegNetX-6.4GF | 19.50 | 4.68 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0468-bea758f9.pth.log)) |
 | RegNetX-8.0GF | 19.75 | 4.86 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0486-1d94db03.pth.log)) |
 | RegNetX-12GF | 20.55 | 5.38 | 46,106,056 | 12,124.22M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0538-5eb7ad44.pth.log)) |
 | RegNetX-16GF | 19.29 | 4.77 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0477-bd9f3534.pth.log)) |

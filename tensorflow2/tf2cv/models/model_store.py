@@ -125,7 +125,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('regnetx016', '0613', 'c51845ab253ed26ab19875f7482f8fd6ead049a5', 'v0.0.486', 'in1k', 0.875),
     ('regnetx032', '0568', '5f6287347fb2c294965aeae9a9ba494b9ea605c2', 'v0.0.492', 'in1k', 0.875),
     ('regnetx040', '0470', 'a3f5478840c94ed1685a6257c9738cae0debc240', 'v0.0.495', 'in1k', 0.875),
-    ('regnetx064', '0486', '4c80dabd40e24b2ab2ccce4801514060c84127d9', 'v0.0.513', 'in1k', 0.875),
+    ('regnetx064', '0457', 'fbb602bcc1842d26d550d4ec3dd222e05b548638', 'v0.0.535', 'in1k', 0.875),
     ('regnetx080', '0466', 'c101c5242bbd7cf52958c2f5f81fca09a4d21091', 'v0.0.515', 'in1k', 0.875),
     ('regnetx120', '0523', '4256f719e4eec284921d699cdda37646c386d70e', 'v0.0.473', 'in1k', 0.875),
     ('regnetx160', '0458', '428d1dc3450a91fe261288386c0e07a5b491e33b', 'v0.0.532', 'in1k', 0.875),

@@ -273,7 +273,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetX-1.6GF | 22.12 | 6.13 | 9,190,136 | 1,618.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnetx016-0613-018dbe2d.params.log)) |
 | RegNetX-3.2GF | 21.28 | 5.68 | 15,296,552 | 3,199.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/regnetx032-0568-6d4372fc.params.log)) |
 | RegNetX-4.0GF | 19.51 | 4.69 | 22,118,248 | 3,986.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0469-c22092c7.params.log)) |
-| RegNetX-6.4GF | 19.69 | 4.84 | 26,209,256 | 6,490.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnetx064-0484-94225eb7.params.log)) |
+| RegNetX-6.4GF | 19.22 | 4.58 | 26,209,256 | 6,490.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0458-47334293.params.log)) |
 | RegNetX-8.0GF | 19.62 | 4.66 | 39,572,648 | 8,017.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0466-4086910a.params.log)) |
 | RegNetX-12GF | 20.34 | 5.22 | 46,106,056 | 12,124.16M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0522-22c6c138.params.log)) |
 | RegNetX-16GF | 19.12 | 4.56 | 54,278,536 | 15,986.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0456-941840a3.params.log)) |

@@ -253,7 +253,7 @@ Some remarks:
 | RegNetX-1.6GF | 22.16 | 6.13 | 9,190,136 | 1,618.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/regnetx016-0613-5092bfd9.npz.log)) |
 | RegNetX-3.2GF | 21.27 | 5.69 | 15,296,552 | 3,199.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.492/regnetx032-0569-c3625268.npz.log)) |
 | RegNetX-4.0GF | 19.53 | 4.71 | 22,118,248 | 3,986.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0471-362a2ce3.npz.log)) |
-| RegNetX-6.4GF | 19.64 | 4.81 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/regnetx064-0481-06504640.npz.log)) |
+| RegNetX-6.4GF | 19.23 | 4.55 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0455-3bdbfa0d.npz.log)) |
 | RegNetX-8.0GF | 19.62 | 4.67 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0467-3618e40b.npz.log)) |
 | RegNetX-12GF | 20.29 | 5.24 | 46,106,056 | 12,124.22M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0524-50b59d58.npz.log)) |
 | RegNetX-16GF | 19.14 | 4.58 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0458-99da1e86.npz.log)) |

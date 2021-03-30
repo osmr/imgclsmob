@@ -85,7 +85,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('seresnet50b', '0539', '459e6871e944d1c7102ee9c055ea428b8d9a168c', 'v0.0.387', 'SE-ResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101', '0460', '37851448605dae67bbf83ff8e7f7e7cc367e1746', 'v0.0.533', 'SE-ResNet-101', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101b', '0487', 'b83a20fd2ad9a32e0fe5cb3daef45aac03ea3194', 'v0.0.460', 'SE-ResNet-101b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnet152', '0447', '7329d456f2024a0522283f335a1a2c5eeabe5ab6', 'v0.0.536', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet152', '0439', '7a6b02ac25caccb0420eea542c625f9b0bfb3e03', 'v0.0.538', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet10', '1338', '935ed56009a64c893153cdba8e4a4f87f7184e71', 'v0.0.377', 'SE-PreResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet18', '0963', 'c065cd9e1c026d0529526cfc945c137bade6f0c7', 'v0.0.380', 'SE-PreResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnetbc26b', '0660', 'f750b2f588a27620b30c86f0060a41422d4a0f75', 'v0.0.399', 'SE-PreResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa

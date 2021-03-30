@@ -233,7 +233,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNet-50b | 20.58 | 5.33 | 28,088,024 | 4,113.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.387/seresnet50b-0533-0d8f0d23.params.log)) |
 | SE-ResNet-101 | 19.00 | 4.41 | 49,326,872 | 7,602.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.533/seresnet101-0441-f9cb9df6.params.log)) |
 | SE-ResNet-101b | 19.46 | 4.62 | 49,326,872 | 7,835.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0462-59fae71a.params.log)) |
-| SE-ResNet-152 | 18.60 | 4.34 | 66,821,848 | 11,328.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.536/seresnet152-0434-ef98d076.params.log)) |
+| SE-ResNet-152 | 18.59 | 4.30 | 66,821,848 | 11,328.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.538/seresnet152-0430-c712f554.params.log)) |
 | SE-PreResNet-10 | 33.60 | 13.06 | 5,461,668 | 894.23M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.377/sepreresnet10-1306-cbdd1053.params.log)) |
 | SE-PreResNet-18 | 27.67 | 9.38 | 11,776,928 | 1,820.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.380/sepreresnet18-0938-f9645ed3.params.log)) |
 | SE-PreResNet-BC-26b | 22.95 | 6.36 | 17,388,424 | 2,355.57M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0636-33c94c9d.params.log)) |

@@ -286,7 +286,7 @@ Some remarks:
 | DLA-102 | 20.57 | 5.17 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-9bebb44b.tf2.h5.log)) |
 | DLA-X-102 | 19.59 | 4.74 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0474-dfef2c81.tf2.h5.log)) |
 | DLA-X2-102 | 19.20 | 4.69 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0469-d7a43ba5.tf2.h5.log)) |
-| DLA-169 | 19.61 | 4.81 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0481-39a0a5d7.tf2.h5.log)) |
+| DLA-169 | 19.27 | 4.62 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0462-24ee0a54.tf2.h5.log)) |
 | DiCENet x0.2 | 55.84 | 31.16 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3116-6fbe46e2.tf2.h5.log)) |
 | DiCENet x0.5 | 48.32 | 24.29 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2429-fbf5fc52.tf2.h5.log)) |
 | DiCENet x0.75 | 39.02 | 17.01 | 1,495,676 | 55.80M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1701-bc438808.tf2.h5.log)) |

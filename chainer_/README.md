@@ -307,7 +307,7 @@ Some remarks:
 | DLA-102 | 20.54 | 5.18 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0518-ebbfedd7.npz.log)) |
 | DLA-X-102 | 19.56 | 4.74 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0474-39bad3b5.npz.log)) |
 | DLA-X2-102 | 19.25 | 4.69 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0469-4030bc12.npz.log)) |
-| DLA-169 | 19.64 | 4.80 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0480-06189655.npz.log)) |
+| DLA-169 | 19.27 | 4.61 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0461-f47952e2.npz.log)) |
 | FishNet-150 | 19.14 | 4.65 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0465-724e74fc.npz.log)) |
 | ESPNetv2 x0.5 | 43.61 | 21.08 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2108-72efda3a.npz.log)) |
 | ESPNetv2 x1.0 | 35.30 | 14.31 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1431-eab8d605.npz.log)) |

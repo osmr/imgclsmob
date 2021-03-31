@@ -331,7 +331,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DLA-102 | 20.69 | 5.37 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0537-fdabf0c3.pth.log)) |
 | DLA-X-102 | 19.70 | 4.88 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0488-b1727759.pth.log)) |
 | DLA-X2-102 | 19.39 | 4.80 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0480-f4e49d04.pth.log)) |
-| DLA-169 | 19.76 | 4.97 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.509/dla169-0497-19724917.pth.log)) |
+| DLA-169 | 19.39 | 4.71 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0471-402f95f0.pth.log)) |
 | FishNet-150 | 19.26 | 4.75 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0475-93e26daa.pth.log)) |
 | ESPNetv2 x0.5 | 42.32 | 20.15 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2015-d234781f.pth.log)) |
 | ESPNetv2 x1.0 | 33.92 | 13.45 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1345-550d5422.pth.log)) |

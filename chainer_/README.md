@@ -236,7 +236,7 @@ Some remarks:
 | ResNeSt(A)-BC-26 | 19.59 | 4.69 | 17,069,448 | 3,646.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/resnestabc26-0469-14cb6ca5.npz.log)) |
 | ResNeSt(A)-50 | 18.94 | 4.38 | 27,483,240 | 5,403.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.531/resnesta50-0438-84192ed0.npz.log)) |
 | ResNeSt(A)-101 | 17.73 | 4.00 | 48,275,016 | 10,247.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta101-0400-bd2efb42.npz.log)) |
-| ResNeSt(A)-152 | 18.71 | 4.52 | 48,275,016 | 10,247.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0452-70e32d11.npz.log)) |
+| ResNeSt(A)-152 | 18.71 | 4.52 | 65,316,040 | 13,976.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0452-70e32d11.npz.log)) |
 | ResNeSt(A)-200 | 16.81 | 3.39 | 70,201,544 | 22,857.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta200-0339-b521427b.npz.log)) |
 | ResNeSt(A)-269 | 16.40 | 3.36 | 110,929,480 | 46,012.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0336-933dbe64.npz.log)) |
 | AirNet50-1x64d (r=2) | 20.46 | 5.28 | 27,425,864 | 4,772.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/airnet50_1x64d_r2-0528-650960af.npz.log)) |

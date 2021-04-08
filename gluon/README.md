@@ -250,7 +250,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNeSt(A)-BC-26 | 19.57 | 4.70 | 17,069,448 | 3,645.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/resnestabc26-0470-f88d49d7.params.log)) |
 | ResNeSt(A)-50 | 18.92 | 4.38 | 27,483,240 | 5,402.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.531/resnesta50-0438-6ce54a97.params.log)) |
 | ResNeSt(A)-101 | 17.74 | 3.99 | 48,275,016 | 10,246.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta101-0399-ab6c6f89.params.log)) |
-| ResNeSt(A)-152 | 18.72 | 4.51 | 48,275,016 | 10,246.42M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0451-532c448d.params.log)) |
+| ResNeSt(A)-152 | 18.72 | 4.51 | 65,316,040 | 13,974.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0451-532c448d.params.log)) |
 | ResNeSt(A)-200 | 16.78 | 3.40 | 70,201,544 | 22,854.22M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta200-0340-3bd1f0c8.params.log)) |
 | ResNeSt(A)-269 | 16.38 | 3.36 | 110,929,480 | 46,005.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0336-8333862a.params.log)) |
 | IBN-ResNet-50 | 21.46 | 5.59 | 25,557,032 | 4,110.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/ibn_resnet50-0559-0f75710a.params.log)) |

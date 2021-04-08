@@ -254,7 +254,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ResNeSt(A)-BC-26 | 19.56 | 4.76 | 17,069,448 | 3,646.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/resnestabc26-0476-7d97b206.pth.log)) |
 | ResNeSt(A)-50 | 19.00 | 4.49 | 27,483,240 | 5,403.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.531/resnesta50-0449-8ebaf2c7.pth.log)) |
 | ResNeSt(A)-101 | 17.83 | 4.03 | 48,275,016 | 10,247.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta101-0403-61e14773.pth.log)) |
-| ResNeSt(A)-152 | 18.87 | 4.63 | 48,275,016 | 10,247.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0463-42e22fed.pth.log)) |
+| ResNeSt(A)-152 | 18.87 | 4.63 | 65,316,040 | 13,976.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0463-42e22fed.pth.log)) |
 | ResNeSt(A)-200 | 16.87 | 3.39 | 70,201,544 | 22,857.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta200-0339-6dc30087.pth.log)) |
 | ResNeSt(A)-269 | 16.47 | 3.38 | 110,929,480 | 46,012.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0338-6a555ce8.pth.log)) |
 | IBN-ResNet-50 | 21.61 | 5.76 | 25,557,032 | 4,110.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/ibn_resnet50-0576-40c420fc.pth.log)) |

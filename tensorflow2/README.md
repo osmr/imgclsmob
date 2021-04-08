@@ -212,6 +212,7 @@ Some remarks:
 | ResNeSt(A)-BC-26 | 19.58 | 4.70 | 17,069,448 | 3,646.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/resnestabc26-0470-05e07501.tf2.h5.log)) |
 | ResNeSt(A)-50 | 18.92 | 4.39 | 27,483,240 | 5,403.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.531/resnesta50-0439-9ef477b8.tf2.h5.log)) |
 | ResNeSt(A)-101 | 17.71 | 4.00 | 48,275,016 | 10,247.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta101-0400-bb2a90f5.tf2.h5.log)) |
+| ResNeSt(A)-152 | 18.71 | 4.50 | 48,275,016 | 10,247.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/resnesta152-0450-b21a24bf.tf2.h5.log)) |
 | ResNeSt(A)-200 | 16.81 | 3.38 | 70,201,544 | 22,857.88M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta200-0338-29a8a745.tf2.h5.log)) |
 | ResNeSt(A)-269 | 16.37 | 3.36 | 110,929,480 | 46,012.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.465/resnesta269-0336-9a33e31b.tf2.h5.log)) |
 | IBN-ResNet-50 | 21.47 | 5.62 | 25,557,032 | 4,110.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/ibn_resnet50-0562-515dd253.tf2.h5.log)) |
@@ -269,7 +270,7 @@ Some remarks:
 | DRN-D-54 | 22.07 | 6.26 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd54-0626-cb792485.tf2.h5.log)) |
 | DRN-D-105 | 21.31 | 5.83 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd105-0583-80eb9ec2.tf2.h5.log)) |
 | DPN-68 | 22.92 | 6.58 | 12,611,602 | 2,351.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dpn68-0658-5b70b7b8.tf2.h5.log)) |
-| DPN-98 | 18.43 | 4.31 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.536/dpn98-0431-0d8c028e.tf2.h5.log)) |
+| DPN-98 | 18.30 | 4.26 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/dpn98-0426-5d6dd2ed.tf2.h5.log)) |
 | DPN-131 | 19.39 | 4.77 | 79,254,504 | 16,076.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/dpn131-0477-282d2d19.tf2.h5.log)) |
 | DarkNet Tiny | 40.34 | 17.45 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_tiny-1745-d30be41a.tf2.h5.log)) |
 | DarkNet Ref | 38.10 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_ref-1671-b4991f6b.tf2.h5.log)) |

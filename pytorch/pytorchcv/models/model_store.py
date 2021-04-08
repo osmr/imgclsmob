@@ -102,6 +102,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnestabc26', '0476', '7d97b20648e1f38454e6f5b1fe796c8eaf6e7e74', 'v0.0.495', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta50', '0449', '8ebaf2c7ee098e60bf9426c21d49a21bc00fa8d0', 'v0.0.531', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta101', '0403', '61e147732069b54ed4da4b342b1b8526a0e9df54', 'v0.0.465', 'ResNeSt(A)-101', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnesta152', '0463', '42e22fedbf9e7a8b2286163e3380044189d524c0', 'v0.0.540', 'ResNeSt(A)-152', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta200', '0339', '6dc300871b186950ee64fd28bb168f7fb4a036e3', 'v0.0.465', 'ResNeSt(A)-200', '2004.08955', 'in1k', 256, 0.875, 150, ''),  # noqa
     ('resnesta269', '0338', '6a555ce85eb177299eb43747cf019a50d3a143c1', 'v0.0.465', 'ResNeSt(A)-269', '2004.08955', 'in1k', 320, 0.875, 100, ''),  # noqa
     ('ibn_resnet50', '0576', '40c420fcbbfd87bf634fc5b351746e124c32e401', 'v0.0.495', 'IBN-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -161,7 +162,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('drnd54', '0586', 'bfdc1f8826027b247e2757be45b176b3b91b9ea3', 'v0.0.116', 'DRN-D-54', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('drnd105', '0548', 'a643f4dcf9e4b69eab06b76e54ce22169f837592', 'v0.0.116', 'DRN-D-105', '1705.09914', 'in1k', 224, 0.875, 200, '[fyu/drn]'),  # noqa
     ('dpn68', '0679', 'a33c98c783cbf93cca4cc9ce1584da50a6b12077', 'v0.0.310', 'DPN-68', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dpn98', '0445', 'ad69ace87af443ebdc510b8fd29e30e6ed6ff0e0', 'v0.0.536', 'DPN-98', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('dpn98', '0430', '50ff8ef6cc0a11461dfd7168c291e2fce4382d24', 'v0.0.540', 'DPN-98', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dpn131', '0503', '1765c5eec6e62bfe03cd25e1b31225b827cc9636', 'v0.0.534', 'DPN-131', '1707.01629', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet_tiny', '1784', '4561e1ada619e33520d1f765b3321f7f8ea6196b', 'v0.0.69', 'DarkNet Tiny', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet_ref', '1718', '034595b49113ee23de72e36f7d8a3dbb594615f6', 'v0.0.64', 'DarkNet Ref', '', 'in1k', 224, 0.875, 200, ''),  # noqa

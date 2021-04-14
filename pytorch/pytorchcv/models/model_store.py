@@ -201,8 +201,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnetv2_w30', '0521', '73d7e48d2006d86c50d03ed24c92277b77fb5146', 'v0.0.525', 'HRNetV2-W30', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w32', '0506', '4aaf8a212b65f4b97f572b6fbbda4fa63ad0954a', 'v0.0.528', 'HRNetV2-W32', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w40', '0493', '6f6d22d3e778c9f80d83d73ecf114fa68784ca6f', 'v0.0.534', 'HRNetV2-W40', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('hrnetv2_w44', '0563', '9321bfd82f7f02a789dc054ac079706f0e8784c4', 'v0.0.421', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
-    ('hrnetv2_w48', '0548', '40f986102a5650bae90d62c459781704626bd890', 'v0.0.421', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
+    ('hrnetv2_w44', '0501', 'ec40e5455147db5a03aab423cac75b816030976d', 'v0.0.541', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('hrnetv2_w48', '0500', '0554b840b6f3f87403433595d946170d91d15334', 'v0.0.541', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w64', '0535', '5961efd0e93740184a582ed4e00de445c91447b9', 'v0.0.421', 'HRNetV2-W64', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('vovnet39', '0564', '63bfa613870b37bd4fb5b71412e7875392aa4f66', 'v0.0.493', 'VoVNet-39', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('vovnet57', '0518', 'c080e47169a176043f298b1e909ddd8776d5aa76', 'v0.0.505', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa

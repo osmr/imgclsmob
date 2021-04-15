@@ -276,7 +276,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetX-4.0GF | 19.51 | 4.69 | 22,118,248 | 3,986.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0469-c22092c7.params.log)) |
 | RegNetX-6.4GF | 19.22 | 4.58 | 26,209,256 | 6,490.97M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0458-47334293.params.log)) |
 | RegNetX-8.0GF | 19.62 | 4.66 | 39,572,648 | 8,017.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0466-4086910a.params.log)) |
-| RegNetX-12GF | 20.34 | 5.22 | 46,106,056 | 12,124.16M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0522-22c6c138.params.log)) |
+| RegNetX-12GF | 19.99 | 5.18 | 46,106,056 | 12,124.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/regnetx120-0518-ea20b368.params.log)) |
 | RegNetX-16GF | 19.12 | 4.56 | 54,278,536 | 15,986.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0456-941840a3.params.log)) |
 | RegNetX-32GF | 19.57 | 4.89 | 107,811,560 | 31,790.18M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0489-80ef5db7.params.log)) |
 | RegNetY-200MF | 28.50 | 9.53 | 3,162,996 | 203.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0953-b37fcac0.params.log)) |
@@ -328,7 +328,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |
 | DLA-102 | 20.58 | 5.17 | 33,268,888 | 7,190.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0517-0e5d954c.params.log)) |
 | DLA-X-102 | 19.59 | 4.70 | 26,309,272 | 5,884.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0470-ea82787c.params.log)) |
-| DLA-X2-102 | 19.24 | 4.67 | 41,282,200 | 9,340.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0467-f9a11862.params.log)) |
+| DLA-X2-102 | 18.66 | 4.23 | 41,282,200 | 9,340.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/dla102x2-0423-dde259b3.params.log)) |
 | DLA-169 | 19.28 | 4.60 | 53,389,720 | 11,593.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0460-71971da4.params.log)) |
 | FishNet-150 | 19.15 | 4.66 | 24,959,400 | 6,435.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0466-ed21862d.params.log)) |
 | ESPNetv2 x0.5 | 43.61 | 21.07 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2107-f2e17f0a.params.log)) |
@@ -352,7 +352,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | HRNetV2-W40 | 19.65 | 4.81 | 57,557,160 | 12,751.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/hrnetv2_w40-0481-2382694c.params.log)) |
 | HRNetV2-W44 | 19.67 | 4.86 | 67,064,984 | 14,945.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w44-0486-f5882024.params.log)) |
 | HRNetV2-W48 | 19.46 | 4.84 | 77,469,864 | 17,344.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w48-0484-936bb78f.params.log)) |
-| HRNetV2-W64 | 21.08 | 5.52 | 128,059,944 | 28,974.95M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0552-3d8ef6e5.params.log)) |
+| HRNetV2-W64 | 21.05 | 5.44 | 128,059,944 | 28,974.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/hrnetv2_w64-0544-e72d0701.params.log)) |
 | VoVNet-39 | 21.54 | 5.48 | 22,600,296 | 7,086.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0548-20b60ee6.params.log)) |
 | VoVNet-57 | 20.14 | 5.10 | 36,640,296 | 8,943.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0510-ed3cad77.params.log)) |
 | SelecSLS-42b | 21.72 | 5.96 | 32,458,248 | 2,980.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0596-f5a35c74.params.log)) |

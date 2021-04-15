@@ -128,7 +128,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx040', '0488', 'b891108c3dd4594ae0d6ecb91ad7be3d2d96878d', 'v0.0.495', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx064', '0468', 'bea758f904ea74e88b85040221f024c8553cf8f8', 'v0.0.535', 'RegNetX-6.4GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx080', '0486', '1d94db030638ab1dd01c644be700a14e5d05ca74', 'v0.0.515', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnetx120', '0538', '5eb7ad44af359b980da57a849e93973dcfe2646f', 'v0.0.473', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx120', '0532', 'a93ee3a7abdd3b6b1d117861d02fc7a344185458', 'v0.0.542', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx160', '0477', 'bd9f3534c727d3e69c410b1909253cce4815385e', 'v0.0.532', 'RegNetX-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx320', '0494', '54a1c651c4a248af6fc64f34fce27ede65b32785', 'v0.0.473', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety002', '0980', '57f04168f284797b799d624d906f5d38dcf23177', 'v0.0.476', 'RegNetY-200MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -179,7 +179,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dla60xc', '1091', '0f6381f335e5bbb4c69b360be61a4a08e5c7a9de', 'v0.0.289', 'DLA-X-60-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102', '0537', 'fdabf0c31bd2e359ee9a8374b6a42d1396093cf1', 'v0.0.505', 'DLA-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla102x', '0488', 'b1727759bba2394891f74481ceb91a603f0b4c8e', 'v0.0.528', 'DLA-X-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('dla102x2', '0480', 'f4e49d04e49217fc4a43791f7f43a4b9805c34f0', 'v0.0.520', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('dla102x2', '0437', '8922a4575b1e4bdd30acd084a5b6ec1f972ec82d', 'v0.0.542', 'DLA-X2-102', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla169', '0471', '402f95f01800539345428ec17e32d033886452c1', 'v0.0.539', 'DLA-169', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fishnet150', '0475', '93e26daaf570bc92b58f7421ab28c22ca405ad93', 'v0.0.502', 'FishNet-150', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('espnetv2_wd2', '2015', 'd234781f81e5d1b5ae6070fc851e3f7bb860b9fd', 'v0.0.238', 'ESPNetv2 x0.5', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa

@@ -256,7 +256,7 @@ Some remarks:
 | RegNetX-4.0GF | 19.53 | 4.71 | 22,118,248 | 3,986.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0471-362a2ce3.npz.log)) |
 | RegNetX-6.4GF | 19.23 | 4.55 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0455-3bdbfa0d.npz.log)) |
 | RegNetX-8.0GF | 19.62 | 4.67 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0467-3618e40b.npz.log)) |
-| RegNetX-12GF | 20.29 | 5.24 | 46,106,056 | 12,124.22M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0524-50b59d58.npz.log)) |
+| RegNetX-12GF | 19.96 | 5.19 | 46,106,056 | 12,124.22M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/regnetx120-0519-68699007.npz.log)) |
 | RegNetX-16GF | 19.14 | 4.58 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0458-99da1e86.npz.log)) |
 | RegNetX-32GF | 19.57 | 4.87 | 107,811,560 | 31,790.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0487-caa9632a.npz.log)) |
 | RegNetY-200MF | 28.50 | 9.55 | 3,162,996 | 203.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0955-5ba3e62c.npz.log)) |
@@ -307,7 +307,7 @@ Some remarks:
 | DLA-X-60-C | 30.70 | 10.76 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1076-4c418399.npz.log)) |
 | DLA-102 | 20.54 | 5.18 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0518-ebbfedd7.npz.log)) |
 | DLA-X-102 | 19.56 | 4.74 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0474-39bad3b5.npz.log)) |
-| DLA-X2-102 | 19.25 | 4.69 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0469-4030bc12.npz.log)) |
+| DLA-X2-102 | 18.68 | 4.25 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/dla102x2-0425-4ffec225.npz.log)) |
 | DLA-169 | 19.27 | 4.61 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0461-f47952e2.npz.log)) |
 | FishNet-150 | 19.14 | 4.65 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0465-724e74fc.npz.log)) |
 | ESPNetv2 x0.5 | 43.61 | 21.08 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2108-72efda3a.npz.log)) |
@@ -331,7 +331,7 @@ Some remarks:
 | HRNetV2-W40 | 19.66 | 4.79 | 57,557,160 | 12,752.26M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/hrnetv2_w40-0479-738507ee.npz.log)) |
 | HRNetV2-W44 | 19.67 | 4.90 | 67,064,984 | 14,946.96M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w44-0490-6e10e2b5.npz.log)) |
 | HRNetV2-W48 | 19.45 | 4.86 | 77,469,864 | 17,345.39M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w48-0486-e8df81b5.npz.log)) |
-| HRNetV2-W64 | 21.10 | 5.53 | 128,059,944 | 28,976.42M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0553-4d8859ee.npz.log)) |
+| HRNetV2-W64 | 20.96 | 5.46 | 128,059,944 | 28,976.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/hrnetv2_w64-0546-26e9545f.npz.log)) |
 | VoVNet-39 | 21.49 | 5.53 | 22,600,296 | 7,086.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0553-6a8b6783.npz.log)) |
 | VoVNet-57 | 20.16 | 5.12 | 36,640,296 | 8,943.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0512-beb31bd5.npz.log)) |
 | SelecSLS-42b | 21.74 | 6.01 | 32,458,248 | 2,980.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0601-d89a5042.npz.log)) |

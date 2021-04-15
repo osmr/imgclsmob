@@ -280,7 +280,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | RegNetX-4.0GF | 19.69 | 4.88 | 22,118,248 | 3,986.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/regnetx040-0488-b891108c.pth.log)) |
 | RegNetX-6.4GF | 19.50 | 4.68 | 26,209,256 | 6,491.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.535/regnetx064-0468-bea758f9.pth.log)) |
 | RegNetX-8.0GF | 19.75 | 4.86 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0486-1d94db03.pth.log)) |
-| RegNetX-12GF | 20.55 | 5.38 | 46,106,056 | 12,124.22M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx120-0538-5eb7ad44.pth.log)) |
+| RegNetX-12GF | 20.02 | 5.32 | 46,106,056 | 12,124.22M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/regnetx120-0532-a93ee3a7.pth.log)) |
 | RegNetX-16GF | 19.29 | 4.77 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0477-bd9f3534.pth.log)) |
 | RegNetX-32GF | 19.65 | 4.94 | 107,811,560 | 31,790.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0494-54a1c651.pth.log)) |
 | RegNetY-200MF | 28.66 | 9.80 | 3,162,996 | 203.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0980-57f04168.pth.log)) |
@@ -331,7 +331,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DLA-X-60-C | 30.98 | 10.91 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1091-0f6381f3.pth.log)) |
 | DLA-102 | 20.69 | 5.37 | 33,268,888 | 7,190.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/dla102-0537-fdabf0c3.pth.log)) |
 | DLA-X-102 | 19.70 | 4.88 | 26,309,272 | 5,884.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.528/dla102x-0488-b1727759.pth.log)) |
-| DLA-X2-102 | 19.39 | 4.80 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/dla102x2-0480-f4e49d04.pth.log)) |
+| DLA-X2-102 | 18.84 | 4.37 | 41,282,200 | 9,340.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/dla102x2-0437-8922a457.pth.log)) |
 | DLA-169 | 19.39 | 4.71 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0471-402f95f0.pth.log)) |
 | FishNet-150 | 19.26 | 4.75 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0475-93e26daa.pth.log)) |
 | ESPNetv2 x0.5 | 42.32 | 20.15 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2015-d234781f.pth.log)) |

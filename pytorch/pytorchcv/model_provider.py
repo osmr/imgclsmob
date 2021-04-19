@@ -152,9 +152,13 @@ from .models.nvpattexp import *
 
 from .models.superpointnet import *
 
-from .models.jasper import *
+from .models.jasper_old import *
 from .models.jasperdr import *
+# from .models.quartznet_old import *
+
 from .models.quartznet import *
+
+from .models.others.oth_quartznet import *
 
 # from .models.others.oth_pose_resnet import *
 # from .models.others.oth_lwopenpose2d import *
@@ -1159,9 +1163,25 @@ _models = {
     'jasperdr10x4': jasperdr10x4,
     'jasperdr10x5': jasperdr10x5,
 
-    'quartznet5x5': quartznet5x5,
-    'quartznet10x5': quartznet10x5,
-    'quartznet15x5': quartznet15x5,
+    # 'quartznet5x5': quartznet5x5,
+    # 'quartznet10x5': quartznet10x5,
+    # 'quartznet15x5': quartznet15x5,
+
+    'quartznet5x5_en_ls': quartznet5x5_en_ls,
+    'quartznet15x5_en': quartznet15x5_en,
+    'quartznet15x5_en_nr': quartznet15x5_en_nr,
+    'quartznet15x5_fr': quartznet15x5_fr,
+    'quartznet15x5_de': quartznet15x5_de,
+    'quartznet15x5_ru': quartznet15x5_ru,
+
+    'oth_quartznet5x5_en_ls': oth_quartznet5x5_en_ls,
+    'oth_quartznet15x5_en': oth_quartznet15x5_en,
+    'oth_quartznet15x5_en_nr': oth_quartznet15x5_en_nr,
+    'oth_quartznet15x5_fr': oth_quartznet15x5_fr,
+    'oth_quartznet15x5_de': oth_quartznet15x5_de,
+    'oth_quartznet15x5_ru': oth_quartznet15x5_ru,
+    'oth_jasper10x5dr_en': oth_jasper10x5dr_en,
+    'oth_jasper10x5dr_en_nr': oth_jasper10x5dr_en_nr,
 
     # 'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
     # 'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,

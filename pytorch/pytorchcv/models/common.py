@@ -10,7 +10,7 @@ __all__ = ['round_channels', 'Identity', 'BreakBlock', 'Swish', 'HSigmoid', 'HSw
            'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock',
            'saconv3x3_block', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
            'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'DualPathParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1464,7 +1464,7 @@ class ChannelShuffle(nn.Module):
         super(ChannelShuffle, self).__init__()
         # assert (channels % groups == 0)
         if channels % groups != 0:
-            raise ValueError('channels must be divisible by groups')
+            raise ValueError("channels must be divisible by groups")
         self.groups = groups
 
     def forward(self, x):
@@ -1522,7 +1522,7 @@ class ChannelShuffle2(nn.Module):
         super(ChannelShuffle2, self).__init__()
         # assert (channels % groups == 0)
         if channels % groups != 0:
-            raise ValueError('channels must be divisible by groups')
+            raise ValueError("channels must be divisible by groups")
         self.groups = groups
 
     def forward(self, x):
@@ -2206,17 +2206,82 @@ class MultiOutputSequential(nn.Sequential):
 
 class ParallelConcurent(nn.Sequential):
     """
-    A sequential container with multiple inputs and multiple outputs.
+    A sequential container with multiple inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    merge_type : str, default 'list'
+        Type of branch merging.
     """
-    def __init__(self):
+    def __init__(self,
+                 axis=1,
+                 merge_type="list"):
         super(ParallelConcurent, self).__init__()
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = axis
+        self.merge_type = merge_type
 
     def forward(self, x):
         out = []
         for module, xi in zip(self._modules.values(), x):
             out.append(module(xi))
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            out = torch.stack(tuple(out), dim=self.axis)
+        elif self.merge_type == "cat":
+            out = torch.cat(tuple(out), dim=self.axis)
+        elif self.merge_type == "sum":
+            out = torch.stack(tuple(out), dim=self.axis).sum(self.axis)
+        else:
+            raise NotImplementedError()
         return out
+
+
+class DualPathParallelConcurent(nn.Sequential):
+    """
+    A sequential container with multiple dual-path inputs and single/multiple outputs.
+    Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    merge_type : str, default 'list'
+        Type of branch merging.
+    """
+    def __init__(self,
+                 axis=1,
+                 merge_type="list"):
+        super(DualPathParallelConcurent, self).__init__()
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = axis
+        self.merge_type = merge_type
+
+    def forward(self, x1, x2):
+        x1_out = []
+        x2_out = []
+        for module, x1i, x2i in zip(self._modules.values(), x1, x2):
+            y1i, y2i = module(x1i, x2i)
+            x1_out.append(y1i)
+            x2_out.append(y2i)
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            x1_out = torch.stack(tuple(x1_out), dim=self.axis)
+            x2_out = torch.stack(tuple(x2_out), dim=self.axis)
+        elif self.merge_type == "cat":
+            x1_out = torch.cat(tuple(x1_out), dim=self.axis)
+            x2_out = torch.cat(tuple(x2_out), dim=self.axis)
+        elif self.merge_type == "sum":
+            x1_out = torch.stack(tuple(x1_out), dim=self.axis).sum(self.axis)
+            x2_out = torch.stack(tuple(x2_out), dim=self.axis).sum(self.axis)
+        else:
+            raise NotImplementedError()
+        return x1_out, x2_out
 
 
 class Flatten(nn.Module):

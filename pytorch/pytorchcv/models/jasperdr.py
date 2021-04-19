@@ -8,8 +8,8 @@ __all__ = ['JasperDr', 'jasperdr5x3', 'jasperdr10x4', 'jasperdr10x5']
 import os
 import torch
 import torch.nn as nn
-from .common import DualPathSequential, ParallelConcurent
-from .jasper import conv1d1, ConvBlock1d, conv1d1_block, JasperFinalBlock
+from .common import DualPathSequential, DualPathParallelConcurent
+from .jasper import conv1d1, MaskConvBlock1d, mask_conv1d1_block, JasperUnit, JasperFinalBlock
 
 
 class JasperDrUnit(nn.Module):
@@ -24,6 +24,8 @@ class JasperDrUnit(nn.Module):
         Number of output channels.
     kernel_size : int
         Convolution window size.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     repeat : int
@@ -33,45 +35,54 @@ class JasperDrUnit(nn.Module):
                  in_channels_list,
                  out_channels,
                  kernel_size,
+                 bn_eps,
                  dropout_rate,
                  repeat):
         super(JasperDrUnit, self).__init__()
-        self.identity_convs = ParallelConcurent()
+        self.use_dropout = (dropout_rate != 0.0)
+
+        self.identity_convs = DualPathParallelConcurent()
         for i, dense_in_channels_i in enumerate(in_channels_list):
-            self.identity_convs.add_module("block{}".format(i + 1), conv1d1_block(
+            self.identity_convs.add_module("block{}".format(i + 1), mask_conv1d1_block(
                 in_channels=dense_in_channels_i,
                 out_channels=out_channels,
+                bn_eps=bn_eps,
                 dropout_rate=0.0,
                 activation=None))
 
         in_channels = in_channels_list[-1]
-        self.body = nn.Sequential()
+        self.body = DualPathSequential()
         for i in range(repeat):
             activation = (lambda: nn.ReLU(inplace=True)) if i < repeat - 1 else None
             dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
-            self.body.add_module("block{}".format(i + 1), ConvBlock1d(
+            self.body.add_module("block{}".format(i + 1), MaskConvBlock1d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 stride=1,
                 padding=(kernel_size // 2),
+                bn_eps=bn_eps,
                 dropout_rate=dropout_rate_i,
                 activation=activation))
             in_channels = out_channels
 
         self.activ = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout(p=dropout_rate)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
 
-    def forward(self, x, y=None):
+    def forward(self, x, x_len):
+        x_len, y, y_len = x_len if type(x_len) is tuple else (x_len, None, None)
         y = [x] if y is None else y + [x]
-        identity = self.identity_convs(y)
+        y_len = [x_len] if y_len is None else y_len + [x_len]
+        identity, _ = self.identity_convs(y, y_len)
         identity = torch.stack(tuple(identity), dim=1)
         identity = identity.sum(dim=1)
-        x = self.body(x)
+        x, x_len = self.body(x, x_len)
         x = x + identity
         x = self.activ(x)
-        x = self.dropout(x)
-        return x, y
+        if self.use_dropout:
+            x = self.dropout(x)
+        return x, (x_len, y, y_len)
 
 
 class JasperDr(nn.Module):
@@ -84,10 +95,16 @@ class JasperDr(nn.Module):
         Number of output channels for each unit and initial/final block.
     kernel_sizes : list of int
         Kernel sizes for each unit and initial/final block.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     dropout_rates : list of int
         Dropout rates for each unit and initial/final block.
     repeat : int
         Count of body convolution blocks.
+    use_dw : bool
+        Whether to use depthwise block.
+    use_dr : bool
+        Whether to use dense residual scheme.
     in_channels : int, default 120
         Number of input channels (audio features).
     num_classes : int, default 11
@@ -96,42 +113,49 @@ class JasperDr(nn.Module):
     def __init__(self,
                  channels,
                  kernel_sizes,
+                 bn_eps,
                  dropout_rates,
                  repeat,
+                 use_dw,
+                 use_dr,
                  in_channels=120,
                  num_classes=11):
         super(JasperDr, self).__init__()
         self.in_size = None
         self.num_classes = num_classes
 
-        self.features = DualPathSequential(
-            return_two=False,
-            first_ordinals=1,
-            last_ordinals=1)
-        self.features.add_module("init_block", ConvBlock1d(
-                in_channels=in_channels,
-                out_channels=channels[0],
-                kernel_size=kernel_sizes[0],
-                stride=2,
-                padding=(kernel_sizes[0] // 2),
-                dropout_rate=dropout_rates[0]))
+        self.features = DualPathSequential()
+        self.features.add_module("init_block", MaskConvBlock1d(
+            in_channels=in_channels,
+            out_channels=channels[0],
+            kernel_size=kernel_sizes[0],
+            stride=2,
+            padding=(kernel_sizes[0] // 2),
+            bn_eps=bn_eps,
+            dropout_rate=dropout_rates[0]))
         in_channels = channels[0]
         in_channels_list = []
         for i, (out_channels, kernel_size, dropout_rate) in\
                 enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
             in_channels_list += [in_channels]
-            self.features.add_module("unit{}".format(i + 1), JasperDrUnit(
-                in_channels_list=in_channels_list,
+            self.features.add_module("unit{}".format(i + 1), JasperUnit(
+                in_channels=in_channels_list,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
+                bn_eps=bn_eps,
                 dropout_rate=dropout_rate,
-                repeat=repeat))
+                repeat=repeat,
+                use_dw=use_dw,
+                use_dr=use_dr))
             in_channels = out_channels
         self.features.add_module("final_block", JasperFinalBlock(
             in_channels=in_channels,
             channels=channels,
             kernel_sizes=kernel_sizes,
-            dropout_rates=dropout_rates))
+            bn_eps=bn_eps,
+            dropout_rates=dropout_rates,
+            use_dw=use_dw,
+            use_dr=use_dr))
         in_channels = channels[-1]
 
         self.output = conv1d1(
@@ -148,13 +172,14 @@ class JasperDr(nn.Module):
                 if module.bias is not None:
                     nn.init.constant_(module.bias, 0)
 
-    def forward(self, x):
-        x = self.features(x)
+    def forward(self, x, x_len):
+        x, x_len = self.features(x, x_len)
         x = self.output(x)
-        return x
+        return x, x_len
 
 
 def get_jasperdr(version,
+                 bn_eps=1e-3,
                  model_name=None,
                  pretrained=False,
                  root=os.path.join("~", ".torch", "models"),
@@ -164,8 +189,10 @@ def get_jasperdr(version,
 
     Parameters:
     ----------
-    blocks : int
-        Number of blocks.
+    version : str
+        Model version.
+    bn_eps : float, default 1e-3
+        Small float added to variance in Batch norm.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -186,12 +213,17 @@ def get_jasperdr(version,
     channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
     kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
     dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
+    use_dw = False
+    use_dr = True
 
     net = JasperDr(
         channels=channels,
         kernel_sizes=kernel_sizes,
+        bn_eps=bn_eps,
         dropout_rates=dropout_rates,
         repeat=repeat,
+        use_dw=use_dw,
+        use_dr=use_dr,
         **kwargs)
 
     if pretrained:
@@ -289,10 +321,11 @@ def _test():
         assert (model != jasperdr10x4 or weight_count == 271878411)
         assert (model != jasperdr10x5 or weight_count == 332771595)
 
-        batch = 4
+        batch = 1
         seq_len = np.random.randint(60, 150)
         x = torch.randn(batch, audio_features, seq_len)
-        y = net(x)
+        x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+        y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, num_classes))
         assert (y.size()[2] in [seq_len // 2, seq_len // 2 + 1])

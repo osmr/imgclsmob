@@ -53,7 +53,7 @@ class ChannelSqueeze(nn.Module):
                  groups):
         super(ChannelSqueeze, self).__init__()
         if channels % groups != 0:
-            raise ValueError('channels must be divisible by groups')
+            raise ValueError("channels must be divisible by groups")
         self.groups = groups
 
     def forward(self, x):

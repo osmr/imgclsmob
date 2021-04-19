@@ -1019,7 +1019,16 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
-    if src_model.startswith("oth_dicenet"):
+    if src_model.startswith("oth_quartznet"):
+        src1 = list(filter(re.compile("\.res\.").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n + src1
+
+        dst1 = list(filter(re.compile("\.identity_conv\.").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst_param_keys = dst1n + dst1
+
+    elif src_model.startswith("oth_dicenet"):
         src1 = list(filter(re.compile("\.conv_height\.").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src2 = list(filter(re.compile("\.conv_width\.").search, src1n))
@@ -1040,7 +1049,7 @@ def convert_pt2pt(dst_params_file_path,
         dst4n = [key for key in dst3n if key not in dst4]
         dst_param_keys = dst4n + dst1 + dst2 + dst3 + dst4
 
-    if src_model.startswith("oth_proxyless"):
+    elif src_model.startswith("oth_proxyless"):
         src1 = src_param_keys[5]
         del src_param_keys[5]
         src_param_keys.insert(0, src1)

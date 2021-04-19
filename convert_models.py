@@ -1024,7 +1024,7 @@ def convert_pt2pt(dst_params_file_path,
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n + src1
 
-        dst1 = list(filter(re.compile("\.identity_conv\.").search, dst_param_keys))
+        dst1 = list(filter(re.compile("\.identity_block\.").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
         dst_param_keys = dst1n + dst1
 

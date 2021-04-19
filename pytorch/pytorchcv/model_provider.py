@@ -152,10 +152,8 @@ from .models.nvpattexp import *
 
 from .models.superpointnet import *
 
-from .models.jasper_old import *
+from .models.jasper import *
 from .models.jasperdr import *
-# from .models.quartznet_old import *
-
 from .models.quartznet import *
 
 from .models.others.oth_quartznet import *
@@ -1162,10 +1160,6 @@ _models = {
     'jasperdr5x3': jasperdr5x3,
     'jasperdr10x4': jasperdr10x4,
     'jasperdr10x5': jasperdr10x5,
-
-    # 'quartznet5x5': quartznet5x5,
-    # 'quartznet10x5': quartznet10x5,
-    # 'quartznet15x5': quartznet15x5,
 
     'quartznet5x5_en_ls': quartznet5x5_en_ls,
     'quartznet15x5_en': quartznet15x5_en,

@@ -1,10 +1,9 @@
 """
-    Jasper for ASR, implemented in PyTorch.
+    Jasper/DR for ASR, implemented in PyTorch.
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'conv1d1', 'MaskConv1d', 'mask_conv1d1',
-           'MaskConvBlock1d', 'mask_conv1d1_block', 'DwsConvBlock1d', 'JasperUnit', 'JasperFinalBlock']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper']
 
 import os
 import torch
@@ -528,7 +527,8 @@ class JasperFinalBlock(nn.Module):
 
 class Jasper(nn.Module):
     """
-    Jasper model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
+    Jasper/DR/QuartzNet model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
+    https://arxiv.org/abs/1904.03288.
 
     Parameters:
     ----------
@@ -621,18 +621,24 @@ class Jasper(nn.Module):
 
 
 def get_jasper(version,
+               use_dw=False,
+               use_dr=False,
                bn_eps=1e-3,
                model_name=None,
                pretrained=False,
                root=os.path.join("~", ".torch", "models"),
                **kwargs):
     """
-    Create Jasper model with specific parameters.
+    Create Jasper/DR/QuartzNet model with specific parameters.
 
     Parameters:
     ----------
-    version : str
-        Model version.
+    version : tuple of str
+        Model type and configuration.
+    use_dw : bool, default False
+        Whether to use depthwise block.
+    use_dr : bool, default False
+        Whether to use dense residual scheme.
     bn_eps : float, default 1e-3
         Small float added to variance in Batch norm.
     model_name : str or None, default None
@@ -644,19 +650,26 @@ def get_jasper(version,
     """
     import numpy as np
 
-    blocks, repeat = tuple(map(int, version.split("x")))
+    blocks, repeat = tuple(map(int, version[1].split("x")))
     main_stage_repeat = blocks // 5
 
-    channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
-    kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
-    dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
+    model_type = version[0]
+    if model_type == "jasper":
+        channels_per_stage = [256, 256, 384, 512, 640, 768, 896, 1024]
+        kernel_sizes_per_stage = [11, 11, 13, 17, 21, 25, 29, 1]
+        dropout_rates_per_stage = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4]
+    elif model_type == "quartznet":
+        channels_per_stage = [256, 256, 256, 512, 512, 512, 512, 1024]
+        kernel_sizes_per_stage = [33, 33, 39, 51, 63, 75, 87, 1]
+        dropout_rates_per_stage = [0.0] * 8
+    else:
+        raise ValueError("Unsupported Jasper family model type: {}".format(model_type))
+
     stage_repeat = np.full((8,), 1)
     stage_repeat[1:-2] *= main_stage_repeat
     channels = sum([[a] * r for (a, r) in zip(channels_per_stage, stage_repeat)], [])
     kernel_sizes = sum([[a] * r for (a, r) in zip(kernel_sizes_per_stage, stage_repeat)], [])
     dropout_rates = sum([[a] * r for (a, r) in zip(dropout_rates_per_stage, stage_repeat)], [])
-    use_dw = False
-    use_dr = False
 
     net = Jasper(
         channels=channels,
@@ -692,7 +705,7 @@ def jasper5x3(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="5x3", model_name="jasper5x3", **kwargs)
+    return get_jasper(version=("jasper", "5x3"), model_name="jasper5x3", **kwargs)
 
 
 def jasper10x4(**kwargs):
@@ -707,7 +720,7 @@ def jasper10x4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="10x4", model_name="jasper10x4", **kwargs)
+    return get_jasper(version=("jasper", "10x4"), model_name="jasper10x4", **kwargs)
 
 
 def jasper10x5(**kwargs):
@@ -722,7 +735,7 @@ def jasper10x5(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version="10x5", model_name="jasper10x5", **kwargs)
+    return get_jasper(version=("jasper", "10x5"), model_name="jasper10x5", **kwargs)
 
 
 def _calc_width(net):

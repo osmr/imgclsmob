@@ -162,13 +162,6 @@ def _test():
         x = torch.randn(batch, audio_features, seq_len)
         len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
 
-        # net.load_state_dict(torch.load("/home/osemery/projects/imgclsmob_data/nemo/quartznet15x5_ru.pth"))
-
-        # x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x_qn.npy"))
-        # len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/xl_qn.npy"))
-        # y1 = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/y_qn.npy"))
-        # y1_len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/yl_qn.npy"))
-
         y, y_len = net(x, len)
         # y.sum().backward()
         assert (y.size()[0] == batch)

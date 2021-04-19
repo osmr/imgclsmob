@@ -83,12 +83,6 @@ def _test():
         x = torch.randn(batch, audio_features, seq_len)
         x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
 
-        # net.load_state_dict(torch.load("/home/osemery/projects/imgclsmob_data/nemo/jasperdr10x5_en.pth"))
-        # x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x_jp.npy"))
-        # x_len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/xl_jp.npy"))
-        # y1 = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/y_jp.npy"))
-        # y1_len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/yl_jp.npy"))
-
         y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, net.num_classes))

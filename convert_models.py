@@ -1019,7 +1019,7 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
-    if src_model.startswith("oth_quartznet"):
+    if src_model.startswith("oth_quartznet") or src_model.startswith("oth_jasper"):
         src1 = list(filter(re.compile("\.res\.").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n + src1

@@ -3,54 +3,45 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['jasperdr5x3', 'jasperdr10x4', 'jasperdr10x5']
+__all__ = ['jasperdr10x5_en', 'jasperdr10x5_en_nr']
 
 from .jasper import get_jasper
 
 
-def jasperdr5x3(**kwargs):
+def jasperdr10x5_en(num_classes=29, **kwargs):
     """
-    Jasper DR 5x3 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
+    Jasper DR 10x5 model for English language from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
     Parameters:
     ----------
+    num_classes : int, default 29
+        Number of classification classes (number of graphemes).
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version=("jasper", "5x3"), use_dr=True, model_name="jasperdr5x3", **kwargs)
+    return get_jasper(num_classes=num_classes, version=("jasper", "10x5"), use_dr=True, model_name="jasperdr10x5_en",
+                      **kwargs)
 
 
-def jasperdr10x4(**kwargs):
+def jasperdr10x5_en_nr(num_classes=29, **kwargs):
     """
-    Jasper DR 10x4 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
-    https://arxiv.org/abs/1904.03288.
+    Jasper DR 10x5 model for English language (with presence of noise) from 'Jasper: An End-to-End Convolutional Neural
+    Acoustic Model,' https://arxiv.org/abs/1904.03288.
 
     Parameters:
     ----------
+    num_classes : int, default 29
+        Number of classification classes (number of graphemes).
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(version=("jasper", "10x4"), use_dr=True, model_name="jasperdr10x4", **kwargs)
-
-
-def jasperdr10x5(**kwargs):
-    """
-    Jasper DR 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
-    https://arxiv.org/abs/1904.03288.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_jasper(version=("jasper", "10x5"), use_dr=True, model_name="jasperdr10x5", **kwargs)
+    return get_jasper(num_classes=num_classes, version=("jasper", "10x5"), use_dr=True, model_name="jasperdr10x5_en_nr",
+                      **kwargs)
 
 
 def _calc_width(net):
@@ -67,37 +58,40 @@ def _test():
     import torch
 
     pretrained = False
-    audio_features = 120
-    num_classes = 11
+    audio_features = 64
 
     models = [
-        jasperdr5x3,
-        jasperdr10x4,
-        jasperdr10x5,
+        jasperdr10x5_en,
+        jasperdr10x5_en_nr,
     ]
 
     for model in models:
 
         net = model(
             in_channels=audio_features,
-            num_classes=num_classes,
             pretrained=pretrained)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != jasperdr5x3 or weight_count == 109848331)
-        assert (model != jasperdr10x4 or weight_count == 271878411)
-        assert (model != jasperdr10x5 or weight_count == 332771595)
+        assert (model != jasperdr10x5_en or weight_count == 332632349)
+        assert (model != jasperdr10x5_en_nr or weight_count == 332632349)
 
         batch = 1
         seq_len = np.random.randint(60, 150)
         x = torch.randn(batch, audio_features, seq_len)
         x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+
+        # net.load_state_dict(torch.load("/home/osemery/projects/imgclsmob_data/nemo/jasperdr10x5_en.pth"))
+        # x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x_jp.npy"))
+        # x_len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/xl_jp.npy"))
+        # y1 = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/y_jp.npy"))
+        # y1_len = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/yl_jp.npy"))
+
         y, y_len = net(x, x_len)
         # y.sum().backward()
-        assert (tuple(y.size())[:2] == (batch, num_classes))
+        assert (tuple(y.size())[:2] == (batch, net.num_classes))
         assert (y.size()[2] in [seq_len // 2, seq_len // 2 + 1])
 
 

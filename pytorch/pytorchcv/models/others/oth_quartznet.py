@@ -1,5 +1,5 @@
 __all__ = ['oth_quartznet5x5_en_ls', 'oth_quartznet15x5_en', 'oth_quartznet15x5_en_nr', 'oth_quartznet15x5_fr',
-           'oth_quartznet15x5_de', 'oth_quartznet15x5_ru', 'oth_jasper10x5dr_en', 'oth_jasper10x5dr_en_nr']
+           'oth_quartznet15x5_de', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr']
 
 import torch.nn as nn
 
@@ -33,8 +33,8 @@ class QuartzNet(nn.Module):
         return x, lens
 
 
-# path_pref = "../../../../../imgclsmob_data/nemo/"
-path_pref = "../imgclsmob_data/nemo/"
+path_pref = "../../../../../imgclsmob_data/nemo/"
+# path_pref = "../imgclsmob_data/nemo/"
 
 
 def oth_quartznet5x5_en_ls(pretrained=False, num_classes=29, **kwargs):
@@ -91,7 +91,7 @@ def oth_quartznet15x5_ru(pretrained=False, num_classes=35, **kwargs):
     return net
 
 
-def oth_jasper10x5dr_en(pretrained=False, num_classes=29, **kwargs):
+def oth_jasperdr10x5_en(pretrained=False, num_classes=29, **kwargs):
     from nemo.collections.asr.models import EncDecCTCModel
     quartznet_nemo_path = path_pref + "Jasper10x5Dr-En_2b94c9d1.nemo"
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
@@ -100,7 +100,7 @@ def oth_jasper10x5dr_en(pretrained=False, num_classes=29, **kwargs):
     return net
 
 
-def oth_jasper10x5dr_en_nr(pretrained=False, num_classes=29, **kwargs):
+def oth_jasperdr10x5_en_nr(pretrained=False, num_classes=29, **kwargs):
     from nemo.collections.asr.models import EncDecCTCModel
     quartznet_nemo_path = path_pref + "stt_en_jasper10x5dr_0d5ebc6c.nemo"
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
@@ -126,14 +126,14 @@ def _test():
     audio_features = 64
 
     models = [
-        oth_quartznet15x5_en,
-        oth_quartznet15x5_en_nr,
-        oth_quartznet15x5_fr,
-        oth_quartznet15x5_de,
-        oth_quartznet15x5_ru,
-        oth_quartznet5x5_en_ls,
-        oth_jasper10x5dr_en,
-        oth_jasper10x5dr_en_nr,
+        # oth_quartznet15x5_en,
+        # oth_quartznet15x5_en_nr,
+        # oth_quartznet15x5_fr,
+        # oth_quartznet15x5_de,
+        # oth_quartznet15x5_ru,
+        # oth_quartznet5x5_en_ls,
+        oth_jasperdr10x5_en,
+        oth_jasperdr10x5_en_nr,
     ]
 
     for model in models:
@@ -152,8 +152,8 @@ def _test():
         assert (model != oth_quartznet15x5_fr or weight_count == 18938731)
         assert (model != oth_quartznet15x5_de or weight_count == 18927456)
         assert (model != oth_quartznet15x5_ru or weight_count == 18930531)
-        assert (model != oth_jasper10x5dr_en or weight_count == 332632349)
-        assert (model != oth_jasper10x5dr_en_nr or weight_count == 332632349)
+        assert (model != oth_jasperdr10x5_en or weight_count == 332632349)
+        assert (model != oth_jasperdr10x5_en_nr or weight_count == 332632349)
 
         batch = 1
 

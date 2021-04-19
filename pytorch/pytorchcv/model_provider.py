@@ -1157,9 +1157,8 @@ _models = {
     'jasper10x4': jasper10x4,
     'jasper10x5': jasper10x5,
 
-    'jasperdr5x3': jasperdr5x3,
-    'jasperdr10x4': jasperdr10x4,
-    'jasperdr10x5': jasperdr10x5,
+    'jasperdr10x5_en': jasperdr10x5_en,
+    'jasperdr10x5_en_nr': jasperdr10x5_en_nr,
 
     'quartznet5x5_en_ls': quartznet5x5_en_ls,
     'quartznet15x5_en': quartznet15x5_en,
@@ -1174,8 +1173,8 @@ _models = {
     'oth_quartznet15x5_fr': oth_quartznet15x5_fr,
     'oth_quartznet15x5_de': oth_quartznet15x5_de,
     'oth_quartznet15x5_ru': oth_quartznet15x5_ru,
-    'oth_jasper10x5dr_en': oth_jasper10x5dr_en,
-    'oth_jasper10x5dr_en_nr': oth_jasper10x5dr_en_nr,
+    'oth_jasperdr10x5_en': oth_jasperdr10x5_en,
+    'oth_jasperdr10x5_en_nr': oth_jasperdr10x5_en_nr,
 
     # 'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
     # 'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,

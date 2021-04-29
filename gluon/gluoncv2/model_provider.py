@@ -143,9 +143,9 @@ from .models.visemenet import *
 from .models.voca import *
 from .models.nvpattexp import *
 
-from .models.jasper import *
-from .models.jasperdr import *
-from .models.quartznet import *
+from .models._jasper import *
+from .models._jasperdr import *
+from .models._quartznet import *
 
 # from .models.others.oth_simple_pose_resnet import *
 # from .models.others.oth_mobile_pose import *

@@ -52,13 +52,13 @@ class MaskConv1d(nn.Conv1d):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple/list of 1 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 1 int
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
+    padding : int or tuple/list of 1 int, default 0
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple/list of 1 int, default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -93,7 +93,8 @@ class MaskConv1d(nn.Conv1d):
             x_len = x_len.to(dtype=torch.long)
             max_len = x.size(2)
             mask = torch.arange(max_len).to(x_len.device).expand(len(x_len), max_len) >= x_len.unsqueeze(1)
-            x = x.masked_fill(mask=mask.unsqueeze(1).to(device=x.device), value=0)
+            mask = mask.unsqueeze(1).to(device=x.device)
+            x = x.masked_fill(mask=mask, value=0)
             x_len = (x_len + 2 * self.padding[0] - self.dilation[0] * (self.kernel_size[0] - 1) -
                      1) // self.stride[0] + 1
         x = F.conv1d(
@@ -258,8 +259,7 @@ class ChannelShuffle1d(nn.Module):
                  channels,
                  groups):
         super(ChannelShuffle1d, self).__init__()
-        if channels % groups != 0:
-            raise ValueError("channels must be divisible by groups")
+        assert (channels % groups == 0)
         self.groups = groups
 
     def forward(self, x):
@@ -776,10 +776,11 @@ def _test():
         assert (model != jasper10x4 or weight_count == 261393693)
         assert (model != jasper10x5 or weight_count == 322286877)
 
-        batch = 1
+        batch = 3
         seq_len = np.random.randint(60, 150)
         x = torch.randn(batch, audio_features, seq_len)
         x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+
         y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, num_classes))

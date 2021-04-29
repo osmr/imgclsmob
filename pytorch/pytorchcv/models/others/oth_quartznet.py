@@ -155,12 +155,13 @@ def _test():
         assert (model != oth_jasperdr10x5_en or weight_count == 332632349)
         assert (model != oth_jasperdr10x5_en_nr or weight_count == 332632349)
 
-        batch = 1
+        batch = 3
 
         seq_len = np.random.randint(60, 150)
         # seq_len = 90
         x = torch.randn(batch, audio_features, seq_len)
         len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+        # len = torch.full((batch, 1), seq_len - 2).to(dtype=torch.long, device=x.device)
 
         y, y_len = net(x, len)
         # y.sum().backward()

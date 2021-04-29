@@ -9,7 +9,8 @@ __all__ = ['round_channels', 'BreakBlock', 'get_activation_layer', 'ReLU6', 'PRe
            'pre_conv3x3_block', 'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN',
            'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent',
+           'DualPathParallelConcurent', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -2093,17 +2094,25 @@ class Concurrent(nn.HybridSequential):
         The axis on which to concatenate the outputs.
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
+    merge_type : str, default None
+        Type of branch merging.
     branches : list of HybridBlock, default None
         Whether to concatenate tensors along a new dimension.
     """
     def __init__(self,
                  axis=1,
                  stack=False,
+                 merge_type=None,
                  branches=None,
                  **kwargs):
         super(Concurrent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["cat", "stack", "sum"])
         self.axis = axis
         self.stack = stack
+        if merge_type is not None:
+            self.merge_type = merge_type
+        else:
+            self.merge_type = "stack" if stack else "cat"
         if branches is not None:
             with self.name_scope():
                 for branch in branches:
@@ -2113,10 +2122,14 @@ class Concurrent(nn.HybridSequential):
         out = []
         for block in self._children.values():
             out.append(block(x))
-        if self.stack:
+        if self.merge_type == "stack":
             out = F.stack(*out, axis=self.axis)
-        else:
+        elif self.merge_type == "cat":
             out = F.concat(*out, dim=self.axis)
+        elif self.merge_type == "sum":
+            out = F.stack(*out, axis=self.axis).sum(axis=self.axis)
+        else:
+            raise NotImplementedError()
         return out
 
 
@@ -2370,16 +2383,82 @@ class ParallelConcurent(nn.HybridSequential):
     """
     A sequential container with multiple inputs and multiple outputs.
     Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    merge_type : str, default 'list'
+        Type of branch merging.
     """
     def __init__(self,
+                 axis=1,
+                 merge_type="list",
                  **kwargs):
         super(ParallelConcurent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = axis
+        self.merge_type = merge_type
 
     def hybrid_forward(self, F, x):
         out = []
         for block, xi in zip(self._children.values(), x):
             out.append(block(xi))
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            out = F.stack(*out, axis=self.axis)
+        elif self.merge_type == "cat":
+            out = F.concat(*out, dim=self.axis)
+        elif self.merge_type == "sum":
+            out = F.stack(*out, axis=self.axis).sum(axis=self.axis)
+        else:
+            raise NotImplementedError()
         return out
+
+
+class DualPathParallelConcurent(nn.HybridSequential):
+    """
+    A sequential container with multiple dual-path inputs and single/multiple outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    merge_type : str, default 'list'
+        Type of branch merging.
+    """
+    def __init__(self,
+                 axis=1,
+                 merge_type="list",
+                 **kwargs):
+        super(DualPathParallelConcurent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = axis
+        self.merge_type = merge_type
+
+    def hybrid_forward(self, F, x1, x2):
+        x1_out = []
+        x2_out = []
+        for block, x1i, x2i in zip(self._children.values(), x1, x2):
+            y1i, y2i = block(x1i, x2i)
+            x1_out.append(y1i)
+            x2_out.append(y2i)
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            x1_out = F.stack(*x1_out, axis=self.axis)
+            x2_out = F.stack(*x2_out, axis=self.axis)
+        elif self.merge_type == "cat":
+            x1_out = F.concat(*x1_out, dim=self.axis)
+            x2_out = F.concat(*x2_out, dim=self.axis)
+        elif self.merge_type == "sum":
+            x1_out = F.stack(*x1_out, axis=self.axis).sum(axis=self.axis)
+            x2_out = F.stack(*x2_out, axis=self.axis).sum(axis=self.axis)
+        else:
+            raise NotImplementedError()
+        return x1_out, x2_out
 
 
 class HeatmapMaxDetBlock(HybridBlock):

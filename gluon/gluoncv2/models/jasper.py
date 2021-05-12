@@ -316,10 +316,6 @@ class DwsConvBlock1d(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     dropout_rate : float, default 0.0

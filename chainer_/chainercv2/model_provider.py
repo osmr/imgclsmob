@@ -1061,13 +1061,15 @@ _models = {
     'jasper10x4': jasper10x4,
     'jasper10x5': jasper10x5,
 
-    'jasperdr5x3': jasperdr5x3,
-    'jasperdr10x4': jasperdr10x4,
-    'jasperdr10x5': jasperdr10x5,
+    'jasperdr10x5_en': jasperdr10x5_en,
+    'jasperdr10x5_en_nr': jasperdr10x5_en_nr,
 
-    'quartznet5x5': quartznet5x5,
-    'quartznet10x5': quartznet10x5,
-    'quartznet15x5': quartznet15x5,
+    'quartznet5x5_en_ls': quartznet5x5_en_ls,
+    'quartznet15x5_en': quartznet15x5_en,
+    'quartznet15x5_en_nr': quartznet15x5_en_nr,
+    'quartznet15x5_fr': quartznet15x5_fr,
+    'quartznet15x5_de': quartznet15x5_de,
+    'quartznet15x5_ru': quartznet15x5_ru,
 }
 
 

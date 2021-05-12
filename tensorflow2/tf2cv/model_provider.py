@@ -108,9 +108,9 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
-from .models.jasper import *
-from .models.jasperdr import *
-from .models.quartznet import *
+from .models._jasper import *
+from .models._jasperdr import *
+from .models._quartznet import *
 
 __all__ = ['get_model']
 

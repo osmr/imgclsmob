@@ -836,8 +836,8 @@ def _test():
     import numpy as np
     import tensorflow.keras.backend as K
 
-    data_format = "channels_last"
-    # data_format = "channels_first"
+    # data_format = "channels_last"
+    data_format = "channels_first"
     pretrained = False
     audio_features = 64
     classes = 29

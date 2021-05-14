@@ -8,7 +8,8 @@ __all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import BatchNormExtra, DualPathSequential, DualPathParallelConcurent, is_channels_first
+from .common import get_activation_layer, Conv1d, BatchNorm, DualPathSequential, DualPathParallelConcurent,\
+    is_channels_first
 
 
 def conv1d1(in_channels,
@@ -16,6 +17,7 @@ def conv1d1(in_channels,
             strides=1,
             groups=1,
             use_bias=False,
+            data_format="channels_last",
             **kwargs):
     """
     1-dim kernel version of the 1D convolution layer.
@@ -32,18 +34,21 @@ def conv1d1(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
-    return nn.Conv1D(
-        channels=out_channels,
+    return Conv1d(
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=1,
         strides=strides,
         groups=groups,
         use_bias=use_bias,
-        in_channels=in_channels,
+        data_format=data_format,
         **kwargs)
 
 
-class MaskConv1d(nn.Conv1D):
+class MaskConv1d(Conv1d):
     """
     Masked 1D convolution block.
 
@@ -67,6 +72,8 @@ class MaskConv1d(nn.Conv1D):
         Whether the layer uses a bias vector.
     use_mask : bool, default True
         Whether to use mask.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
@@ -78,33 +85,41 @@ class MaskConv1d(nn.Conv1D):
                  groups=1,
                  use_bias=False,
                  use_mask=True,
+                 data_format="channels_last",
                  **kwargs):
         super(MaskConv1d, self).__init__(
-            channels=out_channels,
+            in_channels=in_channels,
+            out_channels=out_channels,
             kernel_size=kernel_size,
             strides=strides,
             padding=padding,
             dilation=dilation,
             groups=groups,
             use_bias=use_bias,
-            in_channels=in_channels,
+            data_format=data_format,
             **kwargs)
         self.use_mask = use_mask
+        self.data_format = data_format
         if self.use_mask:
             self.kernel_size = kernel_size[0] if isinstance(kernel_size, (list, tuple)) else kernel_size
             self.strides = strides[0] if isinstance(strides, (list, tuple)) else strides
             self.padding = padding[0] if isinstance(padding, (list, tuple)) else padding
             self.dilation = dilation[0] if isinstance(dilation, (list, tuple)) else dilation
 
-    def call(self, x, x_len, weight, bias=None, training=None):
+    def call(self, x, x_len):
         if self.use_mask:
-            x = F.SequenceMask(
-                data=x.swapaxes(1, 2),
-                sequence_length=F.broadcast_like(x_len, x, lhs_axes=(0,), rhs_axes=(0,)),
-                use_sequence_length=True,
-                axis=1).swapaxes(1, 2)
-            x_len = (x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) / self.strides + 1
-        x = super(MaskConv1d, self).hybrid_forward(F, x, weight=weight, bias=bias)
+            if is_channels_first(self.data_format):
+                max_len = x.shape[2]
+                mask = tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64) < x_len[0]
+                mask = tf.broadcast_to(tf.expand_dims(tf.expand_dims(mask, 0), 1), x.shape)
+                x = tf.where(mask, x, tf.zeros(x.shape))
+            else:
+                max_len = x.shape[1]
+                mask = tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64) < x_len[0]
+                mask = tf.broadcast_to(tf.expand_dims(tf.expand_dims(mask, 0), 2), x.shape)
+                x = tf.where(mask, x, tf.zeros(x.shape))
+            x_len = (x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) // self.strides + 1
+        x = super(MaskConv1d, self).call(x)
         return x, x_len
 
 
@@ -113,6 +128,7 @@ def mask_conv1d1(in_channels,
                  strides=1,
                  groups=1,
                  use_bias=False,
+                 data_format="channels_last",
                  **kwargs):
     """
     Masked 1-dim kernel version of the 1D convolution layer.
@@ -129,6 +145,8 @@ def mask_conv1d1(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     return MaskConv1d(
         in_channels=in_channels,
@@ -137,6 +155,7 @@ def mask_conv1d1(in_channels,
         strides=strides,
         groups=groups,
         use_bias=use_bias,
+        data_format=data_format,
         **kwargs)
 
 
@@ -164,12 +183,14 @@ class MaskConvBlock1d(nn.Layer):
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
@@ -181,44 +202,47 @@ class MaskConvBlock1d(nn.Layer):
                  groups=1,
                  use_bias=False,
                  use_bn=True,
-                 bn_epsilon=1e-5,
-                 activation=(lambda: nn.Activation("relu")),
+                 bn_eps=1e-5,
+                 activation="relu",
                  dropout_rate=0.0,
+                 data_format="channels_last",
                  **kwargs):
         super(MaskConvBlock1d, self).__init__(**kwargs)
         self.activate = (activation is not None)
         self.use_bn = use_bn
         self.use_dropout = (dropout_rate != 0.0)
 
-        with self.name_scope():
-            self.conv = MaskConv1d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
-                groups=groups,
-                use_bias=use_bias)
-            if self.use_bn:
-                self.bn = BatchNormExtra(
-                    in_channels=out_channels,
-                    epsilon=bn_epsilon,
-                    use_global_stats=bn_use_global_stats,
-                    cudnn_off=bn_cudnn_off)
-            if self.activate:
-                self.activ = activation()
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
+        self.conv = MaskConv1d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            use_bias=use_bias,
+            data_format=data_format,
+            name="conv")
+        if self.use_bn:
+            self.bn = BatchNorm(
+                epsilon=bn_eps,
+                data_format=data_format,
+                name="bn")
+        if self.activate:
+            self.activ = get_activation_layer(activation, name="activ")
+        if self.use_dropout:
+            self.dropout = nn.Dropout(
+                rate=dropout_rate,
+                name="dropout")
 
     def call(self, x, x_len, training=None):
         x, x_len = self.conv(x, x_len)
         if self.use_bn:
-            x = self.bn(x)
+            x = self.bn(x, training=training)
         if self.activate:
             x = self.activ(x)
         if self.use_dropout:
-            x = self.dropout(x)
+            x = self.dropout(x, training=training)
         return x, x_len
 
 
@@ -226,6 +250,7 @@ def mask_conv1d1_block(in_channels,
                        out_channels,
                        strides=1,
                        padding=0,
+                       data_format="channels_last",
                        **kwargs):
     """
     1-dim kernel version of the masked 1D convolution block.
@@ -240,6 +265,8 @@ def mask_conv1d1_block(in_channels,
         Strides of the convolution.
     padding : int, default 0
         Padding value for convolution layer.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     return MaskConvBlock1d(
         in_channels=in_channels,
@@ -247,6 +274,7 @@ def mask_conv1d1_block(in_channels,
         kernel_size=1,
         strides=strides,
         padding=padding,
+        data_format=data_format,
         **kwargs)
 
 
@@ -260,17 +288,40 @@ class ChannelShuffle1d(nn.Layer):
         Number of channels.
     groups : int
         Number of groups.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
                  groups,
+                 data_format="channels_last",
                  **kwargs):
         super(ChannelShuffle1d, self).__init__(**kwargs)
         assert (channels % groups == 0)
         self.groups = groups
+        self.data_format = data_format
 
     def call(self, x, training=None):
-        return x.reshape((0, -4, self.groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+        x_shape = x.get_shape().as_list()
+        if is_channels_first(self.data_format):
+            channels = x_shape[1]
+            seq_len = x_shape[2]
+        else:
+            seq_len = x_shape[1]
+            channels = x_shape[2]
+
+        assert (channels % self.groups == 0)
+        channels_per_group = channels // self.groups
+
+        if is_channels_first(self.data_format):
+            x = tf.reshape(x, shape=(-1, self.groups, channels_per_group, seq_len))
+            x = tf.transpose(x, perm=(0, 2, 1, 3))
+            x = tf.reshape(x, shape=(-1, channels, seq_len))
+        else:
+            x = tf.reshape(x, shape=(-1, seq_len, self.groups, channels_per_group))
+            x = tf.transpose(x, perm=(0, 1, 3, 2))
+            x = tf.reshape(x, shape=(-1, seq_len, channels))
+        return x
 
     def __repr__(self):
         s = "{name}(groups={groups})"
@@ -304,12 +355,14 @@ class DwsConvBlock1d(nn.Layer):
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
@@ -321,9 +374,10 @@ class DwsConvBlock1d(nn.Layer):
                  groups=1,
                  use_bias=False,
                  use_bn=True,
-                 bn_epsilon=1e-5,
-                 activation=(lambda: nn.Activation("relu")),
+                 bn_eps=1e-5,
+                 activation="relu",
                  dropout_rate=0.0,
+                 data_format="channels_last",
                  **kwargs):
         super(DwsConvBlock1d, self).__init__(**kwargs)
         self.activate = (activation is not None)
@@ -331,35 +385,41 @@ class DwsConvBlock1d(nn.Layer):
         self.use_dropout = (dropout_rate != 0.0)
         self.use_channel_shuffle = (groups > 1)
 
-        with self.name_scope():
-            self.dw_conv = MaskConv1d(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
-                groups=in_channels,
-                use_bias=use_bias)
-            self.pw_conv = mask_conv1d1(
-                in_channels=in_channels,
-                out_channels=out_channels,
+        self.dw_conv = MaskConv1d(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=in_channels,
+            use_bias=use_bias,
+            data_format=data_format,
+            name="dw_conv")
+        self.pw_conv = mask_conv1d1(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            groups=groups,
+            use_bias=use_bias,
+            data_format=data_format,
+            name="pw_conv")
+        if self.use_channel_shuffle:
+            self.shuffle = ChannelShuffle1d(
+                channels=out_channels,
                 groups=groups,
-                use_bias=use_bias)
-            if self.use_channel_shuffle:
-                self.shuffle = ChannelShuffle1d(
-                    channels=out_channels,
-                    groups=groups)
-            if self.use_bn:
-                self.bn = BatchNormExtra(
-                    in_channels=out_channels,
-                    epsilon=bn_epsilon,
-                    use_global_stats=bn_use_global_stats,
-                    cudnn_off=bn_cudnn_off)
-            if self.activate:
-                self.activ = activation()
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
+                data_format=data_format,
+                name="shuffle")
+        if self.use_bn:
+            self.bn = BatchNorm(
+                epsilon=bn_eps,
+                data_format=data_format,
+                name="bn")
+        if self.activate:
+            self.activ = get_activation_layer(activation, name="activ")
+        if self.use_dropout:
+            self.dropout = nn.Dropout(
+                rate=dropout_rate,
+                name="dropout")
 
     def call(self, x, x_len, training=None):
         x, x_len = self.dw_conv(x, x_len)
@@ -367,11 +427,11 @@ class DwsConvBlock1d(nn.Layer):
         if self.use_channel_shuffle:
             x = self.shuffle(x)
         if self.use_bn:
-            x = self.bn(x)
+            x = self.bn(x, training=training)
         if self.activate:
             x = self.activ(x)
         if self.use_dropout:
-            x = self.dropout(x)
+            x = self.dropout(x, training=training)
         return x, x_len
 
 
@@ -387,7 +447,7 @@ class JasperUnit(nn.Layer):
         Number of output channels.
     kernel_size : int
         Convolution window size.
-    bn_epsilon : float
+    bn_eps : float
         Small float added to variance in Batch norm.
     dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
@@ -397,82 +457,86 @@ class JasperUnit(nn.Layer):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 bn_epsilon,
+                 bn_eps,
                  dropout_rate,
                  repeat,
                  use_dw,
                  use_dr,
+                 data_format="channels_last",
                  **kwargs):
         super(JasperUnit, self).__init__(**kwargs)
         self.use_dropout = (dropout_rate != 0.0)
         self.use_dr = use_dr
         block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
 
-        with self.name_scope():
-            if self.use_dr:
-                self.identity_block = DualPathParallelConcurent()
-                for i, dense_in_channels_i in enumerate(in_channels):
-                    self.identity_block.add(mask_conv1d1_block(
-                        in_channels=dense_in_channels_i,
-                        out_channels=out_channels,
-                        bn_epsilon=bn_epsilon,
-                        bn_use_global_stats=bn_use_global_stats,
-                        bn_cudnn_off=bn_cudnn_off,
-                        dropout_rate=0.0,
-                        activation=None))
-                in_channels = in_channels[-1]
-            else:
-                self.identity_block = mask_conv1d1_block(
-                    in_channels=in_channels,
+        if self.use_dr:
+            self.identity_block = DualPathParallelConcurent(name="identity_block")
+            for i, dense_in_channels_i in enumerate(in_channels):
+                self.identity_block.add(mask_conv1d1_block(
+                    in_channels=dense_in_channels_i,
                     out_channels=out_channels,
-                    bn_epsilon=bn_epsilon,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off,
+                    bn_eps=bn_eps,
                     dropout_rate=0.0,
-                    activation=None)
+                    activation=None,
+                    data_format=data_format,
+                    name="block{}".format(i + 1)))
+            in_channels = in_channels[-1]
+        else:
+            self.identity_block = mask_conv1d1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                bn_eps=bn_eps,
+                dropout_rate=0.0,
+                activation=None,
+                data_format=data_format,
+                name="identity_block")
 
-            self.body = DualPathSequential()
-            for i in range(repeat):
-                activation = (lambda: nn.Activation("relu")) if i < repeat - 1 else None
-                dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
-                self.body.add(block_class(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    strides=1,
-                    padding=(kernel_size // 2),
-                    bn_epsilon=bn_epsilon,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off,
-                    dropout_rate=dropout_rate_i,
-                    activation=activation))
-                in_channels = out_channels
+        self.body = DualPathSequential(name="body")
+        for i in range(repeat):
+            activation = "relu" if i < repeat - 1 else None
+            dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
+            self.body.add(block_class(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                strides=1,
+                padding=(kernel_size // 2),
+                bn_eps=bn_eps,
+                dropout_rate=dropout_rate_i,
+                activation=activation,
+                data_format=data_format,
+                name="block{}".format(i + 1)))
+            in_channels = out_channels
 
-            self.activ = nn.Activation("relu")
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
+        self.activ = nn.ReLU()
+        if self.use_dropout:
+            self.dropout = nn.Dropout(
+                rate=dropout_rate,
+                name="dropout")
 
     def call(self, x, x_len, training=None):
         if self.use_dr:
             x_len, y, y_len = x_len if type(x_len) is tuple else (x_len, None, None)
             y = [x] if y is None else y + [x]
             y_len = [x_len] if y_len is None else y_len + [x_len]
-            identity, _ = self.identity_block(y, y_len)
-            identity = F.stack(*identity, axis=1)
-            identity = identity.sum(axis=1)
+            identity, _ = self.identity_block(y, y_len, training=training)
+            identity = tf.stack(identity, axis=1)
+            identity = tf.math.reduce_sum(identity, axis=1)
         else:
-            identity, _ = self.identity_block(x, x_len)
+            identity, _ = self.identity_block(x, x_len, training=training)
 
-        x, x_len = self.body(x, x_len)
+        x, x_len = self.body(x, x_len, training=training)
         x = x + identity
         x = self.activ(x)
         if self.use_dropout:
-            x = self.dropout(x)
+            x = self.dropout(x, training=training)
 
         if self.use_dr:
             return x, (x_len, y, y_len)
@@ -492,7 +556,7 @@ class JasperFinalBlock(nn.Layer):
         Number of output channels for each block.
     kernel_sizes : list of int
         Kernel sizes for each block.
-    bn_epsilon : float
+    bn_eps : float
         Small float added to variance in Batch norm.
     dropout_rates : list of int
         Dropout rates for each block.
@@ -500,48 +564,50 @@ class JasperFinalBlock(nn.Layer):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  channels,
                  kernel_sizes,
-                 bn_epsilon,
+                 bn_eps,
                  dropout_rates,
                  use_dw,
                  use_dr,
+                 data_format="channels_last",
                  **kwargs):
         super(JasperFinalBlock, self).__init__(**kwargs)
         self.use_dr = use_dr
         conv1_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
 
-        with self.name_scope():
-            self.conv1 = conv1_class(
-                in_channels=in_channels,
-                out_channels=channels[-2],
-                kernel_size=kernel_sizes[-2],
-                strides=1,
-                padding=(2 * kernel_sizes[-2] // 2 - 1),
-                dilation=2,
-                bn_epsilon=bn_epsilon,
-                dropout_rate=dropout_rates[-2],
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off)
-            self.conv2 = MaskConvBlock1d(
-                in_channels=channels[-2],
-                out_channels=channels[-1],
-                kernel_size=kernel_sizes[-1],
-                strides=1,
-                padding=(kernel_sizes[-1] // 2),
-                bn_epsilon=bn_epsilon,
-                dropout_rate=dropout_rates[-1],
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off)
+        self.conv1 = conv1_class(
+            in_channels=in_channels,
+            out_channels=channels[-2],
+            kernel_size=kernel_sizes[-2],
+            strides=1,
+            padding=(2 * kernel_sizes[-2] // 2 - 1),
+            dilation=2,
+            bn_eps=bn_eps,
+            dropout_rate=dropout_rates[-2],
+            data_format=data_format,
+            name="conv1")
+        self.conv2 = MaskConvBlock1d(
+            in_channels=channels[-2],
+            out_channels=channels[-1],
+            kernel_size=kernel_sizes[-1],
+            strides=1,
+            padding=(kernel_sizes[-1] // 2),
+            bn_eps=bn_eps,
+            dropout_rate=dropout_rates[-1],
+            data_format=data_format,
+            name="conv2")
 
     def call(self, x, x_len, training=None):
         if self.use_dr:
             x_len = x_len[0]
-        x, x_len = self.conv1(x, x_len)
-        x, x_len = self.conv2(x, x_len)
+        x, x_len = self.conv1(x, x_len, training=training)
+        x, x_len = self.conv2(x, x_len, training=training)
         return x, x_len
 
 
@@ -556,7 +622,7 @@ class Jasper(tf.keras.Model):
         Number of output channels for each unit and initial/final block.
     kernel_sizes : list of int
         Kernel sizes for each unit and initial/final block.
-    bn_epsilon : float
+    bn_eps : float
         Small float added to variance in Batch norm.
     dropout_rates : list of int
         Dropout rates for each unit and initial/final block.
@@ -570,79 +636,84 @@ class Jasper(tf.keras.Model):
         Number of input channels (audio features).
     classes : int, default 29
         Number of classification classes (number of graphemes).
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
                  kernel_sizes,
-                 bn_epsilon,
+                 bn_eps,
                  dropout_rates,
                  repeat,
                  use_dw,
                  use_dr,
                  in_channels=64,
                  classes=29,
+                 data_format="channels_last",
                  **kwargs):
         super(Jasper, self).__init__(**kwargs)
         self.in_size = None
         self.classes = classes
+        self.data_format = data_format
 
-        with self.name_scope():
-            self.features = DualPathSequential()
-            init_block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
-            self.features.add(init_block_class(
-                in_channels=in_channels,
-                out_channels=channels[0],
-                kernel_size=kernel_sizes[0],
-                strides=2,
-                padding=(kernel_sizes[0] // 2),
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off,
-                dropout_rate=dropout_rates[0]))
-            in_channels = channels[0]
-            in_channels_list = []
-            for i, (out_channels, kernel_size, dropout_rate) in\
-                    enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
-                in_channels_list += [in_channels]
-                self.features.add(JasperUnit(
-                    in_channels=(in_channels_list if use_dr else in_channels),
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    bn_epsilon=bn_epsilon,
-                    dropout_rate=dropout_rate,
-                    repeat=repeat,
-                    use_dw=use_dw,
-                    use_dr=use_dr,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off))
-                in_channels = out_channels
-            self.features.add(JasperFinalBlock(
-                in_channels=in_channels,
-                channels=channels,
-                kernel_sizes=kernel_sizes,
-                bn_epsilon=bn_epsilon,
-                dropout_rates=dropout_rates,
+        self.features = DualPathSequential(name="features")
+        init_block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
+        self.features.add(init_block_class(
+            in_channels=in_channels,
+            out_channels=channels[0],
+            kernel_size=kernel_sizes[0],
+            strides=2,
+            padding=(kernel_sizes[0] // 2),
+            bn_eps=bn_eps,
+            dropout_rate=dropout_rates[0],
+            data_format=data_format,
+            name="init_block"))
+        in_channels = channels[0]
+        in_channels_list = []
+        for i, (out_channels, kernel_size, dropout_rate) in \
+                enumerate(zip(channels[1:-2], kernel_sizes[1:-2], dropout_rates[1:-2])):
+            in_channels_list += [in_channels]
+            self.features.add(JasperUnit(
+                in_channels=(in_channels_list if use_dr else in_channels),
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                bn_eps=bn_eps,
+                dropout_rate=dropout_rate,
+                repeat=repeat,
                 use_dw=use_dw,
                 use_dr=use_dr,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
-            in_channels = channels[-1]
+                data_format=data_format,
+                name="unit{}".format(i + 1)))
+            in_channels = out_channels
+        self.features.add(JasperFinalBlock(
+            in_channels=in_channels,
+            channels=channels,
+            kernel_sizes=kernel_sizes,
+            bn_eps=bn_eps,
+            dropout_rates=dropout_rates,
+            use_dw=use_dw,
+            use_dr=use_dr,
+            data_format=data_format,
+            name="final_block"))
+        in_channels = channels[-1]
 
-            self.output = conv1d1(
-                in_channels=in_channels,
-                out_channels=classes,
-                use_bias=True)
+        self.output1 = conv1d1(
+            in_channels=in_channels,
+            out_channels=classes,
+            use_bias=True,
+            data_format=data_format,
+            name="output1")
 
     def call(self, x, x_len, training=None):
-        x, x_len = self.features(x, x_len)
-        x = self.output(x)
+        x, x_len = self.features(x, x_len, training=training)
+        x = self.output1(x)
         return x, x_len
 
 
 def get_jasper(version,
                use_dw=False,
                use_dr=False,
-               bn_epsilon=1e-3,
+               bn_eps=1e-3,
                model_name=None,
                pretrained=False,
                root=os.path.join("~", ".tensorflow", "models"),
@@ -658,7 +729,7 @@ def get_jasper(version,
         Whether to use depthwise block.
     use_dr : bool, default False
         Whether to use dense residual scheme.
-    bn_epsilon : float, default 1e-3
+    bn_eps : float, default 1e-3
         Small float added to variance in Batch norm.
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -693,7 +764,7 @@ def get_jasper(version,
     net = Jasper(
         channels=channels,
         kernel_sizes=kernel_sizes,
-        bn_epsilon=bn_epsilon,
+        bn_eps=bn_eps,
         dropout_rates=dropout_rates,
         repeat=repeat,
         use_dw=use_dw,

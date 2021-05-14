@@ -108,9 +108,9 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
-from .models._jasper import *
-from .models._jasperdr import *
-from .models._quartznet import *
+from .models.jasper import *
+from .models.jasperdr import *
+from .models.quartznet import *
 
 __all__ = ['get_model']
 
@@ -931,13 +931,15 @@ _models = {
     'jasper10x4': jasper10x4,
     'jasper10x5': jasper10x5,
 
-    'jasperdr5x3': jasperdr5x3,
-    'jasperdr10x4': jasperdr10x4,
-    'jasperdr10x5': jasperdr10x5,
+    'jasperdr10x5_en': jasperdr10x5_en,
+    'jasperdr10x5_en_nr': jasperdr10x5_en_nr,
 
-    'quartznet5x5': quartznet5x5,
-    'quartznet10x5': quartznet10x5,
-    'quartznet15x5': quartznet15x5,
+    'quartznet5x5_en_ls': quartznet5x5_en_ls,
+    'quartznet15x5_en': quartznet15x5_en,
+    'quartznet15x5_en_nr': quartznet15x5_en_nr,
+    'quartznet15x5_fr': quartznet15x5_fr,
+    'quartznet15x5_de': quartznet15x5_de,
+    'quartznet15x5_ru': quartznet15x5_ru,
 }
 
 

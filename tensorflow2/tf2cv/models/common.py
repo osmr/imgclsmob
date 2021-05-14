@@ -10,8 +10,8 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_si
            'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
            'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
            'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'MultiOutputSequential', 'ParallelConcurent', 'NormActivation', 'InterpolationBlock', 'Hourglass',
-           'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'DualPathParallelConcurent', 'NormActivation',
+           'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -2994,25 +2994,37 @@ class Concurrent(SimpleSequential):
     ----------
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
+    merge_type : str, default None
+        Type of branch merging.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  stack=False,
+                 merge_type=None,
                  data_format="channels_last",
                  **kwargs):
         super(Concurrent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["cat", "stack", "sum"])
         self.axis = get_channel_axis(data_format)
-        self.stack = stack
+        if merge_type is not None:
+            self.merge_type = merge_type
+        else:
+            self.merge_type = "stack" if stack else "cat"
 
     def call(self, x, training=None):
         out = []
         for block in self.children:
             out.append(block(x, training=training))
-        if self.stack:
+        if self.merge_type == "stack":
             out = tf.stack(out, axis=self.axis)
-        else:
+        elif self.merge_type == "cat":
             out = tf.concat(out, axis=self.axis)
+        elif self.merge_type == "sum":
+            out = tf.stack(out, axis=self.axis)
+            out = tf.math.reduce_sum(out, axis=self.axis)
+        else:
+            raise NotImplementedError()
         return out
 
 
@@ -3119,18 +3131,85 @@ class MultiOutputSequential(SimpleSequential):
 
 class ParallelConcurent(SimpleSequential):
     """
-    A sequential container with multiple inputs and multiple outputs.
+    A sequential container with multiple inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    merge_type : str, default None
+        Type of branch merging.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 merge_type=None,
+                 data_format="channels_last",
                  **kwargs):
         super(ParallelConcurent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = get_channel_axis(data_format)
+        self.merge_type = merge_type
 
     def call(self, x, training=None):
         out = []
         for block, xi in zip(self.children, x):
             out.append(block(xi, training=training))
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            out = tf.stack(out, axis=self.axis)
+        elif self.merge_type == "cat":
+            out = tf.concat(out, axis=self.axis)
+        elif self.merge_type == "sum":
+            out = tf.stack(out, axis=self.axis)
+            out = tf.math.reduce_sum(out, axis=self.axis)
+        else:
+            raise NotImplementedError()
         return out
+
+
+class DualPathParallelConcurent(SimpleSequential):
+    """
+    A sequential container with multiple dual-path inputs and single/multiple outputs.
+    Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    merge_type : str, default 'list'
+        Type of branch merging.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 merge_type="list",
+                 data_format="channels_last",
+                 **kwargs):
+        super(DualPathParallelConcurent, self).__init__(**kwargs)
+        assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
+        self.axis = get_channel_axis(data_format)
+        self.merge_type = merge_type
+
+    def call(self, x1, x2, training=None):
+        x1_out = []
+        x2_out = []
+        for block, x1i, x2i in zip(self.children, x1, x2):
+            y1i, y2i = block(x1i, x2i, training=training)
+            x1_out.append(y1i)
+            x2_out.append(y2i)
+        if self.merge_type == "list":
+            pass
+        elif self.merge_type == "stack":
+            x1_out = tf.stack(x1_out, axis=self.axis)
+            x2_out = tf.stack(x2_out, axis=self.axis)
+        elif self.merge_type == "cat":
+            x1_out = tf.concat(x1_out, axis=self.axis)
+            x2_out = tf.concat(x2_out, axis=self.axis)
+        elif self.merge_type == "sum":
+            x1_out = tf.math.reduce_sum(tf.stack(x1_out, axis=self.axis), axis=self.axis)
+            x2_out = tf.math.reduce_sum(tf.stack(x2_out, axis=self.axis), axis=self.axis)
+        else:
+            raise NotImplementedError()
+        return x1_out, x2_out
 
 
 class NormActivation(nn.Layer):

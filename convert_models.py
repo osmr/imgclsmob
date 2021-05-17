@@ -940,7 +940,7 @@ def convert_gl2tf2(dst_net,
 
     if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
             (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")) and\
-            (not src_model.startswith("lwopenpose")):
+            (not src_model.startswith("lwopenpose")) and (not src_model.startswith("quartznet")):
         dst_param_keys = [key.replace("/final_block/", "/stageN/final_block/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/final_block/", "/zfinal_block/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
@@ -968,7 +968,7 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in dst_param_keys]
     if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
             (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")) and\
-            (not src_model.startswith("lwopenpose")):
+            (not src_model.startswith("lwopenpose")) and (not src_model.startswith("quartznet")):
         dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]

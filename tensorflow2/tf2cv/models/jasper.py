@@ -653,6 +653,7 @@ class Jasper(tf.keras.Model):
                  **kwargs):
         super(Jasper, self).__init__(**kwargs)
         self.in_size = None
+        self.in_channels = in_channels
         self.classes = classes
         self.data_format = data_format
 

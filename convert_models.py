@@ -71,6 +71,11 @@ def parse_args():
         type=int,
         default=3,
         help="number of input channels for destination model")
+    parser.add_argument(
+        "--model-type",
+        type=str,
+        default="image",
+        help="model type (image or audio)")
 
     parser.add_argument(
         "--save-dir",
@@ -230,7 +235,8 @@ def prepare_dst_model(dst_fwk,
                       ctx,
                       use_cuda,
                       num_classes=None,
-                      in_channels=None):
+                      in_channels=None,
+                      model_type="image"):
     if dst_fwk == "gluon":
         from gluon.utils import prepare_model as prepare_model_gl
         dst_net = prepare_model_gl(
@@ -302,10 +308,18 @@ def prepare_dst_model(dst_fwk,
             use_pretrained=False,
             pretrained_model_file_path="")
         batch_size = 1
-        input_shape = ((batch_size, 3, dst_net.in_size[0], dst_net.in_size[1]) if
-                       dst_net.data_format == "channels_first" else
-                       (batch_size, dst_net.in_size[0], dst_net.in_size[1], 3))
-        dst_net(tf.random.normal(input_shape))
+        if model_type == "image":
+            input_shape = ((batch_size, 3, dst_net.in_size[0], dst_net.in_size[1]) if
+                           dst_net.data_format == "channels_first" else
+                           (batch_size, dst_net.in_size[0], dst_net.in_size[1], 3))
+            dst_net(tf.random.normal(input_shape))
+        else:
+            seq_len = 100
+            input_shape = ((batch_size, dst_net.in_channels, seq_len) if
+                           dst_net.data_format == "channels_first" else
+                           (batch_size, seq_len, dst_net.in_channels))
+            x_len = tf.convert_to_tensor(np.array([seq_len - 0], dtype=np.long))
+            dst_net(tf.random.normal(input_shape), x_len)
         dst_param_keys = [v.name for v in dst_net.weights]
         dst_params = {v.name: v for v in dst_net.weights}
     elif dst_fwk == "tfl":
@@ -539,6 +553,9 @@ def convert_gl2ch(dst_net,
         src_param_keys = src1n
         assert (len(src_param_keys) == len(dst_param_keys))
 
+    if src_model.startswith("quartznet"):
+        dst_param_keys = [key.replace("features/final_block/", "features/zfinal_block/") for key in dst_param_keys]
+
     dst_param_keys = [key.replace("/W", "/weight") for key in dst_param_keys]
     dst_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/features/body/", "/features/zbody/") for key in dst_param_keys]
@@ -562,6 +579,9 @@ def convert_gl2ch(dst_net,
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
+
+    if src_model.startswith("quartznet"):
+        dst_param_keys = [key.replace("features/zfinal_block/", "features/final_block/") for key in dst_param_keys]
 
     dst_param_keys = [key.replace("/weight", "/W") for key in dst_param_keys]
     dst_param_keys = [key.replace("/zfinal_block/", "/final_block/") for key in dst_param_keys]
@@ -1457,7 +1477,8 @@ def _prepare_dst_model(args, ctx, use_cuda):
         ctx=ctx,
         use_cuda=use_cuda,
         num_classes=args.dst_num_classes,
-        in_channels=args.dst_in_channels)
+        in_channels=args.dst_in_channels,
+        model_type=args.model_type)
 
 
 def update_and_initialize_logging(args):
@@ -1473,7 +1494,7 @@ def update_and_initialize_logging(args):
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
         packages += ["mxnet, numpy"]
-        pip_packages += ["mxnet-cu101", "mxnet-cu102", "mxnet-cu110"]
+        pip_packages += ["mxnet-cu102", "mxnet-cu110"]
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
@@ -1481,7 +1502,7 @@ def update_and_initialize_logging(args):
         pip_packages += ["cupy-cuda101", "cupy-cuda102", "cupy-cuda110", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
-        pip_packages += ["keras", "keras-mxnet", "mxnet-cu101", "mxnet-cu102", "mxnet-cu110"]
+        pip_packages += ["keras", "keras-mxnet", "mxnet-cu102", "mxnet-cu110"]
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
         pip_packages += ["tensorflow", "tensorflow-gpu", "tensorpack"]

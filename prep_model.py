@@ -33,6 +33,11 @@ def parse_args():
         type=str,
         default="",
         help="model weights (Gluon) file path")
+    parser.add_argument(
+        "--input-size",
+        type=int,
+        default=224,
+        help="size of the input for model")
     args = parser.parse_args()
     return args
 
@@ -125,7 +130,8 @@ def process_fwk(prep_info_dict,
                 dst_dir_path,
                 model_name,
                 model_file_path,
-                log_file_path):
+                log_file_path,
+                input_size):
     """
     Process weights on specific framework.
 
@@ -143,6 +149,8 @@ def process_fwk(prep_info_dict,
         Log file path.
     dst_framework : str
         Destination framework.
+    input_size : int
+        Size of the input for model.
     """
     if dst_framework == "gluon":
         dst_model_file_ext = "params"
@@ -194,13 +202,15 @@ def process_fwk(prep_info_dict,
                 dst_dir_path=dst_dir_path)], shell=True)
 
         command = "python3 {eval_script}.py --model={model_name} --resume={dst_raw_model_file_path}" \
-                  " --save-dir={dst_dir_path} --num-gpus={num_gpus} --batch-size=100 -j=4 {calc_flops}"
+                  " --save-dir={dst_dir_path} --num-gpus={num_gpus} --batch-size=100 -j=4 --input-size={input_size} " \
+                  "{calc_flops}"
         subprocess.call([command.format(
             eval_script=eval_script,
             model_name=model_name,
             dst_raw_model_file_path=dst_raw_model_file_path,
             dst_dir_path=dst_dir_path,
             num_gpus=num_gpus,
+            input_size=input_size,
             calc_flops=calc_flops)], shell=True)
 
         if dst_framework == "gluon":
@@ -253,6 +263,8 @@ def main():
         "Sha1": [],
     }
 
+    input_size = args.input_size
+
     dst_frameworks = ["gluon", "pytorch", "chainer", "tf2"]
     # dst_frameworks = ["tf2"]
     for dst_framework in dst_frameworks:
@@ -262,7 +274,8 @@ def main():
             dst_dir_path=dst_dir_path,
             model_name=model_name,
             model_file_path=model_file_path,
-            log_file_path=log_file_path)
+            log_file_path=log_file_path,
+            input_size=input_size)
 
     prep_info_df = pd.DataFrame(prep_info_dict)
     prep_info_df.to_csv(

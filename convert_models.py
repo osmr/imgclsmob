@@ -1499,7 +1499,7 @@ def update_and_initialize_logging(args):
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
         packages += ["chainer"]
-        pip_packages += ["cupy-cuda101", "cupy-cuda102", "cupy-cuda110", "chainer"]
+        pip_packages += ["cupy-cuda102", "cupy-cuda110", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
         pip_packages += ["keras", "keras-mxnet", "mxnet-cu102", "mxnet-cu110"]

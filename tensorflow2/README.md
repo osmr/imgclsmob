@@ -197,7 +197,10 @@ Some remarks:
 | SE-ResNet-101b | 19.49 | 4.64 | 49,326,872 | 7,839.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0464-a10be1d2.tf2.h5.log)) |
 | SE-ResNet-152 | 18.62 | 4.29 | 66,821,848 | 11,328.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.538/seresnet152-0429-3fedbd33.tf2.h5.log)) |
 | SE-PreResNet-10 | 33.62 | 13.09 | 5,461,668 | 894.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnet10-1309-af20d06c.tf2.h5.log)) |
-| SE-PreResNet-18 | 27.70 | 9.40 | 11,776,928 | 1,821.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnet18-0940-fe403280.tf2.h5.log)) |
+| SE-PreResNet-12 | 31.62 | 11.82 | 5,536,232 | 1,126.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet12-1182-9d52ac4f.tf2.h5.log)) |
+| SE-PreResNet-16 | 28.38 | 9.56 | 7,022,976 | 1,589.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet16-0956-67583059.tf2.h5.log)) |
+| SE-PreResNet-18 | 27.13 | 8.82 | 11,776,928 | 1,821.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet18-0882-9f039d7e.tf2.h5.log)) |
+| SE-PreResNet-26 | 25.92 | 8.05 | 18,092,188 | 2,747.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet26-0805-042a8316.tf2.h5.log)) |
 | SE-PreResNet-BC-26b | 22.95 | 6.40 | 17,388,424 | 2,357.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnetbc26b-0640-a72bf876.tf2.h5.log)) |
 | SE-PreResNet-BC-38b | 21.44 | 5.67 | 24,019,064 | 3,236.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/sepreresnetbc38b-0567-17d10c63.tf2.h5.log)) |
 | SE-PreResNet-50b | 20.71 | 5.31 | 28,080,472 | 4,113.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0531-0882c0e9.tf2.h5.log)) |
@@ -304,7 +307,7 @@ Some remarks:
 | HRNetV2-W40 | 19.67 | 4.80 | 57,557,160 | 12,751.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/hrnetv2_w40-0480-783aff21.tf2.h5.log)) |
 | HRNetV2-W44 | 19.63 | 4.88 | 67,064,984 | 14,945.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w44-0488-14fcc1a2.tf2.h5.log)) |
 | HRNetV2-W48 | 19.44 | 4.81 | 77,469,864 | 17,344.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.541/hrnetv2_w48-0481-7b8bb74f.tf2.h5.log)) |
-| HRNetV2-W64 | 21.02 | 5.44 | 128,059,944 | 28,974.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/hrnetv2_w64-0544-08fa2486.tf2.h5.log)) |
+| HRNetV2-W64 | 19.50 | 4.79 | 128,059,944 | 28,974.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/hrnetv2_w64-0479-0bd946ed.tf2.h5.log)) |
 | VoVNet-39 | 23.75 | 6.94 | 22,600,296 | 7,086.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/vovnet39-0694-ae8d6df0.tf2.h5.log)) |
 | VoVNet-57 | 22.42 | 6.23 | 36,640,296 | 8,943.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/vovnet57-0623-16133ef5.tf2.h5.log)) |
 | SelecSLS-42b | 21.79 | 5.98 | 32,458,248 | 2,980.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/selecsls42b-0598-6003cd2d.tf2.h5.log)) |
@@ -385,7 +388,7 @@ Some remarks:
 | FBNet-Cb | 24.82 | 7.65 | 5,572,200 | 399.26M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/fbnet_cb-0765-1f5ffd7c.tf2.h5.log)) |
 | Xception | 21.14 | 5.58 | 22,855,952 | 8,403.63M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/xception-0558-b95b5051.tf2.h5.log)) |
 | InceptionV3 | 21.11 | 5.63 | 23,834,568 | 5,743.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/inceptionv3-0563-b0094c1c.tf2.h5.log)) |
-| InceptionV4 | 20.78 | 5.41 | 42,679,816 | 12,304.93M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/inceptionv4-0541-c1fa5642.tf2.h5.log)) |
+| InceptionV4 | 19.94 | 5.06 | 42,679,816 | 12,304.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/inceptionv4-0506-62135f80.tf2.h5.log)) |
 | InceptionResNetV2 | 20.00 | 4.95 | 55,843,464 | 13,188.64M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/inceptionresnetv2-0495-3e2cc545.tf2.h5.log)) |
 | PolyNet | 19.09 | 4.51 | 95,366,600 | 34,821.34M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/polynet-0451-e752c86b.tf2.h5.log)) |
 | NASNet-A 4@1056 | 25.67 | 8.15 | 5,289,978 | 584.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/nasnet_4a1056-0815-5b38d08a.tf2.h5.log)) |

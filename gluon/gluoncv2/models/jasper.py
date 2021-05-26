@@ -103,7 +103,7 @@ class MaskConv1d(nn.Conv1D):
                 sequence_length=F.broadcast_like(x_len, x, lhs_axes=(0,), rhs_axes=(0,)),
                 use_sequence_length=True,
                 axis=1).swapaxes(1, 2)
-            x_len = (x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) / self.strides + 1
+            x_len = ((x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) / self.strides + 1).floor()
         x = super(MaskConv1d, self).hybrid_forward(F, x, weight=weight, bias=bias)
         return x, x_len
 

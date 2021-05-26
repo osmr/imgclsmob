@@ -126,14 +126,14 @@ def _test():
     audio_features = 64
 
     models = [
+        # oth_quartznet5x5_en_ls,
         # oth_quartznet15x5_en,
         # oth_quartznet15x5_en_nr,
         # oth_quartznet15x5_fr,
         # oth_quartznet15x5_de,
         # oth_quartznet15x5_ru,
-        # oth_quartznet5x5_en_ls,
         oth_jasperdr10x5_en,
-        oth_jasperdr10x5_en_nr,
+        # oth_jasperdr10x5_en_nr,
     ]
 
     for model in models:

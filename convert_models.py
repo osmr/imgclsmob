@@ -1003,6 +1003,11 @@ def convert_gl2tf2(dst_net,
                 src_weight = np.transpose(src_weight, axes=(2, 3, 1, 0))
         elif len(src_weight.shape) == 2:
             src_weight = np.transpose(src_weight, axes=(1, 0))
+        elif len(src_weight.shape) == 3:
+            src_weight = np.transpose(src_weight, axes=(2, 1, 0))
+            if dst_key.split("/")[-1][:-2] == "depthwise_kernel":
+                assert(len(dst_params[dst_key].shape) == 4)
+                src_weight = np.expand_dims(src_weight, -1)
         dst_weight = dst_params[dst_key]
         assert (tuple(dst_weight.shape) == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(

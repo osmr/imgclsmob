@@ -223,8 +223,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNeXt-26 (32x4d) | 23.93 | 7.21 | 15,389,480 | 2,488.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.332/resnext26_32x4d-0721-5264d7ef.params.log)) |
 | ResNeXt-50 (32x4d) | 20.84 | 5.45 | 25,028,904 | 4,255.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/resnext50_32x4d-0545-748e53b3.params.log)) |
 | ResNeXt-101 (32x4d) | 18.46 | 4.18 | 44,177,704 | 8,003.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/resnext101_32x4d-0418-c07faa66.params.log)) |
-| ResNeXt-101 (64x4d) | 19.28 | 4.83 | 83,455,272 | 15,500.27M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext101_64x4d-0483-44b79943.params.log)) |
+| ResNeXt-101 (64x4d) | 18.80 | 4.39 | 83,455,272 | 15,500.27M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/resnext101_64x4d-0439-178e7905.params.log)) |
 | SE-ResNet-10 | 31.36 | 11.69 | 5,463,332 | 894.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/seresnet10-1169-675d4b5b.params.log)) |
+| SE-ResNet-12 | 31.64 | 11.76 | 5,537,896 | 1,126.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/seresnet12-1176-df10dd88.params.log)) |
 | SE-ResNet-18 | 27.95 | 9.20 | 11,778,592 | 1,820.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.355/seresnet18-0920-85a6b1da.params.log)) |
 | SE-ResNet-26 | 25.42 | 8.03 | 18,093,852 | 2,746.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.363/seresnet26-0803-9f900419.params.log)) |
 | SE-ResNet-BC-26b | 23.44 | 6.82 | 17,395,976 | 2,358.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.366/seresnetbc26b-0682-15ae6e19.params.log)) |
@@ -234,7 +235,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNet-101 | 19.00 | 4.41 | 49,326,872 | 7,602.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.533/seresnet101-0441-f9cb9df6.params.log)) |
 | SE-ResNet-101b | 19.46 | 4.62 | 49,326,872 | 7,835.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0462-59fae71a.params.log)) |
 | SE-ResNet-152 | 18.59 | 4.30 | 66,821,848 | 11,328.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.538/seresnet152-0430-c712f554.params.log)) |
-| SE-PreResNet-10 | 33.60 | 13.06 | 5,461,668 | 894.23M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.377/sepreresnet10-1306-cbdd1053.params.log)) |
+| SE-PreResNet-10 | 32.37 | 12.21 | 5,461,668 | 894.23M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/sepreresnet10-1221-c3ab94ee.params.log)) |
 | SE-PreResNet-12 | 31.58 | 11.80 | 5,536,232 | 1,126.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet12-1180-d6b7260b.params.log)) |
 | SE-PreResNet-16 | 28.39 | 9.56 | 7,022,976 | 1,589.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet16-0956-b5e4e06f.params.log)) |
 | SE-PreResNet-18 | 27.16 | 8.81 | 11,776,928 | 1,820.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet18-0881-b018c6e3.params.log)) |
@@ -435,7 +436,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ProxylessNAS Mobile | 25.31 | 7.80 | 4,080,512 | 332.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.326/proxylessnas_mobile-0780-b8bb5a64.params.log)) |
 | ProxylessNAS Mob-14 | 22.96 | 6.51 | 6,857,568 | 597.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.331/proxylessnas_mobile14-0651-f08baec8.params.log)) |
 | FBNet-Cb | 24.86 | 7.61 | 5,572,200 | 399.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/fbnet_cb-0761-3db688f2.params.log)) |
-| Xception | 20.99 | 5.56 | 22,855,952 | 8,403.63M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0556-bd2c1684.params.log)) |
+| Xception | 20.43 | 5.11 | 22,855,952 | 8,403.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/xception-0511-9755eb77.params.log)) |
 | InceptionV3 | 21.22 | 5.59 | 23,834,568 | 5,743.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0559-6c087967.params.log)) |
 | InceptionV4 | 19.83 | 4.88 | 42,679,816 | 12,304.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/inceptionv4-0488-a828ae6c.params.log)) |
 | InceptionResNetV2 | 19.96 | 4.94 | 55,843,464 | 13,188.64M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0494-3328f7fa.params.log)) |

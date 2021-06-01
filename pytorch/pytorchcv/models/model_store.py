@@ -75,8 +75,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnext26_32x4d', '0746', '1011ac35e30d753b79f0600a5376c87a37b67a61', 'v0.0.332', 'ResNeXt-26 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext50_32x4d', '0560', 'd7976503d13734114364e0dfef1d22f6d76546d9', 'v0.0.498', 'ResNeXt-50 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext101_32x4d', '0434', '5ac165981bac62627719b3362b31b456cba05df4', 'v0.0.530', 'ResNeXt-101 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnext101_64x4d', '0509', '2af0b82274bbcf5ee75575c58c3dd6a4a292b0ae', 'v0.0.417', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('resnext101_64x4d', '0452', '60d1913ec591af7786056b1d87b3add07fdcf2e1', 'v0.0.544', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet10', '1202', '8dace12e6aaac68d3c272f52b2513a5b40a4f959', 'v0.0.486', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet12', '1200', '81d5406e29f4c91cb85e079cf66c6e7348079e5b', 'v0.0.544', 'SE-ResNet-12', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet18', '0961', '022123a5e88c9917e63165f5b5a7808a606d452a', 'v0.0.355', 'SE-ResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet26', '0824', '64fc8759c5bb9b9b40b2e33a46420ee22ae268c9', 'v0.0.363', 'SE-ResNet-26', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnetbc26b', '0703', 'b98d9d6afca4d79d0347001542162b9fe4071d39', 'v0.0.366', 'SE-ResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -86,7 +87,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('seresnet101', '0460', '37851448605dae67bbf83ff8e7f7e7cc367e1746', 'v0.0.533', 'SE-ResNet-101', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101b', '0487', 'b83a20fd2ad9a32e0fe5cb3daef45aac03ea3194', 'v0.0.460', 'SE-ResNet-101b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet152', '0439', '7a6b02ac25caccb0420eea542c625f9b0bfb3e03', 'v0.0.538', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('sepreresnet10', '1338', '935ed56009a64c893153cdba8e4a4f87f7184e71', 'v0.0.377', 'SE-PreResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('sepreresnet10', '1257', 'a08d5c618ebf6bca046f826366e7cd6fbe40851b', 'v0.0.544', 'SE-PreResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet12', '1203', '4f8d63e2a1841b0a1b5bae5caa46770c3f183055', 'v0.0.543', 'SE-PreResNet-12', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet16', '0975', '251c11a4886ba81d7ac377ace5ab0172101f1b53', 'v0.0.543', 'SE-PreResNet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnet18', '0909', 'cd3cc116f96254d5d664f1c322bbc684287aa82d', 'v0.0.543', 'SE-PreResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -286,7 +287,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('proxylessnas_mobile', '0780', '639a90c27de088402db76b09e410326795b6fbdd', 'v0.0.304', 'ProxylessNAS Mobile', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa
     ('proxylessnas_mobile14', '0662', '0c0ad983f4fb88470d0f3e557d0b23f15e16624f', 'v0.0.331', 'ProxylessNAS Mob-14', '1812.00332', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fbnet_cb', '0762', '2edb61f8e4b5c45d958d0e57beff41fbfacd6061', 'v0.0.415', 'FBNet-Cb', '1812.03443', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('xception', '0549', 'e4f0232c99fa776e630189d62fea18e248a858b2', 'v0.0.115', 'Xception', '1610.02357', 'in1k', 299, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('xception', '0516', 'a75b50eceb5fdfb1e1bfaada6820a448ce40e593', 'v0.0.544', 'Xception', '1610.02357', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('inceptionv3', '0565', 'cf4061800bc1dc3b090920fc9536d8ccc15bb86e', 'v0.0.92', 'InceptionV3', '1512.00567', 'in1k', 299, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('inceptionv4', '0488', '4ae4f331a5ff649e39626fc49cd5c24b8159cd8c', 'v0.0.543', 'InceptionV4', '1602.07261', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('inceptionresnetv2', '0490', '1d1b4d184e6d41091c5ac3321d99fa554b498dbe', 'v0.0.107', 'InceptionResNetV2', '1602.07261', 'in1k', 299, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa

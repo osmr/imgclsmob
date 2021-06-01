@@ -227,8 +227,9 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ResNeXt-26 (32x4d) | 24.14 | 7.46 | 15,389,480 | 2,488.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.332/resnext26_32x4d-0746-1011ac35.pth.log)) |
 | ResNeXt-50 (32x4d) | 21.08 | 5.60 | 25,028,904 | 4,255.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/resnext50_32x4d-0560-d7976503.pth.log)) |
 | ResNeXt-101 (32x4d) | 18.78 | 4.34 | 44,177,704 | 8,003.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.530/resnext101_32x4d-0434-5ac16598.pth.log)) |
-| ResNeXt-101 (64x4d) | 19.58 | 5.09 | 83,455,272 | 15,500.27M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.417/resnext101_64x4d-0509-2af0b822.pth.log)) |
+| ResNeXt-101 (64x4d) | 19.08 | 4.52 | 83,455,272 | 15,500.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/resnext101_64x4d-0452-60d1913e.pth.log)) |
 | SE-ResNet-10 | 31.76 | 12.02 | 5,463,332 | 894.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/seresnet10-1202-8dace12e.pth.log)) |
+| SE-ResNet-12 | 31.93 | 12.00 | 5,537,896 | 1,126.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/seresnet12-1200-81d5406e.pth.log)) |
 | SE-ResNet-18 | 28.18 | 9.61 | 11,778,592 | 1,820.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.355/seresnet18-0961-022123a5.pth.log)) |
 | SE-ResNet-26 | 25.67 | 8.24 | 18,093,852 | 2,747.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.363/seresnet26-0824-64fc8759.pth.log)) |
 | SE-ResNet-BC-26b | 23.59 | 7.03 | 17,395,976 | 2,359.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.366/seresnetbc26b-0703-b98d9d6a.pth.log)) |
@@ -238,7 +239,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | SE-ResNet-101 | 19.24 | 4.60 | 49,326,872 | 7,602.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.533/seresnet101-0460-37851448.pth.log)) |
 | SE-ResNet-101b | 19.70 | 4.87 | 49,326,872 | 7,839.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.460/seresnet101b-0487-b83a20fd.pth.log)) |
 | SE-ResNet-152 | 18.72 | 4.39 | 66,821,848 | 11,328.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.538/seresnet152-0439-7a6b02ac.pth.log)) |
-| SE-PreResNet-10 | 34.03 | 13.38 | 5,461,668 | 894.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.377/sepreresnet10-1338-935ed560.pth.log)) |
+| SE-PreResNet-10 | 32.83 | 12.57 | 5,461,668 | 894.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/sepreresnet10-1257-a08d5c61.pth.log)) |
 | SE-PreResNet-12 | 32.07 | 12.03 | 5,536,232 | 1,126.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet12-1203-4f8d63e2.pth.log)) |
 | SE-PreResNet-16 | 28.77 | 9.75 | 7,022,976 | 1,589.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet16-0975-251c11a4.pth.log)) |
 | SE-PreResNet-18 | 27.43 | 9.09 | 11,776,928 | 1,821.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/sepreresnet18-0909-cd3cc116.pth.log)) |
@@ -438,7 +439,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ProxylessNAS Mobile | 25.41 | 7.80 | 4,080,512 | 332.46M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_mobile-0780-639a90c2.pth.log)) |
 | ProxylessNAS Mob-14 | 23.29 | 6.62 | 6,857,568 | 597.10M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.331/proxylessnas_mobile14-0662-0c0ad983.pth.log)) |
 | FBNet-Cb | 24.89 | 7.62 | 5,572,200 | 399.26M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.415/fbnet_cb-0762-2edb61f8.pth.log)) |
-| Xception | 20.97 | 5.49 | 22,855,952 | 8,403.63M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0549-e4f0232c.pth.log)) |
+| Xception | 20.35 | 5.16 | 22,855,952 | 8,403.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/xception-0516-a75b50ec.pth.log)) |
 | InceptionV3 | 21.12 | 5.65 | 23,834,568 | 5,743.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0565-cf406180.pth.log)) |
 | InceptionV4 | 19.83 | 4.88 | 42,679,816 | 12,304.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/inceptionv4-0488-4ae4f331.pth.log)) |
 | InceptionResNetV2 | 19.93 | 4.90 | 55,843,464 | 13,188.64M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0490-1d1b4d18.pth.log)) |

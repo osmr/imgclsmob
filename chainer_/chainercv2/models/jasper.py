@@ -99,7 +99,8 @@ class MaskConv1d(L.Convolution1D):
 
     def __call__(self, x, x_len):
         if self.use_mask:
-            mask = self.xp.arange(x.shape[2]) < x_len[0]
+            mask = F.broadcast_to(self.xp.arange(x.shape[2]), x.shape).array <\
+                   F.expand_dims(F.expand_dims(x_len, -1), -1).array
             x *= mask
             x_len = (x_len + 2 * self.pad0 - self.dilate[0] * (self.ksize[0] - 1) - 1) // self.stride0 + 1
         x = F.convolution_1d(
@@ -787,14 +788,14 @@ def _test():
         assert (model != jasper10x5 or weight_count == 322286877)
 
         batch = 3
-        seq_len = np.random.randint(60, 150)
-        # seq_len = 90
-        x = np.random.rand(batch, audio_features, seq_len).astype(np.float32)
-        x_len = np.array([seq_len - 2], dtype=np.long)
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = np.random.rand(batch, audio_features, seq_len_max).astype(np.float32)
+        x_len = seq_len.astype(np.long)
 
         y, y_len = net(x, x_len)
         assert (y.shape[:2] == (batch, net.classes))
-        assert (y.shape[2] in [seq_len // 2, seq_len // 2 + 1])
+        assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

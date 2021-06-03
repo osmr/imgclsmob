@@ -110,13 +110,15 @@ class MaskConv1d(Conv1d):
         if self.use_mask:
             if is_channels_first(self.data_format):
                 max_len = x.shape[2]
-                mask = tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64) < x_len[0]
-                mask = tf.broadcast_to(tf.expand_dims(tf.expand_dims(mask, 0), 1), x.shape)
+                mask = tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <\
+                       tf.expand_dims(x_len, -1)
+                mask = tf.broadcast_to(tf.expand_dims(mask, 1), x.shape)
                 x = tf.where(mask, x, tf.zeros(x.shape))
             else:
                 max_len = x.shape[1]
-                mask = tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64) < x_len[0]
-                mask = tf.broadcast_to(tf.expand_dims(tf.expand_dims(mask, 0), 2), x.shape)
+                mask = tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <\
+                       tf.expand_dims(x_len, -1)
+                mask = tf.broadcast_to(tf.expand_dims(mask, -1), x.shape)
                 x = tf.where(mask, x, tf.zeros(x.shape))
             x_len = (x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) // self.strides + 1
         x = super(MaskConv1d, self).call(x)
@@ -837,8 +839,8 @@ def _test():
     import numpy as np
     import tensorflow.keras.backend as K
 
-    # data_format = "channels_last"
-    data_format = "channels_first"
+    data_format = "channels_last"
+    # data_format = "channels_first"
     pretrained = False
     audio_features = 64
     classes = 29
@@ -858,19 +860,19 @@ def _test():
             data_format=data_format)
 
         batch = 3
-        seq_len = np.random.randint(60, 150)
-        # seq_len = 90
-        x = tf.random.normal((batch, audio_features, seq_len) if is_channels_first(data_format) else
-                             (batch, seq_len, audio_features))
-        x_len = tf.convert_to_tensor(np.array([seq_len - 2], dtype=np.long))
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = tf.random.normal((batch, audio_features, seq_len_max) if is_channels_first(data_format) else
+                             (batch, seq_len_max, audio_features))
+        x_len = tf.convert_to_tensor(seq_len.astype(np.long))
 
         y, y_len = net(x, x_len)
         assert (y.shape.as_list()[0] == batch)
         if is_channels_first(data_format):
             assert (y.shape.as_list()[1] == classes)
-            assert (y.shape.as_list()[2] in [seq_len // 2, seq_len // 2 + 1])
+            assert (y.shape.as_list()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
         else:
-            assert (y.shape.as_list()[1] in [seq_len // 2, seq_len // 2 + 1])
+            assert (y.shape.as_list()[1] in [seq_len_max // 2, seq_len_max // 2 + 1])
             assert (y.shape.as_list()[2] == classes)
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])

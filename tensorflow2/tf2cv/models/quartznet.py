@@ -146,19 +146,19 @@ def _test():
             data_format=data_format)
 
         batch = 3
-        seq_len = np.random.randint(60, 150)
-        # seq_len = 90
-        x = tf.random.normal((batch, audio_features, seq_len) if is_channels_first(data_format) else
-                             (batch, seq_len, audio_features))
-        x_len = tf.convert_to_tensor(np.array([seq_len - 2], dtype=np.long))
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = tf.random.normal((batch, audio_features, seq_len_max) if is_channels_first(data_format) else
+                             (batch, seq_len_max, audio_features))
+        x_len = tf.convert_to_tensor(seq_len.astype(np.long))
 
         y, y_len = net(x, x_len)
         assert (y.shape.as_list()[0] == batch)
         if is_channels_first(data_format):
             assert (y.shape.as_list()[1] == net.classes)
-            assert (y.shape.as_list()[2] in [seq_len // 2, seq_len // 2 + 1])
+            assert (y.shape.as_list()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
         else:
-            assert (y.shape.as_list()[1] in [seq_len // 2, seq_len // 2 + 1])
+            assert (y.shape.as_list()[1] in [seq_len_max // 2, seq_len_max // 2 + 1])
             assert (y.shape.as_list()[2] == net.classes)
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])

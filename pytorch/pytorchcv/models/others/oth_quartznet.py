@@ -2,6 +2,89 @@ __all__ = ['oth_quartznet5x5_en_ls', 'oth_quartznet15x5_en', 'oth_quartznet15x5_
            'oth_quartznet15x5_de', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr']
 
 import torch.nn as nn
+# import torch.nn.functional as F
+
+import editdistance
+
+
+class CtcDecoder(object):
+    """
+    CTC decoder (to decode a sequence of labels to words).
+
+    Parameters:
+    ----------
+    vocabulary : list of str
+        Vocabulary of the dataset.
+    """
+    def __init__(self,
+                 vocabulary):
+        super().__init__()
+        self.blank_id = len(vocabulary)
+        self.labels_map = dict([(i, vocabulary[i]) for i in range(len(vocabulary))])
+
+    def __call__(self,
+                 predictions):
+        """
+        Decode a sequence of labels to words.
+
+        Parameters:
+        ----------
+        predictions : np.array of int or list of list of int
+            Tensor with predicted labels.
+
+        Returns:
+        -------
+        list of str
+            Words.
+        """
+        hypotheses = []
+        for prediction in predictions:
+            decoded_prediction = []
+            previous = self.blank_id
+            for p in prediction:
+                if (p != previous or previous == self.blank_id) and p != self.blank_id:
+                    decoded_prediction.append(p)
+                previous = p
+            hypothesis = "".join([self.labels_map[c] for c in decoded_prediction])
+            hypotheses.append(hypothesis)
+        return hypotheses
+
+
+class WER(object):
+    """
+    Word Error Rate (WER).
+
+    Parameters:
+    ----------
+    vocabulary : list of str
+        Vocabulary of the dataset.
+    """
+    def __init__(self,
+                 vocabulary):
+        super().__init__()
+        self.blank_id = len(vocabulary)
+        self.labels_map = dict([(i, vocabulary[i]) for i in range(len(vocabulary))])
+
+        self.scores = 0
+        self.words = 0
+
+    def update(self,
+               hypotheses,
+               references):
+        words = 0.0
+        scores = 0.0
+
+        for h, r in zip(hypotheses, references):
+            h_list = h.split()
+            r_list = r.split()
+            words += len(r_list)
+            scores += editdistance.eval(h_list, r_list)
+
+        self.scores += scores
+        self.words += words
+
+    def compute(self):
+        return float(self.scores) / self.words
 
 
 class QuartzNet(nn.Module):
@@ -15,6 +98,8 @@ class QuartzNet(nn.Module):
         # self.preprocessor = raw_net.preprocessor
         self.encoder = raw_net.encoder
         self.decoder = raw_net.decoder
+
+        # self.vocabulary = raw_net.cfg.decoder.params.vocabulary
 
         self._init_params()
 
@@ -33,8 +118,8 @@ class QuartzNet(nn.Module):
         return x, lens
 
 
-path_pref = "../../../../../imgclsmob_data/nemo/"
-# path_pref = "../imgclsmob_data/nemo/"
+# path_pref = "../../../../../imgclsmob_data/nemo/"
+path_pref = "../imgclsmob_data/nemo/"
 
 
 def oth_quartznet5x5_en_ls(pretrained=False, num_classes=29, **kwargs):
@@ -43,7 +128,7 @@ def oth_quartznet5x5_en_ls(pretrained=False, num_classes=29, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_quartznet15x5_en(pretrained=False, num_classes=29, **kwargs):
@@ -52,7 +137,7 @@ def oth_quartznet15x5_en(pretrained=False, num_classes=29, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_quartznet15x5_en_nr(pretrained=False, num_classes=29, **kwargs):
@@ -61,7 +146,7 @@ def oth_quartznet15x5_en_nr(pretrained=False, num_classes=29, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_quartznet15x5_fr(pretrained=False, num_classes=43, **kwargs):
@@ -70,7 +155,7 @@ def oth_quartznet15x5_fr(pretrained=False, num_classes=43, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_quartznet15x5_de(pretrained=False, num_classes=32, **kwargs):
@@ -79,7 +164,7 @@ def oth_quartznet15x5_de(pretrained=False, num_classes=32, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_quartznet15x5_ru(pretrained=False, num_classes=35, **kwargs):
@@ -88,7 +173,7 @@ def oth_quartznet15x5_ru(pretrained=False, num_classes=35, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_jasperdr10x5_en(pretrained=False, num_classes=29, **kwargs):
@@ -97,7 +182,7 @@ def oth_jasperdr10x5_en(pretrained=False, num_classes=29, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def oth_jasperdr10x5_en_nr(pretrained=False, num_classes=29, **kwargs):
@@ -106,7 +191,7 @@ def oth_jasperdr10x5_en_nr(pretrained=False, num_classes=29, **kwargs):
     raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
     net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
     net = net.cpu()
-    return net
+    return net#, raw_net
 
 
 def _calc_width(net):
@@ -130,10 +215,10 @@ def _test():
         # oth_quartznet15x5_en,
         # oth_quartznet15x5_en_nr,
         # oth_quartznet15x5_fr,
-        # oth_quartznet15x5_de,
-        # oth_quartznet15x5_ru,
+        oth_quartznet15x5_de,
+        oth_quartznet15x5_ru,
         oth_jasperdr10x5_en,
-        # oth_jasperdr10x5_en_nr,
+        oth_jasperdr10x5_en_nr,
     ]
 
     for model in models:
@@ -156,17 +241,16 @@ def _test():
         assert (model != oth_jasperdr10x5_en_nr or weight_count == 332632349)
 
         batch = 3
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = torch.randn(batch, audio_features, seq_len_max)
+        x_len = torch.tensor(seq_len, dtype=torch.long, device=x.device)
+        # x_len = torch.full((batch, 1), seq_len - 2).to(dtype=torch.long, device=x.device)
 
-        seq_len = np.random.randint(60, 150)
-        # seq_len = 90
-        x = torch.randn(batch, audio_features, seq_len)
-        len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
-        # len = torch.full((batch, 1), seq_len - 2).to(dtype=torch.long, device=x.device)
-
-        y, y_len = net(x, len)
+        y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (y.size()[0] == batch)
-        assert (y.size()[1] in [seq_len // 2, seq_len // 2 + 1])
+        assert (y.size()[1] in [seq_len_max // 2, seq_len_max // 2 + 1])
         assert (y.size()[2] == num_classes)
 
 

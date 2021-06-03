@@ -3,13 +3,56 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'CtcDecoder']
 
 import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .common import DualPathSequential, DualPathParallelConcurent
+
+
+class CtcDecoder(object):
+    """
+    CTC decoder (to decode a sequence of labels to words).
+
+    Parameters:
+    ----------
+    vocabulary : list of str
+        Vocabulary of the dataset.
+    """
+    def __init__(self,
+                 vocabulary):
+        super().__init__()
+        self.blank_id = len(vocabulary)
+        self.labels_map = dict([(i, vocabulary[i]) for i in range(len(vocabulary))])
+
+    def __call__(self,
+                 predictions):
+        """
+        Decode a sequence of labels to words.
+
+        Parameters:
+        ----------
+        predictions : np.array of int or list of list of int
+            Tensor with predicted labels.
+
+        Returns:
+        -------
+        list of str
+            Words.
+        """
+        hypotheses = []
+        for prediction in predictions:
+            decoded_prediction = []
+            previous = self.blank_id
+            for p in prediction:
+                if (p != previous or previous == self.blank_id) and p != self.blank_id:
+                    decoded_prediction.append(p)
+                previous = p
+            hypothesis = "".join([self.labels_map[c] for c in decoded_prediction])
+            hypotheses.append(hypothesis)
+        return hypotheses
 
 
 def conv1d1(in_channels,
@@ -624,6 +667,7 @@ def get_jasper(version,
                use_dw=False,
                use_dr=False,
                bn_eps=1e-3,
+               vocabulary=None,
                model_name=None,
                pretrained=False,
                root=os.path.join("~", ".torch", "models"),
@@ -641,6 +685,8 @@ def get_jasper(version,
         Whether to use dense residual scheme.
     bn_eps : float, default 1e-3
         Small float added to variance in Batch norm.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -680,6 +726,8 @@ def get_jasper(version,
         use_dw=use_dw,
         use_dr=use_dr,
         **kwargs)
+
+    net.vocabulary = vocabulary
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -777,14 +825,15 @@ def _test():
         assert (model != jasper10x5 or weight_count == 322286877)
 
         batch = 3
-        seq_len = np.random.randint(60, 150)
-        x = torch.randn(batch, audio_features, seq_len)
-        x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = torch.randn(batch, audio_features, seq_len_max)
+        x_len = torch.tensor(seq_len, dtype=torch.long, device=x.device)
 
         y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, num_classes))
-        assert (y.size()[2] in [seq_len // 2, seq_len // 2 + 1])
+        assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

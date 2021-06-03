@@ -177,15 +177,15 @@ def _test():
         assert (model != quartznet15x5_de or weight_count == 18927456)
         assert (model != quartznet15x5_ru or weight_count == 18930531)
 
-        batch = 1
-        seq_len = np.random.randint(60, 150)
-        # seq_len = 90
-        x = mx.nd.random.normal(shape=(batch, audio_features, seq_len), ctx=ctx)
-        x_len = mx.nd.array([seq_len - 2], ctx=ctx, dtype=np.long)
+        batch = 3
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = mx.nd.random.normal(shape=(batch, audio_features, seq_len_max), ctx=ctx)
+        x_len = mx.nd.array(seq_len, ctx=ctx, dtype=np.long)
 
         y, y_len = net(x, x_len)
         assert (y.shape[:2] == (batch, net.classes))
-        assert (y.shape[2] in [seq_len // 2, seq_len // 2 + 1])
+        assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

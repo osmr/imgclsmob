@@ -78,15 +78,16 @@ def _test():
         assert (model != jasperdr10x5_en or weight_count == 332632349)
         assert (model != jasperdr10x5_en_nr or weight_count == 332632349)
 
-        batch = 1
-        seq_len = np.random.randint(60, 150)
-        x = torch.randn(batch, audio_features, seq_len)
-        x_len = torch.tensor(seq_len - 2, dtype=torch.long, device=x.device).unsqueeze(dim=0)
+        batch = 3
+        seq_len = np.random.randint(60, 150, batch)
+        seq_len_max = seq_len.max() + 2
+        x = torch.randn(batch, audio_features, seq_len_max)
+        x_len = torch.tensor(seq_len, dtype=torch.long, device=x.device)
 
         y, y_len = net(x, x_len)
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, net.num_classes))
-        assert (y.size()[2] in [seq_len // 2, seq_len // 2 + 1])
+        assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

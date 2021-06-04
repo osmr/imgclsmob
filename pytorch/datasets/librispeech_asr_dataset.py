@@ -223,7 +223,7 @@ class NemoMelSpecExtractor(object):
             ys.append(yi)
 
         channels = ys[0].shape[0]
-        x_len_max = max([yi.shape[-1] for yi in ys])
+        x_len_max = max([yj.shape[-1] for yj in ys])
         x = np.zeros((batch, channels, x_len_max), dtype=np.float32)
         for i, yi in enumerate(ys):
             x_len_i = x_len[i]

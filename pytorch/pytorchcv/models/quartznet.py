@@ -8,7 +8,6 @@ __all__ = ['quartznet5x5_en_ls', 'quartznet15x5_en', 'quartznet15x5_en_nr', 'qua
            'quartznet15x5_ru']
 
 from .jasper import get_jasper
-# from .jasper import CtcDecoder
 
 
 def quartznet5x5_en_ls(num_classes=29, **kwargs):
@@ -184,10 +183,6 @@ def _test():
         # y.sum().backward()
         assert (tuple(y.size())[:2] == (batch, net.num_classes))
         assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
-
-        # if net.vocabulary is not None:
-        #     greedy_predictions = y.transpose(1, 2).log_softmax(dim=-1).argmax(dim=-1, keepdim=False).cpu().numpy()
-        #     ctc_predictions = CtcDecoder(vocabulary=net.vocabulary)(greedy_predictions)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,11 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'CtcDecoder']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'CtcDecoder', 'NemoMelSpecExtractor',
+           'JasperTranscriber']
 
 import os
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -53,6 +55,214 @@ class CtcDecoder(object):
             hypothesis = "".join([self.labels_map[c] for c in decoded_prediction])
             hypotheses.append(hypothesis)
         return hypotheses
+
+
+class NemoMelSpecExtractor(object):
+    """
+    Mel-Spectrogram Extractor from NVIDIA NEMO toolkit.
+
+    Parameters:
+    ----------
+    sample_rate : int, default 16000
+        Sample rate of the input audio data.
+    window_size_sec : float, default 0.02
+        Size of window for FFT in seconds.
+    window_stride_sec : float, default 0.01
+        Stride of window for FFT in seconds.
+    n_fft : int, default 512
+        Length of FT window.
+    n_filters : int, default 64
+        Number of Mel spectrogram freq bins.
+    preemph : float, default 0.97
+        Amount of pre emphasis to add to audio.
+    dither : float, default 1.0e-05
+        Amount of white-noise dithering.
+    """
+    def __init__(self,
+                 sample_rate=16000,
+                 window_size_sec=0.02,
+                 window_stride_sec=0.01,
+                 n_fft=512,
+                 n_filters=64,
+                 preemph=0.97,
+                 dither=1.0e-05,
+                 **kwargs):
+        super(NemoMelSpecExtractor, self).__init__(**kwargs)
+        self.log_zero_guard_value = 2 ** -24
+        win_length = int(window_size_sec * sample_rate)
+        self.hop_length = int(window_stride_sec * sample_rate)
+
+        from scipy import signal as scipy_signal
+        from librosa import stft as librosa_stft
+        from librosa.filters import mel as librosa_mel
+
+        window_fn = scipy_signal.hann(win_length, sym=True)
+        self.stft = lambda x: librosa_stft(
+            x,
+            n_fft=n_fft,
+            hop_length=self.hop_length,
+            win_length=win_length,
+            window=window_fn,
+            center=True)
+
+        self.dither = dither
+        self.preemph = preemph
+
+        self.pad_align = 16
+
+        self.filter_bank = librosa_mel(
+            sample_rate,
+            n_fft,
+            n_mels=n_filters,
+            fmin=0,
+            fmax=(sample_rate / 2))
+
+    def __call__(self, xs):
+        """
+        Preprocess audio.
+
+        Parameters:
+        ----------
+        xs : list of np.array
+            Audio data.
+
+        Returns:
+        -------
+        np.array
+            Audio data.
+        np.array
+            Audio data lengths.
+        """
+        x_eps = 1e-5
+
+        batch = len(xs)
+        x_len = np.zeros((batch,), dtype=np.long)
+
+        ys = []
+        for i, xi in enumerate(xs):
+            x_len[i] = np.ceil(float(len(xi)) / self.hop_length).astype(np.long)
+
+            if self.dither > 0:
+                xi += self.dither * np.random.randn(*xi.shape)
+
+            xi = np.concatenate((xi[:1], xi[1:] - self.preemph * xi[:-1]), axis=0)
+
+            yi = self.stft(xi)
+            yi = np.abs(yi)
+            yi = np.square(yi)
+            yi = np.matmul(self.filter_bank, yi)
+            yi = np.log(yi + self.log_zero_guard_value)
+
+            assert (yi.shape[1] != 1)
+            yi_mean = yi.mean(axis=1)
+            yi_std = yi.std(axis=1)
+            yi_std += x_eps
+            yi = (yi - np.expand_dims(yi_mean, axis=-1)) / np.expand_dims(yi_std, axis=-1)
+
+            ys.append(yi)
+
+        channels = ys[0].shape[0]
+        x_len_max = max([yi.shape[-1] for yi in ys])
+        x = np.zeros((batch, channels, x_len_max), dtype=np.float32)
+        for i, yi in enumerate(ys):
+            x_len_i = x_len[i]
+            x[i, :, :x_len_i] = yi[:, :x_len_i]
+
+        pad_rem = x_len_max % self.pad_align
+        if pad_rem != 0:
+            x = np.pad(x, ((0, 0), (0, 0), (0, self.pad_align - pad_rem)))
+
+        return x, x_len
+
+
+class JasperTranscriber(object):
+    """
+    Jasper/DR/QuartzNet model transcriber.
+
+    Parameters:
+    ----------
+    net : nn.Module
+        Network.
+    use_cuda : bool
+        Whether to use CUDA.
+    dither : float, default 0.0
+        Amount of white-noise dithering.
+    """
+    def __init__(self,
+                 net,
+                 use_cuda,
+                 dither=0.0):
+        super(JasperTranscriber, self).__init__()
+        self.use_cuda = use_cuda
+        self.net = net
+        self.preprocessor = NemoMelSpecExtractor(dither=dither)
+        self.ctc_decoder = CtcDecoder(vocabulary=net.vocabulary)
+
+    def __call__(self, audio_file_paths):
+        """
+        Transcribe audio.
+
+        Parameters:
+        ----------
+        audio_file_paths : list of str
+            Paths to audio files.
+
+        Returns:
+        -------
+        list of str
+            Transcribed texts.
+        """
+        assert (type(audio_file_paths) in [list, tuple])
+
+        audio_data_list = self.read_audio(audio_file_paths)
+        x_np, x_np_len = self.preprocessor(audio_data_list)
+
+        x = torch.from_numpy(x_np)
+        x_len = torch.from_numpy(x_np_len)
+        if self.use_cuda:
+            x = x.cuda()
+            x_len = x_len.cuda()
+
+        y, y_len = self.net(x, x_len)
+
+        greedy_predictions = y.transpose(1, 2).log_softmax(dim=-1).argmax(dim=-1, keepdim=False).cpu().numpy()
+        ctc_predictions = self.ctc_decoder(greedy_predictions)
+
+        return ctc_predictions
+
+    @staticmethod
+    def read_audio(audio_file_paths):
+        """
+        Read audio.
+
+        Parameters:
+        ----------
+        audio_file_paths : list of str
+            Paths to audio files.
+
+        Returns:
+        -------
+        list of np.array
+            Audio data.
+        """
+        desired_audio_sample_rate = 16000
+
+        from soundfile import SoundFile
+
+        audio_data_list = []
+        for audio_file_path in audio_file_paths:
+            with SoundFile(audio_file_path, "r") as data:
+                sample_rate = data.samplerate
+                audio_data = data.read(dtype="float32")
+            audio_data = audio_data.transpose()
+            if desired_audio_sample_rate != sample_rate:
+                from librosa.core import resample as lr_resample
+                audio_data = lr_resample(y=audio_data, orig_sr=sample_rate, target_sr=desired_audio_sample_rate)
+            if audio_data.ndim >= 2:
+                audio_data = np.mean(audio_data, axis=1)
+            audio_data_list.append(audio_data)
+
+        return audio_data_list
 
 
 def conv1d1(in_channels,
@@ -589,6 +799,10 @@ class Jasper(nn.Module):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
+    return_text : bool, default False
+        Whether to return text instead of logits.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     in_channels : int, default 64
         Number of input channels (audio features).
     num_classes : int, default 29
@@ -602,11 +816,15 @@ class Jasper(nn.Module):
                  repeat,
                  use_dw,
                  use_dr,
+                 return_text=False,
+                 vocabulary=None,
                  in_channels=64,
                  num_classes=29):
         super(Jasper, self).__init__()
         self.in_size = None
         self.num_classes = num_classes
+        self.vocabulary = vocabulary
+        self.return_text = return_text
 
         self.features = DualPathSequential()
         init_block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
@@ -648,6 +866,9 @@ class Jasper(nn.Module):
             out_channels=num_classes,
             bias=True)
 
+        if self.return_text:
+            self.ctc_decoder = CtcDecoder(vocabulary=vocabulary)
+
         self._init_params()
 
     def _init_params(self):
@@ -657,10 +878,38 @@ class Jasper(nn.Module):
                 if module.bias is not None:
                     nn.init.constant_(module.bias, 0)
 
-    def forward(self, x, x_len):
+    def forward(self, x, x_len=None):
+        if x_len is None:
+            assert (type(x) in (list, tuple))
+            x, x_len = x
         x, x_len = self.features(x, x_len)
         x = self.output(x)
-        return x, x_len
+
+        if self.return_text:
+            greedy_predictions = x.transpose(1, 2).log_softmax(dim=-1).argmax(dim=-1, keepdim=False).cpu().numpy()
+            return self.ctc_decoder(greedy_predictions)
+        else:
+            return x, x_len
+
+    def transcript(self, audio_file_paths, use_cuda=False):
+        """
+        Transcribe audio.
+
+        Parameters:
+        ----------
+        audio_file_paths : list of str
+            Paths to audio files.
+
+        Returns:
+        -------
+        list of str
+            Transcribed texts.
+        use_cuda : bool, default False
+            Whether to use CUDA.
+        """
+        jt = JasperTranscriber(self, use_cuda=use_cuda)
+        v = jt(audio_file_paths)
+        return v
 
 
 def get_jasper(version,
@@ -725,9 +974,8 @@ def get_jasper(version,
         repeat=repeat,
         use_dw=use_dw,
         use_dr=use_dr,
+        vocabulary=vocabulary,
         **kwargs)
-
-    net.vocabulary = vocabulary
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -796,7 +1044,6 @@ def _calc_width(net):
 
 
 def _test():
-    import numpy as np
     import torch
 
     pretrained = False

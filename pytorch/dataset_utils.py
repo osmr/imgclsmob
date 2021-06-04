@@ -18,6 +18,7 @@ from .datasets.coco_hpe1_dataset import CocoHpe1MetaInfo
 from .datasets.coco_hpe2_dataset import CocoHpe2MetaInfo
 from .datasets.coco_hpe3_dataset import CocoHpe3MetaInfo
 from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
+from .datasets.librispeech_asr_dataset import LibriSpeechMetaInfo
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import WeightedRandomSampler
 
@@ -51,6 +52,7 @@ def get_dataset_metainfo(dataset_name):
         "CocoHpe2": CocoHpe2MetaInfo,
         "CocoHpe3": CocoHpe3MetaInfo,
         "HPatches": HPatchesMetaInfo,
+        "LibriSpeech": LibriSpeechMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()

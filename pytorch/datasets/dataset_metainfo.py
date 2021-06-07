@@ -17,6 +17,7 @@ class DatasetMetaInfo(object):
         self.root_dir_path = None
         self.dataset_class = None
         self.dataset_class_extra_kwargs = None
+        self.dataset_class_extra_kwargs = None
         self.num_training_samples = None
         self.in_channels = None
         self.num_classes = None

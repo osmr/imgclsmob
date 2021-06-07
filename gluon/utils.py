@@ -3,7 +3,7 @@
 """
 
 __all__ = ['prepare_mx_context', 'get_initializer', 'prepare_model', 'calc_net_weight_count', 'validate',
-           'report_accuracy', 'get_composite_metric', 'get_metric_name', 'get_loss']
+           'validate_asr', 'report_accuracy', 'get_composite_metric', 'get_metric_name', 'get_loss']
 
 import os
 import re
@@ -16,6 +16,7 @@ from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 from .metrics.det_metrics import CocoDetMApMetric, VOC07MApMetric, WiderfaceDetMetric
 from .metrics.hpe_metrics import CocoHpeOksApMetric
+from .metrics.asr_metrics import WER
 from .losses import SegSoftmaxCrossEntropyLoss, MixSoftmaxCrossEntropyLoss
 
 
@@ -226,7 +227,50 @@ def validate(metric,
     metric.reset()
     for batch in val_data:
         data_list, labels_list = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        outputs_list = [net(x.astype(dtype, copy=False)) for x in data_list]
+        metric.update(labels_list, outputs_list)
+    return metric
+
+
+def validate_asr(metric,
+                 net,
+                 val_data,
+                 batch_fn,
+                 data_source_needs_reset,
+                 dtype,
+                 ctx):
+    """
+    Core validation/testing routine for ASR.
+
+    Parameters:
+    ----------
+    metric : EvalMetric
+        Metric object instance.
+    net : HybridBlock
+        Model.
+    val_data : DataLoader or ImageRecordIter
+        Data loader or ImRec-iterator.
+    batch_fn : func
+        Function for splitting data after extraction from data loader.
+    data_source_needs_reset : bool
+        Whether to reset data (if test_data is ImageRecordIter).
+    dtype : str
+        Base data type for tensors.
+    ctx : Context
+        MXNet context.
+
+    Returns:
+    -------
+    EvalMetric
+        Metric object instance.
+    """
+    if data_source_needs_reset:
+        val_data.reset()
+    metric.reset()
+    for batch in val_data:
+        data_list, data2_list, labels_list = batch_fn(batch, ctx)
+        outputs_list = [net(x.astype(dtype, copy=False), x2.astype(dtype, copy=False)) for (x, x2) in
+                        zip(data_list, data2_list)]
         metric.update(labels_list, outputs_list)
     return metric
 
@@ -303,6 +347,8 @@ def get_metric(metric_name, metric_extra_kwargs):
         return WiderfaceDetMetric(**metric_extra_kwargs)
     elif metric_name == "CocoHpeOksApMetric":
         return CocoHpeOksApMetric(**metric_extra_kwargs)
+    elif metric_name == "WER":
+        return WER(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 

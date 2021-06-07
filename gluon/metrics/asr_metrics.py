@@ -2,12 +2,12 @@
 Evaluation Metrics for Automatic Speech Recognition (ASR).
 """
 
-from .metric import EvalMetric
+import mxnet as mx
 
 __all__ = ['WER']
 
 
-class WER(EvalMetric):
+class WER(mx.metric.EvalMetric):
     """
     Computes Word Error Rate (WER) for Automatic Speech Recognition (ASR).
 
@@ -43,36 +43,36 @@ class WER(EvalMetric):
 
         Parameters:
         ----------
-        labels : torch.Tensor
-            The labels of the data with class indices as values, one per sample.
-        preds : torch.Tensor
-            Prediction values for samples. Each prediction value can either be the class index,
-            or a vector of likelihoods for all classes.
+        labels : list of `NDArray`
+            The labels of the data.
+        preds : list of `NDArray`
+            Predicted values.
         """
         import editdistance
 
-        labels_code = labels.cpu().numpy()
-        labels = []
-        for label_code in labels_code:
-            label_text = "".join([self.ctc_decoder.labels_map[c] for c in label_code])
-            labels.append(label_text)
+        for labels_i, preds_i in zip(labels, preds):
+            labels_code = labels_i.asnumpy()
+            labels_i = []
+            for label_code in labels_code:
+                label_text = "".join([self.ctc_decoder.labels_map[c] for c in label_code])
+                labels_i.append(label_text)
 
-        preds = preds[0]
-        greedy_predictions = preds.transpose(1, 2).log_softmax(dim=-1).argmax(dim=-1, keepdim=False).cpu().numpy()
-        preds = self.ctc_decoder(greedy_predictions)
+            preds_i = preds_i[0]
+            greedy_predictions = preds_i.swapaxes(1, 2).log_softmax(axis=-1).argmax(axis=-1, keepdims=False).asnumpy()
+            preds_i = self.ctc_decoder(greedy_predictions)
 
-        assert (len(labels) == len(preds))
-        for pred, label in zip(preds, labels):
-            pred = pred.split()
-            label = label.split()
+            assert (len(labels_i) == len(preds_i))
+            for pred, label in zip(preds_i, labels_i):
+                pred = pred.split()
+                label = label.split()
 
-            word_error_count = editdistance.eval(label, pred)
-            word_count = len(label)
+                word_error_count = editdistance.eval(label, pred)
+                word_count = len(label)
 
-            self.sum_metric += word_error_count
-            self.global_sum_metric += word_error_count
-            self.num_inst += word_count
-            self.global_num_inst += word_count
+                self.sum_metric += word_error_count
+                self.global_sum_metric += word_error_count
+                self.num_inst += word_count
+                self.global_num_inst += word_count
 
 
 class CtcDecoder(object):

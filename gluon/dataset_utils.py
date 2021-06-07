@@ -21,6 +21,7 @@ from .datasets.coco_hpe1_dataset import CocoHpe1MetaInfo
 from .datasets.coco_hpe2_dataset import CocoHpe2MetaInfo
 from .datasets.coco_hpe3_dataset import CocoHpe3MetaInfo
 from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
+from .datasets.librispeech_asr_dataset import LibriSpeechMetaInfo
 from .weighted_random_sampler import WeightedRandomSampler
 from mxnet.gluon.data import DataLoader
 from mxnet.gluon.utils import split_and_load
@@ -57,6 +58,7 @@ def get_dataset_metainfo(dataset_name):
         "CocoHpe2": CocoHpe2MetaInfo,
         "CocoHpe3": CocoHpe3MetaInfo,
         "HPatches": HPatchesMetaInfo,
+        "LibriSpeech": LibriSpeechMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -91,10 +93,12 @@ def get_train_data_source(ds_metainfo,
             num_workers=num_workers)
     else:
         transform_train = ds_metainfo.train_transform(ds_metainfo=ds_metainfo)
+        kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="train",
-            transform=(transform_train if ds_metainfo.do_transform else None))
+            transform=(transform_train if ds_metainfo.do_transform else None),
+            **kwargs)
         if not ds_metainfo.do_transform:
             if ds_metainfo.do_transform_first:
                 dataset = dataset.transform_first(fn=transform_train)
@@ -149,10 +153,12 @@ def get_val_data_source(ds_metainfo,
             num_workers=num_workers)
     else:
         transform_val = ds_metainfo.val_transform(ds_metainfo=ds_metainfo)
+        kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="val",
-            transform=(transform_val if ds_metainfo.do_transform else None))
+            transform=(transform_val if ds_metainfo.do_transform else None),
+            **kwargs)
         if not ds_metainfo.do_transform:
             if ds_metainfo.do_transform_first:
                 dataset = dataset.transform_first(fn=transform_val)
@@ -195,11 +201,12 @@ def get_test_data_source(ds_metainfo,
             num_workers=num_workers)
     else:
         transform_test = ds_metainfo.test_transform(ds_metainfo=ds_metainfo)
+        kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="test",
             transform=(transform_test if ds_metainfo.do_transform else None),
-            **ds_metainfo.test_dataset_extra_kwargs)
+            **kwargs)
         if not ds_metainfo.do_transform:
             if ds_metainfo.do_transform_first:
                 dataset = dataset.transform_first(fn=transform_test)
@@ -229,7 +236,15 @@ def get_batch_fn(ds_metainfo):
     func
         Desired function.
     """
-    if ds_metainfo.use_imgrec:
+    if ds_metainfo.ml_type == "asr":
+        def batch_fn(batch, ctx):
+            data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            data2 = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
+            return data, data2, label
+
+        return batch_fn
+    elif ds_metainfo.use_imgrec:
         def batch_fn(batch, ctx):
             data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
             label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)

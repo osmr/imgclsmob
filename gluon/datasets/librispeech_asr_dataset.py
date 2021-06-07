@@ -4,38 +4,34 @@
 
 import os
 import numpy as np
-import torch.utils.data as data
-import torchvision.transforms as transforms
+from mxnet.gluon.data import dataset
+from mxnet.gluon.data.vision import transforms
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class LibriSpeech(data.Dataset):
+class LibriSpeech(dataset.Dataset):
     """
     LibriSpeech dataset for Automatic Speech Recognition (ASR).
 
     Parameters:
     ----------
-    root : str, default '~/.torch/datasets/LibriSpeech'
-        Path to the folder stored the dataset.
+    root : str
+        Path to folder storing the dataset.
     mode : str, default 'test'
         'train', 'val', 'test', or 'demo'.
     subset : str, default 'dev-clean'
         Data subset.
-    transform : function, default None
-        A function that takes data and transforms it.
-    target_transform : function, default None
-        A function that takes label and transforms it.
+    transform : callable, optional
+        A function that transforms the image.
     """
     def __init__(self,
-                 root=os.path.join("~", ".torch", "datasets", "LibriSpeech"),
+                 root,
                  mode="test",
                  subset="dev-clean",
-                 transform=None,
-                 target_transform=None):
+                 transform=None):
         super(LibriSpeech, self).__init__()
         assert (mode in ("train", "val", "test", "demo"))
         self._transform = transform
-        self._target_transform = target_transform
         self.data = []
 
         vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
@@ -78,7 +74,7 @@ class LibriSpeech(data.Dataset):
         audio_data_list = self.read_audio([wav_file_path])
         x_np, x_np_len = self.preprocessor(audio_data_list)
 
-        return (x_np[0], x_np_len[0]), label_text
+        return x_np[0], x_np_len[0], label_text
 
     def __len__(self):
         return len(self.data)
@@ -238,9 +234,7 @@ class NemoMelSpecExtractor(object):
 
 def ls_test_transform(ds_metainfo):
     assert (ds_metainfo is not None)
-    return transforms.Compose([
-        transforms.ToTensor(),
-    ])
+    return transforms.Compose([])
 
 
 class LibriSpeechMetaInfo(DatasetMetaInfo):
@@ -263,7 +257,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         self.val_transform = ls_test_transform
         self.test_transform = ls_test_transform
         self.saver_acc_ind = 0
-        self.dataset_class_extra_kwargs = {"subset": "dev-clean"}
+        self.test_dataset_extra_kwargs = {"subset": "dev-clean"}
 
     def add_dataset_parser_arguments(self,
                                      parser,
@@ -296,4 +290,4 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
             Main script arguments.
         """
         super(LibriSpeechMetaInfo, self).update(args)
-        self.dataset_class_extra_kwargs["subset"] = args.subset
+        self.test_dataset_extra_kwargs["subset"] = args.subset

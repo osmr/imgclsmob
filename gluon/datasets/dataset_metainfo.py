@@ -40,7 +40,6 @@ class DatasetMetaInfo(object):
         self.train_net_extra_kwargs = {"root": os.path.join("~", ".mxnet", "models")}
         self.test_net_extra_kwargs = None
         self.load_ignore_extra = False
-        self.test_dataset_extra_kwargs = {}
         self.loss_name = None
         self.loss_extra_kwargs = None
 

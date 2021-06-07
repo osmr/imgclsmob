@@ -9,7 +9,7 @@ import argparse
 from sys import version_info
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
-from gluon.utils import calc_net_weight_count, validate
+from gluon.utils import calc_net_weight_count, validate, validate_asr
 from gluon.utils import get_composite_metric
 from gluon.utils import report_accuracy
 from gluon.dataset_utils import get_dataset_metainfo
@@ -135,7 +135,7 @@ def parse_args():
         type=str,
         default="ImageNet1K_rec",
         help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, "
-             "ADE20K, Cityscapes, COCO")
+             "ADE20K, Cityscapes, COCO, LibriSpeech")
     parser.add_argument(
         "--work-dir",
         type=str,
@@ -166,7 +166,8 @@ def calc_model_accuracy(net,
                         calc_weight_count=False,
                         calc_flops=False,
                         calc_flops_only=True,
-                        extended_log=False):
+                        extended_log=False,
+                        ml_type="cls"):
     """
     Main test routine.
 
@@ -198,6 +199,8 @@ def calc_model_accuracy(net,
         Whether to only calculate FLOPs without testing.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+    ml_type : str, default 'cls'
+        Machine learning type.
 
     Returns:
     -------
@@ -205,8 +208,9 @@ def calc_model_accuracy(net,
         Accuracy values.
     """
     if not calc_flops_only:
+        validate_fn = validate_asr if ml_type == "asr" else validate
         tic = time.time()
-        validate(
+        validate_fn(
             metric=metric,
             net=net,
             val_data=test_data,
@@ -314,7 +318,8 @@ def test_model(args):
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        ml_type=ds_metainfo.ml_type)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

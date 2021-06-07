@@ -67,7 +67,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('preresnet152', '0464', 'baeb6c5208310ab7c919fc0da3c20267471a8fa1', 'v0.0.510', 'PreResNet-152', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet152b', '0459', '42c9fbcfe4e92463497fa4c2d0b007a191c6c043', 'v0.0.523', 'PreResNet-152b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('preresnet200b', '0468', 'f82215f3a5616098e8172a85bb42071f1823a27d', 'v0.0.529', 'PreResNet-200b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('preresnet269b', '0581', '1a7878bb10923b22bda58d7935dfa6e5e8a7b67d', 'v0.0.239', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, '[soeaver/mxnet-model]'),  # noqa
+    ('preresnet269b', '0527', 'f38eca01ea8cf43d6e6fecf1fe6b1a6cd5725cb2', 'v0.0.545', 'PreResNet-269b', '1603.05027', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext14_16x4d', '1248', '35ffac2a26374e71b6bf4bc9f90b7a1a1dd47e7d', 'v0.0.370', 'ResNeXt-14 (16x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext14_32x2d', '1281', '14521186b8c78c7c07f3904360839f22c180f65e', 'v0.0.371', 'ResNeXt-14 (32x2d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnext14_32x4d', '1146', '89aa679393d8356ce5589749b4371714bf4ceac0', 'v0.0.327', 'ResNeXt-14 (32x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -78,6 +78,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnext101_64x4d', '0452', '60d1913ec591af7786056b1d87b3add07fdcf2e1', 'v0.0.544', 'ResNeXt-101 (64x4d)', '1611.05431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet10', '1202', '8dace12e6aaac68d3c272f52b2513a5b40a4f959', 'v0.0.486', 'SE-ResNet-10', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet12', '1200', '81d5406e29f4c91cb85e079cf66c6e7348079e5b', 'v0.0.544', 'SE-ResNet-12', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet14', '0998', 'e2c666dd14dec8918854df7200706ed0c5ae8e74', 'v0.0.545', 'SE-ResNet-14', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('seresnet16', '1200', '81d5406e29f4c91cb85e079cf66c6e7348079e5b', 'v0.0.545', 'SE-ResNet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet18', '0961', '022123a5e88c9917e63165f5b5a7808a606d452a', 'v0.0.355', 'SE-ResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet26', '0824', '64fc8759c5bb9b9b40b2e33a46420ee22ae268c9', 'v0.0.363', 'SE-ResNet-26', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnetbc26b', '0703', 'b98d9d6afca4d79d0347001542162b9fe4071d39', 'v0.0.366', 'SE-ResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa

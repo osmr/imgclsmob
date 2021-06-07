@@ -675,8 +675,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
              "contiguous_id_to_json": None,
              "data_shape": None,
              "post_affine": get_post_transform}]
-        self.test_dataset_extra_kwargs = {
-            "skip_empty": False}
+        self.dataset_class_extra_kwargs = {"skip_empty": False}
         self.saver_acc_ind = 0
         self.do_transform = True
         self.do_transform_first = False

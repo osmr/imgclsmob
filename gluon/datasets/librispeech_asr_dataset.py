@@ -290,4 +290,4 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
             Main script arguments.
         """
         super(LibriSpeechMetaInfo, self).update(args)
-        self.test_dataset_extra_kwargs["subset"] = args.subset
+        self.dataset_class_extra_kwargs["subset"] = args.subset

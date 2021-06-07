@@ -244,6 +244,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         self.short_label = "ls"
         self.root_dir_name = "LibriSpeech"
         self.dataset_class = LibriSpeech
+        self.dataset_class_extra_kwargs = {"subset": "dev-clean"}
         self.ml_type = "asr"
         self.num_classes = 29
         self.vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
@@ -257,7 +258,6 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         self.val_transform = ls_test_transform
         self.test_transform = ls_test_transform
         self.saver_acc_ind = 0
-        self.test_dataset_extra_kwargs = {"subset": "dev-clean"}
 
     def add_dataset_parser_arguments(self,
                                      parser,

@@ -133,7 +133,7 @@ def parse_args():
         type=str,
         default="ImageNet1K",
         help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, ADE20K, Cityscapes, "
-             "COCO, LibriSpeech")
+             "COCO, LibriSpeech, MCV")
     parser.add_argument(
         "--work-dir",
         type=str,
@@ -426,6 +426,7 @@ def main():
             "cocohpe": "CocoHpe",
             "hp": "HPatches",
             "ls": "LibriSpeech",
+            "mcv": "MCV",
         }
         for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
             error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo

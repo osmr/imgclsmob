@@ -1,5 +1,6 @@
 __all__ = ['oth_quartznet5x5_en_ls', 'oth_quartznet15x5_en', 'oth_quartznet15x5_en_nr', 'oth_quartznet15x5_fr',
-           'oth_quartznet15x5_de', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr']
+           'oth_quartznet15x5_de', 'oth_quartznet15x5_it', 'oth_quartznet15x5_es', 'oth_quartznet15x5_ca',
+           'oth_quartznet15x5_pl', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr']
 
 import torch.nn as nn
 # import torch.nn.functional as F
@@ -167,6 +168,42 @@ def oth_quartznet15x5_de(pretrained=False, num_classes=32, **kwargs):
     return net#, raw_net
 
 
+def oth_quartznet15x5_it(pretrained=False, num_classes=39, **kwargs):
+    from nemo.collections.asr.models import EncDecCTCModel
+    quartznet_nemo_path = path_pref + "stt_it_quartznet15x5_0f6e4537.nemo"
+    raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
+    net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
+    net = net.cpu()
+    return net#, raw_net
+
+
+def oth_quartznet15x5_es(pretrained=False, num_classes=36, **kwargs):
+    from nemo.collections.asr.models import EncDecCTCModel
+    quartznet_nemo_path = path_pref + "stt_es_quartznet15x5_f2083912.nemo"
+    raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
+    net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
+    net = net.cpu()
+    return net#, raw_net
+
+
+def oth_quartznet15x5_ca(pretrained=False, num_classes=39, **kwargs):
+    from nemo.collections.asr.models import EncDecCTCModel
+    quartznet_nemo_path = path_pref + "stt_ca_quartznet15x5_b1a4fa3c.nemo"
+    raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
+    net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
+    net = net.cpu()
+    return net#, raw_net
+
+
+def oth_quartznet15x5_pl(pretrained=False, num_classes=34, **kwargs):
+    from nemo.collections.asr.models import EncDecCTCModel
+    quartznet_nemo_path = path_pref + "stt_pl_quartznet15x5_9dd685f7.nemo"
+    raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
+    net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
+    net = net.cpu()
+    return net#, raw_net
+
+
 def oth_quartznet15x5_ru(pretrained=False, num_classes=35, **kwargs):
     from nemo.collections.asr.models import EncDecCTCModel
     quartznet_nemo_path = path_pref + "stt_ru_quartznet15x5_88a3e5aa.nemo"
@@ -215,7 +252,11 @@ def _test():
         # oth_quartznet15x5_en,
         # oth_quartznet15x5_en_nr,
         # oth_quartznet15x5_fr,
-        oth_quartznet15x5_de,
+        # oth_quartznet15x5_de,
+        # oth_quartznet15x5_it,
+        # oth_quartznet15x5_es,
+        oth_quartznet15x5_ca,
+        oth_quartznet15x5_pl,
         oth_quartznet15x5_ru,
         oth_jasperdr10x5_en,
         oth_jasperdr10x5_en_nr,
@@ -236,6 +277,10 @@ def _test():
         assert (model != oth_quartznet15x5_en_nr or weight_count == 18924381)
         assert (model != oth_quartznet15x5_fr or weight_count == 18938731)
         assert (model != oth_quartznet15x5_de or weight_count == 18927456)
+        assert (model != oth_quartznet15x5_it or weight_count == 18934631)
+        assert (model != oth_quartznet15x5_es or weight_count == 18931556)
+        assert (model != oth_quartznet15x5_ca or weight_count == 18934631)
+        assert (model != oth_quartznet15x5_pl or weight_count == 18929506)
         assert (model != oth_quartznet15x5_ru or weight_count == 18930531)
         assert (model != oth_jasperdr10x5_en or weight_count == 332632349)
         assert (model != oth_jasperdr10x5_en_nr or weight_count == 332632349)

@@ -30,7 +30,7 @@ class AsrDataset(dataset.Dataset):
         assert (mode in ("train", "val", "test", "demo"))
         self.root = root
         self.mode = mode
-        self.transform = transform
+        self._transform = transform
         self.data = []
         self.preprocessor = NemoMelSpecExtractor(dither=0.0)
 

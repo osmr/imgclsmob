@@ -130,7 +130,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        vocabulary = dataset.vocabulary
+        vocabulary = dataset._data.vocabulary
         self.num_classes = len(vocabulary) + 1
         self.val_metric_extra_kwargs[0]["vocabulary"] = vocabulary
         self.test_metric_extra_kwargs[0]["vocabulary"] = vocabulary

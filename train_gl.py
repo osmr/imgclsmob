@@ -266,7 +266,8 @@ def parse_args():
         "--dataset",
         type=str,
         default="ImageNet1K_rec",
-        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN")
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN, LibriSpeech,"
+             " MCV")
     parser.add_argument(
         "--work-dir",
         type=str,

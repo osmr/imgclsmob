@@ -3,8 +3,8 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'CtcDecoder', 'NemoMelSpecExtractor',
-           'JasperTranscriber']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'MaskConv1d', 'CtcDecoder',
+           'NemoMelSpecExtractor', 'JasperTranscriber']
 
 import os
 import numpy as np
@@ -821,7 +821,7 @@ class Jasper(nn.Module):
                  in_channels=64,
                  num_classes=29):
         super(Jasper, self).__init__()
-        self.in_size = None
+        self.in_size = in_channels
         self.num_classes = num_classes
         self.vocabulary = vocabulary
         self.return_text = return_text

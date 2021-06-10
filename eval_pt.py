@@ -270,7 +270,8 @@ def calc_model_accuracy(net,
                         calc_weight_count=False,
                         calc_flops=False,
                         calc_flops_only=True,
-                        extended_log=False):
+                        extended_log=False,
+                        ml_type="cls"):
     """
     Estimating particular model accuracy.
 
@@ -296,6 +297,8 @@ def calc_model_accuracy(net,
         Whether to only calculate FLOPs without testing.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+    ml_type : str, default 'cls'
+        Machine learning type.
 
     Returns:
     -------
@@ -325,7 +328,11 @@ def calc_model_accuracy(net,
         if not calc_flops:
             logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
-        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
+        in_shapes = [(1, input_image_size, 100), (1,)] if ml_type == "asr" else\
+            [(1, in_channels, input_image_size[0], input_image_size[1])]
+        num_flops, num_macs, num_params = measure_model(
+            model=net,
+            in_shapes=in_shapes)
         assert (not calc_weight_count) or (weight_count == num_params)
         stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
                    " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"
@@ -391,7 +398,8 @@ def test_model(args):
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        ml_type=ds_metainfo.ml_type)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

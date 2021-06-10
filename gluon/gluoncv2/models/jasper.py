@@ -3,7 +3,7 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'MaskConv1d']
 
 import os
 from mxnet import cpu
@@ -613,7 +613,7 @@ class Jasper(HybridBlock):
                  classes=29,
                  **kwargs):
         super(Jasper, self).__init__(**kwargs)
-        self.in_size = None
+        self.in_size = in_channels
         self.classes = classes
 
         with self.name_scope():

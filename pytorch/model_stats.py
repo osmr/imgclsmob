@@ -16,6 +16,7 @@ from .pytorchcv.models.proxylessnas import ProxylessUnit
 from .pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 from .pytorchcv.models.centernet import CenterNetHeatmapMaxDet
 from .pytorchcv.models.danet import ScaleBlock
+from .pytorchcv.models.jasper import MaskConv1d
 
 __all__ = ['measure_model']
 
@@ -65,8 +66,7 @@ def calc_block_num_params(module):
 
 
 def measure_model(model,
-                  in_channels,
-                  in_size):
+                  in_shapes):
     """
     Calculate model statistics.
 
@@ -74,10 +74,8 @@ def measure_model(model,
     ----------
     model : HybridBlock
         Tested model.
-    in_channels : int
-        Number of input channels.
-    in_size : tuple of two ints
-        Spatial size of the expected input image.
+    in_shapes : list of tuple of ints
+        Shapes of the input tensors.
     """
     global num_flops
     global num_macs
@@ -90,7 +88,8 @@ def measure_model(model,
 
     def call_hook(module, x, y):
         if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock) or
-                isinstance(module, RiRFinalBlock) or isinstance(module, InterpolationBlock)):
+                isinstance(module, RiRFinalBlock) or isinstance(module, InterpolationBlock) or
+                isinstance(module, MaskConv1d)):
             assert (len(x) == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):
@@ -242,6 +241,31 @@ def measure_model(model,
         elif type(module) in [nn.Softmax2d, nn.Softmax]:
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
+        elif type(module) in [MaskConv1d, nn.Conv1d]:
+            if isinstance(y, tuple):
+                assert isinstance(module, MaskConv1d)
+                y = y[0]
+            batch = x[0].shape[0]
+            x_h = x[0].shape[2]
+            kernel_size = module.kernel_size
+            stride = module.stride
+            dilation = module.dilation
+            padding = module.padding
+            groups = module.groups
+            in_channels = module.in_channels
+            out_channels = module.out_channels
+            y_h = (x_h + 2 * padding[0] - dilation[0] * (kernel_size[0] - 1) - 1) // stride[0] + 1
+            assert (out_channels == y.shape[1])
+            assert (y_h == y.shape[2])
+            kernel_total_size = kernel_size[0]
+            y_size = y_h
+            extra_num_macs = kernel_total_size * in_channels * y_size * out_channels // groups
+            if module.bias is None:
+                extra_num_flops = (2 * kernel_total_size * y_size - 1) * in_channels * out_channels // groups
+            else:
+                extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock]:
             extra_num_flops, extra_num_macs = module.calc_flops(x[0])
         elif isinstance(module, LwopDecoderFinalBlock):
@@ -278,9 +302,16 @@ def measure_model(model,
 
     hook_handles = register_forward_hooks(model)
 
-    x = Variable(torch.zeros(1, in_channels, in_size[0], in_size[1]))
     model.eval()
-    model(x)
+    if len(in_shapes) == 1:
+        x = Variable(torch.zeros(*in_shapes[0]))
+        model(x)
+    elif len(in_shapes) == 2:
+        x1 = Variable(torch.zeros(*in_shapes[0]))
+        x2 = Variable(torch.zeros(*in_shapes[1]))
+        model(x1, x2)
+    else:
+        raise NotImplementedError()
 
     num_params1 = calc_block_num_params2(model)
     if num_params != num_params1:

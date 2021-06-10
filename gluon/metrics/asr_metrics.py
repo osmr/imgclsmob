@@ -67,7 +67,9 @@ class WER(mx.metric.EvalMetric):
                 label = label.split()
 
                 word_error_count = editdistance.eval(label, pred)
-                word_count = len(label)
+                word_count = max(len(label), len(pred))
+
+                assert (word_error_count <= word_count)
 
                 self.sum_metric += word_error_count
                 self.global_sum_metric += word_error_count

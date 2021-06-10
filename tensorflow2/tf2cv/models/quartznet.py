@@ -25,8 +25,10 @@ def quartznet5x5_en_ls(classes=29, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "5x5"), use_dw=True, model_name="quartznet5x5_en_ls",
-                      **kwargs)
+    vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                  't', 'u', 'v', 'w', 'x', 'y', 'z', "'"]
+    return get_jasper(classes=classes, version=("quartznet", "5x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet5x5_en_ls", **kwargs)
 
 
 def quartznet15x5_en(classes=29, **kwargs):
@@ -43,8 +45,10 @@ def quartznet15x5_en(classes=29, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, model_name="quartznet15x5_en",
-                      **kwargs)
+    vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                  't', 'u', 'v', 'w', 'x', 'y', 'z', "'"]
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet15x5_en", **kwargs)
 
 
 def quartznet15x5_en_nr(classes=29, **kwargs):
@@ -61,8 +65,10 @@ def quartznet15x5_en_nr(classes=29, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, model_name="quartznet15x5_en_nr",
-                      **kwargs)
+    vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                  't', 'u', 'v', 'w', 'x', 'y', 'z', "'"]
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet15x5_en_nr", **kwargs)
 
 
 def quartznet15x5_fr(classes=43, **kwargs):
@@ -79,8 +85,11 @@ def quartznet15x5_fr(classes=43, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, model_name="quartznet15x5_fr",
-                      **kwargs)
+    vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                  't', 'u', 'v', 'w', 'x', 'y', 'z', "'", 'ç', 'é', 'â', 'ê', 'î', 'ô', 'û', 'à', 'è', 'ù', 'ë', 'ï',
+                  'ü', 'ÿ']
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet15x5_fr", **kwargs)
 
 
 def quartznet15x5_de(classes=32, **kwargs):
@@ -97,7 +106,9 @@ def quartznet15x5_de(classes=32, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True,
+    vocabulary = [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                  't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü', 'ß']
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
                       model_name="quartznet15x5_de", **kwargs)
 
 
@@ -195,8 +206,10 @@ def quartznet15x5_ru(classes=35, **kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, model_name="quartznet15x5_ru",
-                      **kwargs)
+    vocabulary = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с',
+                  'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet15x5_ru", **kwargs)
 
 
 def _test():

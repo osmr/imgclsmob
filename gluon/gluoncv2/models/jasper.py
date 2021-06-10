@@ -594,6 +594,8 @@ class Jasper(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     in_channels : int, default 64
         Number of input channels (audio features).
     classes : int, default 29
@@ -609,12 +611,14 @@ class Jasper(HybridBlock):
                  use_dr,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
+                 vocabulary=None,
                  in_channels=64,
                  classes=29,
                  **kwargs):
         super(Jasper, self).__init__(**kwargs)
         self.in_size = in_channels
         self.classes = classes
+        self.vocabulary = vocabulary
 
         with self.name_scope():
             self.features = DualPathSequential()
@@ -673,6 +677,7 @@ def get_jasper(version,
                use_dw=False,
                use_dr=False,
                bn_epsilon=1e-3,
+               vocabulary=None,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
@@ -691,6 +696,8 @@ def get_jasper(version,
         Whether to use dense residual scheme.
     bn_epsilon : float, default 1e-3
         Small float added to variance in Batch norm.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -731,6 +738,7 @@ def get_jasper(version,
         repeat=repeat,
         use_dw=use_dw,
         use_dr=use_dr,
+        vocabulary=vocabulary,
         **kwargs)
 
     if pretrained:

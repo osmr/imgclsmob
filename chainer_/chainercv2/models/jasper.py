@@ -571,6 +571,8 @@ class Jasper(Chain):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     in_channels : int, default 64
         Number of input channels (audio features).
     classes : int, default 29
@@ -584,12 +586,14 @@ class Jasper(Chain):
                  repeat,
                  use_dw,
                  use_dr,
+                 vocabulary=None,
                  in_channels=64,
                  classes=29,
                  **kwargs):
         super(Jasper, self).__init__(**kwargs)
-        self.in_size = None
+        self.in_size = in_channels
         self.classes = classes
+        self.vocabulary = vocabulary
 
         with self.init_scope():
             self.features = DualPathSequential()
@@ -643,6 +647,7 @@ def get_jasper(version,
                use_dw=False,
                use_dr=False,
                bn_eps=1e-3,
+               vocabulary=None,
                model_name=None,
                pretrained=False,
                root=os.path.join("~", ".chainer", "models"),
@@ -660,6 +665,8 @@ def get_jasper(version,
         Whether to use dense residual scheme.
     bn_eps : float, default 1e-3
         Small float added to variance in Batch norm.
+    vocabulary : list of str or None, default None
+        Vocabulary of the dataset.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -698,6 +705,7 @@ def get_jasper(version,
         repeat=repeat,
         use_dw=use_dw,
         use_dr=use_dr,
+        vocabulary=vocabulary,
         **kwargs)
 
     if pretrained:

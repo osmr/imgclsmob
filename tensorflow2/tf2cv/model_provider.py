@@ -939,6 +939,10 @@ _models = {
     'quartznet15x5_en_nr': quartznet15x5_en_nr,
     'quartznet15x5_fr': quartznet15x5_fr,
     'quartznet15x5_de': quartznet15x5_de,
+    'quartznet15x5_it': quartznet15x5_it,
+    'quartznet15x5_es': quartznet15x5_es,
+    'quartznet15x5_ca': quartznet15x5_ca,
+    'quartznet15x5_pl': quartznet15x5_pl,
     'quartznet15x5_ru': quartznet15x5_ru,
 }
 

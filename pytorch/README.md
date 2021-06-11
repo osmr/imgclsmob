@@ -789,6 +789,27 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | Lightweight OpenPose 3D | MobileNet | 39.99/65.95/40.70 | 5,085,983 | 11,049.43M | From [Daniil-Osokin/li...3d...ch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.458/lwopenpose3d_mobilenet_cmupan_coco-3999-4c727e1d.pth.log)) |
 | IBPPose | - | 64.87/83.62/70.13 | 95,827,784 | 57,195.91M | From [jialee93/Improved...Parts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.459/ibppose_coco-6487-1958fe10.pth.log)) |
 
+### Mozilla Common Voice (Corpus 6.1, dev subset)
+
+Some remarks:
+- NR means Noise Reduction.
+- LS means trained on LibriSpeech dataset.
+
+| Model | Lang | WER, % | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | --- |
+| Jasper DR 10x5 | En | 21.89 | 332,632,349 | 16,617.80M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/jasperdr10x5_en-2189-02c9de39.pth.log)) |
+| Jasper DR 10x5 NR | En | 17.89 | 332,632,349 | 16,617.80M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/jasperdr10x5_en_nr-1789-23d1b22e.pth.log)) |
+| QuartzNet 5x5 LS | En | 44.69 | 6,713,181 | 332.93M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet5x5_en_ls-4469-9af00731.pth.log)) |
+| QuartzNet 15x5 | En | 16.76 | 18,924,381 | 938.49M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_en-1676-9a845395.pth.log)) |
+| QuartzNet 15x5 NR | En | 17.74 | 18,924,381 | 938.49M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_en_nr-1774-b2ee38c0.pth.log)) |
+| QuartzNet 15x5 | De | 11.66 | 18,927,456 | 938.64M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_de-1166-292a3755.pth.log)) |
+| QuartzNet 15x5 | Fr | 13.88 | 18,938,731 | 939.20M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_fr-1388-506b49da.pth.log)) |
+| QuartzNet 15x5 | It | 15.02 | 18,934,631 | 939.00M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_it-1502-cde1bdb7.pth.log)) |
+| QuartzNet 15x5 | Es | 12.95 | 18,931,556 | 938.85M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_es-1295-310a39fb.pth.log)) |
+| QuartzNet 15x5 | Ca | 8.42 | 18,934,631 | 939.00M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ca-0842-0e45996e.pth.log)) |
+| QuartzNet 15x5 | Pl | 13.59 | 18,929,506 | 938.74M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_pl-1359-fe5ab9ef.pth.log)) |
+| QuartzNet 15x5 | Ru | 16.47 | 18,930,531 | 938.79M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ru-1647-5fcce8e0.pth.log)) |
+
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
@@ -825,3 +846,4 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [jialee93/Improved...Parts]: https://github.com/jialee93/Improved-Body-Parts
 [zllrunning/face...Torch]: https://github.com/zllrunning/face-parsing.PyTorch
 [MCG-NKU/SCNet]: https://github.com/MCG-NKU/SCNet
+[NVIDIA/NeMo]: https://github.com/NVIDIA/NeMo

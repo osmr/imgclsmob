@@ -13,7 +13,7 @@ from .common import is_channels_first
 
 def quartznet5x5_en_ls(classes=29, **kwargs):
     """
-    QuartzNet 15x5 model for English language (trained on LibriSpeech dataset) from 'QuartzNet: Deep Automatic Speech
+    QuartzNet 5x5 model for English language (trained on LibriSpeech dataset) from 'QuartzNet: Deep Automatic Speech
     Recognition with 1D Time-Channel Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
     Parameters:

@@ -646,6 +646,18 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('lwopenpose2d_mobilenet_cmupan_coco', '3999', 'b4a22e7c2a05e53fe22185002c48e81f76c2d918', 'v0.0.458'),
     ('lwopenpose3d_mobilenet_cmupan_coco', '3999', '4658738ec27d46ee01f2cad4aa975914e9f7108c', 'v0.0.458'),
     ('ibppose_coco', '6486', '024d1fafb7471572129ccbb07d662f6d8ccdc758', 'v0.0.459'),
+    ('jasperdr10x5_en', '2189', 'bdbd9ddfd3b7ddcb9f6f76acf08ec0c70316cb9e', 'v0.0.546'),
+    ('jasperdr10x5_en_nr', '1789', '308e149aed9fe3fe31dadf54d1ecb4c8cddd955c', 'v0.0.546'),
+    ('quartznet5x5_en_ls', '4468', '80a3111a60da0a290d6bdbe628418273c3503dbc', 'v0.0.546'),
+    ('quartznet15x5_en', '1676', '16ac80d1a513653cf67ddc5f35a6419ed61daf06', 'v0.0.546'),
+    ('quartznet15x5_en_nr', '1773', '8a2304dee1d96bf2a21e0422b06d61f67dd267a7', 'v0.0.546'),
+    ('quartznet15x5_de', '1166', 'bafc8de8c7b451fd246061ab6a750f69d3c10af5', 'v0.0.546'),
+    ('quartznet15x5_fr', '1388', 'ff71b3c7b0c264bf8432301cdd5c16f7667767ce', 'v0.0.546'),
+    ('quartznet15x5_it', '1502', 'eb6a15ec72e600739500c3e6ca5bda6bdfe9ec7f', 'v0.0.546'),
+    ('quartznet15x5_es', '1295', '538f9e3422662d42752d1b0401b4e8ca6d41eba8', 'v0.0.546'),
+    ('quartznet15x5_ca', '0842', '2561a97010c31e5c4b89d92ac04a46a28b885a97', 'v0.0.546'),
+    ('quartznet15x5_pl', '1359', 'eeb19acae9d594db583dbd4278ba57e06caa58cc', 'v0.0.546'),
+    ('quartznet15x5_ru', '1647', '25a179643abc694ac5e8f95428a9d0eafd430aaa', 'v0.0.546'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

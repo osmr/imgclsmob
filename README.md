@@ -188,7 +188,7 @@ Some remarks:
 Some remarks:
 - `a/A` corresponds to COCO.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CenterNet | a | a | a | - | - | a | [link](https://arxiv.org/abs/1904.07850) | [link](https://github.com/xingyizhou/CenterNet) | 2019 |
 
@@ -197,10 +197,21 @@ Some remarks:
 Some remarks:
 - `a/A` corresponds to COCO.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlphaPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1612.00137) | [link](https://github.com/MVIG-SJTU/AlphaPose) | 2016 |
 | SimplePose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | [link](https://github.com/microsoft/human-pose-estimation.pytorch) | 2018 |
 | SimplePose(Mobile) | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | - | 2018 |
 | Lightweight OpenPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1811.12004) | [link](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) | 2018 |
 | IBPPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1911.10529) | [link](https://github.com/jialee93/Improved-Body-Parts) | 2019 |
+
+## Table of implemented automatic speech recognition models
+
+Some remarks:
+- `a/A` corresponds to LibriSpeech.
+- `b/B` corresponds to Mozilla Common Voice.
+
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Jasper DR | AB | AB | ab | - | - | ab | [link](https://arxiv.org/abs/1904.03288) | [link](https://github.com/NVIDIA/NeMo) | 2019 |
+| QuartzNet | AB | AB | ab | - | - | ab | [link](https://arxiv.org/abs/1910.10261) | [link](https://github.com/NVIDIA/NeMo) | 2019 |

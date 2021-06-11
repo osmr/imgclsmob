@@ -568,6 +568,18 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('lwopenpose2d_mobilenet_cmupan_coco', '3999', '626b66cb1d36d0721b59d5acaa8d08d7690ea830', 'v0.0.458', 'cocohpe', 0.0),  # noqa
     ('lwopenpose3d_mobilenet_cmupan_coco', '3999', 'df9b1c5f667deb93a87f69479ce92093e7c9f3b6', 'v0.0.458', 'cocohpe', 0.0),  # noqa
     ('ibppose_coco', '6487', '79500f3d5dd990fd63544e3e3ca65f0382b06e44', 'v0.0.459', 'cocohpe', 0.0),
+    ('jasperdr10x5_en', 'nana', '24b8755d97ec126d1c63b8560751a1bbb2b04a93', 'v0.0.546', 'mcv', 0.0),
+    ('jasperdr10x5_en_nr', 'nana', '6f599fcb3018f57075702bb2cf7cceb448da81da', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet5x5_en_ls', 'nana', '793ced32173baf51ed2377033ff7ccaedad2a341', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_en', 'nana', '021696c7a466bc5d46c5c1e039b5d753078a40fe', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_en_nr', 'nana', 'e49dae4a7eb02a89b4f8a775e16489522711a24b', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_de', 'nana', 'ba84bf1ba2a2328459cea306521cfa55d98e5795', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_fr', 'nana', '1a44e20003018c78b7c3be7f5d929937d699a377', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_it', 'nana', 'f7d70adf6aed742e7049cf6fcc108a9f34f0fa2f', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_es', 'nana', '3844f288d3841adc3b4d8c4aecd374b6c1cafd82', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_ca', 'nana', '332a0385ad280a50a1ed7de9c818811af8f7aa97', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_pl', 'nana', '571570058c7a6982aa31be43eccaa021d197b6b7', 'v0.0.546', 'mcv', 0.0),
+    ('quartznet15x5_ru', 'nana', '12402f748c434c15f5c52e7d5ecf8b2f106aca0f', 'v0.0.546', 'mcv', 0.0),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

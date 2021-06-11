@@ -262,6 +262,8 @@ def main():
             "cocoseg": "CocoSeg",
             "cocohpe": "CocoHpe",
             "hp": "HPatches",
+            "ls": "LibriSpeech",
+            "mcv": "MCV",
         }
         for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
             error, checksum, repo_release_tag, ds, scale = model_metainfo

@@ -787,9 +787,11 @@ def get_jasper(version,
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
         in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
-        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
-            (1,) + net.in_size + (in_channels,)
-        net.build(input_shape=input_shape)
+        seq_len = 100
+        x_shape = (1, net.in_size, seq_len) if net.data_format == "channels_first" else (1, seq_len, net.in_size)
+        x = tf.random.normal(x_shape)
+        x_len = tf.convert_to_tensor(np.array([seq_len], np.long))
+        net(x, x_len)
         net.load_weights(
             filepath=get_model_file(
                 model_name=model_name,

@@ -786,7 +786,6 @@ def get_jasper(version,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
         seq_len = 100
         x_shape = (1, net.in_size, seq_len) if net.data_format == "channels_first" else (1, seq_len, net.in_size)
         x = tf.random.normal(x_shape)

@@ -107,12 +107,12 @@ def parse_args():
     parser.add_argument(
         "--log-packages",
         type=str,
-        default="keras, mxnet, tensorflow-gpu",
+        default="keras, mxnet, tensorflow, tensorflow-gpu",
         help="list of python packages for logging")
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="keras, keras-mxnet, mxnet, mxnet-cu100",
+        default="keras, keras-mxnet, mxnet, mxnet-cu110",
         help="list of pip packages for logging")
     args = parser.parse_args()
     return args

@@ -100,12 +100,12 @@ def parse_args():
     parser.add_argument(
         "--log-packages",
         type=str,
-        default="tensorflow-gpu",
+        default="tensorflow, tensorflow-gpu",
         help="list of python packages for logging")
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="tensorflow-gpu, tensorpack",
+        default="tensorflow, tensorflow-gpu, tensorpack",
         help="list of pip packages for logging")
     args = parser.parse_args()
     return args

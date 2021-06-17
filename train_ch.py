@@ -158,7 +158,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="cupy-cuda100, chainer, chainercv",
+        default="cupy-cuda110, chainer, chainercv",
         help="list of pip packages for logging")
 
 

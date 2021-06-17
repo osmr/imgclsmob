@@ -5,7 +5,7 @@ __all__ = ['oth_quartznet5x5_en_ls', 'oth_quartznet15x5_en', 'oth_quartznet15x5_
 import torch.nn as nn
 # import torch.nn.functional as F
 
-import editdistance
+# import editdistance
 
 
 class CtcDecoder(object):
@@ -51,41 +51,41 @@ class CtcDecoder(object):
         return hypotheses
 
 
-class WER(object):
-    """
-    Word Error Rate (WER).
-
-    Parameters:
-    ----------
-    vocabulary : list of str
-        Vocabulary of the dataset.
-    """
-    def __init__(self,
-                 vocabulary):
-        super().__init__()
-        self.blank_id = len(vocabulary)
-        self.labels_map = dict([(i, vocabulary[i]) for i in range(len(vocabulary))])
-
-        self.scores = 0
-        self.words = 0
-
-    def update(self,
-               hypotheses,
-               references):
-        words = 0.0
-        scores = 0.0
-
-        for h, r in zip(hypotheses, references):
-            h_list = h.split()
-            r_list = r.split()
-            words += len(r_list)
-            scores += editdistance.eval(h_list, r_list)
-
-        self.scores += scores
-        self.words += words
-
-    def compute(self):
-        return float(self.scores) / self.words
+# class WER(object):
+#     """
+#     Word Error Rate (WER).
+#
+#     Parameters:
+#     ----------
+#     vocabulary : list of str
+#         Vocabulary of the dataset.
+#     """
+#     def __init__(self,
+#                  vocabulary):
+#         super().__init__()
+#         self.blank_id = len(vocabulary)
+#         self.labels_map = dict([(i, vocabulary[i]) for i in range(len(vocabulary))])
+#
+#         self.scores = 0
+#         self.words = 0
+#
+#     def update(self,
+#                hypotheses,
+#                references):
+#         words = 0.0
+#         scores = 0.0
+#
+#         for h, r in zip(hypotheses, references):
+#             h_list = h.split()
+#             r_list = r.split()
+#             words += len(r_list)
+#             scores += editdistance.eval(h_list, r_list)
+#
+#         self.scores += scores
+#         self.words += words
+#
+#     def compute(self):
+#         return float(self.scores) / self.words
 
 
 class QuartzNet(nn.Module):

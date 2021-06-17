@@ -285,7 +285,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('xception', '0518', 'a311fd377a845eacdec8146503a61e672d82a78c', 'v0.0.544'),
     ('inceptionv3', '0561', '4ddea4df44f132ffc9e2b22b1e7d686f8b59703b', 'v0.0.92'),
     ('inceptionv4', '0487', '75970908c643ff9a4cd681ab82d21fb56e3604cd', 'v0.0.543'),
-    ('inceptionresnetv2', '0492', '3d3de82bb9db27b260603fe2f956ad929c3eb277', 'v0.0.107'),
+    ('inceptionresnetv2', '0472', '178ff37acc2c10d9c770bd0ae14d4aec77aff683', 'v0.0.547'),
     ('polynet', '0450', '6dc7028b0edc48c452f83dd38448b1242c554a5e', 'v0.0.96'),
     ('nasnet_4a1056', '0790', '92b4789ba1ad62d39ff7aac4ddbb21af45e84d02', 'v0.0.495'),
     ('nasnet_6a4032', '0422', 'd49d46631abda0ec7ac4a0076e6f8d05bf99b7d1', 'v0.0.101'),

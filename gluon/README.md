@@ -441,7 +441,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | Xception | 20.43 | 5.11 | 22,855,952 | 8,403.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/xception-0511-9755eb77.params.log)) |
 | InceptionV3 | 21.22 | 5.59 | 23,834,568 | 5,743.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0559-6c087967.params.log)) |
 | InceptionV4 | 19.83 | 4.88 | 42,679,816 | 12,304.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/inceptionv4-0488-a828ae6c.params.log)) |
-| InceptionResNetV2 | 19.96 | 4.94 | 55,843,464 | 13,188.64M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0494-3328f7fa.params.log)) |
+| InceptionResNetV2 | 19.48 | 4.70 | 55,843,464 | 13,188.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.547/inceptionresnetv2-0470-4ea29355.params.log)) |
 | PolyNet | 19.09 | 4.53 | 95,366,600 | 34,821.34M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0453-74280314.params.log)) |
 | NASNet-A 4@1056 | 25.16 | 7.90 | 5,289,978 | 584.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/nasnet_4a1056-0790-f89dd74f.params.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |

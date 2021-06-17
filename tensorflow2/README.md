@@ -392,7 +392,7 @@ Some remarks:
 | Xception | 20.41 | 5.20 | 22,855,952 | 8,403.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.544/xception-0520-9b570c49.tf2.h5.log)) |
 | InceptionV3 | 21.11 | 5.63 | 23,834,568 | 5,743.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/inceptionv3-0563-b0094c1c.tf2.h5.log)) |
 | InceptionV4 | 19.94 | 5.06 | 42,679,816 | 12,304.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.543/inceptionv4-0506-62135f80.tf2.h5.log)) |
-| InceptionResNetV2 | 20.00 | 4.95 | 55,843,464 | 13,188.64M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/inceptionresnetv2-0495-3e2cc545.tf2.h5.log)) |
+| InceptionResNetV2 | 19.43 | 4.70 | 55,843,464 | 13,188.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.547/inceptionresnetv2-0470-7f761d81.tf2.h5.log)) |
 | PolyNet | 19.09 | 4.51 | 95,366,600 | 34,821.34M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/polynet-0451-e752c86b.tf2.h5.log)) |
 | NASNet-A 4@1056 | 25.67 | 8.15 | 5,289,978 | 584.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/nasnet_4a1056-0815-5b38d08a.tf2.h5.log)) |
 | NASNet-A 6@4032 | 18.24 | 4.27 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.428/nasnet_6a4032-0427-1f0d2198.tf2.h5.log)) |

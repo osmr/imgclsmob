@@ -292,7 +292,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('xception', '0516', 'a75b50eceb5fdfb1e1bfaada6820a448ce40e593', 'v0.0.544', 'Xception', '1610.02357', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('inceptionv3', '0565', 'cf4061800bc1dc3b090920fc9536d8ccc15bb86e', 'v0.0.92', 'InceptionV3', '1512.00567', 'in1k', 299, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('inceptionv4', '0488', '4ae4f331a5ff649e39626fc49cd5c24b8159cd8c', 'v0.0.543', 'InceptionV4', '1602.07261', 'in1k', 299, 0.875, 200, ''),  # noqa
-    ('inceptionresnetv2', '0490', '1d1b4d184e6d41091c5ac3321d99fa554b498dbe', 'v0.0.107', 'InceptionResNetV2', '1602.07261', 'in1k', 299, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('inceptionresnetv2', '0474', '19f51781f8a454803207e319289f404d50e252cb', 'v0.0.547', 'InceptionResNetV2', '1602.07261', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('polynet', '0452', '6a1b295dad3f261b48e845f1b283e4eef3ab5a0b', 'v0.0.96', 'PolyNet', '1611.05725', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('nasnet_4a1056', '0803', '44f5ecbe03da2cd21803c555366121e29b207907', 'v0.0.495', 'NASNet-A 4@1056', '1707.07012', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('nasnet_6a4032', '0421', 'f354d28f4acdde399e081260c3f46152eca5d27e', 'v0.0.101', 'NASNet-A 6@4032', '1707.07012', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa

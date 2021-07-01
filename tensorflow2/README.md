@@ -246,7 +246,7 @@ Some remarks:
 | RegNetX-8.0GF | 19.62 | 4.66 | 39,572,648 | 8,017.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0466-c101c524.tf2.h5.log)) |
 | RegNetX-12GF | 19.96 | 5.21 | 46,106,056 | 12,124.22M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/regnetx120-0521-7eb9799a.tf2.h5.log)) |
 | RegNetX-16GF | 19.11 | 4.58 | 54,278,536 | 15,986.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0458-428d1dc3.tf2.h5.log)) |
-| RegNetX-32GF | 19.59 | 4.85 | 107,811,560 | 31,790.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0485-c11d938f.tf2.h5.log)) |
+| RegNetX-32GF | 17.86 | 3.95 | 107,811,560 | 31,790.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.548/regnetx320-0395-b7354725.tf2.h5.log)) |
 | RegNetY-200MF | 28.49 | 9.53 | 3,162,996 | 203.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0953-8935adba.tf2.h5.log)) |
 | RegNetY-400MF | 24.82 | 7.50 | 4,344,144 | 410.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0750-65a10212.tf2.h5.log)) |
 | RegNetY-600MF | 23.58 | 7.00 | 6,055,160 | 610.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety006-0700-af7dca34.tf2.h5.log)) |
@@ -258,7 +258,7 @@ Some remarks:
 | RegNetY-8.0GF | 18.77 | 4.39 | 39,180,068 | 7,996.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0439-e9b5f16a.tf2.h5.log)) |
 | RegNetY-12GF | 18.49 | 4.29 | 51,822,544 | 12,132.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.526/regnety120-0429-1d6a27ba.tf2.h5.log)) |
 | RegNetY-16GF | 18.67 | 4.29 | 83,590,140 | 15,944.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/regnety160-0429-5a9e1191.tf2.h5.log)) |
-| RegNetY-32GF | 19.10 | 4.58 | 145,046,770 | 32,317.66M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety320-0458-b9ceda18.tf2.h5.log)) |
+| RegNetY-32GF | 18.73 | 4.26 | 145,046,770 | 32,317.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.548/regnety320-0426-f994590f.tf2.h5.log)) |
 | PyramidNet-101 (a=360) | 20.42 | 5.20 | 42,455,070 | 8,743.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-a0d72160.tf2.h5.log)) |
 | DiracNetV2-18 | 30.59 | 11.13 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet18v2-1113-4d687b74.tf2.h5.log)) |
 | DiracNetV2-34 | 27.92 | 9.50 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet34v2-0950-161d97fd.tf2.h5.log)) |

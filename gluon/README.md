@@ -284,7 +284,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetX-8.0GF | 19.62 | 4.66 | 39,572,648 | 8,017.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/regnetx080-0466-4086910a.params.log)) |
 | RegNetX-12GF | 19.99 | 5.18 | 46,106,056 | 12,124.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/regnetx120-0518-ea20b368.params.log)) |
 | RegNetX-16GF | 19.12 | 4.56 | 54,278,536 | 15,986.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.532/regnetx160-0456-941840a3.params.log)) |
-| RegNetX-32GF | 19.57 | 4.89 | 107,811,560 | 31,790.18M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0489-80ef5db7.params.log)) |
+| RegNetX-32GF | 17.83 | 3.94 | 107,811,560 | 31,790.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.548/regnetx320-0394-a120c8d2.params.log)) |
 | RegNetY-200MF | 28.50 | 9.53 | 3,162,996 | 203.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0953-b37fcac0.params.log)) |
 | RegNetY-400MF | 24.85 | 7.47 | 4,344,144 | 409.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0747-5626bdf4.params.log)) |
 | RegNetY-600MF | 23.59 | 6.97 | 6,055,160 | 609.91M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety006-0697-81372679.params.log)) |
@@ -296,7 +296,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetY-8.0GF | 18.78 | 4.36 | 39,180,068 | 7,994.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0436-4cd7fc61.params.log)) |
 | RegNetY-12GF | 18.51 | 4.31 | 51,822,544 | 12,129.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.526/regnety120-0431-effa35b6.params.log)) |
 | RegNetY-16GF | 18.63 | 4.30 | 83,590,140 | 15,941.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/regnety160-0430-82731569.params.log)) |
-| RegNetY-32GF | 19.10 | 4.58 | 145,046,770 | 32,313.76M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety320-0458-900b9591.params.log)) |
+| RegNetY-32GF | 18.75 | 4.27 | 145,046,770 | 32,313.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.548/regnety320-0427-c3ed4596.params.log)) |
 | PyramidNet-101 (a=360) | 20.41 | 5.20 | 42,455,070 | 8,743.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-3a98a2bf.params.log)) |
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
 | DiracNetV2-34 | 27.93 | 9.46 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet34v2-0946-1faa6f12.params.log)) |

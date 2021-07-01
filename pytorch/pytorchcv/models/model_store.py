@@ -136,11 +136,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx080', '0486', '1d94db030638ab1dd01c644be700a14e5d05ca74', 'v0.0.515', 'RegNetX-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx120', '0532', 'a93ee3a7abdd3b6b1d117861d02fc7a344185458', 'v0.0.542', 'RegNetX-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx160', '0477', 'bd9f3534c727d3e69c410b1909253cce4815385e', 'v0.0.532', 'RegNetX-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnetx320', '0494', '54a1c651c4a248af6fc64f34fce27ede65b32785', 'v0.0.473', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety002', '0980', '57f04168f284797b799d624d906f5d38dcf23177', 'v0.0.476', 'RegNetY-200MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety004', '0769', '8c36573f17d3ef2ab8770be2593e94d714b035d7', 'v0.0.481', 'RegNetY-400MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety006', '0712', 'd6401a374a2c35ed1b2ac29a885438834c38cd0a', 'v0.0.483', 'RegNetY-600MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety008', '0660', 'ed298c233ef1ce2e3f82a6d23be1eebd43afdd75', 'v0.0.483', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx320', '0413', '34bc3cd236481d9b96d3405f58855c7582270583', 'v0.0.548', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety002', '0980', '57f04168f284797b799d624d906f5d38dcf23177', 'v0.0.476', 'RegNetY-200MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety004', '0769', '8c36573f17d3ef2ab8770be2593e94d714b035d7', 'v0.0.481', 'RegNetY-400MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety006', '0712', 'd6401a374a2c35ed1b2ac29a885438834c38cd0a', 'v0.0.483', 'RegNetY-600MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety008', '0660', 'ed298c233ef1ce2e3f82a6d23be1eebd43afdd75', 'v0.0.483', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety016', '0581', 'b45eccd6d1a80dc6e5608abd89c79db7547f2735', 'v0.0.486', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety032', '0404', 'cb3314864b68dfd2e0037928a3b635c81f86ccb2', 'v0.0.473', 'RegNetY-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety040', '0470', '052d76810aca2267e217a219d600299acc171c40', 'v0.0.494', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -148,7 +148,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety080', '0448', 'c084bf6a0ee2f7722396622fb7865ee0c19b7244', 'v0.0.516', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety120', '0442', 'bf25956032eb6d98134a8e8b0e4640324cc92e59', 'v0.0.526', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety160', '0444', 'e7e05d91c588a308e1676163fd3ed914b61ab12e', 'v0.0.527', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety320', '0474', '643155ebbf529baf5c36d0894ebba86bdf789cc8', 'v0.0.473', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety320', '0443', '9fb5d9e8622853fa49a6eb1b0c849c03c46931f2', 'v0.0.548', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('pyramidnet101_a360', '0543', '7f1747f84b83b504ece3eb2bc3924d36343358ad', 'v0.0.507', 'PyramidNet-101 (a=360)', '1610.02915', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('diracnet18v2', '1170', 'e06737707a1f5a5c7fe4e57da92ed890b034cb9a', 'v0.0.111', 'DiracNetV2-18', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa
     ('diracnet34v2', '0993', 'a6a661c0c3e96af320e5b9bf65a6c8e5e498a474', 'v0.0.111', 'DiracNetV2-34', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa

@@ -598,6 +598,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('quartznet15x5_ca', '0842', '0e45996ea5e41e9a0ed02b5447181aadb18185c7', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
     ('quartznet15x5_pl', '1359', 'fe5ab9ef02b426673c5b2c8616a7229f48188219', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
     ('quartznet15x5_ru', '1647', '5fcce8e0ab605a12b817045cbc84316b9cf312fc', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_ru34', '0968', 'a3976fa20f652ec9b3324f6d5ee22a7df2314dd7', 'v0.0.549', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

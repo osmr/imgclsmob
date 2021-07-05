@@ -873,6 +873,7 @@ Some remarks:
 | QuartzNet 15x5 | Ca | 8.42 | 18,934,631 | 939.00M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ca-0842-2561a970.params.log)) |
 | QuartzNet 15x5 | Pl | 13.59 | 18,929,506 | 938.74M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_pl-1359-eeb19aca.params.log)) |
 | QuartzNet 15x5 | Ru | 16.47 | 18,930,531 | 938.79M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ru-1647-25a17964.params.log)) |
+| QuartzNet 15x5 | Ru/34 | 9.68 | 18,929,506 | 938.74M | From [sberdevices/golos] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.549/quartznet15x5_ru34-0968-518bc447.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
@@ -911,3 +912,4 @@ Some remarks:
 [zllrunning/face...Torch]: https://github.com/zllrunning/face-parsing.PyTorch
 [MCG-NKU/SCNet]: https://github.com/MCG-NKU/SCNet
 [NVIDIA/NeMo]: https://github.com/NVIDIA/NeMo
+[sberdevices/golos]: https://github.com/sberdevices/golos

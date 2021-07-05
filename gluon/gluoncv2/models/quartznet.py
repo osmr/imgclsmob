@@ -5,7 +5,8 @@
 """
 
 __all__ = ['quartznet5x5_en_ls', 'quartznet15x5_en', 'quartznet15x5_en_nr', 'quartznet15x5_fr', 'quartznet15x5_de',
-           'quartznet15x5_it', 'quartznet15x5_es', 'quartznet15x5_ca', 'quartznet15x5_pl', 'quartznet15x5_ru']
+           'quartznet15x5_it', 'quartznet15x5_es', 'quartznet15x5_ca', 'quartznet15x5_pl', 'quartznet15x5_ru',
+           'quartznet15x5_ru34']
 
 from .jasper import get_jasper
 
@@ -83,7 +84,7 @@ def quartznet15x5_fr(classes=43, **kwargs):
 
     Parameters:
     ----------
-    classes : int, default 29
+    classes : int, default 43
         Number of classification classes (number of graphemes).
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -106,7 +107,7 @@ def quartznet15x5_de(classes=32, **kwargs):
 
     Parameters:
     ----------
-    classes : int, default 29
+    classes : int, default 32
         Number of classification classes (number of graphemes).
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -231,6 +232,28 @@ def quartznet15x5_ru(classes=35, **kwargs):
                       model_name="quartznet15x5_ru", **kwargs)
 
 
+def quartznet15x5_ru34(classes=34, **kwargs):
+    """
+    QuartzNet 15x5 model for Russian language (32 graphemes) from 'QuartzNet: Deep Automatic Speech Recognition with 1D
+    Time-Channel Separable Convolutions,' https://arxiv.org/abs/1910.10261.
+
+    Parameters:
+    ----------
+    classes : int, default 34
+        Number of classification classes (number of graphemes).
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    vocabulary = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т',
+                  'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
+    return get_jasper(classes=classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
+                      model_name="quartznet15x5_ru34", **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = net.collect_params()
@@ -260,6 +283,7 @@ def _test():
         quartznet15x5_ca,
         quartznet15x5_pl,
         quartznet15x5_ru,
+        quartznet15x5_ru34,
     ]
 
     for model in models:
@@ -285,6 +309,7 @@ def _test():
         assert (model != quartznet15x5_ca or weight_count == 18934631)
         assert (model != quartznet15x5_pl or weight_count == 18929506)
         assert (model != quartznet15x5_ru or weight_count == 18930531)
+        assert (model != quartznet15x5_ru34 or weight_count == 18929506)
 
         batch = 3
         seq_len = np.random.randint(60, 150, batch)

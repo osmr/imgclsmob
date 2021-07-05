@@ -1,6 +1,7 @@
 __all__ = ['oth_quartznet5x5_en_ls', 'oth_quartznet15x5_en', 'oth_quartznet15x5_en_nr', 'oth_quartznet15x5_fr',
            'oth_quartznet15x5_de', 'oth_quartznet15x5_it', 'oth_quartznet15x5_es', 'oth_quartznet15x5_ca',
-           'oth_quartznet15x5_pl', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr']
+           'oth_quartznet15x5_pl', 'oth_quartznet15x5_ru', 'oth_jasperdr10x5_en', 'oth_jasperdr10x5_en_nr',
+           'oth_quartznet15x5_ru34']
 
 import torch.nn as nn
 # import torch.nn.functional as F
@@ -231,6 +232,15 @@ def oth_jasperdr10x5_en_nr(pretrained=False, num_classes=29, **kwargs):
     return net#, raw_net
 
 
+def oth_quartznet15x5_ru34(pretrained=False, num_classes=34, **kwargs):
+    from nemo.collections.asr.models import EncDecCTCModel
+    quartznet_nemo_path = path_pref + "QuartzNet15x5_golos_1a63a2d8.nemo"
+    raw_net = EncDecCTCModel.restore_from(quartznet_nemo_path)
+    net = QuartzNet(raw_net=raw_net, num_classes=num_classes)
+    net = net.cpu()
+    return net#, raw_net
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -244,7 +254,7 @@ def _test():
     import numpy as np
     import torch
 
-    pretrained = False
+    pretrained = True
     audio_features = 64
 
     models = [
@@ -255,11 +265,12 @@ def _test():
         # oth_quartznet15x5_de,
         # oth_quartznet15x5_it,
         # oth_quartznet15x5_es,
-        oth_quartznet15x5_ca,
-        oth_quartznet15x5_pl,
-        oth_quartznet15x5_ru,
-        oth_jasperdr10x5_en,
-        oth_jasperdr10x5_en_nr,
+        # oth_quartznet15x5_ca,
+        # oth_quartznet15x5_pl,
+        # oth_quartznet15x5_ru,
+        # oth_jasperdr10x5_en,
+        # oth_jasperdr10x5_en_nr,
+        oth_quartznet15x5_ru34,
     ]
 
     for model in models:
@@ -284,6 +295,7 @@ def _test():
         assert (model != oth_quartznet15x5_ru or weight_count == 18930531)
         assert (model != oth_jasperdr10x5_en or weight_count == 332632349)
         assert (model != oth_jasperdr10x5_en_nr or weight_count == 332632349)
+        assert (model != oth_quartznet15x5_ru34 or weight_count == 18929506)
 
         batch = 3
         seq_len = np.random.randint(60, 150, batch)

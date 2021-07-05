@@ -1202,6 +1202,7 @@ _models = {
     'quartznet15x5_ca': quartznet15x5_ca,
     'quartznet15x5_pl': quartznet15x5_pl,
     'quartznet15x5_ru': quartznet15x5_ru,
+    'quartznet15x5_ru34': quartznet15x5_ru34,
 
     # 'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
     # 'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,

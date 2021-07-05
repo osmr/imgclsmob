@@ -1074,6 +1074,7 @@ _models = {
     'quartznet15x5_ca': quartznet15x5_ca,
     'quartznet15x5_pl': quartznet15x5_pl,
     'quartznet15x5_ru': quartznet15x5_ru,
+    'quartznet15x5_ru34': quartznet15x5_ru34,
 }
 
 

@@ -1170,6 +1170,7 @@ _models = {
     'quartznet15x5_ca': quartznet15x5_ca,
     'quartznet15x5_pl': quartznet15x5_pl,
     'quartznet15x5_ru': quartznet15x5_ru,
+    'quartznet15x5_ru34': quartznet15x5_ru34,
 
     'oth_quartznet5x5_en_ls': oth_quartznet5x5_en_ls,
     'oth_quartznet15x5_en': oth_quartznet15x5_en,
@@ -1183,6 +1184,7 @@ _models = {
     'oth_quartznet15x5_ru': oth_quartznet15x5_ru,
     'oth_jasperdr10x5_en': oth_jasperdr10x5_en,
     'oth_jasperdr10x5_en_nr': oth_jasperdr10x5_en_nr,
+    'oth_quartznet15x5_ru34': oth_quartznet15x5_ru34,
 
     # 'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
     # 'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,

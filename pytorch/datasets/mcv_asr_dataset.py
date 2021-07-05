@@ -39,7 +39,7 @@ class McvDataset(AsrDataset):
             root=root,
             mode=mode,
             transform=transform)
-        assert (lang in ("en", "fr", "de", "it", "es", "ca", "pl", "ru"))
+        assert (lang in ("en", "fr", "de", "it", "es", "ca", "pl", "ru", "ru34"))
         self.vocabulary = self.get_vocabulary_for_lang(lang=lang)
 
         desired_audio_sample_rate = 16000
@@ -169,7 +169,7 @@ class McvDataset(AsrDataset):
                 text = re.sub("v", "w", text)
                 text = "".join((c if c in self.vocabulary else unidecode.unidecode(c)) for c in text)
                 text = re.sub("\s+", " ", text)
-            elif lang == "ru":
+            elif lang in ("ru", "ru34"):
                 text = re.sub("по-", "по", text)
                 text = re.sub("во-", "во", text)
                 text = re.sub("-то", "то", text)
@@ -187,6 +187,8 @@ class McvDataset(AsrDataset):
                 text = re.sub("x", "кс", text)
                 text = re.sub("h", "х", text)
                 text = re.sub("\s+", " ", text)
+                if lang == "ru34":
+                    text = re.sub("ё", "е", text)
 
             text = re.sub(" $", "", text)
             # print("<== {}".format(text))
@@ -217,7 +219,7 @@ class McvDataset(AsrDataset):
         list of str
             Vocabulary set.
         """
-        assert (lang in ("en", "fr", "de", "it", "es", "ca", "pl", "ru"))
+        assert (lang in ("en", "fr", "de", "it", "es", "ca", "pl", "ru", "ru34"))
         if lang == "en":
             return [' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
                     't', 'u', 'v', 'w', 'x', 'y', 'z', "'"]
@@ -243,6 +245,9 @@ class McvDataset(AsrDataset):
         elif lang == "ru":
             return [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с',
                     'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
+        elif lang == "ru34":
+            return [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т',
+                    'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
         else:
             return None
 

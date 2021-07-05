@@ -54,7 +54,8 @@ class McvDataset(AsrDataset):
         root_dir_path = os.path.expanduser(root)
         assert os.path.exists(root_dir_path)
 
-        data_dir_path = os.path.join(root_dir_path, lang)
+        lang_ = lang if lang != "ru34" else "ru"
+        data_dir_path = os.path.join(root_dir_path, lang_)
         assert os.path.exists(data_dir_path)
 
         metainfo_file_path = os.path.join(data_dir_path, subset + ".tsv")

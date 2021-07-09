@@ -9,85 +9,8 @@ __all__ = ['InceptionResNetV2', 'inceptionresnetv2']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, AvgPool2d, Conv2d, BatchNorm, SimpleSequential, Concurrent, conv1x1, flatten,\
-    is_channels_first
-
-
-class InceptConv(nn.Layer):
-    """
-    InceptionResNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 data_format="channels_last",
-                 **kwargs):
-        super(InceptConv, self).__init__(**kwargs)
-        self.conv = Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=padding,
-            use_bias=False,
-            data_format=data_format,
-            name="conv")
-        self.bn = BatchNorm(
-            momentum=0.1,
-            epsilon=1e-3,
-            data_format=data_format,
-            name="bn")
-        self.activ = nn.ReLU()
-
-    def call(self, x, training=None):
-        x = self.conv(x)
-        x = self.bn(x, training=training)
-        x = self.activ(x)
-        return x
-
-
-def incept_conv1x1(in_channels,
-                   out_channels,
-                   data_format="channels_last",
-                   **kwargs):
-    """
-    1x1 version of the InceptionResNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    return InceptConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        data_format=data_format,
-        **kwargs)
+from .common import MaxPool2d, AvgPool2d, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent,\
+    conv1x1, flatten, is_channels_first
 
 
 class MaxPoolBranch(nn.Layer):
@@ -125,12 +48,15 @@ class AvgPoolBranch(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(AvgPoolBranch, self).__init__(**kwargs)
@@ -141,9 +67,10 @@ class AvgPoolBranch(nn.Layer):
             # count_include_pad=False,
             data_format=data_format,
             name="pool")
-        self.conv = incept_conv1x1(
+        self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv")
 
@@ -163,18 +90,22 @@ class Conv1x1Branch(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(Conv1x1Branch, self).__init__(**kwargs)
-        self.conv = incept_conv1x1(
+        self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv")
 
@@ -199,6 +130,8 @@ class ConvSeqBranch(nn.Layer):
         List of strides of the convolution.
     padding_list : list of tuple of int or tuple of tuple/list of 2 int
         List of padding values for convolution layers.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -208,6 +141,7 @@ class ConvSeqBranch(nn.Layer):
                  kernel_size_list,
                  strides_list,
                  padding_list,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(ConvSeqBranch, self).__init__(**kwargs)
@@ -218,12 +152,13 @@ class ConvSeqBranch(nn.Layer):
         self.conv_list = SimpleSequential(name="conv_list")
         for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                 out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.children.append(InceptConv(
+            self.conv_list.children.append(ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
+                bn_eps=bn_eps,
                 data_format=data_format,
                 name="conv{}".format(i + 1)))
             in_channels = out_channels
@@ -239,10 +174,13 @@ class InceptionAUnit(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(InceptionAUnit, self).__init__(**kwargs)
@@ -255,6 +193,7 @@ class InceptionAUnit(nn.Layer):
         self.branches.children.append(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=32,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -263,6 +202,7 @@ class InceptionAUnit(nn.Layer):
             kernel_size_list=(1, 3),
             strides_list=(1, 1),
             padding_list=(0, 1),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.branches.children.append(ConvSeqBranch(
@@ -271,6 +211,7 @@ class InceptionAUnit(nn.Layer):
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 1),
             padding_list=(0, 1, 1),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch3"))
         self.conv = conv1x1(
@@ -296,10 +237,13 @@ class ReductionAUnit(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(ReductionAUnit, self).__init__(**kwargs)
@@ -314,6 +258,7 @@ class ReductionAUnit(nn.Layer):
             kernel_size_list=(3,),
             strides_list=(2,),
             padding_list=(0,),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -322,6 +267,7 @@ class ReductionAUnit(nn.Layer):
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 2),
             padding_list=(0, 1, 0),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.branches.children.append(MaxPoolBranch(
@@ -339,10 +285,13 @@ class InceptionBUnit(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(InceptionBUnit, self).__init__(**kwargs)
@@ -355,6 +304,7 @@ class InceptionBUnit(nn.Layer):
         self.branches.children.append(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=192,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -363,6 +313,7 @@ class InceptionBUnit(nn.Layer):
             kernel_size_list=(1, (1, 7), (7, 1)),
             strides_list=(1, 1, 1),
             padding_list=(0, (0, 3), (3, 0)),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.conv = conv1x1(
@@ -388,10 +339,13 @@ class ReductionBUnit(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(ReductionBUnit, self).__init__(**kwargs)
@@ -406,6 +360,7 @@ class ReductionBUnit(nn.Layer):
             kernel_size_list=(1, 3),
             strides_list=(1, 2),
             padding_list=(0, 0),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -414,6 +369,7 @@ class ReductionBUnit(nn.Layer):
             kernel_size_list=(1, 3),
             strides_list=(1, 2),
             padding_list=(0, 0),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.branches.children.append(ConvSeqBranch(
@@ -422,6 +378,7 @@ class ReductionBUnit(nn.Layer):
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 2),
             padding_list=(0, 1, 0),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch3"))
         self.branches.children.append(MaxPoolBranch(
@@ -439,6 +396,8 @@ class InceptionCUnit(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     scale : float, default 1.0
         Scale value for residual branch.
     activate : bool, default True
@@ -447,6 +406,7 @@ class InceptionCUnit(nn.Layer):
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  scale=0.2,
                  activate=True,
                  data_format="channels_last",
@@ -462,6 +422,7 @@ class InceptionCUnit(nn.Layer):
         self.branches.children.append(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=192,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -470,6 +431,7 @@ class InceptionCUnit(nn.Layer):
             kernel_size_list=(1, (1, 3), (3, 1)),
             strides_list=(1, 1, 1),
             padding_list=(0, (0, 1), (1, 0)),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.conv = conv1x1(
@@ -497,10 +459,13 @@ class InceptBlock5b(nn.Layer):
 
     Parameters:
     ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  data_format="channels_last",
                  **kwargs):
         super(InceptBlock5b, self).__init__(**kwargs)
@@ -512,6 +477,7 @@ class InceptBlock5b(nn.Layer):
         self.branches.children.append(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=96,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch1"))
         self.branches.children.append(ConvSeqBranch(
@@ -520,6 +486,7 @@ class InceptBlock5b(nn.Layer):
             kernel_size_list=(1, 5),
             strides_list=(1, 1),
             padding_list=(0, 2),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch2"))
         self.branches.children.append(ConvSeqBranch(
@@ -528,11 +495,13 @@ class InceptBlock5b(nn.Layer):
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 1),
             padding_list=(0, 1, 1),
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch3"))
         self.branches.children.append(AvgPoolBranch(
             in_channels=in_channels,
             out_channels=64,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="branch4"))
 
@@ -549,36 +518,39 @@ class InceptInitBlock(nn.Layer):
     ----------
     in_channels : int
         Number of input channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 bn_eps,
                  in_channels,
                  data_format="channels_last",
                  **kwargs):
         super(InceptInitBlock, self).__init__(**kwargs)
-        self.conv1 = InceptConv(
+        self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=32,
-            kernel_size=3,
             strides=2,
             padding=0,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv1")
-        self.conv2 = InceptConv(
+        self.conv2 = conv3x3_block(
             in_channels=32,
             out_channels=32,
-            kernel_size=3,
             strides=1,
             padding=0,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv2")
-        self.conv3 = InceptConv(
+        self.conv3 = conv3x3_block(
             in_channels=32,
             out_channels=64,
-            kernel_size=3,
             strides=1,
             padding=1,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv3")
         self.pool1 = MaxPool2d(
@@ -587,20 +559,20 @@ class InceptInitBlock(nn.Layer):
             padding=0,
             data_format=data_format,
             name="pool1")
-        self.conv4 = InceptConv(
+        self.conv4 = conv1x1_block(
             in_channels=64,
             out_channels=80,
-            kernel_size=1,
             strides=1,
             padding=0,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv4")
-        self.conv5 = InceptConv(
+        self.conv5 = conv3x3_block(
             in_channels=80,
             out_channels=192,
-            kernel_size=3,
             strides=1,
             padding=0,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="conv5")
         self.pool2 = MaxPool2d(
@@ -610,6 +582,7 @@ class InceptInitBlock(nn.Layer):
             data_format=data_format,
             name="pool2")
         self.block = InceptBlock5b(
+            bn_eps=bn_eps,
             data_format=data_format,
             name="block")
 
@@ -634,6 +607,8 @@ class InceptionResNetV2(tf.keras.Model):
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
@@ -645,6 +620,7 @@ class InceptionResNetV2(tf.keras.Model):
     """
     def __init__(self,
                  dropout_rate=0.0,
+                 bn_eps=1e-5,
                  in_channels=3,
                  in_size=(299, 299),
                  classes=1000,
@@ -661,6 +637,7 @@ class InceptionResNetV2(tf.keras.Model):
         self.features = SimpleSequential(name="features")
         self.features.add(InceptInitBlock(
             in_channels=in_channels,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="init_block"))
 
@@ -673,18 +650,21 @@ class InceptionResNetV2(tf.keras.Model):
                     unit = normal_units[i]
                 if (i == len(layers) - 1) and (j == layers_per_stage - 1):
                     stage.add(unit(
+                        bn_eps=bn_eps,
                         scale=1.0,
                         activate=False,
                         data_format=data_format,
                         name="unit{}".format(j + 1)))
                 else:
                     stage.add(unit(
+                        bn_eps=bn_eps,
                         data_format=data_format,
                         name="unit{}".format(j + 1)))
             self.features.add(stage)
-        self.features.add(incept_conv1x1(
+        self.features.add(conv1x1_block(
             in_channels=2080,
             out_channels=1536,
+            bn_eps=bn_eps,
             data_format=data_format,
             name="final_block"))
         self.features.add(nn.AveragePooling2D(
@@ -726,7 +706,6 @@ def get_inceptionresnetv2(model_name=None,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-
     net = InceptionResNetV2(**kwargs)
 
     if pretrained:
@@ -757,7 +736,7 @@ def inceptionresnetv2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
+    return get_inceptionresnetv2(model_name="inceptionresnetv2", bn_eps=1e-3, **kwargs)
 
 
 def _test():

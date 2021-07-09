@@ -505,6 +505,7 @@ class ConvBlock(Chain):
 def conv1x1_block(in_channels,
                   out_channels,
                   stride=1,
+                  pad=0,
                   groups=1,
                   use_bias=False,
                   use_bn=True,
@@ -521,6 +522,8 @@ def conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 0
+        Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
     use_bias : bool, default False
@@ -537,7 +540,7 @@ def conv1x1_block(in_channels,
         out_channels=out_channels,
         ksize=1,
         stride=stride,
-        pad=0,
+        pad=pad,
         groups=groups,
         use_bias=use_bias,
         use_bn=use_bn,

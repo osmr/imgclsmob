@@ -12,72 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, SimpleSequential, Concurrent
-
-
-class InceptConv(Chain):
-    """
-    InceptionResNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(InceptConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                decay=0.1,
-                eps=1e-3)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def incept_conv1x1(in_channels,
-                   out_channels):
-    """
-    1x1 version of the InceptionResNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return InceptConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0)
+from common import conv1x1, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent
 
 
 class MaxPoolBranch(Chain):
@@ -109,10 +44,13 @@ class AvgPoolBranch(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(AvgPoolBranch, self).__init__()
         with self.init_scope():
             self.pool = partial(
@@ -121,9 +59,10 @@ class AvgPoolBranch(Chain):
                 stride=1,
                 pad=1,
                 pad_value=None)
-            self.conv = incept_conv1x1(
+            self.conv = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=out_channels)
+                out_channels=out_channels,
+                bn_eps=bn_eps)
 
     def __call__(self, x):
         x = self.pool(x)
@@ -141,15 +80,19 @@ class Conv1x1Branch(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(Conv1x1Branch, self).__init__()
         with self.init_scope():
-            self.conv = incept_conv1x1(
+            self.conv = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=out_channels)
+                out_channels=out_channels,
+                bn_eps=bn_eps)
 
     def __call__(self, x):
         x = self.conv(x)
@@ -172,13 +115,16 @@ class ConvSeqBranch(Chain):
         List of strides of the convolution.
     padding_list : list of tuple of int or tuple of tuple/list of 2 int
         List of padding values for convolution layers.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
                  out_channels_list,
                  kernel_size_list,
                  strides_list,
-                 padding_list):
+                 padding_list,
+                 bn_eps):
         super(ConvSeqBranch, self).__init__()
         assert (len(out_channels_list) == len(kernel_size_list))
         assert (len(out_channels_list) == len(strides_list))
@@ -189,12 +135,13 @@ class ConvSeqBranch(Chain):
             with self.conv_list.init_scope():
                 for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                         out_channels_list, kernel_size_list, strides_list, padding_list)):
-                    setattr(self.conv_list, "conv{}".format(i + 1), InceptConv(
+                    setattr(self.conv_list, "conv{}".format(i + 1), ConvBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         ksize=kernel_size,
                         stride=strides,
-                        pad=padding))
+                        pad=padding,
+                        bn_eps=bn_eps))
                     in_channels = out_channels
 
     def __call__(self, x):
@@ -205,8 +152,14 @@ class ConvSeqBranch(Chain):
 class InceptionAUnit(Chain):
     """
     InceptionResNetV2 type Inception-A unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptionAUnit, self).__init__()
         self.scale = 0.17
         in_channels = 320
@@ -216,19 +169,22 @@ class InceptionAUnit(Chain):
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=32))
+                    out_channels=32,
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(32, 32),
                     kernel_size_list=(1, 3),
                     strides_list=(1, 1),
-                    padding_list=(0, 1)))
+                    padding_list=(0, 1),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch3", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(32, 48, 64),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 1),
-                    padding_list=(0, 1, 1)))
+                    padding_list=(0, 1, 1),
+                    bn_eps=bn_eps))
             self.conv = conv1x1(
                 in_channels=128,
                 out_channels=in_channels,
@@ -247,8 +203,14 @@ class InceptionAUnit(Chain):
 class ReductionAUnit(Chain):
     """
     InceptionResNetV2 type Reduction-A unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(ReductionAUnit, self).__init__()
         in_channels = 320
 
@@ -260,13 +222,15 @@ class ReductionAUnit(Chain):
                     out_channels_list=(384,),
                     kernel_size_list=(3,),
                     strides_list=(2,),
-                    padding_list=(0,)))
+                    padding_list=(0,),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(256, 256, 384),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 2),
-                    padding_list=(0, 1, 0)))
+                    padding_list=(0, 1, 0),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch3", MaxPoolBranch())
 
     def __call__(self, x):
@@ -277,8 +241,14 @@ class ReductionAUnit(Chain):
 class InceptionBUnit(Chain):
     """
     InceptionResNetV2 type Inception-B unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptionBUnit, self).__init__()
         self.scale = 0.10
         in_channels = 1088
@@ -288,13 +258,15 @@ class InceptionBUnit(Chain):
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=192))
+                    out_channels=192,
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(128, 160, 192),
                     kernel_size_list=(1, (1, 7), (7, 1)),
                     strides_list=(1, 1, 1),
-                    padding_list=(0, (0, 3), (3, 0))))
+                    padding_list=(0, (0, 3), (3, 0)),
+                    bn_eps=bn_eps))
             self.conv = conv1x1(
                 in_channels=384,
                 out_channels=in_channels,
@@ -313,8 +285,14 @@ class InceptionBUnit(Chain):
 class ReductionBUnit(Chain):
     """
     InceptionResNetV2 type Reduction-B unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(ReductionBUnit, self).__init__()
         in_channels = 1088
 
@@ -326,19 +304,22 @@ class ReductionBUnit(Chain):
                     out_channels_list=(256, 384),
                     kernel_size_list=(1, 3),
                     strides_list=(1, 2),
-                    padding_list=(0, 0)))
+                    padding_list=(0, 0),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(256, 288),
                     kernel_size_list=(1, 3),
                     strides_list=(1, 2),
-                    padding_list=(0, 0)))
+                    padding_list=(0, 0),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch3", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(256, 288, 320),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 2),
-                    padding_list=(0, 1, 0)))
+                    padding_list=(0, 1, 0),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch4", MaxPoolBranch())
 
     def __call__(self, x):
@@ -356,10 +337,13 @@ class InceptionCUnit(Chain):
         Scale value for residual branch.
     activate : bool, default True
         Whether activate the convolution block.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  scale=0.2,
-                 activate=True):
+                 activate=True,
+                 bn_eps=1e-5):
         super(InceptionCUnit, self).__init__()
         self.activate = activate
         self.scale = scale
@@ -370,13 +354,15 @@ class InceptionCUnit(Chain):
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=192))
+                    out_channels=192,
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(192, 224, 256),
                     kernel_size_list=(1, (1, 3), (3, 1)),
                     strides_list=(1, 1, 1),
-                    padding_list=(0, (0, 1), (1, 0))))
+                    padding_list=(0, (0, 1), (1, 0)),
+                    bn_eps=bn_eps))
             self.conv = conv1x1(
                 in_channels=448,
                 out_channels=in_channels,
@@ -397,8 +383,14 @@ class InceptionCUnit(Chain):
 class InceptBlock5b(Chain):
     """
     InceptionResNetV2 type Mixed-5b block.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptBlock5b, self).__init__()
         in_channels = 192
 
@@ -407,22 +399,26 @@ class InceptBlock5b(Chain):
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=96))
+                    out_channels=96,
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(48, 64),
                     kernel_size_list=(1, 5),
                     strides_list=(1, 1),
-                    padding_list=(0, 2)))
+                    padding_list=(0, 2),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch3", ConvSeqBranch(
                     in_channels=in_channels,
                     out_channels_list=(64, 96, 96),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 1),
-                    padding_list=(0, 1, 1)))
+                    padding_list=(0, 1, 1),
+                    bn_eps=bn_eps))
                 setattr(self.branches, "branch4", AvgPoolBranch(
                     in_channels=in_channels,
-                    out_channels=64))
+                    out_channels=64,
+                    bn_eps=bn_eps))
 
     def __call__(self, x):
         x = self.branches(x)
@@ -437,54 +433,57 @@ class InceptInitBlock(Chain):
     ----------
     in_channels : int
         Number of input channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 bn_eps):
         super(InceptInitBlock, self).__init__()
         with self.init_scope():
-            self.conv1 = InceptConv(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=32,
-                ksize=3,
                 stride=2,
-                pad=0)
-            self.conv2 = InceptConv(
+                pad=0,
+                bn_eps=bn_eps)
+            self.conv2 = conv3x3_block(
                 in_channels=32,
                 out_channels=32,
-                ksize=3,
                 stride=1,
-                pad=0)
-            self.conv3 = InceptConv(
+                pad=0,
+                bn_eps=bn_eps)
+            self.conv3 = conv3x3_block(
                 in_channels=32,
                 out_channels=64,
-                ksize=3,
                 stride=1,
-                pad=1)
+                pad=1,
+                bn_eps=bn_eps)
             self.pool1 = partial(
                 F.max_pooling_2d,
                 ksize=3,
                 stride=2,
                 pad=0,
                 cover_all=False)
-            self.conv4 = InceptConv(
+            self.conv4 = conv1x1_block(
                 in_channels=64,
                 out_channels=80,
-                ksize=1,
                 stride=1,
-                pad=0)
-            self.conv5 = InceptConv(
+                pad=0,
+                bn_eps=bn_eps)
+            self.conv5 = conv3x3_block(
                 in_channels=80,
                 out_channels=192,
-                ksize=3,
                 stride=1,
-                pad=0)
+                pad=0,
+                bn_eps=bn_eps)
             self.pool2 = partial(
                 F.max_pooling_2d,
                 ksize=3,
                 stride=2,
                 pad=0,
                 cover_all=False)
-            self.block = InceptBlock5b()
+            self.block = InceptBlock5b(bn_eps=bn_eps)
 
     def __call__(self, x):
         x = self.conv1(x)
@@ -507,6 +506,8 @@ class InceptionResNetV2(Chain):
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
@@ -516,6 +517,7 @@ class InceptionResNetV2(Chain):
     """
     def __init__(self,
                  dropout_rate=0.0,
+                 bn_eps=1e-5,
                  in_channels=3,
                  in_size=(299, 299),
                  classes=1000):
@@ -530,7 +532,8 @@ class InceptionResNetV2(Chain):
             self.features = SimpleSequential()
             with self.features.init_scope():
                 setattr(self.features, "init_block", InceptInitBlock(
-                    in_channels=in_channels))
+                    in_channels=in_channels,
+                    bn_eps=bn_eps))
 
                 for i, layers_per_stage in enumerate(layers):
                     stage = SimpleSequential()
@@ -541,14 +544,15 @@ class InceptionResNetV2(Chain):
                             else:
                                 unit = normal_units[i]
                             if (i == len(layers) - 1) and (j == layers_per_stage - 1):
-                                setattr(stage, "unit{}".format(j + 1), unit(scale=1.0, activate=False))
+                                setattr(stage, "unit{}".format(j + 1), unit(scale=1.0, activate=False, bn_eps=bn_eps))
                             else:
-                                setattr(stage, "unit{}".format(j + 1), unit())
+                                setattr(stage, "unit{}".format(j + 1), unit(bn_eps=bn_eps))
                     setattr(self.features, "stage{}".format(i + 1), stage)
 
-                setattr(self.features, 'final_conv', incept_conv1x1(
+                setattr(self.features, 'final_conv', conv1x1_block(
                     in_channels=2080,
-                    out_channels=1536))
+                    out_channels=1536,
+                    bn_eps=bn_eps))
                 setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=8,
@@ -590,7 +594,6 @@ def get_inceptionresnetv2(model_name=None,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-
     net = InceptionResNetV2(**kwargs)
 
     if pretrained:
@@ -618,7 +621,7 @@ def inceptionresnetv2(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
+    return get_inceptionresnetv2(model_name="inceptionresnetv2", bn_eps=1e-3, **kwargs)
 
 
 def _test():

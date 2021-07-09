@@ -653,7 +653,6 @@ def get_inceptionv4(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     net = InceptionV4(**kwargs)
 
     if pretrained:

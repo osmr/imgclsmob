@@ -616,7 +616,6 @@ def get_inceptionv3(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     init_block_channels = 192
     channels = [[256, 288, 288],
                 [768, 768, 768, 768, 768],

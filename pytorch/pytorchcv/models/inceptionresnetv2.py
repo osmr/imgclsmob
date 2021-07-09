@@ -565,7 +565,6 @@ def get_inceptionresnetv2(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     net = InceptionResNetV2(**kwargs)
 
     if pretrained:

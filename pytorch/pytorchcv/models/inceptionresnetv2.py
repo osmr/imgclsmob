@@ -9,7 +9,7 @@ __all__ = ['InceptionResNetV2', 'inceptionresnetv2']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, ConvBlock, conv1x1_block, Concurrent
+from .common import conv1x1, ConvBlock, conv1x1_block, conv3x3_block, Concurrent
 
 
 class MaxPoolBranch(nn.Module):
@@ -417,24 +417,21 @@ class InceptInitBlock(nn.Module):
                  in_channels,
                  bn_eps):
         super(InceptInitBlock, self).__init__()
-        self.conv1 = ConvBlock(
+        self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=32,
-            kernel_size=3,
             stride=2,
             padding=0,
             bn_eps=bn_eps)
-        self.conv2 = ConvBlock(
+        self.conv2 = conv3x3_block(
             in_channels=32,
             out_channels=32,
-            kernel_size=3,
             stride=1,
             padding=0,
             bn_eps=bn_eps)
-        self.conv3 = ConvBlock(
+        self.conv3 = conv3x3_block(
             in_channels=32,
             out_channels=64,
-            kernel_size=3,
             stride=1,
             padding=1,
             bn_eps=bn_eps)
@@ -442,17 +439,15 @@ class InceptInitBlock(nn.Module):
             kernel_size=3,
             stride=2,
             padding=0)
-        self.conv4 = ConvBlock(
+        self.conv4 = conv1x1_block(
             in_channels=64,
             out_channels=80,
-            kernel_size=1,
             stride=1,
             padding=0,
             bn_eps=bn_eps)
-        self.conv5 = ConvBlock(
+        self.conv5 = conv3x3_block(
             in_channels=80,
             out_channels=192,
-            kernel_size=3,
             stride=1,
             padding=0,
             bn_eps=bn_eps)

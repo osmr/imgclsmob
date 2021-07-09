@@ -12,7 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import conv1x1, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent
+from .common import conv1x1, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent
 
 
 class MaxPoolBranch(Chain):

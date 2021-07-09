@@ -10,97 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import Concurrent
-
-
-class InceptConv(nn.Module):
-    """
-    InceptionV4 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(InceptConv, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bn = nn.BatchNorm2d(
-            num_features=out_channels,
-            eps=1e-3,
-            momentum=0.1)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def incept_conv1x1(in_channels,
-                   out_channels):
-    """
-    1x1 version of the InceptionV4 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return InceptConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0)
-
-
-def incept_conv3x3(in_channels,
-                   out_channels,
-                   stride,
-                   padding=1):
-    """
-    3x3 version of the InceptionV4 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    """
-    return InceptConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=padding)
+from .common import ConvBlock, conv1x1_block, conv3x3_block, Concurrent
 
 
 class MaxPoolBranch(nn.Module):
@@ -129,19 +39,23 @@ class AvgPoolBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(AvgPoolBranch, self).__init__()
         self.pool = nn.AvgPool2d(
             kernel_size=3,
             stride=1,
             padding=1,
             count_include_pad=False)
-        self.conv = incept_conv1x1(
+        self.conv = conv1x1_block(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            bn_eps=bn_eps)
 
     def forward(self, x):
         x = self.pool(x)
@@ -159,14 +73,18 @@ class Conv1x1Branch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(Conv1x1Branch, self).__init__()
-        self.conv = incept_conv1x1(
+        self.conv = conv1x1_block(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            bn_eps=bn_eps)
 
     def forward(self, x):
         x = self.conv(x)
@@ -183,16 +101,20 @@ class Conv3x3Branch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_eps):
         super(Conv3x3Branch, self).__init__()
-        self.conv = incept_conv3x3(
+        self.conv = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=2,
-            padding=0)
+            padding=0,
+            bn_eps=bn_eps)
 
     def forward(self, x):
         x = self.conv(x)
@@ -215,13 +137,16 @@ class ConvSeqBranch(nn.Module):
         List of strides of the convolution.
     padding_list : list of tuple of int or tuple of tuple/list of 2 int
         List of padding values for convolution layers.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
                  out_channels_list,
                  kernel_size_list,
                  strides_list,
-                 padding_list):
+                 padding_list,
+                 bn_eps):
         super(ConvSeqBranch, self).__init__()
         assert (len(out_channels_list) == len(kernel_size_list))
         assert (len(out_channels_list) == len(strides_list))
@@ -230,12 +155,13 @@ class ConvSeqBranch(nn.Module):
         self.conv_list = nn.Sequential()
         for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                 out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.add_module("conv{}".format(i + 1), InceptConv(
+            self.conv_list.add_module("conv{}".format(i + 1), ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 stride=strides,
-                padding=padding))
+                padding=padding,
+                bn_eps=bn_eps))
             in_channels = out_channels
 
     def forward(self, x):
@@ -261,6 +187,8 @@ class ConvSeq3x3Branch(nn.Module):
         List of strides of the convolution.
     padding_list : list of tuple of int or tuple of tuple/list of 2 int
         List of padding values for convolution layers.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
@@ -268,30 +196,34 @@ class ConvSeq3x3Branch(nn.Module):
                  mid_channels_list,
                  kernel_size_list,
                  strides_list,
-                 padding_list):
+                 padding_list,
+                 bn_eps):
         super(ConvSeq3x3Branch, self).__init__()
         self.conv_list = nn.Sequential()
         for i, (mid_channels, kernel_size, strides, padding) in enumerate(zip(
                 mid_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.add_module("conv{}".format(i + 1), InceptConv(
+            self.conv_list.add_module("conv{}".format(i + 1), ConvBlock(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 kernel_size=kernel_size,
                 stride=strides,
-                padding=padding))
+                padding=padding,
+                bn_eps=bn_eps))
             in_channels = mid_channels
-        self.conv1x3 = InceptConv(
+        self.conv1x3 = ConvBlock(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=(1, 3),
             stride=1,
-            padding=(0, 1))
-        self.conv3x1 = InceptConv(
+            padding=(0, 1),
+            bn_eps=bn_eps)
+        self.conv3x1 = ConvBlock(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=(3, 1),
             stride=1,
-            padding=(1, 0))
+            padding=(1, 0),
+            bn_eps=bn_eps)
 
     def forward(self, x):
         x = self.conv_list(x)
@@ -304,30 +236,40 @@ class ConvSeq3x3Branch(nn.Module):
 class InceptionAUnit(nn.Module):
     """
     InceptionV4 type Inception-A unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptionAUnit, self).__init__()
         in_channels = 384
 
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
-            out_channels=96))
+            out_channels=96,
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(64, 96),
             kernel_size_list=(1, 3),
             strides_list=(1, 1),
-            padding_list=(0, 1)))
+            padding_list=(0, 1),
+            bn_eps=bn_eps))
         self.branches.add_module("branch3", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(64, 96, 96),
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 1),
-            padding_list=(0, 1, 1)))
+            padding_list=(0, 1, 1),
+            bn_eps=bn_eps))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=96))
+            out_channels=96,
+            bn_eps=bn_eps))
 
     def forward(self, x):
         x = self.branches(x)
@@ -337,8 +279,14 @@ class InceptionAUnit(nn.Module):
 class ReductionAUnit(nn.Module):
     """
     InceptionV4 type Reduction-A unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(ReductionAUnit, self).__init__()
         in_channels = 384
 
@@ -348,13 +296,15 @@ class ReductionAUnit(nn.Module):
             out_channels_list=(384,),
             kernel_size_list=(3,),
             strides_list=(2,),
-            padding_list=(0,)))
+            padding_list=(0,),
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(192, 224, 256),
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 2),
-            padding_list=(0, 1, 0)))
+            padding_list=(0, 1, 0),
+            bn_eps=bn_eps))
         self.branches.add_module("branch3", MaxPoolBranch())
 
     def forward(self, x):
@@ -365,30 +315,40 @@ class ReductionAUnit(nn.Module):
 class InceptionBUnit(nn.Module):
     """
     InceptionV4 type Inception-B unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptionBUnit, self).__init__()
         in_channels = 1024
 
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
-            out_channels=384))
+            out_channels=384,
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(192, 224, 256),
             kernel_size_list=(1, (1, 7), (7, 1)),
             strides_list=(1, 1, 1),
-            padding_list=(0, (0, 3), (3, 0))))
+            padding_list=(0, (0, 3), (3, 0)),
+            bn_eps=bn_eps))
         self.branches.add_module("branch3", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(192, 192, 224, 224, 256),
             kernel_size_list=(1, (7, 1), (1, 7), (7, 1), (1, 7)),
             strides_list=(1, 1, 1, 1, 1),
-            padding_list=(0, (3, 0), (0, 3), (3, 0), (0, 3))))
+            padding_list=(0, (3, 0), (0, 3), (3, 0), (0, 3)),
+            bn_eps=bn_eps))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=128))
+            out_channels=128,
+            bn_eps=bn_eps))
 
     def forward(self, x):
         x = self.branches(x)
@@ -398,8 +358,14 @@ class InceptionBUnit(nn.Module):
 class ReductionBUnit(nn.Module):
     """
     InceptionV4 type Reduction-B unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(ReductionBUnit, self).__init__()
         in_channels = 1024
 
@@ -409,13 +375,15 @@ class ReductionBUnit(nn.Module):
             out_channels_list=(192, 192),
             kernel_size_list=(1, 3),
             strides_list=(1, 2),
-            padding_list=(0, 0)))
+            padding_list=(0, 0),
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(256, 256, 320, 320),
             kernel_size_list=(1, (1, 7), (7, 1), 3),
             strides_list=(1, 1, 1, 2),
-            padding_list=(0, (0, 3), (3, 0), 0)))
+            padding_list=(0, (0, 3), (3, 0), 0),
+            bn_eps=bn_eps))
         self.branches.add_module("branch3", MaxPoolBranch())
 
     def forward(self, x):
@@ -426,32 +394,42 @@ class ReductionBUnit(nn.Module):
 class InceptionCUnit(nn.Module):
     """
     InceptionV4 type Inception-C unit.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptionCUnit, self).__init__()
         in_channels = 1536
 
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
-            out_channels=256))
+            out_channels=256,
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeq3x3Branch(
             in_channels=in_channels,
             out_channels=256,
             mid_channels_list=(384,),
             kernel_size_list=(1,),
             strides_list=(1,),
-            padding_list=(0,)))
+            padding_list=(0,),
+            bn_eps=bn_eps))
         self.branches.add_module("branch3", ConvSeq3x3Branch(
             in_channels=in_channels,
             out_channels=256,
             mid_channels_list=(384, 448, 512),
             kernel_size_list=(1, (3, 1), (1, 3)),
             strides_list=(1, 1, 1),
-            padding_list=(0, (1, 0), (0, 1))))
+            padding_list=(0, (1, 0), (0, 1)),
+            bn_eps=bn_eps))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=256))
+            out_channels=256,
+            bn_eps=bn_eps))
 
     def forward(self, x):
         x = self.branches(x)
@@ -461,14 +439,21 @@ class InceptionCUnit(nn.Module):
 class InceptBlock3a(nn.Module):
     """
     InceptionV4 type Mixed-3a block.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptBlock3a, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", MaxPoolBranch())
         self.branches.add_module("branch2", Conv3x3Branch(
             in_channels=64,
-            out_channels=96))
+            out_channels=96,
+            bn_eps=bn_eps))
 
     def forward(self, x):
         x = self.branches(x)
@@ -478,8 +463,14 @@ class InceptBlock3a(nn.Module):
 class InceptBlock4a(nn.Module):
     """
     InceptionV4 type Mixed-4a block.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptBlock4a, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
@@ -487,13 +478,15 @@ class InceptBlock4a(nn.Module):
             out_channels_list=(64, 96),
             kernel_size_list=(1, 3),
             strides_list=(1, 1),
-            padding_list=(0, 0)))
+            padding_list=(0, 0),
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=160,
             out_channels_list=(64, 64, 64, 96),
             kernel_size_list=(1, (1, 7), (7, 1), 3),
             strides_list=(1, 1, 1, 1),
-            padding_list=(0, (0, 3), (3, 0), 0)))
+            padding_list=(0, (0, 3), (3, 0), 0),
+            bn_eps=bn_eps))
 
     def forward(self, x):
         x = self.branches(x)
@@ -503,13 +496,20 @@ class InceptBlock4a(nn.Module):
 class InceptBlock5a(nn.Module):
     """
     InceptionV4 type Mixed-5a block.
+
+    Parameters:
+    ----------
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
-    def __init__(self):
+    def __init__(self,
+                 bn_eps):
         super(InceptBlock5a, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv3x3Branch(
             in_channels=192,
-            out_channels=192))
+            out_channels=192,
+            bn_eps=bn_eps))
         self.branches.add_module("branch2", MaxPoolBranch())
 
     def forward(self, x):
@@ -525,31 +525,34 @@ class InceptInitBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 bn_eps):
         super(InceptInitBlock, self).__init__()
-        self.conv1 = InceptConv(
+        self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=32,
-            kernel_size=3,
             stride=2,
-            padding=0)
-        self.conv2 = InceptConv(
+            padding=0,
+            bn_eps=bn_eps)
+        self.conv2 = conv3x3_block(
             in_channels=32,
             out_channels=32,
-            kernel_size=3,
             stride=1,
-            padding=0)
-        self.conv3 = InceptConv(
+            padding=0,
+            bn_eps=bn_eps)
+        self.conv3 = conv3x3_block(
             in_channels=32,
             out_channels=64,
-            kernel_size=3,
             stride=1,
-            padding=1)
-        self.block1 = InceptBlock3a()
-        self.block2 = InceptBlock4a()
-        self.block3 = InceptBlock5a()
+            padding=1,
+            bn_eps=bn_eps)
+        self.block1 = InceptBlock3a(bn_eps=bn_eps)
+        self.block2 = InceptBlock4a(bn_eps=bn_eps)
+        self.block3 = InceptBlock5a(bn_eps=bn_eps)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -570,6 +573,8 @@ class InceptionV4(nn.Module):
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
@@ -579,6 +584,7 @@ class InceptionV4(nn.Module):
     """
     def __init__(self,
                  dropout_rate=0.0,
+                 bn_eps=1e-5,
                  in_channels=3,
                  in_size=(299, 299),
                  num_classes=1000):
@@ -591,7 +597,8 @@ class InceptionV4(nn.Module):
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
-            in_channels=in_channels))
+            in_channels=in_channels,
+            bn_eps=bn_eps))
 
         for i, layers_per_stage in enumerate(layers):
             stage = nn.Sequential()
@@ -600,7 +607,7 @@ class InceptionV4(nn.Module):
                     unit = reduction_units[i - 1]
                 else:
                     unit = normal_units[i]
-                stage.add_module("unit{}".format(j + 1), unit())
+                stage.add_module("unit{}".format(j + 1), unit(bn_eps=bn_eps))
             self.features.add_module("stage{}".format(i + 1), stage)
 
         self.features.add_module("final_pool", nn.AvgPool2d(
@@ -673,7 +680,7 @@ def inceptionv4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_inceptionv4(model_name="inceptionv4", **kwargs)
+    return get_inceptionv4(model_name="inceptionv4", bn_eps=1e-3, **kwargs)
 
 
 def _calc_width(net):

@@ -242,7 +242,9 @@ class InceptionResnetV1(nn.Module):
         )
         self.block8 = Block8(noReLU=True)
         self.avgpool_1a = nn.AdaptiveAvgPool2d(1)
+
         self.dropout = nn.Dropout(dropout_prob)
+
         self.last_linear = nn.Linear(1792, 512, bias=False)
         self.last_bn = nn.BatchNorm1d(512, eps=0.001, momentum=0.1, affine=True)
 

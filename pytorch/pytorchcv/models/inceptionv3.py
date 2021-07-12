@@ -4,18 +4,17 @@
     https://arxiv.org/abs/1512.00567.
 """
 
-__all__ = ['InceptionV3', 'inceptionv3']
+__all__ = ['InceptionV3', 'inceptionv3', 'MaxPoolBranch', 'AvgPoolBranch', 'Conv1x1Branch', 'ConvSeqBranch']
 
 import os
 import torch
 import torch.nn as nn
-import torch.nn.init as init
 from .common import ConvBlock, conv1x1_block, conv3x3_block, Concurrent
 
 
 class MaxPoolBranch(nn.Module):
     """
-    InceptionV3 specific max pooling branch block.
+    Inception specific max pooling branch block.
     """
     def __init__(self):
         super(MaxPoolBranch, self).__init__()
@@ -31,7 +30,7 @@ class MaxPoolBranch(nn.Module):
 
 class AvgPoolBranch(nn.Module):
     """
-    InceptionV3 specific average pooling branch block.
+    Inception specific average pooling branch block.
 
     Parameters:
     ----------
@@ -41,16 +40,20 @@ class AvgPoolBranch(nn.Module):
         Number of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
+    count_include_pad : bool, default True
+        Whether to include the zero-padding in the averaging calculation.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_eps):
+                 bn_eps,
+                 count_include_pad=True):
         super(AvgPoolBranch, self).__init__()
         self.pool = nn.AvgPool2d(
             kernel_size=3,
             stride=1,
-            padding=1)
+            padding=1,
+            count_include_pad=count_include_pad)
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -64,7 +67,7 @@ class AvgPoolBranch(nn.Module):
 
 class Conv1x1Branch(nn.Module):
     """
-    InceptionV3 specific convolutional 1x1 branch block.
+    Inception specific convolutional 1x1 branch block.
 
     Parameters:
     ----------
@@ -92,7 +95,7 @@ class Conv1x1Branch(nn.Module):
 
 class ConvSeqBranch(nn.Module):
     """
-    InceptionV3 specific convolutional sequence branch block.
+    Inception specific convolutional sequence branch block.
 
     Parameters:
     ----------
@@ -587,11 +590,11 @@ class InceptionV3(nn.Module):
         self._init_params()
 
     def _init_params(self):
-        for module in self.modules():
+        for module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

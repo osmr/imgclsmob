@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1512.00567.
 """
 
-__all__ = ['InceptionV3', 'inceptionv3']
+__all__ = ['InceptionV3', 'inceptionv3', 'MaxPoolBranch', 'AvgPoolBranch', 'Conv1x1Branch', 'ConvSeqBranch']
 
 import os
 import chainer.functions as F
@@ -17,7 +17,7 @@ from .common import ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, C
 
 class MaxPoolBranch(Chain):
     """
-    InceptionV3 specific max pooling branch block.
+    Inception specific max pooling branch block.
     """
     def __init__(self):
         super(MaxPoolBranch, self).__init__()
@@ -36,7 +36,7 @@ class MaxPoolBranch(Chain):
 
 class AvgPoolBranch(Chain):
     """
-    InceptionV3 specific average pooling branch block.
+    Inception specific average pooling branch block.
 
     Parameters:
     ----------
@@ -46,18 +46,29 @@ class AvgPoolBranch(Chain):
         Number of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
+    count_include_pad : bool, default True
+        Whether to include the zero-padding in the averaging calculation.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_eps):
+                 bn_eps,
+                 count_include_pad=True):
         super(AvgPoolBranch, self).__init__()
         with self.init_scope():
-            self.pool = partial(
-                F.average_pooling_2d,
-                ksize=3,
-                stride=1,
-                pad=1)
+            if count_include_pad:
+                self.pool = partial(
+                    F.average_pooling_2d,
+                    ksize=3,
+                    stride=1,
+                    pad=1)
+            else:
+                self.pool = partial(
+                    F.average_pooling_nd,
+                    ksize=3,
+                    stride=1,
+                    pad=1,
+                    pad_value=None)
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -71,7 +82,7 @@ class AvgPoolBranch(Chain):
 
 class Conv1x1Branch(Chain):
     """
-    InceptionV3 specific convolutional 1x1 branch block.
+    Inception specific convolutional 1x1 branch block.
 
     Parameters:
     ----------
@@ -100,7 +111,7 @@ class Conv1x1Branch(Chain):
 
 class ConvSeqBranch(Chain):
     """
-    InceptionV3 specific convolutional sequence branch block.
+    Inception specific convolutional sequence branch block.
 
     Parameters:
     ----------

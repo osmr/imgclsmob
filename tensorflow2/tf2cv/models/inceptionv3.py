@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1512.00567.
 """
 
-__all__ = ['InceptionV3', 'inceptionv3']
+__all__ = ['InceptionV3', 'inceptionv3', 'MaxPoolBranch', 'AvgPoolBranch', 'Conv1x1Branch', 'ConvSeqBranch']
 
 import os
 import tensorflow as tf
@@ -15,7 +15,7 @@ from .common import MaxPool2d, AvgPool2d, ConvBlock, conv1x1_block, conv3x3_bloc
 
 class MaxPoolBranch(nn.Layer):
     """
-    InceptionV3 specific max pooling branch block.
+    Inception specific max pooling branch block.
 
     Parameters:
     ----------
@@ -40,7 +40,7 @@ class MaxPoolBranch(nn.Layer):
 
 class AvgPoolBranch(nn.Layer):
     """
-    InceptionV3 specific average pooling branch block.
+    Inception specific average pooling branch block.
 
     Parameters:
     ----------
@@ -50,6 +50,8 @@ class AvgPoolBranch(nn.Layer):
         Number of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
+    count_include_pad : bool, default True
+        Whether to include the zero-padding in the averaging calculation.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -57,9 +59,12 @@ class AvgPoolBranch(nn.Layer):
                  in_channels,
                  out_channels,
                  bn_eps,
+                 count_include_pad=True,
                  data_format="channels_last",
                  **kwargs):
         super(AvgPoolBranch, self).__init__(**kwargs)
+        assert (count_include_pad or not count_include_pad)
+
         self.pool = AvgPool2d(
             pool_size=3,
             strides=1,
@@ -81,7 +86,7 @@ class AvgPoolBranch(nn.Layer):
 
 class Conv1x1Branch(nn.Layer):
     """
-    InceptionV3 specific convolutional 1x1 branch block.
+    Inception specific convolutional 1x1 branch block.
 
     Parameters:
     ----------
@@ -115,7 +120,7 @@ class Conv1x1Branch(nn.Layer):
 
 class ConvSeqBranch(nn.Layer):
     """
-    InceptionV3 specific convolutional sequence branch block.
+    Inception specific convolutional sequence branch block.
 
     Parameters:
     ----------

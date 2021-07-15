@@ -133,6 +133,7 @@ Some remarks:
 | Xception | A | A | A | - | - | A | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A | A | A | - | - | A | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |
 | InceptionV4 | A | A | A | - | - | A | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
+| InceptionResNetV1 | a | a | a | - | - | a | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
 | InceptionResNetV2 | A | A | A | - | - | A | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
 | PolyNet | A | A | A | - | - | A | [link](https://arxiv.org/abs/1611.05725) | [link](https://github.com/open-mmlab/polynet) | 2016 |
 | NASNet-Large | A | A | A | - | - | A | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |

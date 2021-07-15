@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1512.00567.
 """
 
-__all__ = ['InceptionV3', 'inceptionv3']
+__all__ = ['InceptionV3', 'inceptionv3', 'inceptionv3_gl', 'MaxPoolBranch', 'AvgPoolBranch', 'Conv1x1Branch',
+           'ConvSeqBranch']
 
 import os
 from mxnet import cpu
@@ -15,7 +16,7 @@ from .common import ConvBlock, conv1x1_block, conv3x3_block
 
 class MaxPoolBranch(HybridBlock):
     """
-    InceptionV3 specific max pooling branch block.
+    Inception specific max pooling branch block.
     """
     def __init__(self,
                  **kwargs):
@@ -33,7 +34,7 @@ class MaxPoolBranch(HybridBlock):
 
 class AvgPoolBranch(HybridBlock):
     """
-    InceptionV3 specific average pooling branch block.
+    Inception specific average pooling branch block.
 
     Parameters:
     ----------
@@ -45,19 +46,23 @@ class AvgPoolBranch(HybridBlock):
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    count_include_pad : bool, default True
+        Whether to include the zero-padding in the averaging calculation.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  bn_epsilon,
                  bn_use_global_stats,
+                 count_include_pad=True,
                  **kwargs):
         super(AvgPoolBranch, self).__init__(**kwargs)
         with self.name_scope():
             self.pool = nn.AvgPool2D(
                 pool_size=3,
                 strides=1,
-                padding=1)
+                padding=1,
+                count_include_pad=count_include_pad)
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -72,7 +77,7 @@ class AvgPoolBranch(HybridBlock):
 
 class Conv1x1Branch(HybridBlock):
     """
-    InceptionV3 specific convolutional 1x1 branch block.
+    Inception specific convolutional 1x1 branch block.
 
     Parameters:
     ----------
@@ -106,7 +111,7 @@ class Conv1x1Branch(HybridBlock):
 
 class ConvSeqBranch(HybridBlock):
     """
-    InceptionV3 specific convolutional sequence branch block.
+    Inception specific convolutional sequence branch block.
 
     Parameters:
     ----------
@@ -741,6 +746,23 @@ def inceptionv3(**kwargs):
     return get_inceptionv3(model_name="inceptionv3", bn_epsilon=1e-3, **kwargs)
 
 
+def inceptionv3_gl(**kwargs):
+    """
+    InceptionV3 model (Gluon-like) from 'Rethinking the Inception Architecture for Computer Vision,'
+    https://arxiv.org/abs/1512.00567.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_inceptionv3(model_name="inceptionv3_gl", bn_epsilon=1e-5, **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -749,6 +771,7 @@ def _test():
 
     models = [
         inceptionv3,
+        inceptionv3_gl,
     ]
 
     for model in models:
@@ -767,6 +790,7 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionv3 or weight_count == 23834568)
+        assert (model != inceptionv3_gl or weight_count == 23834568)
 
         x = mx.nd.zeros((1, 3, 299, 299), ctx=ctx)
         y = net(x)

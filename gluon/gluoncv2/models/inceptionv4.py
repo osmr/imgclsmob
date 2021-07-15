@@ -10,99 +10,8 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
-from .common import ConvBlock, conv1x1_block, conv3x3_block
-
-
-class MaxPoolBranch(HybridBlock):
-    """
-    InceptionV4 specific max pooling branch block.
-    """
-    def __init__(self,
-                 **kwargs):
-        super(MaxPoolBranch, self).__init__(**kwargs)
-        with self.name_scope():
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=0)
-
-    def hybrid_forward(self, F, x):
-        x = self.pool(x)
-        return x
-
-
-class AvgPoolBranch(HybridBlock):
-    """
-    InceptionV4 specific average pooling branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_epsilon : float
-        Small float added to variance in Batch norm.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_epsilon,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(AvgPoolBranch, self).__init__(**kwargs)
-        with self.name_scope():
-            self.pool = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-            self.conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats)
-
-    def hybrid_forward(self, F, x):
-        x = self.pool(x)
-        x = self.conv(x)
-        return x
-
-
-class Conv1x1Branch(HybridBlock):
-    """
-    InceptionV4 specific convolutional 1x1 branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_epsilon : float
-        Small float added to variance in Batch norm.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_epsilon,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(Conv1x1Branch, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        return x
+from .common import ConvBlock, conv3x3_block
+from .inceptionv3 import MaxPoolBranch, AvgPoolBranch, Conv1x1Branch, ConvSeqBranch
 
 
 class Conv3x3Branch(HybridBlock):
@@ -138,60 +47,6 @@ class Conv3x3Branch(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
-        return x
-
-
-class ConvSeqBranch(HybridBlock):
-    """
-    InceptionV4 specific convolutional sequence branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels_list : list of tuple of int
-        List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of padding values for convolution layers.
-    bn_epsilon : float
-        Small float added to variance in Batch norm.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels_list,
-                 kernel_size_list,
-                 strides_list,
-                 padding_list,
-                 bn_epsilon,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(ConvSeqBranch, self).__init__(**kwargs)
-        assert (len(out_channels_list) == len(kernel_size_list))
-        assert (len(out_channels_list) == len(strides_list))
-        assert (len(out_channels_list) == len(padding_list))
-
-        with self.name_scope():
-            self.conv_list = nn.HybridSequential(prefix="")
-            for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                    out_channels_list, kernel_size_list, strides_list, padding_list)):
-                self.conv_list.add(ConvBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    strides=strides,
-                    padding=padding,
-                    bn_epsilon=bn_epsilon,
-                    bn_use_global_stats=bn_use_global_stats))
-                in_channels = out_channels
-
-    def hybrid_forward(self, F, x):
-        x = self.conv_list(x)
         return x
 
 
@@ -312,7 +167,8 @@ class InceptionAUnit(HybridBlock):
                 in_channels=in_channels,
                 out_channels=96,
                 bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                count_include_pad=False))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -407,7 +263,8 @@ class InceptionBUnit(HybridBlock):
                 in_channels=in_channels,
                 out_channels=128,
                 bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                count_include_pad=False))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -504,7 +361,8 @@ class InceptionCUnit(HybridBlock):
                 in_channels=in_channels,
                 out_channels=256,
                 bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                count_include_pad=False))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)

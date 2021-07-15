@@ -12,91 +12,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent
-
-
-class MaxPoolBranch(Chain):
-    """
-    InceptionV4 specific max pooling branch block.
-    """
-    def __init__(self):
-        super(MaxPoolBranch, self).__init__()
-        with self.init_scope():
-            self.pool = partial(
-                F.max_pooling_2d,
-                ksize=3,
-                stride=2,
-                pad=0,
-                cover_all=False)
-
-    def __call__(self, x):
-        x = self.pool(x)
-        return x
-
-
-class AvgPoolBranch(Chain):
-    """
-    InceptionV4 specific average pooling branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps):
-        super(AvgPoolBranch, self).__init__()
-        with self.init_scope():
-            self.pool = partial(
-                F.average_pooling_nd,
-                ksize=3,
-                stride=1,
-                pad=1,
-                pad_value=None)
-            self.conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_eps=bn_eps)
-
-    def __call__(self, x):
-        x = self.pool(x)
-        x = self.conv(x)
-        return x
-
-
-class Conv1x1Branch(Chain):
-    """
-    InceptionV4 specific convolutional 1x1 branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps):
-        super(Conv1x1Branch, self).__init__()
-        with self.init_scope():
-            self.conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_eps=bn_eps)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        return x
+from .common import ConvBlock, conv3x3_block, SimpleSequential, Concurrent
+from .inceptionv3 import MaxPoolBranch, AvgPoolBranch, Conv1x1Branch, ConvSeqBranch
 
 
 class Conv3x3Branch(Chain):
@@ -127,56 +44,6 @@ class Conv3x3Branch(Chain):
 
     def __call__(self, x):
         x = self.conv(x)
-        return x
-
-
-class ConvSeqBranch(Chain):
-    """
-    InceptionV4 specific convolutional sequence branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels_list : list of tuple of int
-        List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of padding values for convolution layers.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels_list,
-                 kernel_size_list,
-                 strides_list,
-                 padding_list,
-                 bn_eps):
-        super(ConvSeqBranch, self).__init__()
-        assert (len(out_channels_list) == len(kernel_size_list))
-        assert (len(out_channels_list) == len(strides_list))
-        assert (len(out_channels_list) == len(padding_list))
-
-        with self.init_scope():
-            self.conv_list = SimpleSequential()
-            with self.conv_list.init_scope():
-                for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                        out_channels_list, kernel_size_list, strides_list, padding_list)):
-                    setattr(self.conv_list, "conv{}".format(i + 1), ConvBlock(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        ksize=kernel_size,
-                        stride=strides,
-                        pad=padding,
-                        bn_eps=bn_eps))
-                    in_channels = out_channels
-
-    def __call__(self, x):
-        x = self.conv_list(x)
         return x
 
 
@@ -284,7 +151,8 @@ class InceptionAUnit(Chain):
                 setattr(self.branches, "branch4", AvgPoolBranch(
                     in_channels=in_channels,
                     out_channels=96,
-                    bn_eps=bn_eps))
+                    bn_eps=bn_eps,
+                    count_include_pad=False))
 
     def __call__(self, x):
         x = self.branches(x)
@@ -367,7 +235,8 @@ class InceptionBUnit(Chain):
                 setattr(self.branches, "branch4", AvgPoolBranch(
                     in_channels=in_channels,
                     out_channels=128,
-                    bn_eps=bn_eps))
+                    bn_eps=bn_eps,
+                    count_include_pad=False))
 
     def __call__(self, x):
         x = self.branches(x)
@@ -452,7 +321,8 @@ class InceptionCUnit(Chain):
                 setattr(self.branches, "branch4", AvgPoolBranch(
                     in_channels=in_channels,
                     out_channels=256,
-                    bn_eps=bn_eps))
+                    bn_eps=bn_eps,
+                    count_include_pad=False))
 
     def __call__(self, x):
         x = self.branches(x)

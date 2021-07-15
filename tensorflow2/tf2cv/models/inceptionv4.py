@@ -9,109 +9,8 @@ __all__ = ['InceptionV4', 'inceptionv4']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, AvgPool2d, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent,\
-    flatten, is_channels_first, get_channel_axis
-
-
-class MaxPoolBranch(nn.Layer):
-    """
-    InceptionV4 specific max pooling branch block.
-
-    Parameters:
-    ----------
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 data_format="channels_last",
-                 **kwargs):
-        super(MaxPoolBranch, self).__init__(**kwargs)
-        self.pool = MaxPool2d(
-            pool_size=3,
-            strides=2,
-            padding=0,
-            data_format=data_format,
-            name="pool")
-
-    def call(self, x, training=None):
-        x = self.pool(x)
-        return x
-
-
-class AvgPoolBranch(nn.Layer):
-    """
-    InceptionV4 specific average pooling branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps,
-                 data_format="channels_last",
-                 **kwargs):
-        super(AvgPoolBranch, self).__init__(**kwargs)
-        self.pool = AvgPool2d(
-            pool_size=3,
-            strides=1,
-            padding=1,
-            # count_include_pad=False,
-            data_format=data_format,
-            name="pool")
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps,
-            data_format=data_format,
-            name="conv")
-
-    def call(self, x, training=None):
-        x = self.pool(x)
-        x = self.conv(x, training=training)
-        return x
-
-
-class Conv1x1Branch(nn.Layer):
-    """
-    InceptionV4 specific convolutional 1x1 branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps,
-                 data_format="channels_last",
-                 **kwargs):
-        super(Conv1x1Branch, self).__init__(**kwargs)
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps,
-            data_format=data_format,
-            name="conv")
-
-    def call(self, x, training=None):
-        x = self.conv(x, training=training)
-        return x
+from .common import ConvBlock, conv3x3_block, SimpleSequential, Concurrent, flatten, is_channels_first, get_channel_axis
+from .inceptionv3 import MaxPoolBranch, AvgPoolBranch, Conv1x1Branch, ConvSeqBranch
 
 
 class Conv3x3Branch(nn.Layer):
@@ -147,60 +46,6 @@ class Conv3x3Branch(nn.Layer):
 
     def call(self, x, training=None):
         x = self.conv(x, training=training)
-        return x
-
-
-class ConvSeqBranch(nn.Layer):
-    """
-    InceptionV4 specific convolutional sequence branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels_list : list of tuple of int
-        List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
-        List of padding values for convolution layers.
-    bn_eps : float
-        Small float added to variance in Batch norm.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels_list,
-                 kernel_size_list,
-                 strides_list,
-                 padding_list,
-                 bn_eps,
-                 data_format="channels_last",
-                 **kwargs):
-        super(ConvSeqBranch, self).__init__(**kwargs)
-        assert (len(out_channels_list) == len(kernel_size_list))
-        assert (len(out_channels_list) == len(strides_list))
-        assert (len(out_channels_list) == len(padding_list))
-
-        self.conv_list = SimpleSequential(name="conv_list")
-        for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.children.append(ConvBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                bn_eps=bn_eps,
-                data_format=data_format,
-                name="conv{}".format(i + 1)))
-            in_channels = out_channels
-
-    def call(self, x, training=None):
-        x = self.conv_list(x, training=training)
         return x
 
 
@@ -329,6 +174,7 @@ class InceptionAUnit(nn.Layer):
             in_channels=in_channels,
             out_channels=96,
             bn_eps=bn_eps,
+            count_include_pad=False,
             data_format=data_format,
             name="branch4"))
 
@@ -434,6 +280,7 @@ class InceptionBUnit(nn.Layer):
             in_channels=in_channels,
             out_channels=128,
             bn_eps=bn_eps,
+            count_include_pad=False,
             data_format=data_format,
             name="branch4"))
 
@@ -541,6 +388,7 @@ class InceptionCUnit(nn.Layer):
             in_channels=in_channels,
             out_channels=256,
             bn_eps=bn_eps,
+            count_include_pad=False,
             data_format=data_format,
             name="branch4"))
 

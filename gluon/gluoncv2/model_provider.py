@@ -72,6 +72,7 @@ from .models.fbnet import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
+from .models.inceptionresnetv1 import *
 from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
@@ -645,7 +646,9 @@ _models = {
 
     'xception': xception,
     'inceptionv3': inceptionv3,
+    'inceptionv3_gl': inceptionv3_gl,
     'inceptionv4': inceptionv4,
+    'inceptionresnetv1': inceptionresnetv1,
     'inceptionresnetv2': inceptionresnetv2,
     'polynet': polynet,
 

@@ -410,7 +410,7 @@ class InceptHead(HybridBlock):
                 self.dropout = nn.Dropout(rate=dropout_rate)
             self.fc1 = nn.Dense(
                 units=512,
-                bias=False,
+                use_bias=False,
                 in_units=in_channels)
             self.bn = BatchNormExtra(
                 in_channels=512,

@@ -296,7 +296,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | RegNetY-8.0GF | 18.78 | 4.36 | 39,180,068 | 7,994.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.516/regnety080-0436-4cd7fc61.params.log)) |
 | RegNetY-12GF | 18.51 | 4.31 | 51,822,544 | 12,129.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.526/regnety120-0431-effa35b6.params.log)) |
 | RegNetY-16GF | 18.63 | 4.30 | 83,590,140 | 15,941.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.527/regnety160-0430-82731569.params.log)) |
-| RegNetY-32GF | 18.75 | 4.27 | 145,046,770 | 32,313.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.548/regnety320-0427-c3ed4596.params.log)) |
+| RegNetY-32GF | 17.83 | 3.73 | 145,046,770 | 32,313.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.550/regnety320-0373-d26a5f80.params.log)) |
 | PyramidNet-101 (a=360) | 20.41 | 5.20 | 42,455,070 | 8,743.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-3a98a2bf.params.log)) |
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
 | DiracNetV2-34 | 27.93 | 9.46 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet34v2-0946-1faa6f12.params.log)) |

@@ -148,7 +148,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnety080', '0448', 'c084bf6a0ee2f7722396622fb7865ee0c19b7244', 'v0.0.516', 'RegNetY-8.0GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety120', '0442', 'bf25956032eb6d98134a8e8b0e4640324cc92e59', 'v0.0.526', 'RegNetY-12GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnety160', '0444', 'e7e05d91c588a308e1676163fd3ed914b61ab12e', 'v0.0.527', 'RegNetY-16GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('regnety320', '0443', '9fb5d9e8622853fa49a6eb1b0c849c03c46931f2', 'v0.0.548', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnety320', '0383', 'a8b16205af3911b14f2fb3ca7cf55529a94fa52f', 'v0.0.550', 'RegNetY-32GF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('pyramidnet101_a360', '0543', '7f1747f84b83b504ece3eb2bc3924d36343358ad', 'v0.0.507', 'PyramidNet-101 (a=360)', '1610.02915', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('diracnet18v2', '1170', 'e06737707a1f5a5c7fe4e57da92ed890b034cb9a', 'v0.0.111', 'DiracNetV2-18', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa
     ('diracnet34v2', '0993', 'a6a661c0c3e96af320e5b9bf65a6c8e5e498a474', 'v0.0.111', 'DiracNetV2-34', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa

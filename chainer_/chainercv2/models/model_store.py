@@ -141,7 +141,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('regnety080', '0437', 'f324b0464dc045e411606b6da836d13d5e456ce8', 'v0.0.516'),
     ('regnety120', '0430', 'fa03425ab8fc82a9bbbb59a4eb5173bb9f8ea7aa', 'v0.0.526'),
     ('regnety160', '0429', '0a034eb9e3171320f3bd41199b466c96534f14aa', 'v0.0.527'),
-    ('regnety320', '0426', 'd16e5158c8a81121b4076e4bc5fa3f94400c19cf', 'v0.0.548'),
+    ('regnety320', '0372', '7bc537394ea4baabb5b839b5bf63d1de24ef5007', 'v0.0.550'),
     ('pyramidnet101_a360', '0520', 'e37960c468df05477caaf2fec90d9a81ff675cf3', 'v0.0.507'),
     ('diracnet18v2', '1113', 'b85b43d13697dfbddbea6e46dea4766359fff7e5', 'v0.0.111'),
     ('diracnet34v2', '0948', '0245163a5c947bd6e07a743f17e6ca92c79c84da', 'v0.0.111'),

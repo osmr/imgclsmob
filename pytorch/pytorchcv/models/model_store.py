@@ -210,6 +210,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnetv2_w44', '0501', 'ec40e5455147db5a03aab423cac75b816030976d', 'v0.0.541', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w48', '0500', '0554b840b6f3f87403433595d946170d91d15334', 'v0.0.541', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w64', '0487', '108e78b1f2eedcf705bcce55e286969861f67cf8', 'v0.0.543', 'HRNetV2-W64', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('vovnet27s', '0997', 'b7a5bf677bd3431bbed44b439fde7a01d699ace1', 'v0.0.551', 'VoVNet-27-slim', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('vovnet39', '0564', '63bfa613870b37bd4fb5b71412e7875392aa4f66', 'v0.0.493', 'VoVNet-39', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('vovnet57', '0518', 'c080e47169a176043f298b1e909ddd8776d5aa76', 'v0.0.505', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('selecsls42b', '0611', 'acff1e8b36428719059eec4b60c7b2c045a54d8e', 'v0.0.493', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -290,7 +291,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('proxylessnas_mobile14', '0662', '0c0ad983f4fb88470d0f3e557d0b23f15e16624f', 'v0.0.331', 'ProxylessNAS Mob-14', '1812.00332', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fbnet_cb', '0762', '2edb61f8e4b5c45d958d0e57beff41fbfacd6061', 'v0.0.415', 'FBNet-Cb', '1812.03443', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('xception', '0516', 'a75b50eceb5fdfb1e1bfaada6820a448ce40e593', 'v0.0.544', 'Xception', '1610.02357', 'in1k', 299, 0.875, 200, ''),  # noqa
-    ('inceptionv3', '0565', 'cf4061800bc1dc3b090920fc9536d8ccc15bb86e', 'v0.0.92', 'InceptionV3', '1512.00567', 'in1k', 299, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('inceptionv3', '0553', '91e8dcb3e9795a4babd2720f9b5886b3d94e1606', 'v0.0.551', 'InceptionV3', '1512.00567', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('inceptionv4', '0488', '4ae4f331a5ff649e39626fc49cd5c24b8159cd8c', 'v0.0.543', 'InceptionV4', '1602.07261', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('inceptionresnetv2', '0474', '19f51781f8a454803207e319289f404d50e252cb', 'v0.0.547', 'InceptionResNetV2', '1602.07261', 'in1k', 299, 0.875, 200, ''),  # noqa
     ('polynet', '0452', '6a1b295dad3f261b48e845f1b283e4eef3ab5a0b', 'v0.0.96', 'PolyNet', '1611.05725', 'in1k', 331, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa

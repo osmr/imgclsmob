@@ -85,6 +85,8 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["WER"]
         self.val_transform = asr_test_transform
         self.test_transform = asr_test_transform
+        self.test_net_extra_kwargs = {"from_audio": True}
+        self.allow_hybridize = False
         self.saver_acc_ind = 0
 
     def add_dataset_parser_arguments(self,

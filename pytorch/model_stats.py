@@ -16,7 +16,7 @@ from .pytorchcv.models.proxylessnas import ProxylessUnit
 from .pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 from .pytorchcv.models.centernet import CenterNetHeatmapMaxDet
 from .pytorchcv.models.danet import ScaleBlock
-from .pytorchcv.models.jasper import MaskConv1d
+from .pytorchcv.models.jasper import MaskConv1d, NemoMelSpecExtractor
 
 __all__ = ['measure_model']
 
@@ -89,7 +89,7 @@ def measure_model(model,
     def call_hook(module, x, y):
         if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock) or
                 isinstance(module, RiRFinalBlock) or isinstance(module, InterpolationBlock) or
-                isinstance(module, MaskConv1d)):
+                isinstance(module, MaskConv1d) or isinstance(module, NemoMelSpecExtractor)):
             assert (len(x) == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):
@@ -266,7 +266,8 @@ def measure_model(model,
                 extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
             extra_num_flops *= batch
             extra_num_macs *= batch
-        elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock]:
+        elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock,
+                              NemoMelSpecExtractor]:
             extra_num_flops, extra_num_macs = module.calc_flops(x[0])
         elif isinstance(module, LwopDecoderFinalBlock):
             if not module.calc_3d_features:

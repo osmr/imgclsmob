@@ -240,9 +240,16 @@ def get_batch_fn(ds_metainfo):
     """
     if ds_metainfo.ml_type == "asr":
         def batch_fn(batch, ctx):
-            data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-            data2 = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-            label = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
+            # data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            # data2 = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            # label = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
+            # return data, data2, label
+            # data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            # label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            # return data, label
+            data = split_and_load(batch[0][0], ctx_list=ctx, batch_axis=0)
+            data2 = split_and_load(batch[0][1], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
             return data, data2, label
 
         return batch_fn

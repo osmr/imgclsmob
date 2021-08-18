@@ -97,7 +97,7 @@ class QuartzNet(nn.Module):
         self.in_size = None
         self.num_classes = num_classes
 
-        # self.preprocessor = raw_net.preprocessor
+        self.preprocessor = raw_net.preprocessor
         self.encoder = raw_net.encoder
         self.decoder = raw_net.decoder
 

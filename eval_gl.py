@@ -9,7 +9,8 @@ import argparse
 from sys import version_info
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
-from gluon.utils import calc_net_weight_count, validate, validate_asr
+from gluon.utils import calc_net_weight_count, validate
+from gluon.utils import validate_asr
 from gluon.utils import get_composite_metric
 from gluon.utils import report_accuracy
 from gluon.dataset_utils import get_dataset_metainfo
@@ -209,6 +210,7 @@ def calc_model_accuracy(net,
     """
     if not calc_flops_only:
         validate_fn = validate_asr if ml_type == "asr" else validate
+        # validate_fn = validate
         tic = time.time()
         validate_fn(
             metric=metric,
@@ -234,7 +236,7 @@ def calc_model_accuracy(net,
         if not calc_flops:
             logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
-        in_shapes = [(1, input_image_size, 100), (1,)] if ml_type == "asr" else\
+        in_shapes = [(1, 640 * 25 * 5), (1,)] if ml_type == "asr" else\
             [(1, in_channels, input_image_size[0], input_image_size[1])]
         num_flops, num_macs, num_params = measure_model(
             model=net,

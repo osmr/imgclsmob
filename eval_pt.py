@@ -328,7 +328,7 @@ def calc_model_accuracy(net,
         if not calc_flops:
             logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
-        in_shapes = [(1, input_image_size, 100), (1,)] if ml_type == "asr" else\
+        in_shapes = [(1, 640 * 25 * 5), (1,)] if ml_type == "asr" else\
             [(1, in_channels, input_image_size[0], input_image_size[1])]
         num_flops, num_macs, num_params = measure_model(
             model=net,

@@ -3,8 +3,8 @@
     Original paper: 'Jasper: An End-to-End Convolutional Neural Acoustic Model,' https://arxiv.org/abs/1904.03288.
 """
 
-__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'MaskConv1d', 'CtcDecoder',
-           'NemoMelSpecExtractor', 'JasperTranscriber']
+__all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'MaskConv1d', 'NemoAudioReader',
+           'NemoMelSpecExtractor', 'CtcDecoder']
 
 import os
 import numpy as np
@@ -12,6 +12,280 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .common import DualPathSequential, DualPathParallelConcurent
+
+
+def outmask_fill(x, x_len, value=0.0):
+    """
+    Masked fill a tensor.
+
+    Parameters:
+    ----------
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+    value : float, default 0.0
+        Filled value.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    max_len = x.size(2)
+    mask = torch.arange(max_len).to(x_len.device).expand(len(x_len), max_len) >= x_len.unsqueeze(1)
+    mask = mask.unsqueeze(dim=1).to(device=x.device)
+    x = x.masked_fill(mask=mask, value=value)
+    return x
+
+
+def masked_normalize(x, x_len):
+    """
+    Normalize a tensor with mask.
+
+    Parameters:
+    ----------
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    x = outmask_fill(x, x_len)
+    x_mean = x.sum(dim=2) / x_len.unsqueeze(dim=1)
+    x_m0 = x - x_mean.unsqueeze(dim=2)
+    x_m0 = outmask_fill(x_m0, x_len)
+    x_std = x_m0.sum(dim=2) / x_len.unsqueeze(dim=1)
+    x = x_m0 / x_std.unsqueeze(dim=2)
+    return x
+
+
+def masked_normalize2(x, x_len):
+    """
+    Normalize a tensor with mask (scheme #2).
+
+    Parameters:
+    ----------
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    x = outmask_fill(x, x_len)
+    x_mean = x.sum(dim=2) / x_len.unsqueeze(dim=1)
+    x2_mean = x.square().sum(dim=2) / x_len.unsqueeze(dim=1)
+    x_std = (x2_mean - x_mean.square()).sqrt()
+    x = (x - x_mean.unsqueeze(dim=2)) / x_std.unsqueeze(dim=2)
+    return x
+
+
+def masked_normalize3(x, x_len):
+    """
+    Normalize a tensor with mask (scheme #3).
+
+    Parameters:
+    ----------
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    x_eps = 1e-5
+    x_mean = torch.zeros(x.shape[:2], dtype=x.dtype, device=x.device)
+    x_std = torch.zeros(x.shape[:2], dtype=x.dtype, device=x.device)
+    for i in range(x.shape[0]):
+        x_mean[i, :] = x[i, :, : x_len[i]].mean(dim=1)
+        x_std[i, :] = x[i, :, : x_len[i]].std(dim=1)
+    x_std += x_eps
+    return (x - x_mean.unsqueeze(dim=2)) / x_std.unsqueeze(dim=2)
+
+
+class NemoAudioReader(object):
+    """
+    Audio Reader from NVIDIA NEMO toolkit.
+
+    Parameters:
+    ----------
+    desired_audio_sample_rate : int, default 16000
+        Desired audio sample rate.
+    trunc_value : int or None, default None
+        Value to truncate.
+    """
+    def __init__(self, desired_audio_sample_rate=16000):
+        super(NemoAudioReader, self).__init__()
+        self.desired_audio_sample_rate = desired_audio_sample_rate
+
+    def read_from_file(self, audio_file_path):
+        """
+        Read audio from file.
+
+        Parameters:
+        ----------
+        audio_file_path : str
+            Path to audio file.
+
+        Returns:
+        -------
+        np.array
+            Audio data.
+        """
+        from soundfile import SoundFile
+        with SoundFile(audio_file_path, "r") as data:
+            sample_rate = data.samplerate
+            audio_data = data.read(dtype="float32")
+
+        audio_data = audio_data.transpose()
+
+        if sample_rate != self.desired_audio_sample_rate:
+            from librosa.core import resample as lr_resample
+            audio_data = lr_resample(y=audio_data, orig_sr=sample_rate, target_sr=self.desired_audio_sample_rate)
+        if audio_data.ndim >= 2:
+            audio_data = np.mean(audio_data, axis=1)
+
+        return audio_data
+
+    def read_from_files(self, audio_file_paths):
+        """
+        Read audios from files.
+
+        Parameters:
+        ----------
+        audio_file_paths : list of str
+            Paths to audio files.
+
+        Returns:
+        -------
+        list of np.array
+            Audio data.
+        """
+        assert (type(audio_file_paths) in (list, tuple))
+
+        audio_data_list = []
+        for audio_file_path in audio_file_paths:
+            audio_data = self.read_from_file(audio_file_path)
+            audio_data_list.append(audio_data)
+        return audio_data_list
+
+
+class NemoMelSpecExtractor(nn.Module):
+    """
+    Mel-Spectrogram Extractor from NVIDIA NEMO toolkit.
+
+    Parameters:
+    ----------
+    sample_rate : int, default 16000
+        Sample rate of the input audio data.
+    window_size_sec : float, default 0.02
+        Size of window for FFT in seconds.
+    window_stride_sec : float, default 0.01
+        Stride of window for FFT in seconds.
+    n_fft : int, default 512
+        Length of FT window.
+    n_filters : int, default 64
+        Number of Mel spectrogram freq bins.
+    preemph : float, default 0.97
+        Amount of pre emphasis to add to audio.
+    dither : float, default 1.0e-05
+        Amount of white-noise dithering.
+    """
+    def __init__(self,
+                 sample_rate=16000,
+                 window_size_sec=0.02,
+                 window_stride_sec=0.01,
+                 n_fft=512,
+                 n_filters=64,
+                 preemph=0.97,
+                 dither=1.0e-05):
+        super(NemoMelSpecExtractor, self).__init__()
+        self.log_zero_guard_value = 2 ** -24
+        win_length = int(window_size_sec * sample_rate)
+        self.hop_length = int(window_stride_sec * sample_rate)
+        self.n_filters = n_filters
+
+        window_tensor = torch.hann_window(win_length, periodic=False)
+        self.register_buffer("window", window_tensor)
+        self.stft = lambda x: torch.stft(
+            x,
+            n_fft=n_fft,
+            hop_length=self.hop_length,
+            win_length=win_length,
+            window=self.window.to(dtype=torch.float),
+            center=True)
+
+        self.dither = dither
+        self.preemph = preemph
+
+        self.pad_align = 16
+
+        from librosa.filters import mel as librosa_mel
+        filter_bank = librosa_mel(
+            sr=sample_rate,
+            n_fft=n_fft,
+            n_mels=n_filters,
+            fmin=0.0,
+            fmax=(sample_rate / 2.0))
+        fb_tensor = torch.from_numpy(filter_bank).unsqueeze(0)
+        self.register_buffer("fb", fb_tensor)
+
+    def forward(self, x, x_len):
+        """
+        Preprocess audio.
+
+        Parameters:
+        ----------
+        xs : list of np.array
+            Audio data.
+
+        Returns:
+        -------
+        x : np.array
+            Audio data.
+        x_len : np.array
+            Audio data lengths.
+        """
+        x_len = torch.ceil(x_len.float() / self.hop_length).to(dtype=torch.long)
+
+        if self.dither > 0:
+            x += self.dither * torch.randn_like(x)
+
+        x = torch.cat((x[:, :1], x[:, 1:] - self.preemph * x[:, :-1]), dim=1)
+
+        with torch.cuda.amp.autocast(enabled=False):
+            x = self.stft(x)
+
+        x = x.pow(2).sum(-1)
+        x = torch.matmul(self.fb.to(x.dtype), x)
+        x = torch.log(x + self.log_zero_guard_value)
+
+        x = masked_normalize2(x, x_len)
+        x = outmask_fill(x, x_len)
+
+        x_len_max = x.size(-1)
+        pad_rem = x_len_max % self.pad_align
+        if pad_rem != 0:
+            x = F.pad(x, pad=(0, self.pad_align - pad_rem))
+
+        return x, x_len
+
+    def calc_flops(self, x):
+        assert (x.shape[0] == 1)
+        num_flops = x.numel()
+        num_macs = 0
+        return num_flops, num_macs
 
 
 class CtcDecoder(object):
@@ -55,214 +329,6 @@ class CtcDecoder(object):
             hypothesis = "".join([self.labels_map[c] for c in decoded_prediction])
             hypotheses.append(hypothesis)
         return hypotheses
-
-
-class NemoMelSpecExtractor(object):
-    """
-    Mel-Spectrogram Extractor from NVIDIA NEMO toolkit.
-
-    Parameters:
-    ----------
-    sample_rate : int, default 16000
-        Sample rate of the input audio data.
-    window_size_sec : float, default 0.02
-        Size of window for FFT in seconds.
-    window_stride_sec : float, default 0.01
-        Stride of window for FFT in seconds.
-    n_fft : int, default 512
-        Length of FT window.
-    n_filters : int, default 64
-        Number of Mel spectrogram freq bins.
-    preemph : float, default 0.97
-        Amount of pre emphasis to add to audio.
-    dither : float, default 1.0e-05
-        Amount of white-noise dithering.
-    """
-    def __init__(self,
-                 sample_rate=16000,
-                 window_size_sec=0.02,
-                 window_stride_sec=0.01,
-                 n_fft=512,
-                 n_filters=64,
-                 preemph=0.97,
-                 dither=1.0e-05,
-                 **kwargs):
-        super(NemoMelSpecExtractor, self).__init__(**kwargs)
-        self.log_zero_guard_value = 2 ** -24
-        win_length = int(window_size_sec * sample_rate)
-        self.hop_length = int(window_stride_sec * sample_rate)
-
-        from scipy import signal as scipy_signal
-        from librosa import stft as librosa_stft
-        from librosa.filters import mel as librosa_mel
-
-        window_fn = scipy_signal.hann(win_length, sym=True)
-        self.stft = lambda x: librosa_stft(
-            x,
-            n_fft=n_fft,
-            hop_length=self.hop_length,
-            win_length=win_length,
-            window=window_fn,
-            center=True)
-
-        self.dither = dither
-        self.preemph = preemph
-
-        self.pad_align = 16
-
-        self.filter_bank = librosa_mel(
-            sample_rate,
-            n_fft,
-            n_mels=n_filters,
-            fmin=0,
-            fmax=(sample_rate / 2))
-
-    def __call__(self, xs):
-        """
-        Preprocess audio.
-
-        Parameters:
-        ----------
-        xs : list of np.array
-            Audio data.
-
-        Returns:
-        -------
-        np.array
-            Audio data.
-        np.array
-            Audio data lengths.
-        """
-        x_eps = 1e-5
-
-        batch = len(xs)
-        x_len = np.zeros((batch,), dtype=np.long)
-
-        ys = []
-        for i, xi in enumerate(xs):
-            x_len[i] = np.ceil(float(len(xi)) / self.hop_length).astype(np.long)
-
-            if self.dither > 0:
-                xi += self.dither * np.random.randn(*xi.shape)
-
-            xi = np.concatenate((xi[:1], xi[1:] - self.preemph * xi[:-1]), axis=0)
-
-            yi = self.stft(xi)
-            yi = np.abs(yi)
-            yi = np.square(yi)
-            yi = np.matmul(self.filter_bank, yi)
-            yi = np.log(yi + self.log_zero_guard_value)
-
-            assert (yi.shape[1] != 1)
-            yi_mean = yi.mean(axis=1)
-            yi_std = yi.std(axis=1)
-            yi_std += x_eps
-            yi = (yi - np.expand_dims(yi_mean, axis=-1)) / np.expand_dims(yi_std, axis=-1)
-
-            ys.append(yi)
-
-        channels = ys[0].shape[0]
-        x_len_max = max([yj.shape[-1] for yj in ys])
-        x = np.zeros((batch, channels, x_len_max), dtype=np.float32)
-        for i, yi in enumerate(ys):
-            x_len_i = x_len[i]
-            x[i, :, :x_len_i] = yi[:, :x_len_i]
-
-        pad_rem = x_len_max % self.pad_align
-        if pad_rem != 0:
-            x = np.pad(x, ((0, 0), (0, 0), (0, self.pad_align - pad_rem)))
-
-        return x, x_len
-
-
-class JasperTranscriber(object):
-    """
-    Jasper/DR/QuartzNet model transcriber.
-
-    Parameters:
-    ----------
-    net : nn.Module
-        Network.
-    use_cuda : bool
-        Whether to use CUDA.
-    dither : float, default 0.0
-        Amount of white-noise dithering.
-    """
-    def __init__(self,
-                 net,
-                 use_cuda,
-                 dither=0.0):
-        super(JasperTranscriber, self).__init__()
-        self.use_cuda = use_cuda
-        self.net = net
-        self.preprocessor = NemoMelSpecExtractor(dither=dither)
-        self.ctc_decoder = CtcDecoder(vocabulary=net.vocabulary)
-
-    def __call__(self, audio_file_paths):
-        """
-        Transcribe audio.
-
-        Parameters:
-        ----------
-        audio_file_paths : list of str
-            Paths to audio files.
-
-        Returns:
-        -------
-        list of str
-            Transcribed texts.
-        """
-        assert (type(audio_file_paths) in [list, tuple])
-
-        audio_data_list = self.read_audio(audio_file_paths)
-        x_np, x_np_len = self.preprocessor(audio_data_list)
-
-        x = torch.from_numpy(x_np)
-        x_len = torch.from_numpy(x_np_len)
-        if self.use_cuda:
-            x = x.cuda()
-            x_len = x_len.cuda()
-
-        y, y_len = self.net(x, x_len)
-
-        greedy_predictions = y.transpose(1, 2).log_softmax(dim=-1).argmax(dim=-1, keepdim=False).cpu().numpy()
-        ctc_predictions = self.ctc_decoder(greedy_predictions)
-
-        return ctc_predictions
-
-    @staticmethod
-    def read_audio(audio_file_paths):
-        """
-        Read audio.
-
-        Parameters:
-        ----------
-        audio_file_paths : list of str
-            Paths to audio files.
-
-        Returns:
-        -------
-        list of np.array
-            Audio data.
-        """
-        desired_audio_sample_rate = 16000
-
-        from soundfile import SoundFile
-
-        audio_data_list = []
-        for audio_file_path in audio_file_paths:
-            with SoundFile(audio_file_path, "r") as data:
-                sample_rate = data.samplerate
-                audio_data = data.read(dtype="float32")
-            audio_data = audio_data.transpose()
-            if desired_audio_sample_rate != sample_rate:
-                from librosa.core import resample as lr_resample
-                audio_data = lr_resample(y=audio_data, orig_sr=sample_rate, target_sr=desired_audio_sample_rate)
-            if audio_data.ndim >= 2:
-                audio_data = np.mean(audio_data, axis=1)
-            audio_data_list.append(audio_data)
-
-        return audio_data_list
 
 
 def conv1d1(in_channels,
@@ -343,11 +409,7 @@ class MaskConv1d(nn.Conv1d):
 
     def forward(self, x, x_len):
         if self.use_mask:
-            x_len = x_len.to(dtype=torch.long)
-            max_len = x.size(2)
-            mask = torch.arange(max_len).to(x_len.device).expand(len(x_len), max_len) >= x_len.unsqueeze(1)
-            mask = mask.unsqueeze(1).to(device=x.device)
-            x = x.masked_fill(mask=mask, value=0)
+            x = outmask_fill(x, x_len)
             x_len = (x_len + 2 * self.padding[0] - self.dilation[0] * (self.kernel_size[0] - 1) -
                      1) // self.stride[0] + 1
         x = F.conv1d(
@@ -799,6 +861,10 @@ class Jasper(nn.Module):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
+    from_audio : bool, default False
+        Whether to treat input as audio instead of Mel-specs.
+    dither : float, default 0.0
+        Amount of white-noise dithering.
     return_text : bool, default False
         Whether to return text instead of logits.
     vocabulary : list of str or None, default None
@@ -816,6 +882,8 @@ class Jasper(nn.Module):
                  repeat,
                  use_dw,
                  use_dr,
+                 from_audio=False,
+                 dither=0.0,
                  return_text=False,
                  vocabulary=None,
                  in_channels=64,
@@ -824,7 +892,11 @@ class Jasper(nn.Module):
         self.in_size = in_channels
         self.num_classes = num_classes
         self.vocabulary = vocabulary
+        self.from_audio = from_audio
         self.return_text = return_text
+
+        if self.from_audio:
+            self.preprocessor = NemoMelSpecExtractor(dither=dither)
 
         self.features = DualPathSequential()
         init_block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
@@ -882,6 +954,10 @@ class Jasper(nn.Module):
         if x_len is None:
             assert (type(x) in (list, tuple))
             x, x_len = x
+
+        if self.from_audio:
+            x, x_len = self.preprocessor(x, x_len)
+
         x, x_len = self.features(x, x_len)
         x = self.output(x)
 
@@ -890,26 +966,6 @@ class Jasper(nn.Module):
             return self.ctc_decoder(greedy_predictions)
         else:
             return x, x_len
-
-    def transcript(self, audio_file_paths, use_cuda=False):
-        """
-        Transcribe audio.
-
-        Parameters:
-        ----------
-        audio_file_paths : list of str
-            Paths to audio files.
-
-        Returns:
-        -------
-        list of str
-            Transcribed texts.
-        use_cuda : bool, default False
-            Whether to use CUDA.
-        """
-        jt = JasperTranscriber(self, use_cuda=use_cuda)
-        v = jt(audio_file_paths)
-        return v
 
 
 def get_jasper(version,
@@ -1047,8 +1103,10 @@ def _test():
     import torch
 
     pretrained = False
+    from_audio = True
     audio_features = 64
     num_classes = 29
+    use_cuda = True
 
     models = [
         jasper5x3,
@@ -1061,7 +1119,11 @@ def _test():
         net = model(
             in_channels=audio_features,
             num_classes=num_classes,
+            from_audio=from_audio,
             pretrained=pretrained)
+
+        if use_cuda:
+            net = net.cuda()
 
         # net.train()
         net.eval()
@@ -1072,15 +1134,25 @@ def _test():
         assert (model != jasper10x5 or weight_count == 322286877)
 
         batch = 3
-        seq_len = np.random.randint(60, 150, batch)
+        aud_scale = 640 if from_audio else 1
+        seq_len = np.random.randint(150, 250, batch) * aud_scale
         seq_len_max = seq_len.max() + 2
-        x = torch.randn(batch, audio_features, seq_len_max)
+        x_shape = (batch, seq_len_max) if from_audio else (batch, audio_features, seq_len_max)
+        x = torch.randn(x_shape)
         x_len = torch.tensor(seq_len, dtype=torch.long, device=x.device)
+
+        if use_cuda:
+            x = x.cuda()
+            x_len = x_len.cuda()
 
         y, y_len = net(x, x_len)
         # y.sum().backward()
-        assert (tuple(y.size())[:2] == (batch, num_classes))
-        assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
+
+        assert (tuple(y.size())[:2] == (batch, net.num_classes))
+        if from_audio:
+            assert (y.size()[2] in range(seq_len_max // aud_scale * 2, seq_len_max // aud_scale * 2 + 9))
+        else:
+            assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

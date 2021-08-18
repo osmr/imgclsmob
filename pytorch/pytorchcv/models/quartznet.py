@@ -246,7 +246,9 @@ def _test():
     import torch
 
     pretrained = False
+    from_audio = False
     audio_features = 64
+    use_cuda = True
 
     models = [
         quartznet5x5_en_ls,
@@ -266,7 +268,11 @@ def _test():
 
         net = model(
             in_channels=audio_features,
+            from_audio=from_audio,
             pretrained=pretrained)
+
+        if use_cuda:
+            net = net.cuda()
 
         # net.train()
         net.eval()
@@ -285,15 +291,25 @@ def _test():
         assert (model != quartznet15x5_ru34 or weight_count == 18929506)
 
         batch = 3
-        seq_len = np.random.randint(60, 150, batch)
+        aud_scale = 640 if from_audio else 1
+        seq_len = np.random.randint(150, 250, batch) * aud_scale
         seq_len_max = seq_len.max() + 2
-        x = torch.randn(batch, audio_features, seq_len_max)
+        x_shape = (batch, seq_len_max) if from_audio else (batch, audio_features, seq_len_max)
+        x = torch.randn(x_shape)
         x_len = torch.tensor(seq_len, dtype=torch.long, device=x.device)
+
+        if use_cuda:
+            x = x.cuda()
+            x_len = x_len.cuda()
 
         y, y_len = net(x, x_len)
         # y.sum().backward()
+
         assert (tuple(y.size())[:2] == (batch, net.num_classes))
-        assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
+        if from_audio:
+            assert (y.size()[2] in range(seq_len_max // aud_scale * 2, seq_len_max // aud_scale * 2 + 9))
+        else:
+            assert (y.size()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

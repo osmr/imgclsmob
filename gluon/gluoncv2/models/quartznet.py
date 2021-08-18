@@ -270,6 +270,7 @@ def _test():
     import mxnet as mx
 
     pretrained = False
+    from_audio = True
     audio_features = 64
 
     models = [
@@ -290,6 +291,7 @@ def _test():
 
         net = model(
             in_channels=audio_features,
+            from_audio=from_audio,
             pretrained=pretrained)
 
         ctx = mx.cpu()
@@ -312,14 +314,20 @@ def _test():
         assert (model != quartznet15x5_ru34 or weight_count == 18929506)
 
         batch = 3
-        seq_len = np.random.randint(60, 150, batch)
+        aud_scale = 640 if from_audio else 1
+        seq_len = np.random.randint(150, 250, batch) * aud_scale
         seq_len_max = seq_len.max() + 2
-        x = mx.nd.random.normal(shape=(batch, audio_features, seq_len_max), ctx=ctx)
+        x_shape = (batch, seq_len_max) if from_audio else (batch, audio_features, seq_len_max)
+        x = mx.nd.random.normal(shape=x_shape, ctx=ctx)
         x_len = mx.nd.array(seq_len, ctx=ctx, dtype=np.long)
 
         y, y_len = net(x, x_len)
+
         assert (y.shape[:2] == (batch, net.classes))
-        assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
+        if from_audio:
+            assert (y.shape[2] in range(seq_len_max // aud_scale * 2, seq_len_max // aud_scale * 2 + 9))
+        else:
+            assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

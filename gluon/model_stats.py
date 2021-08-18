@@ -16,7 +16,7 @@ from .gluoncv2.models.proxylessnas import ProxylessUnit
 from .gluoncv2.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 from .gluoncv2.models.centernet import CenterNetHeatmapMaxDet
 from .gluoncv2.models.danet import ScaleBlock
-from .gluoncv2.models.jasper import MaskConv1d
+from .gluoncv2.models.jasper import MaskConv1d, NemoMelSpecExtractor
 
 __all__ = ['measure_model']
 
@@ -93,7 +93,7 @@ def measure_model(model,
     def call_hook(block, x, y):
         if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock) or
                 isinstance(block, RiRFinalBlock) or isinstance(block, InterpolationBlock) or
-                isinstance(block, MaskConv1d)):
+                isinstance(block, MaskConv1d) or isinstance(block, NemoMelSpecExtractor)):
             assert (len(x) == 1)
         assert (len(block._children) == 0)
         if isinstance(block, nn.Dense):
@@ -246,7 +246,8 @@ def measure_model(model,
                 extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
             extra_num_flops *= batch
             extra_num_macs *= batch
-        elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock]:
+        elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock,
+                             NemoMelSpecExtractor]:
             extra_num_flops, extra_num_macs = block.calc_flops(x[0])
         elif isinstance(block, LwopDecoderFinalBlock):
             if not block.calc_3d_features:

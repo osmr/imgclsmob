@@ -262,7 +262,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | IBN-ResNet-50 | 21.46 | 5.59 | 25,557,032 | 4,110.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/ibn_resnet50-0559-0f75710a.params.log)) |
 | IBN-ResNet-101 | 19.69 | 4.89 | 44,549,160 | 7,830.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/ibn_resnet101-0489-db938be9.params.log)) |
 | IBN(b)-ResNet-50 | 21.70 | 5.79 | 25,558,568 | 4,112.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/ibnb_resnet50-0579-146aa6e1.params.log)) |
-| IBN-ResNeXt-101 (32x4d) | 21.43 | 5.62 | 44,177,704 | 8,003.45M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnext101_32x4d-0562-05ddba79.params.log)) |
+| IBN-ResNeXt-101 (32x4d) | 19.76 | 4.87 | 44,177,704 | 8,003.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/ibn_resnext101_32x4d-0487-1398597e.params.log)) |
 | IBN-DenseNet-121 | 23.33 | 6.46 | 7,978,856 | 2,872.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0646-82ee3ff4.params.log)) |
 | IBN-DenseNet-169 | 22.14 | 6.08 | 14,149,480 | 3,403.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0608-b509f339.params.log)) |
 | AirNet50-1x64d (r=2) | 20.45 | 5.23 | 27,425,864 | 4,772.11M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/airnet50_1x64d_r2-0523-1f982e0e.params.log)) |
@@ -323,7 +323,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DarkNet Ref | 38.00 | 16.68 | 7,319,416 | 367.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1668-3011b4e1.params.log)) |
 | DarkNet-53 | 21.27 | 5.50 | 41,609,928 | 7,133.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0550-1d0b4f62.params.log)) |
 | i-RevNet-301 | 26.97 | 8.97 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0897-cef9b5bf.params.log)) |
-| BagNet-9 | 59.57 | 35.44 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-3544-ea1ae645.params.log)) |
+| BagNet-9 | 48.77 | 25.36 | 15,688,744 | 16,049.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2536-6b5d69da.params.log)) |
 | BagNet-17 | 44.76 | 21.52 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-2152-4b3a6212.params.log)) |
 | BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
 | DLA-34 | 24.31 | 7.05 | 15,742,104 | 3,071.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-557c5f4f.params.log)) |

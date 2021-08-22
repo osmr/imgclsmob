@@ -1,5 +1,4 @@
 # Computer vision models on Chainer
-# Computer vision models on Chainer
 
 [![PyPI](https://img.shields.io/pypi/v/chainercv2.svg)](https://pypi.python.org/pypi/chainercv2)
 [![Downloads](https://pepy.tech/badge/chainercv2)](https://pepy.tech/project/chainercv2)
@@ -302,7 +301,7 @@ Some remarks:
 | DarkNet Ref | 38.09 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1671-b2d5721f.npz.log)) |
 | DarkNet-53 | 21.27 | 5.52 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0552-3e6f4076.npz.log)) |
 | i-RevNet-301 | 26.96 | 8.87 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0887-ed6e6df0.npz.log)) |
-| BagNet-9 | 59.57 | 35.45 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-3545-8ac8c0f7.npz.log)) |
+| BagNet-9 | 48.78 | 25.44 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2544-346ee143.npz.log)) |
 | BagNet-17 | 44.78 | 21.51 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-2151-57188969.npz.log)) |
 | BagNet-33 | 36.41 | 14.92 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1492-a7be162c.npz.log)) |
 | DLA-34 | 24.39 | 7.06 | 15,742,104 | 3,071.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0706-576dd492.npz.log)) |

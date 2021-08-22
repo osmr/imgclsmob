@@ -224,7 +224,7 @@ Some remarks:
 | IBN-ResNet-50 | 21.47 | 5.62 | 25,557,032 | 4,110.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/ibn_resnet50-0562-515dd253.tf2.h5.log)) |
 | IBN-ResNet-101 | 19.69 | 4.89 | 44,549,160 | 7,830.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/ibn_resnet101-0489-325dbc1c.tf2.h5.log)) |
 | IBN(b)-ResNet-50 | 21.69 | 5.80 | 25,558,568 | 4,112.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/ibnb_resnet50-0580-dbf9219a.tf2.h5.log)) |
-| IBN-ResNeXt-101 (32x4d) | 21.41 | 5.64 | 44,177,704 | 8,003.45M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/ibn_resnext101_32x4d-0564-c149beb5.tf2.h5.log)) |
+| IBN-ResNeXt-101 (32x4d) | 19.78 | 4.90 | 44,177,704 | 8,003.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/ibn_resnext101_32x4d-0490-5e262e0d.tf2.h5.log)) |
 | IBN-DenseNet-121 | 23.34 | 6.47 | 7,978,856 | 2,872.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.493/ibn_densenet121-0647-830420b2.tf2.h5.log)) |
 | IBN-DenseNet-169 | 22.13 | 6.07 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.500/ibn_densenet169-0607-74a97a40.tf2.h5.log)) |
 | AirNet50-1x64d (r=2) | 20.55 | 5.28 | 27,425,864 | 4,772.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/airnet50_1x64d_r2-0528-065bd85b.tf2.h5.log)) |
@@ -281,7 +281,7 @@ Some remarks:
 | DarkNet Tiny | 40.34 | 17.45 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_tiny-1745-d30be41a.tf2.h5.log)) |
 | DarkNet Ref | 38.10 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_ref-1671-b4991f6b.tf2.h5.log)) |
 | DarkNet-53 | 21.26 | 5.54 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0554-118630cc.tf2.h5.log)) |
-| BagNet-9 | 59.59 | 35.53 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bagnet9-3553-43eb57dc.tf2.h5.log)) |
+| BagNet-9 | 48.78 | 25.41 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2541-f2c2b3c2.tf2.h5.log)) |
 | BagNet-17 | 44.75 | 21.54 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bagnet17-2154-8a31e347.tf2.h5.log)) |
 | BagNet-33 | 36.42 | 14.97 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bagnet33-1497-ef600c89.tf2.h5.log)) |
 | DLA-34 | 24.37 | 7.05 | 15,742,104 | 3,071.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-ade65c16.tf2.h5.log)) |

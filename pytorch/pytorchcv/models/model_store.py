@@ -114,7 +114,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('ibn_resnet50', '0576', '40c420fcbbfd87bf634fc5b351746e124c32e401', 'v0.0.495', 'IBN-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibn_resnet101', '0507', '6f488f243cb02e8f4e934a390f8037cef927dcf7', 'v0.0.552', 'IBN-ResNet-101', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibnb_resnet50', '0597', '383b44324af7bb3842b93df177bdd199864e0e8d', 'v0.0.552', 'IBN(b)-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('ibn_resnext101_32x4d', '0542', 'b5233c663a4d207d08c21107d6c951956e910be8', 'v0.0.127', 'IBN-ResNeXt-101 (32x4d)', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
+    ('ibn_resnext101_32x4d', '0512', '73534cc42c9f7b1aa859b32e012c31f9ea66fd60', 'v0.0.553', 'IBN-ResNeXt-101 (32x4d)', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibn_densenet121', '0673', '0ea2c535382c7a3d92e712617d8405ba631c071f', 'v0.0.493', 'IBN-DenseNet-121', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('ibn_densenet169', '0619', 'ec2c0556f4fb2e2e51d49460095bf28259cb5d19', 'v0.0.500', 'IBN-DenseNet-169', '1807.09441', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('airnet50_1x64d_r2', '0532', '398445f4059b5505e2fd5b7338fe174960f8571a', 'v0.0.522', 'AirNet50-1x64d (r=2)', '', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -174,7 +174,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('darknet_ref', '1718', '034595b49113ee23de72e36f7d8a3dbb594615f6', 'v0.0.64', 'DarkNet Ref', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('darknet53', '0558', '8be575a04c1789c16b7fa6835919461bb5b174d1', 'v0.0.501', 'DarkNet-53', '1804.02767', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('irevnet301', '0841', '95dc8d94257bf16027edd7077b785a8676369fca', 'v0.0.251', 'i-RevNet-301', '1802.07088', 'in1k', 224, 0.875, 200, '[jhjacobsen/pytorch-i-revnet]'),  # noqa
-    ('bagnet9', '2961', 'cab1179284e9749697f38c1c7e5f0e172be12c89', 'v0.0.255', 'BagNet-9', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
+    ('bagnet9', '2576', '36d935e1ec250208f585a1a53b65c79ddc11d7cd', 'v0.0.553', 'BagNet-9', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bagnet17', '1884', '6b2a100f8d14d4616709586483f625743ed04769', 'v0.0.255', 'BagNet-17', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('bagnet33', '1301', '4f17b6e837dacd978b15708ffbb2c1e6be3c371a', 'v0.0.255', 'BagNet-33', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('dla34', '0724', '649c67e61942283abe7f6a798fb9fcae346e5a5d', 'v0.0.486', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa

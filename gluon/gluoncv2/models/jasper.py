@@ -13,6 +13,35 @@ from mxnet.gluon import nn, HybridBlock
 from .common import BatchNormExtra, DualPathSequential, DualPathParallelConcurent
 
 
+def outmask_fill(F, x, x_len, value=0.0):
+    """
+    Masked fill a tensor.
+
+    Parameters:
+    ----------
+    F : object
+        MXNet specific package.
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+    value : float, default 0.0
+        Filled value.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    x = F.SequenceMask(
+        data=x.swapaxes(1, 2),
+        sequence_length=x_len,
+        use_sequence_length=True,
+        value=value,
+        axis=1).swapaxes(1, 2)
+    return x
+
+
 class NemoAudioReader(object):
     """
     Audio Reader from NVIDIA NEMO toolkit.
@@ -80,7 +109,7 @@ class NemoAudioReader(object):
         return audio_data_list
 
 
-class NemoMelSpecExtractor(object):
+class NemoMelSpecExtractor(HybridBlock):
     """
     Mel-Spectrogram Extractor from NVIDIA NEMO toolkit.
 
@@ -141,43 +170,19 @@ class NemoMelSpecExtractor(object):
             fmin=0,
             fmax=(sample_rate / 2))
 
-    def __call__(self,
-                 xs,
-                 ys_mean=None,
-                 ys_std=None):
-        """
-        Preprocess audio.
+    def hybrid_forward(self, F, x, x_len):
+        xs = x.asnumpy()
 
-        Parameters:
-        ----------
-        xs : list of np.array
-            Audio data.
-        ys_mean : np.array
-            Mean values for ys.
-        ys_std : np.array
-            STD values for ys.
-
-        Returns:
-        -------
-        x : np.array
-            Audio data.
-        x_len : np.array
-            Audio data lengths.
-        ys_mean : np.array
-            Mean values for ys.
-        ys_std : np.array
-            STD values for ys.
-        """
         x_eps = 1e-5
 
         batch = len(xs)
-        x_len = np.zeros((batch,), dtype=np.long)
+        y_len = np.zeros((batch,), dtype=np.long)
 
         ys = []
         ys_mean_ = np.zeros((batch, self.n_filters), np.float32)
         ys_std_ = np.zeros((batch, self.n_filters), np.float32)
         for i, xi in enumerate(xs):
-            x_len[i] = np.ceil(float(len(xi)) / self.hop_length).astype(np.long)
+            y_len[i] = np.ceil(float(len(xi)) / self.hop_length).astype(np.long)
 
             if self.dither > 0:
                 xi += self.dither * np.random.randn(*xi.shape)
@@ -192,13 +197,10 @@ class NemoMelSpecExtractor(object):
 
             assert (yi.shape[1] != 1)
 
-            if (ys_mean is None) or (ys_std is None):
-                yi_mean = yi.mean(axis=1)
-                yi_std = yi.std(axis=1)
-                yi_std += x_eps
-            else:
-                yi_mean = ys_mean[i]
-                yi_std = ys_std[i]
+            yi_mean = yi.mean(axis=1)
+            yi_std = yi.std(axis=1)
+            yi_std += x_eps
+
             ys_mean_[i] = yi_mean
             ys_std_[i] = yi_std
             yi = (yi - np.expand_dims(yi_mean, axis=-1)) / np.expand_dims(yi_std, axis=-1)
@@ -207,22 +209,18 @@ class NemoMelSpecExtractor(object):
 
         channels = ys[0].shape[0]
         x_len_max = max([yj.shape[-1] for yj in ys])
-        x = np.zeros((batch, channels, x_len_max), dtype=np.float32)
+        y = np.zeros((batch, channels, x_len_max), dtype=np.float32)
         for i, yi in enumerate(ys):
-            x_len_i = x_len[i]
-            x[i, :, :x_len_i] = yi[:, :x_len_i]
+            x_len_i = y_len[i]
+            y[i, :, :x_len_i] = yi[:, :x_len_i]
 
         pad_rem = x_len_max % self.pad_align
         if pad_rem != 0:
-            x = np.pad(x, ((0, 0), (0, 0), (0, self.pad_align - pad_rem)))
+            y = np.pad(y, ((0, 0), (0, 0), (0, self.pad_align - pad_rem)))
 
-        # x = torch.from_numpy(x)
-        # x_len = torch.from_numpy(x_len)
-        # if self.use_cuda:
-        #     x = x.cuda()
-        #     x_len = x_len.cuda()
-
-        return x, x_len, ys_mean_, ys_std_
+        x = F.array(y, ctx=x.context)
+        x_len = F.array(y_len, ctx=x.context)
+        return x, x_len
 
     def calc_flops(self, x):
         assert (x.shape[0] == 1)
@@ -361,11 +359,7 @@ class MaskConv1d(nn.Conv1D):
 
     def hybrid_forward(self, F, x, x_len, weight, bias=None):
         if self.use_mask:
-            x = F.SequenceMask(
-                data=x.swapaxes(1, 2),
-                sequence_length=x_len,
-                use_sequence_length=True,
-                axis=1).swapaxes(1, 2)
+            x = outmask_fill(F, x, x_len)
             x_len = ((x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) / self.strides + 1).floor()
         x = super(MaskConv1d, self).hybrid_forward(F, x, weight=weight, bias=bias)
         return x, x_len
@@ -895,6 +889,9 @@ class Jasper(HybridBlock):
         self.return_text = return_text
 
         with self.name_scope():
+            if self.from_audio:
+                self.preprocessor = NemoMelSpecExtractor(dither=dither)
+
             self.features = DualPathSequential()
             init_block_class = DwsConvBlock1d if use_dw else MaskConvBlock1d
             self.features.add(init_block_class(
@@ -941,8 +938,6 @@ class Jasper(HybridBlock):
                 out_channels=classes,
                 use_bias=True)
 
-        if self.from_audio:
-            self.preprocessor = NemoMelSpecExtractor(dither=dither)
         if self.return_text:
             self.ctc_decoder = CtcDecoder(vocabulary=vocabulary)
 
@@ -952,9 +947,7 @@ class Jasper(HybridBlock):
             x, x_len = x
 
         if self.from_audio:
-            y, y_len, _, _ = self.preprocessor(x.asnumpy())
-            x = F.array(y, ctx=x.context)
-            x_len = F.array(y_len, ctx=x.context)
+            x, x_len = self.preprocessor(x, x_len)
 
         x, x_len = self.features(x, x_len)
         x = self.output(x)

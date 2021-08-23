@@ -1110,7 +1110,6 @@ def _calc_width(net):
 
 
 def _test():
-    import numpy as np
     import mxnet as mx
 
     pretrained = False

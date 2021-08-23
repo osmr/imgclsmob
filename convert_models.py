@@ -1501,20 +1501,20 @@ def update_and_initialize_logging(args):
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
         packages += ["mxnet, numpy"]
-        pip_packages += ["mxnet-cu102", "mxnet-cu110"]
+        pip_packages += ["mxnet-cu110", "mxnet-cu112"]
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
         packages += ["chainer"]
-        pip_packages += ["cupy-cuda102", "cupy-cuda110", "chainer"]
+        pip_packages += ["cupy-cuda110", "cupy-cuda112", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
-        pip_packages += ["keras", "keras-mxnet", "mxnet-cu102", "mxnet-cu110"]
+        pip_packages += ["keras", "keras-mxnet", "mxnet-cu110", "mxnet-cu112"]
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
         pip_packages += ["tensorflow", "tensorflow-gpu", "tensorpack"]
     if (args.src_fwk == "tf2") or (args.dst_fwk == "tf2") or (args.dst_fwk == "tfl"):
-        packages += ["tensorflow-gpu"]
+        packages += ["tensorflow"]
         pip_packages += ["tensorflow", "tensorflow-gpu"]
 
     _, log_file_exist = initialize_logging(

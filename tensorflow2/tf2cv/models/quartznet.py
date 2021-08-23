@@ -241,6 +241,7 @@ def _test():
     data_format = "channels_last"
     # data_format = "channels_first"
     pretrained = False
+    from_audio = True
     audio_features = 64
 
     models = [
@@ -261,24 +262,30 @@ def _test():
 
         net = model(
             in_channels=audio_features,
+            from_audio=from_audio,
             pretrained=pretrained,
             data_format=data_format)
 
         batch = 3
-        seq_len = np.random.randint(60, 150, batch)
+        aud_scale = 640 if from_audio else 1
+        seq_len = np.random.randint(150, 250, batch) * aud_scale
         seq_len_max = seq_len.max() + 2
-        x = tf.random.normal((batch, audio_features, seq_len_max) if is_channels_first(data_format) else
-                             (batch, seq_len_max, audio_features))
+        x_shape = (batch, seq_len_max) if from_audio else (
+            (batch, audio_features, seq_len_max) if is_channels_first(data_format) else
+            (batch, seq_len_max, audio_features))
+        x = tf.random.normal(shape=x_shape)
         x_len = tf.convert_to_tensor(seq_len.astype(np.long))
 
         y, y_len = net(x, x_len)
+
         assert (y.shape.as_list()[0] == batch)
-        if is_channels_first(data_format):
-            assert (y.shape.as_list()[1] == net.classes)
-            assert (y.shape.as_list()[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
+        classes_id = 1 if is_channels_first(data_format) else 2
+        seq_id = 2 if is_channels_first(data_format) else 1
+        assert (y.shape.as_list()[classes_id] == net.classes)
+        if from_audio:
+            assert (y.shape.as_list()[seq_id] in range(seq_len_max // aud_scale * 2, seq_len_max // aud_scale * 2 + 9))
         else:
-            assert (y.shape.as_list()[1] in [seq_len_max // 2, seq_len_max // 2 + 1])
-            assert (y.shape.as_list()[2] == net.classes)
+            assert (y.shape.as_list()[seq_id] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))

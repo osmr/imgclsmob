@@ -239,6 +239,7 @@ def _test():
     chainer.global_config.train = False
 
     pretrained = False
+    from_audio = True
     audio_features = 64
 
     models = [
@@ -258,6 +259,7 @@ def _test():
     for model in models:
         net = model(
             in_channels=audio_features,
+            from_audio=from_audio,
             pretrained=pretrained)
 
         weight_count = net.count_params()
@@ -275,14 +277,20 @@ def _test():
         assert (model != quartznet15x5_ru34 or weight_count == 18929506)
 
         batch = 3
-        seq_len = np.random.randint(60, 150, batch)
+        aud_scale = 640 if from_audio else 1
+        seq_len = np.random.randint(150, 250, batch) * aud_scale
         seq_len_max = seq_len.max() + 2
-        x = np.random.rand(batch, audio_features, seq_len_max).astype(np.float32)
+        x_shape = (batch, seq_len_max) if from_audio else (batch, audio_features, seq_len_max)
+        x = np.random.rand(*x_shape).astype(np.float32)
         x_len = seq_len.astype(np.long)
 
         y, y_len = net(x, x_len)
+
         assert (y.shape[:2] == (batch, net.classes))
-        assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
+        if from_audio:
+            assert (y.shape[2] in range(seq_len_max // aud_scale * 2, seq_len_max // aud_scale * 2 + 9))
+        else:
+            assert (y.shape[2] in [seq_len_max // 2, seq_len_max // 2 + 1])
 
 
 if __name__ == "__main__":

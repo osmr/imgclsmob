@@ -314,7 +314,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DRN-C-58 | 22.35 | 6.27 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0627-44cbf15c.params.log)) |
 | DRN-D-22 | 24.67 | 7.44 | 16,393,752 | 13,051.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0744-aecf15fc.params.log)) |
 | DRN-D-38 | 22.83 | 6.24 | 26,501,912 | 21,151.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0624-4a86d6eb.params.log)) |
-| DRN-D-54 | 22.05 | 6.27 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0627-87d44c87.params.log)) |
+| DRN-D-54 | 20.29 | 4.97 | 35,809,176 | 28,547.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0497-117ca29b.params.log)) |
 | DRN-D-105 | 21.31 | 5.81 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0581-ab12d662.params.log)) |
 | DPN-68 | 22.87 | 6.58 | 12,611,602 | 2,351.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.310/dpn68-0658-07251919.params.log)) |
 | DPN-98 | 18.29 | 4.22 | 61,570,728 | 11,716.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/dpn98-0422-1ace57dc.params.log)) |

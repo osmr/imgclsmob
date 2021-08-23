@@ -273,7 +273,7 @@ Some remarks:
 | DRN-C-58 | 22.36 | 6.26 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc58-0626-e5c7be89.tf2.h5.log)) |
 | DRN-D-22 | 24.71 | 7.47 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0747-99f94425.tf2.h5.log)) |
 | DRN-D-38 | 22.82 | 6.23 | 26,501,912 | 21,151.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0623-63255b31.tf2.h5.log)) |
-| DRN-D-54 | 22.07 | 6.26 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd54-0626-cb792485.tf2.h5.log)) |
+| DRN-D-54 | 20.29 | 4.98 | 35,809,176 | 28,547.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0498-b724009a.tf2.h5.log)) |
 | DRN-D-105 | 21.31 | 5.83 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd105-0583-80eb9ec2.tf2.h5.log)) |
 | DPN-68 | 22.92 | 6.58 | 12,611,602 | 2,351.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dpn68-0658-5b70b7b8.tf2.h5.log)) |
 | DPN-98 | 18.30 | 4.26 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/dpn98-0426-5d6dd2ed.tf2.h5.log)) |

@@ -158,7 +158,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('drnc58', '0629', '063ef19974f0158bcc6b9e4020729291462a08a3', 'v0.0.116'),
     ('drnd22', '0747', 'e4c5cf7351f691f0afe4c7b4325fd4e3a4b47681', 'v0.0.498'),
     ('drnd38', '0624', '1a1a7b99703d3d8bade3ebb0f22f0ffbad33ad60', 'v0.0.552'),
-    ('drnd54', '0623', '31e8eeb88bdbb07d8613a16471c8c5bd67ae823a', 'v0.0.116'),
+    ('drnd54', '0500', 'b679707c999e1a6f24a63e3d96f667a941cef141', 'v0.0.554'),
     ('drnd105', '0584', 'c0d7657b2d3c4cf7d97ff407cd50dda5d1bd1880', 'v0.0.116'),
     ('dpn68', '0656', 'bf9b72e9749da4c6ee5a544639f78ac7fa85f7ce', 'v0.0.310'),
     ('dpn98', '0426', '2ab67669d6b82719cd23128ccdf1ef71511bea94', 'v0.0.540'),

@@ -258,7 +258,7 @@ class McvMetaInfo(DatasetMetaInfo):
         super(McvMetaInfo, self).__init__()
         self.label = "MCV"
         self.short_label = "mcv"
-        self.root_dir_name = "mcv"
+        self.root_dir_name = "cv-corpus-6.1-2020-12-11"
         self.dataset_class = McvDataset
         self.lang = "en"
         self.dataset_class_extra_kwargs = {

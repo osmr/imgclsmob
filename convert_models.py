@@ -149,6 +149,12 @@ def prepare_src_model(src_fwk,
                 src_param_keys_ = src_param_keys.copy()
                 src_param_keys = [key for key in src_param_keys_ if (not key.endswith(".mask"))]
                 ext_src_param_keys2 = [key for key in src_param_keys_ if (key.endswith(".mask"))]
+            elif src_model.startswith("jasper") or src_model.startswith("quartznet"):
+                src_param_keys_ = src_param_keys.copy()
+                src_param_keys = [key for key in src_param_keys_ if (not key.endswith(".window")) and
+                                  (not key.endswith(".fb"))]
+                ext_src_param_keys2 = [key for key in src_param_keys_ if (key.endswith(".window")) or
+                                       (key.endswith(".fb"))]
 
     elif src_fwk == "pytorch":
         from pytorch.utils import prepare_model as prepare_model_pt
@@ -314,10 +320,11 @@ def prepare_dst_model(dst_fwk,
                            (batch_size, dst_net.in_size[0], dst_net.in_size[1], 3))
             dst_net(tf.random.normal(input_shape))
         else:
-            seq_len = 100
-            input_shape = ((batch_size, dst_net.in_channels, seq_len) if
-                           dst_net.data_format == "channels_first" else
-                           (batch_size, seq_len, dst_net.in_channels))
+            seq_len = 100 * 640
+            # input_shape = ((batch_size, dst_net.in_channels, seq_len) if
+            #                dst_net.data_format == "channels_first" else
+            #                (batch_size, seq_len, dst_net.in_channels))
+            input_shape = (batch_size, seq_len)
             x_len = tf.convert_to_tensor(np.array([seq_len - 0], dtype=np.long))
             dst_net(tf.random.normal(input_shape), x_len)
         dst_param_keys = [v.name for v in dst_net.weights]
@@ -974,6 +981,7 @@ def convert_gl2tf2(dst_net,
         dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
+
     if src_model.startswith("hrnet"):
         dst_param_keys = [key.replace("/atransition/", "/transition/") for key in dst_param_keys]
     if src_model.startswith("hardnet"):
@@ -1004,7 +1012,9 @@ def convert_gl2tf2(dst_net,
         elif len(src_weight.shape) == 2:
             src_weight = np.transpose(src_weight, axes=(1, 0))
         elif len(src_weight.shape) == 3:
-            src_weight = np.transpose(src_weight, axes=(2, 1, 0))
+            if not ((src_model.startswith("jasper") or src_model.startswith("quartznet")) and
+                    dst_key.split("/")[-1][:-2] == "fb"):
+                src_weight = np.transpose(src_weight, axes=(2, 1, 0))
             if dst_key.split("/")[-1][:-2] == "depthwise_kernel":
                 assert(len(dst_params[dst_key].shape) == 4)
                 src_weight = np.expand_dims(src_weight, -1)

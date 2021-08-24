@@ -8,6 +8,7 @@ __all__ = ['Jasper', 'jasper5x3', 'jasper10x4', 'jasper10x5', 'get_jasper', 'Mas
 
 import os
 import numpy as np
+import mxnet as mx
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import BatchNormExtra, DualPathSequential, DualPathParallelConcurent
@@ -20,7 +21,7 @@ def outmask_fill(F, x, x_len, value=0.0):
     Parameters:
     ----------
     F : object
-        MXNet specific package.
+        MXNet tensor processing package.
     x : tensor
         Input tensor.
     x_len : tensor
@@ -39,6 +40,33 @@ def outmask_fill(F, x, x_len, value=0.0):
         use_sequence_length=True,
         value=value,
         axis=1).swapaxes(1, 2)
+    return x
+
+
+def masked_normalize2(F, x, x_len):
+    """
+    Normalize a tensor with mask (scheme #2).
+
+    Parameters:
+    ----------
+    F : object
+        MXNet tensor processing package.
+    x : tensor
+        Input tensor.
+    x_len : tensor
+        Tensor with lengths.
+
+    Returns:
+    -------
+    tensor
+        Resulted tensor.
+    """
+    x = outmask_fill(F, x, x_len)
+    x_len_float = x_len.astype("float32").expand_dims(axis=1)
+    x_mean = x.sum(axis=2) / x_len_float
+    x2_mean = x.square().sum(axis=2) / x_len_float
+    x_std = (x2_mean - x_mean.square()).sqrt()
+    x = (x - x_mean.expand_dims(axis=2)) / x_std.expand_dims(axis=2)
     return x
 
 
@@ -137,7 +165,7 @@ class NemoMelSpecExtractor(HybridBlock):
                  n_fft=512,
                  n_filters=64,
                  preemph=0.97,
-                 dither=1.0e-05,
+                 dither=1.0e-5,
                  **kwargs):
         super(NemoMelSpecExtractor, self).__init__(**kwargs)
         self.log_zero_guard_value = 2 ** -24
@@ -147,15 +175,13 @@ class NemoMelSpecExtractor(HybridBlock):
 
         from scipy import signal as scipy_signal
         from librosa import stft as librosa_stft
-        from librosa.filters import mel as librosa_mel
-
-        window_fn = scipy_signal.hann(win_length, sym=True)
+        window_arr = scipy_signal.hann(win_length, sym=True)
         self.stft = lambda x: librosa_stft(
             x,
             n_fft=n_fft,
             hop_length=self.hop_length,
             win_length=win_length,
-            window=window_fn,
+            window=window_arr,
             center=True)
 
         self.dither = dither
@@ -163,64 +189,65 @@ class NemoMelSpecExtractor(HybridBlock):
 
         self.pad_align = 16
 
-        self.filter_bank = librosa_mel(
-            sample_rate,
-            n_fft,
+        from librosa.filters import mel as librosa_mel
+        fb_arr = librosa_mel(
+            sr=sample_rate,
+            n_fft=n_fft,
             n_mels=n_filters,
-            fmin=0,
-            fmax=(sample_rate / 2))
+            fmin=0.0,
+            fmax=(sample_rate / 2.0))
+        fb_arr = np.expand_dims(fb_arr, axis=0)
 
-    def hybrid_forward(self, F, x, x_len):
-        xs = x.asnumpy()
+        with self.name_scope():
+            self.window = self.params.get(
+                "window",
+                grad_req="null",
+                shape=window_arr.shape,
+                init=mx.init.Constant(window_arr),
+                allow_deferred_init=False,
+                differentiable=False)
+            self.fb = self.params.get(
+                "fb",
+                grad_req="null",
+                shape=fb_arr.shape,
+                init=mx.init.Constant(fb_arr),
+                allow_deferred_init=False,
+                differentiable=False)
 
-        x_eps = 1e-5
+    def hybrid_forward(self, F, x, x_len, window=None, fb=None):
+        x_len = ((x_len.astype("float32") / self.hop_length).ceil()).astype("int64")
 
-        batch = len(xs)
-        y_len = np.zeros((batch,), dtype=np.long)
+        if self.dither > 0:
+            x += self.dither * F.random.normal_like(x)
 
-        ys = []
-        ys_mean_ = np.zeros((batch, self.n_filters), np.float32)
-        ys_std_ = np.zeros((batch, self.n_filters), np.float32)
-        for i, xi in enumerate(xs):
-            y_len[i] = np.ceil(float(len(xi)) / self.hop_length).astype(np.long)
+        x = F.concat(x[:, :1], x[:, 1:] - self.preemph * x[:, :-1], dim=1)
 
-            if self.dither > 0:
-                xi += self.dither * np.random.randn(*xi.shape)
+        x = self.calc_real_stft(F, x)
 
-            xi = np.concatenate((xi[:1], xi[1:] - self.preemph * xi[:-1]), axis=0)
+        x = F.power(x, 2)
+        x = F.batch_dot(fb.repeat(repeats=x.shape[0], axis=0), x)
+        x = F.log(x + self.log_zero_guard_value)
 
-            yi = self.stft(xi)
-            yi = np.abs(yi)
-            yi = np.square(yi)
-            yi = np.matmul(self.filter_bank, yi)
-            yi = np.log(yi + self.log_zero_guard_value)
+        x = masked_normalize2(F, x, x_len)
+        x = outmask_fill(F, x, x_len)
 
-            assert (yi.shape[1] != 1)
-
-            yi_mean = yi.mean(axis=1)
-            yi_std = yi.std(axis=1)
-            yi_std += x_eps
-
-            ys_mean_[i] = yi_mean
-            ys_std_[i] = yi_std
-            yi = (yi - np.expand_dims(yi_mean, axis=-1)) / np.expand_dims(yi_std, axis=-1)
-
-            ys.append(yi)
-
-        channels = ys[0].shape[0]
-        x_len_max = max([yj.shape[-1] for yj in ys])
-        y = np.zeros((batch, channels, x_len_max), dtype=np.float32)
-        for i, yi in enumerate(ys):
-            x_len_i = y_len[i]
-            y[i, :, :x_len_i] = yi[:, :x_len_i]
-
+        x_len_max = x.shape[-1]
         pad_rem = x_len_max % self.pad_align
         if pad_rem != 0:
-            y = np.pad(y, ((0, 0), (0, 0), (0, self.pad_align - pad_rem)))
+            x = x.expand_dims(1).pad(mode="constant", pad_width=(0, 0, 0, 0, 0, 0, 0, self.pad_align - pad_rem),
+                                     constant_value=0).squeeze(1)
 
-        x = F.array(y, ctx=x.context)
-        x_len = F.array(y_len, ctx=x.context)
         return x, x_len
+
+    def calc_real_stft(self, F, x):
+        x_np = x.asnumpy()
+        ys = []
+        for xi_np in x_np:
+            ys.append(self.stft(xi_np))
+        x_np = np.array(ys)
+        x_np = np.abs(x_np)
+        x = F.array(x_np, ctx=x.context)
+        return x
 
     def calc_flops(self, x):
         assert (x.shape[0] == 1)
@@ -851,7 +878,7 @@ class Jasper(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
-    from_audio : bool, default False
+    from_audio : bool, default True
         Whether to treat input as audio instead of Mel-specs.
     dither : float, default 0.0
         Amount of white-noise dithering.
@@ -874,7 +901,7 @@ class Jasper(HybridBlock):
                  use_dr,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
-                 from_audio=False,
+                 from_audio=True,
                  dither=0.0,
                  return_text=False,
                  vocabulary=None,
@@ -1107,6 +1134,8 @@ def _test():
 
     pretrained = False
     from_audio = True
+    # dither = 0.0
+    dither = 1.0e-5
     audio_features = 64
     classes = 29
 
@@ -1122,6 +1151,7 @@ def _test():
             in_channels=audio_features,
             classes=classes,
             from_audio=from_audio,
+            dither=dither,
             pretrained=pretrained)
 
         ctx = mx.cpu()

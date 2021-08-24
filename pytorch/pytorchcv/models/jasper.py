@@ -209,7 +209,7 @@ class NemoMelSpecExtractor(nn.Module):
                  n_fft=512,
                  n_filters=64,
                  preemph=0.97,
-                 dither=1.0e-05):
+                 dither=1.0e-5):
         super(NemoMelSpecExtractor, self).__init__()
         self.log_zero_guard_value = 2 ** -24
         win_length = int(window_size_sec * sample_rate)
@@ -257,7 +257,7 @@ class NemoMelSpecExtractor(nn.Module):
         x_len : np.array
             Audio data lengths.
         """
-        x_len = torch.ceil(x_len.float() / self.hop_length).to(dtype=torch.long)
+        x_len = torch.ceil(x_len.float() / self.hop_length).long()
 
         if self.dither > 0:
             x += self.dither * torch.randn_like(x)
@@ -861,7 +861,7 @@ class Jasper(nn.Module):
         Whether to use depthwise block.
     use_dr : bool
         Whether to use dense residual scheme.
-    from_audio : bool, default False
+    from_audio : bool, default True
         Whether to treat input as audio instead of Mel-specs.
     dither : float, default 0.0
         Amount of white-noise dithering.
@@ -882,7 +882,7 @@ class Jasper(nn.Module):
                  repeat,
                  use_dw,
                  use_dr,
-                 from_audio=False,
+                 from_audio=True,
                  dither=0.0,
                  return_text=False,
                  vocabulary=None,

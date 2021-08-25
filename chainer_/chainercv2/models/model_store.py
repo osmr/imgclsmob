@@ -154,7 +154,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('peleenet', '0984', '32d512c0d0f89b8cbc413f34d6d6609712f6668c', 'v0.0.496'),
     ('wrn50_2', '0607', 'c597636592320ac714874bb4dbe90e4c89c3b6c9', 'v0.0.520'),
     ('drnc26', '0710', '16a6251b3f82de588f43e203a6845de006a10882', 'v0.0.508'),
-    ('drnc42', '0693', 'ec938cc429d3d0e54c34243c10be83ffae38023e', 'v0.0.116'),
+    ('drnc42', '0614', '6b2099e0224e0f451a67b5d8266bd9a6535793e2', 'v0.0.556'),
     ('drnc58', '0629', '063ef19974f0158bcc6b9e4020729291462a08a3', 'v0.0.116'),
     ('drnd22', '0747', 'e4c5cf7351f691f0afe4c7b4325fd4e3a4b47681', 'v0.0.498'),
     ('drnd38', '0624', '1a1a7b99703d3d8bade3ebb0f22f0ffbad33ad60', 'v0.0.552'),

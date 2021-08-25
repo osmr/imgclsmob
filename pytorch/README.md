@@ -799,19 +799,19 @@ Some remarks:
 
 | Model | Lang | WER, % | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | --- |
-| Jasper DR 10x5 | En | 21.89 | 332,632,349 | 16,617.80M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/jasperdr10x5_en-2189-02c9de39.pth.log)) |
-| Jasper DR 10x5 NR | En | 17.89 | 332,632,349 | 16,617.80M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/jasperdr10x5_en_nr-1789-23d1b22e.pth.log)) |
-| QuartzNet 5x5 LS | En | 44.69 | 6,713,181 | 332.93M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet5x5_en_ls-4469-9af00731.pth.log)) |
-| QuartzNet 15x5 | En | 16.76 | 18,924,381 | 938.49M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_en-1676-9a845395.pth.log)) |
-| QuartzNet 15x5 NR | En | 17.74 | 18,924,381 | 938.49M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_en_nr-1774-b2ee38c0.pth.log)) |
-| QuartzNet 15x5 | De | 11.66 | 18,927,456 | 938.64M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_de-1166-292a3755.pth.log)) |
-| QuartzNet 15x5 | Fr | 13.88 | 18,938,731 | 939.20M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_fr-1388-506b49da.pth.log)) |
-| QuartzNet 15x5 | It | 15.02 | 18,934,631 | 939.00M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_it-1502-cde1bdb7.pth.log)) |
-| QuartzNet 15x5 | Es | 12.95 | 18,931,556 | 938.85M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_es-1295-310a39fb.pth.log)) |
-| QuartzNet 15x5 | Ca | 8.42 | 18,934,631 | 939.00M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ca-0842-0e45996e.pth.log)) |
-| QuartzNet 15x5 | Pl | 13.59 | 18,929,506 | 938.74M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_pl-1359-fe5ab9ef.pth.log)) |
-| QuartzNet 15x5 | Ru | 16.47 | 18,930,531 | 938.79M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.546/quartznet15x5_ru-1647-5fcce8e0.pth.log)) |
-| QuartzNet 15x5 | Ru/34 | 9.68 | 18,929,506 | 938.74M | From [sberdevices/golos] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.549/quartznet15x5_ru34-0968-a3976fa2.pth.log)) |
+| Jasper DR 10x5 | En | 21.92 | 332,632,349 | 85,142.96M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/jasperdr10x5_en-2192-c2c00e2c.pth.log)) |
+| Jasper DR 10x5 NR | En | 17.92 | 332,632,349 | 85,142.96M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/jasperdr10x5_en_nr-1792-0417568d.pth.log)) |
+| QuartzNet 5x5 LS | En | 44.69 | 6,713,181 | 1,717.12M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet5x5_en_ls-4469-45bb0d81.pth.log)) |
+| QuartzNet 15x5 | En | 16.79 | 18,924,381 | 4,840.29M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_en-1679-d59dfb8a.pth.log)) |
+| QuartzNet 15x5 NR | En | 17.76 | 18,924,381 | 4,840.29M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_en_nr-1776-dfc92f27.pth.log)) |
+| QuartzNet 15x5 | De | 11.67 | 18,927,456 | 4,841.08M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_de-1167-fb6c1f37.pth.log)) |
+| QuartzNet 15x5 | Fr | 13.88 | 18,938,731 | 4,843.96M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_fr-1388-18af35d6.pth.log)) |
+| QuartzNet 15x5 | It | 15.02 | 18,934,631 | 4,842.91M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_it-1502-04cac187.pth.log)) |
+| QuartzNet 15x5 | Es | 12.95 | 18,931,556 | 4,842.13M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_es-1295-0e3f57f7.pth.log)) |
+| QuartzNet 15x5 | Ca | 8.42 | 18,934,631 | 4,842.91M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_ca-0842-05b4e456.pth.log)) |
+| QuartzNet 15x5 | Pl | 13.59 | 18,929,506 | 4,841.60M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_pl-1359-a57dfee4.pth.log)) |
+| QuartzNet 15x5 | Ru | 16.48 | 18,930,531 | 4,841.87M | From [NVIDIA/NeMo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_ru-1648-deaa15ba.pth.log)) |
+| QuartzNet 15x5 | Ru/34 | 9.69 | 18,929,506 | 4,841.60M | From [sberdevices/golos] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.555/quartznet15x5_ru34-0969-977a0157.pth.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

@@ -588,19 +588,19 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('lwopenpose2d_mobilenet_cmupan_coco', '3999', 'a6b9c66bb43e7819464f1ce23c6e3433b726b95d', 'v0.0.458', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('lwopenpose3d_mobilenet_cmupan_coco', '3999', '4c727e1dece57dede247da2d7b97d647c0d51b0a', 'v0.0.458', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('ibppose_coco', '6487', '1958fe10a02a1c441e40d109d3281845488e1e2f', 'v0.0.459', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
-    ('jasperdr10x5_en', '2189', '02c9de39ef4f15d0ba37f32eca6ebbb0f9478839', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('jasperdr10x5_en_nr', '1789', '23d1b22e475a593decbe762014c6d2b72f4c049a', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet5x5_en_ls', '4469', '9af007317efa436fea0cb886c01d422a6a86f202', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_en', '1676', '9a845395e5457d503b3bec7238036c56e2b4c551', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_en_nr', '1774', 'b2ee38c071844ef2dadb26e79d10da1a5b98b6f2', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_de', '1166', '292a37552e19bac55c4478a0cdd6bb64281337d5', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_fr', '1388', '506b49da3c46aa96ba7feca8fbe627f5d52ff731', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_it', '1502', 'cde1bdb79878c920c4a3a80df7b2e0e94657f18d', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_es', '1295', '310a39fb2cbdc1eb071aa59ccbc11a47337450b3', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_ca', '0842', '0e45996ea5e41e9a0ed02b5447181aadb18185c7', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_pl', '1359', 'fe5ab9ef02b426673c5b2c8616a7229f48188219', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_ru', '1647', '5fcce8e0ab605a12b817045cbc84316b9cf312fc', 'v0.0.546', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_ru34', '0968', 'a3976fa20f652ec9b3324f6d5ee22a7df2314dd7', 'v0.0.549', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('jasperdr10x5_en', '2192', 'c2c00e2cc4a4302731e93c7cf9e59378a50668ab', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('jasperdr10x5_en_nr', '1792', '0417568d949907fcb9cf99de6646849fee1f2840', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet5x5_en_ls', '4469', '45bb0d815f16dcd1e754e90f82175b5366f75121', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_en', '1679', 'd59dfb8a63e6661a43ded110c059d587dfa77eee', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_en_nr', '1776', 'dfc92f272f3d7f3a0f040b52418605016a68250e', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_de', '1167', 'fb6c1f372bb80014cc7b9f04d7d615229b36084c', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_fr', '1388', '18af35d6317462f2afdd3da5fc636f052459f211', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_it', '1502', '04cac1876b9bfc82f1bc98b3c41ed664434168d5', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_es', '1295', '0e3f57f74b7b21bdc568620a1edeea6338a5691a', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_ca', '0842', '05b4e456a3035a095cbc2212a9982ea12850dacb', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_pl', '1359', 'a57dfee49831403bb01b8624fac39f7403365ee3', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_ru', '1647', 'deaa15ba85f5c1447076c744de2231fbc7eb94e8', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_ru34', '0969', '977a01574b0c741435bfe76c3bcc6c58e22f816f', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

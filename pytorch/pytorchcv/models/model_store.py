@@ -599,7 +599,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('quartznet15x5_es', '1295', '0e3f57f74b7b21bdc568620a1edeea6338a5691a', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
     ('quartznet15x5_ca', '0842', '05b4e456a3035a095cbc2212a9982ea12850dacb', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
     ('quartznet15x5_pl', '1359', 'a57dfee49831403bb01b8624fac39f7403365ee3', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
-    ('quartznet15x5_ru', '1647', 'deaa15ba85f5c1447076c744de2231fbc7eb94e8', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
+    ('quartznet15x5_ru', '1648', 'deaa15ba85f5c1447076c744de2231fbc7eb94e8', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
     ('quartznet15x5_ru34', '0969', '977a01574b0c741435bfe76c3bcc6c58e22f816f', 'v0.0.555', '', '', 'mcv', 0, 0.0, 0, ''),  # noqa
 ]}
 

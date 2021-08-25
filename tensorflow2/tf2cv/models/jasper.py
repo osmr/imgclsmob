@@ -1081,7 +1081,8 @@ def get_jasper(version,
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
         seq_len = 100
-        x_shape = (1, net.in_size, seq_len) if net.data_format == "channels_first" else (1, seq_len, net.in_size)
+        x_shape = (1, seq_len * 640) if net.from_audio else (
+            (1, net.in_size, seq_len) if is_channels_first(net.data_format) else (1, seq_len, net.in_size))
         x = tf.random.normal(x_shape)
         x_len = tf.convert_to_tensor(np.array([seq_len], np.long))
         net(x, x_len)

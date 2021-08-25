@@ -656,7 +656,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('quartznet15x5_de', '1166', '5e254c91fe57bb2ed5bae62eb5067fc4922f4184', 'v0.0.555'),
     ('quartznet15x5_fr', '1388', 'f2236953caa996832118c7a412c839395237b5c2', 'v0.0.555'),
     ('quartznet15x5_it', '1502', '2df788c3c06415237e254ea91ab2994b35c32e71', 'v0.0.555'),
-    ('quartznet15x5_es', '1295', '2df788c3c06415237e254ea91ab2994b35c32e71', 'v0.0.555'),
+    ('quartznet15x5_es', '1295', '117352a802814689275b03a161c537ae91e68a9f', 'v0.0.555'),
     ('quartznet15x5_ca', '0842', 'da40489e324b6a790638d8ed164be3728f4caf3c', 'v0.0.555'),
     ('quartznet15x5_pl', '1359', '0df08d125314b5a728cd22b77bb8c6dc2b9c2cd1', 'v0.0.555'),
     ('quartznet15x5_ru', '1648', 'aecf49e137f8041cebc5fcfe8d1834420f03d98b', 'v0.0.555'),

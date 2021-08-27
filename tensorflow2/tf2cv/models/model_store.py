@@ -209,7 +209,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('selecsls60b', '0538', '5e4cdf6504c2dede81ee416d09d50e07ea0599fc', 'v0.0.495', 'in1k', 0.875),
     ('hardnet39ds', '0871', '0bd9fa5e72e0a80229534c195f160f5d6e603763', 'v0.0.485', 'in1k', 0.875),
     ('hardnet68ds', '0741', '371ee29a54f43a89fa2c4803b28fd1bc6d03d25d', 'v0.0.487', 'in1k', 0.875),
-    ('hardnet68', '0712', 'bbfe6e11c7fdf5748f909c3c23c475e04382057e', 'v0.0.491', 'in1k', 0.875),
+    ('hardnet68', '0704', 'c968512e936a77c8fd40e2743e46fbe74318d944', 'v0.0.557', 'in1k', 0.875),
     ('hardnet85', '0569', '28a9588e6edfc424e6b2ffc5b3fdbc97fe73f0d1', 'v0.0.495', 'in1k', 0.875),
     ('squeezenet_v1_0', '1760', 'd13ba73265325f21eb34e782989a7269cad406c6', 'v0.0.422', 'in1k', 0.875),
     ('squeezenet_v1_1', '1742', '95b614487f1f0572bd0dba18e0fc6d63df3a6bfc', 'v0.0.422', 'in1k', 0.875),

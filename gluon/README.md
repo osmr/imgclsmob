@@ -367,7 +367,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SelecSLS-60b | 20.62 | 5.37 | 32,774,064 | 3,629.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0537-7f83801b.params.log)) |
 | HarDNet-39DS | 26.52 | 8.64 | 3,488,228 | 437.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0864-72e8423e.params.log)) |
 | HarDNet-68DS | 24.25 | 7.38 | 4,180,602 | 788.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0738-012bf3ac.params.log)) |
-| HarDNet-68 | 24.10 | 7.10 | 17,565,348 | 4,256.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/hardnet68-0710-c8d4c059.params.log)) |
+| HarDNet-68 | 24.03 | 7.02 | 17,565,348 | 4,256.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.557/hardnet68-0702-6667306d.params.log)) |
 | HarDNet-85 | 21.87 | 5.72 | 36,670,212 | 9,088.58M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/hardnet85-0572-3baa0a7d.params.log)) |
 | SqueezeNet v1.0 | 38.73 | 17.34 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1734-e6f8b0e8.params.log)) |
 | SqueezeNet v1.1 | 39.09 | 17.39 | 1,235,496 | 352.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-d7a1483a.params.log)) |

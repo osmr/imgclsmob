@@ -319,7 +319,7 @@ Some remarks:
 | SelecSLS-60b | 20.61 | 5.38 | 32,774,064 | 3,629.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/selecsls60b-0538-5e4cdf65.tf2.h5.log)) |
 | HarDNet-39DS | 26.49 | 8.71 | 3,488,228 | 437.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.485/hardnet39ds-0871-0bd9fa5e.tf2.h5.log)) |
 | HarDNet-68DS | 24.24 | 7.41 | 4,180,602 | 788.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.487/hardnet68ds-0741-371ee29a.tf2.h5.log)) |
-| HarDNet-68 | 24.10 | 7.12 | 17,565,348 | 4,256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.491/hardnet68-0712-bbfe6e11.tf2.h5.log)) |
+| HarDNet-68 | 24.00 | 7.04 | 17,565,348 | 4,256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.557/hardnet68-0704-c968512e.tf2.h5.log)) |
 | HarDNet-85 | 21.84 | 5.69 | 36,670,212 | 9,088.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.495/hardnet85-0569-28a9588e.tf2.h5.log)) |
 | SqueezeNet v1.0 | 39.23 | 17.60 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/squeezenet_v1_0-1760-d13ba732.tf2.h5.log)) |
 | SqueezeNet v1.1 | 39.12 | 17.42 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/squeezenet_v1_1-1742-95b61448.tf2.h5.log)) |

@@ -327,7 +327,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DarkNet-53 | 21.33 | 5.58 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0558-8be575a0.pth.log)) |
 | i-RevNet-301 | 25.98 | 8.41 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0841-95dc8d94.pth.log)) |
 | BagNet-9 | 49.15 | 25.76 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2576-36d935e1.pth.log)) |
-| BagNet-17 | 41.20 | 18.84 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-1884-6b2a100f.pth.log)) |
+| BagNet-17 | 36.88 | 15.51 | 16,213,032 | 15,768.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1551-04da269c.pth.log)) |
 | BagNet-33 | 33.34 | 13.01 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1301-4f17b6e8.pth.log)) |
 | DLA-34 | 24.59 | 7.24 | 15,742,104 | 3,071.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0724-649c67e6.pth.log)) |
 | DLA-46-C | 34.28 | 13.23 | 1,301,400 | 585.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.282/dla46c-1323-efcd3636.pth.log)) |

@@ -300,7 +300,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PyramidNet-101 (a=360) | 20.41 | 5.20 | 42,455,070 | 8,743.54M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.507/pyramidnet101_a360-0520-3a98a2bf.params.log)) |
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
 | DiracNetV2-34 | 27.93 | 9.46 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet34v2-0946-1faa6f12.params.log)) |
-| CRU-Net-56 | 25.72 | 8.25 | 25,609,384 | 5,660.66M | From [cypw/CRU-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.197/crunet56-0825-ad16523b.params.log)) |
+| CRU-Net-56 | 20.64 | 5.36 | 25,609,384 | 5,660.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/crunet56-0536-d7112ed4.params.log)) |
 | DenseNet-121 | 23.25 | 6.85 | 7,978,856 | 2,872.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.314/densenet121-0685-d3a1fae8.params.log)) |
 | DenseNet-161 | 21.82 | 5.92 | 28,681,000 | 7,793.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.432/densenet161-0592-29897d41.params.log)) |
 | DenseNet-169 | 22.10 | 6.05 | 14,149,480 | 3,403.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.406/densenet169-0605-9c045c86.params.log)) |
@@ -324,7 +324,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DarkNet-53 | 21.27 | 5.50 | 41,609,928 | 7,133.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0550-1d0b4f62.params.log)) |
 | i-RevNet-301 | 26.97 | 8.97 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0897-cef9b5bf.params.log)) |
 | BagNet-9 | 48.77 | 25.36 | 15,688,744 | 16,049.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2536-6b5d69da.params.log)) |
-| BagNet-17 | 44.76 | 21.52 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-2152-4b3a6212.params.log)) |
+| BagNet-17 | 36.51 | 15.23 | 16,213,032 | 15,768.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1523-cc7b9a74.params.log)) |
 | BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
 | DLA-34 | 24.31 | 7.05 | 15,742,104 | 3,071.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-557c5f4f.params.log)) |
 | DLA-46-C | 33.84 | 12.86 | 1,301,400 | 585.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.182/dla46c-1286-5b38b67f.params.log)) |

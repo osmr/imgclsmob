@@ -168,7 +168,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('darknet53', '0552', '3e6f40761d22e830fe6040def741590bfb77a653', 'v0.0.501'),
     ('irevnet301', '0887', 'ed6e6df033e659893b9021a6381f101feff002b8', 'v0.0.251'),
     ('bagnet9', '2544', '346ee14310c654f3484b5ef380950557fc5a2078', 'v0.0.553'),
-    ('bagnet17', '2151', '571889691e8dfedac68e9b6226a9d4a2b237594c', 'v0.0.255'),
+    ('bagnet17', '1523', 'ccc69ea4558cd023e9e0a8e13269ef63700b63e0', 'v0.0.558'),
     ('bagnet33', '1492', 'a7be162cc1572d5d32f30643ddcd2ead5834cb17', 'v0.0.255'),
     ('dla34', '0706', '576dd492cc7047152c1251c0b56595da6e09e0bb', 'v0.0.486'),
     ('dla46c', '1292', '98e3efd5e9cd50d3b403bc36b71614aad4bf69ff', 'v0.0.282'),

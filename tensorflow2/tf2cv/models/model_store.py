@@ -172,7 +172,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('darknet_ref', '1671', 'b4991f6b58ae95118aa9ea84cae4a27e328196b5', 'v0.0.422', 'in1k', 0.875),
     ('darknet53', '0554', '118630cc9e4e262609ed9b654d2e089594840041', 'v0.0.501', 'in1k', 0.875),
     ('bagnet9', '2541', 'f2c2b3c2282d510792dc08b4f8ea212a2de9596d', 'v0.0.553', 'in1k', 0.875),
-    ('bagnet17', '2154', '8a31e34793f4ebc9c7585f531dab1b47b3befc0d', 'v0.0.424', 'in1k', 0.875),
+    ('bagnet17', '1523', 'f21a35804ecea7bee12f7ab7e7f9dfbe1bef98b1', 'v0.0.558', 'in1k', 0.875),
     ('bagnet33', '1497', 'ef600c89aacdd881c2c5483defa9cb220286d31b', 'v0.0.424', 'in1k', 0.875),
     ('dla34', '0705', 'ade65c1687c187de7e6c7a8d8c9654a0b836c160', 'v0.0.486', 'in1k', 0.875),
     ('dla46c', '1287', 'dfcae3b549121205008235fd7e59793b394f8998', 'v0.0.427', 'in1k', 0.875),

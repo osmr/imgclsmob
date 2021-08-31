@@ -175,7 +175,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('darknet53', '0558', '8be575a04c1789c16b7fa6835919461bb5b174d1', 'v0.0.501', 'DarkNet-53', '1804.02767', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('irevnet301', '0841', '95dc8d94257bf16027edd7077b785a8676369fca', 'v0.0.251', 'i-RevNet-301', '1802.07088', 'in1k', 224, 0.875, 200, '[jhjacobsen/pytorch-i-revnet]'),  # noqa
     ('bagnet9', '2576', '36d935e1ec250208f585a1a53b65c79ddc11d7cd', 'v0.0.553', 'BagNet-9', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('bagnet17', '1884', '6b2a100f8d14d4616709586483f625743ed04769', 'v0.0.255', 'BagNet-17', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
+    ('bagnet17', '1551', '04da269cb4db817fa8750c2605e4fe7e6c0250ed', 'v0.0.558', 'BagNet-17', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bagnet33', '1301', '4f17b6e837dacd978b15708ffbb2c1e6be3c371a', 'v0.0.255', 'BagNet-33', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
     ('dla34', '0724', '649c67e61942283abe7f6a798fb9fcae346e5a5d', 'v0.0.486', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46c', '1323', 'efcd363642a4b479892f47edae7440f0eea05edb', 'v0.0.282', 'DLA-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa

@@ -282,7 +282,7 @@ Some remarks:
 | DarkNet Ref | 38.10 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_ref-1671-b4991f6b.tf2.h5.log)) |
 | DarkNet-53 | 21.26 | 5.54 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0554-118630cc.tf2.h5.log)) |
 | BagNet-9 | 48.78 | 25.41 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2541-f2c2b3c2.tf2.h5.log)) |
-| BagNet-17 | 44.75 | 21.54 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bagnet17-2154-8a31e347.tf2.h5.log)) |
+| BagNet-17 | 36.56 | 15.23 | 16,213,032 | 15,768.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1523-f21a3580.tf2.h5.log)) |
 | BagNet-33 | 36.42 | 14.97 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bagnet33-1497-ef600c89.tf2.h5.log)) |
 | DLA-34 | 24.37 | 7.05 | 15,742,104 | 3,071.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-ade65c16.tf2.h5.log)) |
 | DLA-46-C | 33.83 | 12.87 | 1,301,400 | 585.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/dla46c-1287-dfcae3b5.tf2.h5.log)) |

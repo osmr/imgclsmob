@@ -314,7 +314,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | WRN-50-2 | 22.25 | 6.26 | 68,849,128 | 11,405.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/wrn50_2-0626-1e67b96c.pth.log)) |
 | DRN-C-26 | 24.61 | 7.23 | 21,126,584 | 16,993.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/drnc26-0723-e7306483.pth.log)) |
 | DRN-C-42 | 22.37 | 6.28 | 31,234,744 | 25,093.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.556/drnc42-0628-8817241f.pth.log)) |
-| DRN-C-58 | 21.73 | 6.01 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0601-70ec1f56.pth.log)) |
+| DRN-C-58 | 20.65 | 5.27 | 40,542,008 | 32,489.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.559/drnc58-0527-3f74be98.pth.log)) |
 | DRN-D-22 | 24.86 | 7.58 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0758-02cb44bd.pth.log)) |
 | DRN-D-38 | 22.94 | 6.43 | 26,501,912 | 21,151.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0643-496f648b.pth.log)) |
 | DRN-D-54 | 20.40 | 5.17 | 35,809,176 | 28,547.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0517-caa3c85d.pth.log)) |

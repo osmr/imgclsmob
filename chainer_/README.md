@@ -289,7 +289,7 @@ Some remarks:
 | WRN-50-2 | 22.07 | 6.07 | 68,849,128 | 11,405.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/wrn50_2-0607-c5976365.npz.log)) |
 | DRN-C-26 | 24.34 | 7.10 | 21,126,584 | 16,993.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.508/drnc26-0710-16a6251b.npz.log)) |
 | DRN-C-42 | 22.31 | 6.14 | 31,234,744 | 25,093.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.556/drnc42-0614-6b2099e0.npz.log)) |
-| DRN-C-58 | 22.35 | 6.29 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0629-063ef199.npz.log)) |
+| DRN-C-58 | 20.47 | 5.17 | 40,542,008 | 32,489.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.559/drnc58-0517-a333394a.npz.log)) |
 | DRN-D-22 | 24.73 | 7.47 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0747-e4c5cf73.npz.log)) |
 | DRN-D-38 | 22.83 | 6.24 | 26,501,912 | 21,151.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0624-1a1a7b99.npz.log)) |
 | DRN-D-54 | 20.31 | 5.00 | 35,809,176 | 28,547.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0500-b679707c.npz.log)) |

@@ -99,7 +99,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('sepreresnet50b', '0549', '4628a07d7dd92c775868dffd33fd6e3e7522c261', 'v0.0.461', 'SE-PreResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext50_32x4d', '0451', '52029a7f6170873b2d50a7016fba053e98183f7b', 'v0.0.505', 'SE-ResNeXt-50 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext101_32x4d', '0467', 'c738e758c535fac87027fc4b9271a7cb95442505', 'v0.0.529', 'SE-ResNeXt-101 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnext101_64x4d', '0476', 'da806109a2346be16f2b3b9aa60aa8f52bc6a1fa', 'v0.0.418', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('seresnext101_64x4d', '0428', 'ea9d98df431d53251011099f317cd20fa2307d1b', 'v0.0.561', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet16', '0820', '373aeafdc994c3e03bf483a9fa3ecb152353722a', 'v0.0.341', 'SENet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet28', '0598', '27165b63696061e57c141314d44732aa65f807a8', 'v0.0.356', 'SENet-28', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet154', '0455', '95dbccbe56dc93c4544e6d1c6673f09425a4cee2', 'v0.0.522', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -176,7 +176,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('irevnet301', '0841', '95dc8d94257bf16027edd7077b785a8676369fca', 'v0.0.251', 'i-RevNet-301', '1802.07088', 'in1k', 224, 0.875, 200, '[jhjacobsen/pytorch-i-revnet]'),  # noqa
     ('bagnet9', '2576', '36d935e1ec250208f585a1a53b65c79ddc11d7cd', 'v0.0.553', 'BagNet-9', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bagnet17', '1551', '04da269cb4db817fa8750c2605e4fe7e6c0250ed', 'v0.0.558', 'BagNet-17', '', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('bagnet33', '1301', '4f17b6e837dacd978b15708ffbb2c1e6be3c371a', 'v0.0.255', 'BagNet-33', '', 'in1k', 224, 0.875, 200, '[wielandbrendel/bag...models]'),  # noqa
+    ('bagnet33', '1070', '7d16b6f4190ed5ce3f4f26373d60b51cdc5d4cd9', 'v0.0.561', 'BagNet-33', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla34', '0724', '649c67e61942283abe7f6a798fb9fcae346e5a5d', 'v0.0.486', 'DLA-34', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46c', '1323', 'efcd363642a4b479892f47edae7440f0eea05edb', 'v0.0.282', 'DLA-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('dla46xc', '1269', '00d3754ad0ff22636bb1f4b4fb8baebf4751a1ee', 'v0.0.293', 'DLA-X-46-C', '1707.06484', 'in1k', 224, 0.875, 200, ''),  # noqa

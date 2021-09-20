@@ -247,7 +247,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-PreResNet-50b | 20.67 | 5.32 | 28,080,472 | 4,110.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0532-5b620ff7.params.log)) |
 | SE-ResNeXt-50 (32x4d) | 18.74 | 4.33 | 27,559,896 | 4,258.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.505/seresnext50_32x4d-0433-d74d1d0a.params.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.06 | 4.44 | 48,955,416 | 8,008.26M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.529/seresnext101_32x4d-0444-3c89aec5.params.log)) |
-| SE-ResNeXt-101 (64x4d) | 18.98 | 4.66 | 88,232,984 | 15,505.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0466-15e16730.params.log)) |
+| SE-ResNeXt-101 (64x4d) | 18.43 | 4.08 | 88,232,984 | 15,505.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/seresnext101_64x4d-0408-2e039a41.params.log)) |
 | SENet-16 | 25.34 | 8.06 | 31,366,168 | 5,080.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.341/senet16-0806-ba268021.params.log)) |
 | SENet-28 | 21.68 | 5.91 | 36,453,768 | 5,731.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.356/senet28-0591-d5297a35.params.log)) |
 | SENet-154 | 18.84 | 4.40 | 115,088,984 | 20,745.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.522/senet154-0440-c0e2d2b9.params.log)) |
@@ -325,7 +325,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | i-RevNet-301 | 26.97 | 8.97 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0897-cef9b5bf.params.log)) |
 | BagNet-9 | 48.77 | 25.36 | 15,688,744 | 16,049.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2536-6b5d69da.params.log)) |
 | BagNet-17 | 36.51 | 15.23 | 16,213,032 | 15,768.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1523-cc7b9a74.params.log)) |
-| BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
+| BagNet-33 | 29.49 | 10.41 | 18,310,184 | 16,371.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/bagnet33-1041-3b20fa3a.params.log)) |
 | DLA-34 | 24.31 | 7.05 | 15,742,104 | 3,071.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.486/dla34-0705-557c5f4f.params.log)) |
 | DLA-46-C | 33.84 | 12.86 | 1,301,400 | 585.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.182/dla46c-1286-5b38b67f.params.log)) |
 | DLA-X-46-C | 32.96 | 12.25 | 1,068,440 | 546.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.293/dla46xc-1225-e570f5f0.params.log)) |
@@ -343,7 +343,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ESPNetv2 x1.5 | 31.05 | 11.35 | 2,314,856 | 185.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/espnetv2_w3d2-1135-efd55816.params.log)) |
 | ESPNetv2 x2.0 | 28.91 | 9.94 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0994-c212d81a.params.log)) |
 | DiCENet x0.2 | 55.15 | 30.67 | 1,130,704 | 18.70M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3067-e7d01194.params.log)) |
-| DiCENet x0.5 | 47.59 | 23.70 | 1,214,120 | 30.39M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2370-add0bc22.params.log)) |
+| DiCENet x0.5 | 47.15 | 23.08 | 1,214,120 | 30.39M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/dicenet_wd2-2308-c03d6d00.params.log)) |
 | DiCENet x0.75 | 38.25 | 16.47 | 1,495,676 | 55.64M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1647-7200f0a3.params.log)) |
 | DiCENet x1.0 | 35.02 | 14.11 | 1,805,604 | 81.96M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/dicenet_w1-1411-93e2e0df.params.log)) |
 | DiCENet x1.25 | 33.11 | 12.51 | 2,162,888 | 111.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.515/dicenet_w5d4-1251-71073760.params.log)) |

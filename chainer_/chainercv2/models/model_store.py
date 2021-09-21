@@ -181,7 +181,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('dla102x2', '0425', '4ffec22510a29d1a22d0eb9666be1649b120c789', 'v0.0.542'),
     ('dla169', '0461', 'f47952e20e67ac6b526ae9946f673d3a5c57e4da', 'v0.0.539'),
     ('fishnet150', '0465', '724e74fc0471c81dd75a97c1928f46d06d10815b', 'v0.0.502'),
-    ('espnetv2_wd2', '2094', '1fd688ad3646740f90389ac8045d89a521b0554a', 'v0.0.560'),
+    ('espnetv2_wd2', '2079', 'f77e3ecf5f0c2e59cba65e6394c0b7220efc075e', 'v0.0.562'),
     ('espnetv2_w1', '1431', 'eab8d605b475bd3659d6834ba5140d327f57c7de', 'v0.0.238'),
     ('espnetv2_w5d4', '1268', 'dc69f420f422154ab7242bcd95488541491d4982', 'v0.0.238'),
     ('espnetv2_w3d2', '1140', '1bfaa23b08b27972064758ae869476b2a4931bd4', 'v0.0.520'),

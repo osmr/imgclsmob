@@ -320,7 +320,7 @@ Some remarks:
 | ESPNetv2 x1.25 | 33.07 | 12.68 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1268-dc69f420.npz.log)) |
 | ESPNetv2 x1.5 | 31.04 | 11.40 | 2,314,856 | 185.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/espnetv2_w3d2-1140-1bfaa23b.npz.log)) |
 | ESPNetv2 x2.0 | 28.95 | 9.90 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0990-bfb3ab7c.npz.log)) |
-| DiCENet x0.2 | 55.10 | 30.64 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-3064-118c88d2.npz.log)) |
+| DiCENet x0.2 | 54.93 | 30.55 | 1,130,704 | 18.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.563/dicenet_wd5-3055-708911b8.npz.log)) |
 | DiCENet x0.5 | 47.19 | 23.09 | 1,214,120 | 30.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/dicenet_wd2-2309-b383f3a6.npz.log)) |
 | DiCENet x0.75 | 38.19 | 16.42 | 1,495,676 | 55.80M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1642-c97e9157.npz.log)) |
 | DiCENet x1.0 | 35.02 | 14.13 | 1,805,604 | 82.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.513/dicenet_w1-1413-e926dbb2.npz.log)) |

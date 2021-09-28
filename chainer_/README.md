@@ -293,14 +293,14 @@ Some remarks:
 | DRN-D-22 | 24.73 | 7.47 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0747-e4c5cf73.npz.log)) |
 | DRN-D-38 | 22.83 | 6.24 | 26,501,912 | 21,151.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0624-1a1a7b99.npz.log)) |
 | DRN-D-54 | 20.31 | 5.00 | 35,809,176 | 28,547.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0500-b679707c.npz.log)) |
-| DRN-D-105 | 21.32 | 5.84 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0584-c0d7657b.npz.log)) |
+| DRN-D-105 | 19.76 | 4.89 | 54,801,304 | 43,442.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/drnd105-0489-49cba09d.npz.log)) |
 | DPN-68 | 22.93 | 6.56 | 12,611,602 | 2,351.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.310/dpn68-0656-bf9b72e9.npz.log)) |
 | DPN-98 | 18.31 | 4.26 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/dpn98-0426-2ab67669.npz.log)) |
 | DPN-131 | 19.38 | 4.79 | 79,254,504 | 16,076.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/dpn131-0479-eb5a4bc2.npz.log)) |
 | DarkNet Tiny | 40.33 | 17.46 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-b04fa463.npz.log)) |
 | DarkNet Ref | 38.09 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1671-b2d5721f.npz.log)) |
 | DarkNet-53 | 21.27 | 5.52 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0552-3e6f4076.npz.log)) |
-| i-RevNet-301 | 26.96 | 8.87 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0887-ed6e6df0.npz.log)) |
+| i-RevNet-301 | 24.27 | 7.38 | 125,120,356 | 14,453.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/irevnet301-0738-cc2ac933.npz.log)) |
 | BagNet-9 | 48.78 | 25.44 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2544-346ee143.npz.log)) |
 | BagNet-17 | 36.51 | 15.23 | 16,213,032 | 15,768.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1523-ccc69ea4.npz.log)) |
 | BagNet-33 | 29.45 | 10.44 | 18,310,184 | 16,371.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/bagnet33-1044-17d82bc6.npz.log)) |
@@ -317,7 +317,7 @@ Some remarks:
 | FishNet-150 | 19.14 | 4.65 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0465-724e74fc.npz.log)) |
 | ESPNetv2 x0.5 | 43.42 | 20.79 | 1,241,332 | 35.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.562/espnetv2_wd2-2079-f77e3ecf.npz.log)) |
 | ESPNetv2 x1.0 | 35.30 | 14.31 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1431-eab8d605.npz.log)) |
-| ESPNetv2 x1.25 | 33.07 | 12.68 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1268-dc69f420.npz.log)) |
+| ESPNetv2 x1.25 | 32.24 | 12.24 | 1,965,440 | 138.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/espnetv2_w5d4-1224-68e58dc6.npz.log)) |
 | ESPNetv2 x1.5 | 31.04 | 11.40 | 2,314,856 | 185.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/espnetv2_w3d2-1140-1bfaa23b.npz.log)) |
 | ESPNetv2 x2.0 | 28.95 | 9.90 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0990-bfb3ab7c.npz.log)) |
 | DiCENet x0.2 | 54.93 | 30.55 | 1,130,704 | 18.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.563/dicenet_wd5-3055-708911b8.npz.log)) |

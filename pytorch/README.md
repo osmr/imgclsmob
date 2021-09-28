@@ -318,14 +318,14 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DRN-D-22 | 24.86 | 7.58 | 16,393,752 | 13,051.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.498/drnd22-0758-02cb44bd.pth.log)) |
 | DRN-D-38 | 22.94 | 6.43 | 26,501,912 | 21,151.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.552/drnd38-0643-496f648b.pth.log)) |
 | DRN-D-54 | 20.40 | 5.17 | 35,809,176 | 28,547.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.554/drnd54-0517-caa3c85d.pth.log)) |
-| DRN-D-105 | 20.62 | 5.48 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0548-a643f4dc.pth.log)) |
+| DRN-D-105 | 19.87 | 5.01 | 54,801,304 | 43,442.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/drnd105-0501-8dc6aa76.pth.log)) |
 | DPN-68 | 23.24 | 6.79 | 12,611,602 | 2,351.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.310/dpn68-0679-a33c98c7.pth.log)) |
 | DPN-98 | 18.44 | 4.30 | 61,570,728 | 11,716.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.540/dpn98-0430-50ff8ef6.pth.log)) |
 | DPN-131 | 19.62 | 5.03 | 79,254,504 | 16,076.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.534/dpn131-0503-1765c5ee.pth.log)) |
 | DarkNet Tiny | 40.74 | 17.84 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1784-4561e1ad.pth.log)) |
 | DarkNet Ref | 38.58 | 17.18 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1718-034595b4.pth.log)) |
 | DarkNet-53 | 21.33 | 5.58 | 41,609,928 | 7,133.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.501/darknet53-0558-8be575a0.pth.log)) |
-| i-RevNet-301 | 25.98 | 8.41 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0841-95dc8d94.pth.log)) |
+| i-RevNet-301 | 24.31 | 7.52 | 125,120,356 | 14,453.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/irevnet301-0752-d378865f.pth.log)) |
 | BagNet-9 | 49.15 | 25.76 | 15,688,744 | 16,049.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.553/bagnet9-2576-36d935e1.pth.log)) |
 | BagNet-17 | 36.88 | 15.51 | 16,213,032 | 15,768.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.558/bagnet17-1551-04da269c.pth.log)) |
 | BagNet-33 | 29.82 | 10.70 | 18,310,184 | 16,371.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/bagnet33-1070-7d16b6f4.pth.log)) |

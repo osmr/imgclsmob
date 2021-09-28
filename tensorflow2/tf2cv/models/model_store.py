@@ -164,7 +164,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('drnd22', '0747', '99f944258689018459cff2d2e920a6e10ddd3f09', 'v0.0.498', 'in1k', 0.875),
     ('drnd38', '0623', '63255b31333cf7ed685f01ad18444eeb5662f1a3', 'v0.0.552', 'in1k', 0.875),
     ('drnd54', '0498', 'b724009abdcf2e19eeb08e5b16203bebe6884b03', 'v0.0.554', 'in1k', 0.875),
-    ('drnd105', '0583', '80eb9ec2efd053d2f1e73d08911208c5d787e7cf', 'v0.0.425', 'in1k', 0.875),
+    ('drnd105', '0489', '3b0e701c0a9c8bf70bbd1023a7820332e0c3b57b', 'v0.0.564', 'in1k', 0.875),
     ('dpn68', '0658', '5b70b7b86c33c3dfb04f5fa189e5d501e8804499', 'v0.0.427', 'in1k', 0.875),
     ('dpn98', '0426', '5d6dd2ed646c9bfa2c57497fca670f989b4113a5', 'v0.0.540', 'in1k', 0.875),
     ('dpn131', '0477', '282d2d194252b222fdbec3d97d30f2ecc4b661e9', 'v0.0.534', 'in1k', 0.875),

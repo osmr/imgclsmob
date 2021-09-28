@@ -341,7 +341,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ESPNetv2 x1.0 | 35.33 | 14.27 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1427-538f31fb.params.log)) |
 | ESPNetv2 x1.25 | 32.21 | 12.26 | 1,965,440 | 138.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/espnetv2_w5d4-1226-2a498c6d.params.log)) |
 | ESPNetv2 x1.5 | 31.05 | 11.35 | 2,314,856 | 185.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.520/espnetv2_w3d2-1135-efd55816.params.log)) |
-| ESPNetv2 x2.0 | 28.91 | 9.94 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0994-c212d81a.params.log)) |
+| ESPNetv2 x2.0 | 28.99 | 9.63 | 3,498,136 | 306.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.565/espnetv2_w2-0963-066808be.params.log)) |
 | DiCENet x0.2 | 54.91 | 30.51 | 1,130,704 | 18.70M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.563/dicenet_wd5-3051-46077eac.params.log)) |
 | DiCENet x0.5 | 47.15 | 23.08 | 1,214,120 | 30.39M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.561/dicenet_wd2-2308-c03d6d00.params.log)) |
 | DiCENet x0.75 | 38.25 | 16.47 | 1,495,676 | 55.64M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_w3d4-1647-7200f0a3.params.log)) |

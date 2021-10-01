@@ -343,7 +343,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ESPNetv2 x0.5 | 42.32 | 20.15 | 1,241,332 | 35.36M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_wd2-2015-d234781f.pth.log)) |
 | ESPNetv2 x1.0 | 33.92 | 13.45 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1345-550d5422.pth.log)) |
 | ESPNetv2 x1.25 | 32.06 | 12.18 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1218-85d97b2b.pth.log)) |
-| ESPNetv2 x1.5 | 30.83 | 11.29 | 2,314,856 | 185.77M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w3d2-1129-3bbb49ad.pth.log)) |
+| ESPNetv2 x1.5 | 30.19 | 11.08 | 2,314,856 | 185.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.566/espnetv2_w3d2-1108-40da2416.pth.log)) |
 | ESPNetv2 x2.0 | 27.94 | 9.61 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0961-13ba0f72.pth.log)) |
 | DiCENet x0.2 | 53.91 | 29.38 | 1,130,704 | 18.76M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd5-2938-2d721aa1.pth.log)) |
 | DiCENet x0.5 | 46.16 | 22.58 | 1,214,120 | 30.48M | From [sacmehta/EdgeNets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.497/dicenet_wd2-2258-4f35289a.pth.log)) |

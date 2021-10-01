@@ -191,7 +191,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('espnetv2_wd2', '2015', 'd234781f81e5d1b5ae6070fc851e3f7bb860b9fd', 'v0.0.238', 'ESPNetv2 x0.5', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa
     ('espnetv2_w1', '1345', '550d54229d7fd8f7c090601c2123ab3ca106393b', 'v0.0.238', 'ESPNetv2 x1.0', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa
     ('espnetv2_w5d4', '1218', '85d97b2b1c9ebb176f634949ef5ca6d7fe70f09c', 'v0.0.238', 'ESPNetv2 x1.25', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa
-    ('espnetv2_w3d2', '1129', '3bbb49adaa4fa984a67f82862db7dcfc4998429e', 'v0.0.238', 'ESPNetv2 x1.5', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa
+    ('espnetv2_w3d2', '1108', '40da2416923f5a79ae1001d2bbc9c7cbdf8c8d67', 'v0.0.566', 'ESPNetv2 x1.5', '1811.11431', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('espnetv2_w2', '0961', '13ba0f7200eb745bacdf692905fde711236448ef', 'v0.0.238', 'ESPNetv2 x2.0', '1811.11431', 'in1k', 224, 0.875, 200, '[sacmehta/ESPNetv2]'),  # noqa
     ('dicenet_wd5', '2938', '2d721aa1795c7eb57dfabf73d17a416be64ae7fa', 'v0.0.497', 'DiCENet x0.2', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa
     ('dicenet_wd2', '2258', '4f35289a84f31aece5747d01fa54779f7d9dd1db', 'v0.0.497', 'DiCENet x0.5', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa

@@ -337,7 +337,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DLA-X2-102 | 18.66 | 4.23 | 41,282,200 | 9,340.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.542/dla102x2-0423-dde259b3.params.log)) |
 | DLA-169 | 19.28 | 4.60 | 53,389,720 | 11,593.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0460-71971da4.params.log)) |
 | FishNet-150 | 19.15 | 4.66 | 24,959,400 | 6,435.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0466-ed21862d.params.log)) |
-| ESPNetv2 x0.5 | 42.20 | 19.71 | 1,241,332 | 35.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.562/espnetv2_wd2-1971-2821c339.params.log)) |
+| ESPNetv2 x0.5 | 42.20 | 19.71 | 1,241,332 | 35.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.567/espnetv2_wd2-1971-2821c339.params.log)) |
 | ESPNetv2 x1.0 | 35.33 | 14.27 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1427-538f31fb.params.log)) |
 | ESPNetv2 x1.25 | 32.21 | 12.26 | 1,965,440 | 138.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/espnetv2_w5d4-1226-2a498c6d.params.log)) |
 | ESPNetv2 x1.5 | 29.99 | 10.86 | 2,314,856 | 185.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.566/espnetv2_w3d2-1086-e869dabd.params.log)) |

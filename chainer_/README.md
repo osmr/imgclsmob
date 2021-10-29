@@ -316,7 +316,7 @@ Some remarks:
 | DLA-169 | 19.27 | 4.61 | 53,389,720 | 11,593.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.539/dla169-0461-f47952e2.npz.log)) |
 | FishNet-150 | 19.14 | 4.65 | 24,959,400 | 6,435.05M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.502/fishnet150-0465-724e74fc.npz.log)) |
 | ESPNetv2 x0.5 | 42.16 | 19.69 | 1,241,332 | 35.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.567/espnetv2_wd2-1969-a245c12a.npz.log)) |
-| ESPNetv2 x1.0 | 35.30 | 14.31 | 1,670,072 | 98.09M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w1-1431-eab8d605.npz.log)) |
+| ESPNetv2 x1.0 | 35.28 | 14.21 | 1,670,072 | 98.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.568/espnetv2_w1-1421-e9989f46.npz.log)) |
 | ESPNetv2 x1.25 | 32.24 | 12.24 | 1,965,440 | 138.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.564/espnetv2_w5d4-1224-68e58dc6.npz.log)) |
 | ESPNetv2 x1.5 | 29.95 | 10.83 | 2,314,856 | 185.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.566/espnetv2_w3d2-1083-8e56a2e5.npz.log)) |
 | ESPNetv2 x2.0 | 27.93 | 9.44 | 3,498,136 | 306.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.566/espnetv2_w2-0944-5ec4ed95.npz.log)) |

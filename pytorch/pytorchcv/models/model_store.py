@@ -28,7 +28,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bn_vgg16b', '0795', 'bfff365ac38a763aaed4b4d9bdc7b2cdbe6c8e9f', 'v0.0.489', 'BN-VGG-16b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bn_vgg19b', '0746', 'f523b4e4b070a170f63e9bb6965fca3764751aa9', 'v0.0.490', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnet10', '1293', 'cedc302c71cfa87c1fb2c52a9c156522187fd929', 'v0.0.483', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnet10', '1253', '88a5961b62448ef51d57e749675cdb097695a634', 'v0.0.569', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet12', '1223', '84a43cf672c708a016dd1142ca1a23c278931532', 'v0.0.485', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet14', '1109', 'b3132cbfb7d64ae83b1cd2e3954f4c5b1180fd7b', 'v0.0.491', 'ResNet-14', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnetbc14b', '1074', '14b1fd95d8b7964c0e7c6eba22f6f58db03d3df0', 'v0.0.481', 'ResNet-BC-14b', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -200,7 +200,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('dicenet_w5d4', '1240', '8c4dd6f6be26e3c29012377e4b1bd88d5089977a', 'v0.0.497', 'DiCENet x1.25', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa
     ('dicenet_w3d2', '1123', 'e5c5db64a407bd9cd6567301b2d6477ea614dc87', 'v0.0.497', 'DiCENet x1.5', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa
     ('dicenet_w7d8', '1062', '8b599d4697ce5f2c95f26104796c3089cff5f6c6', 'v0.0.497', 'DiCENet x1.75', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa
-    ('dicenet_w2', '1019', '44e2153f20e75365950e5066701c165a8b928a93', 'v0.0.497', 'DiCENet x2.0', '1906.03516', 'in1k', 224, 0.875, 200, '[sacmehta/EdgeNets]'),  # noqa
+    ('dicenet_w2', '0945', '5c48ba97187df4bbc9ca30071facd1728f8808ad', 'v0.0.569', 'DiCENet x2.0', '1906.03516', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnet_w18_small_v1', '0901', '300230646c0796b7ba20954a9245803ecac4cdf0', 'v0.0.492', 'HRNet-W18 Small V1', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnet_w18_small_v2', '0618', 'ef7b1fe4e206cadaad6a59faef1e0bc6104da825', 'v0.0.499', 'HRNet-W18 Small V2', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('hrnetv2_w18', '0512', '9d2b7fbfb4a0efd878172ec8f81d517ba347a6a2', 'v0.0.508', 'HRNetV2-W18', '1908.07919', 'in1k', 224, 0.875, 200, ''),  # noqa

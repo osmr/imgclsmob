@@ -21,7 +21,6 @@ import tensorflow.keras.layers as nn
 from tensorflow.python.keras import backend as K
 from tensorflow.python.framework import tensor_shape
 from tensorflow.python.keras import initializers
-from tensorflow.python.keras.engine.input_spec import InputSpec
 
 
 def is_channels_first(data_format):
@@ -233,8 +232,7 @@ class PReLU2(nn.PReLU):
         for i in range(1, len(input_shape)):
             if i != channel_axis:
                 axes[i] = input_shape[i]
-        from tensorflow.python.keras.engine.input_spec import InputSpec
-        self.input_spec = InputSpec(ndim=len(input_shape), axes=axes)
+        self.input_spec = tf.keras.layers.InputSpec(ndim=len(input_shape), axes=axes)
         self.built = True
 
     def call(self, x):
@@ -1078,12 +1076,12 @@ class SelectableDense(nn.Layer):
         self.bias_initializer = initializers.get(bias_initializer)
 
         self.supports_masking = True
-        self.input_spec = InputSpec(min_ndim=2)
+        self.input_spec = tf.keras.layers.InputSpec(min_ndim=2)
 
     def build(self, input_shape):
         input_shape = tensor_shape.TensorShape(input_shape)
         last_dim = tensor_shape.dimension_value(input_shape[-1])
-        self.input_spec = InputSpec(min_ndim=2, axes={-1: last_dim})
+        self.input_spec = tf.keras.layers.InputSpec(min_ndim=2, axes={-1: last_dim})
         self.weight = self.add_weight(
             "weight",
             shape=[self.num_options, self.out_channels, self.in_channels],

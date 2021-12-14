@@ -35,7 +35,7 @@ class PreActivation(nn.Layer):
         self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
-        self.activ = PReLU2()
+        self.activ = PReLU2(in_channels=in_channels, name="activ")
 
     def call(self, x, training=None):
         x = self.bn(x, training=training)
@@ -65,7 +65,7 @@ class ShortcutBlock(nn.Layer):
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=in_channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=in_channels, name="activ")),
             data_format=data_format,
             name="conv1")
         self.conv2 = conv1x1_block(
@@ -146,7 +146,7 @@ class ESPBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=num_branches,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=mid_channels, name="activ")),
             data_format=data_format,
             name="reduce_conv")
 
@@ -176,7 +176,7 @@ class ESPBlock(nn.Layer):
             data_format=data_format,
             name="preactiv")
         if not self.downsample:
-            self.activ = PReLU2()
+            self.activ = PReLU2(in_channels=out_channels, name="activ")
 
     def call(self, x, x0, training=None):
         y = self.reduce_conv(x, training=training)
@@ -238,7 +238,7 @@ class DownsampleBlock(nn.Layer):
             out_channels=out_channels,
             data_format=data_format,
             name="shortcut_block")
-        self.activ = PReLU2()
+        self.activ = PReLU2(in_channels=out_channels, name="activ")
 
     def call(self, x, x0, training=None):
         y1 = self.pool(x)
@@ -274,7 +274,7 @@ class ESPInitBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             strides=2,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=out_channels, name="activ")),
             data_format=data_format,
             name="conv")
         self.pool = AvgPool2d(
@@ -316,14 +316,14 @@ class ESPFinalBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=in_channels,
             groups=in_channels,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=in_channels, name="activ")),
             data_format=data_format,
             name="conv1")
         self.conv2 = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
             groups=final_groups,
-            activation=(lambda: PReLU2()),
+            activation=(lambda: PReLU2(in_channels=out_channels, name="activ")),
             data_format=data_format,
             name="conv2")
 

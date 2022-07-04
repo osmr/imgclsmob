@@ -44,6 +44,9 @@ class CIFARWRN(tf.keras.Model):
         self.in_size = in_size
         self.classes = classes
         self.data_format = data_format
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.in_channels = in_channels
 
         self.features = SimpleSequential(name="features")
         self.features.add(conv3x3(

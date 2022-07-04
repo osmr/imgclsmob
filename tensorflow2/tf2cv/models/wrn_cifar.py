@@ -44,6 +44,9 @@ class CIFARWRN(tf.keras.Model):
         self.in_size = in_size
         self.classes = classes
         self.data_format = data_format
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.in_channels = in_channels
 
         self.features = SimpleSequential(name="features")
         self.features.add(conv3x3(
@@ -86,6 +89,17 @@ class CIFARWRN(tf.keras.Model):
         x = flatten(x, self.data_format)
         x = self.output1(x)
         return x
+
+    def get_config(self):
+        config = {
+            "channels": self.channels,
+            "init_block_channels": self.init_block_channels,
+            "in_channels": self.in_channels,
+            "in_size": self.in_size,
+            "classes": self.classes,
+            "data_format": self.data_format,
+        }
+        return config
 
 
 def get_wrn_cifar(classes,

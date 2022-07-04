@@ -91,15 +91,14 @@ class CIFARWRN(tf.keras.Model):
         return x
 
     def get_config(self):
-        config = super(CIFARWRN, self).get_config()
-        config.update({
+        config = {
             "channels": self.channels,
             "init_block_channels": self.init_block_channels,
             "in_channels": self.in_channels,
             "in_size": self.in_size,
             "classes": self.classes,
             "data_format": self.data_format,
-        })
+        }
         return config
 
 

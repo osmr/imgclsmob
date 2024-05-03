@@ -32,7 +32,7 @@ def seg_pixel_accuracy_np(label_imask,
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
-    Returns:
+    Returns
     -------
     float or tuple of two ints
         PA metric value.
@@ -67,7 +67,7 @@ def segm_mean_accuracy_hmasks(label_hmask,
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns:
+    Returns
     -------
     float
         MA metric value.
@@ -111,7 +111,7 @@ def segm_mean_accuracy(label_hmask,
     pred_imask : np.array
         Predicted index mask.
 
-    Returns:
+    Returns
     -------
     float
         MA metric value.
@@ -156,7 +156,7 @@ def segm_mean_iou_imasks(label_hmask,
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns:
+    Returns
     -------
     float
         MA metric value.
@@ -200,7 +200,7 @@ def seg_mean_iou_np(label_hmask,
     pred_imask : np.array
         Predicted index mask.
 
-    Returns:
+    Returns
     -------
     float
         MIoU metric value.
@@ -245,7 +245,7 @@ def segm_mean_iou2(label_hmask,
     pred_hmask : nd.array
         Predicted one-hot mask (batch of).
 
-    Returns:
+    Returns
     -------
     float
         MIoU metric value.
@@ -302,7 +302,7 @@ def seg_mean_iou_imasks_np(label_imask,
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
-    Returns:
+    Returns
     -------
     float or tuple of two np.arrays of int
         MIoU metric value.
@@ -364,7 +364,7 @@ def segm_fw_iou_hmasks(label_hmask,
     pred_hmask : np.array
         Predicted one-hot mask.
 
-    Returns:
+    Returns
     -------
     float
         FrIoU metric value.
@@ -403,7 +403,7 @@ def segm_fw_iou(label_hmask,
     pred_imask : np.array
         Predicted index mask.
 
-    Returns:
+    Returns
     -------
     float
         FrIoU metric value.

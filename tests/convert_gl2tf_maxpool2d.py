@@ -45,7 +45,7 @@ def maxpool2d(x,
     name : str, default 'conv2d'
         Layer name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.

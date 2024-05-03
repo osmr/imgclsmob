@@ -31,7 +31,7 @@ def hard_nms(cdds,
     iou_thresh : float, default 0.25
         IoU threshold.
 
-    Returns:
+    Returns
     -------
     np.array
         Filtered borders.

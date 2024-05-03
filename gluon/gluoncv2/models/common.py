@@ -30,7 +30,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns:
+    Returns
     -------
     int
         Weighted number of channels.
@@ -156,7 +156,7 @@ def get_activation_layer(activation):
     activation : function, or str, or HybridBlock
         Activation function or name of activation function.
 
-    Returns:
+    Returns
     -------
     HybridBlock
         Activation layer.
@@ -1482,7 +1482,7 @@ def channel_shuffle(x,
     groups : int
         Number of groups.
 
-    Returns:
+    Returns
     -------
     Symbol or NDArray
         Resulted tensor.
@@ -1532,7 +1532,7 @@ def channel_shuffle2(x,
     channels_per_group : int
         Number of channels per group.
 
-    Returns:
+    Returns
     -------
     Symbol or NDArray
         Resulted tensor.
@@ -1957,7 +1957,7 @@ def split(x,
     axis : int, default 1
         Axis along which to split.
 
-    Returns:
+    Returns
     -------
     Tuple of Symbol or NDArray
         Resulted tensor.

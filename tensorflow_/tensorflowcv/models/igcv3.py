@@ -41,7 +41,7 @@ def inv_res_unit(x,
     name : str, default 'inv_res_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -272,7 +272,7 @@ def igcv3_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -292,7 +292,7 @@ def igcv3_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -312,7 +312,7 @@ def igcv3_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -332,7 +332,7 @@ def igcv3_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

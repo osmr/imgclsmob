@@ -48,7 +48,7 @@ def dws_exp_se_res_unit(x,
     name : str, default 'dws_exp_se_res_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -123,7 +123,7 @@ def mnas_init_block(x,
     name : str, default 'mnas_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -167,7 +167,7 @@ def mnas_final_block(x,
     name : str, default 'mnas_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

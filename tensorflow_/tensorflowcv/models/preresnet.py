@@ -42,7 +42,7 @@ def preres_block(x,
     name : str, default 'preres_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     tuple of two Tensors
         Resulted tensor and preactivated input tensor.
@@ -96,7 +96,7 @@ def preres_bottleneck_block(x,
     name : str, default 'preres_bottleneck_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     tuple of two Tensors
         Resulted tensor and preactivated input tensor.
@@ -163,7 +163,7 @@ def preres_unit(x,
     name : str, default 'preres_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -228,7 +228,7 @@ def preres_init_block(x,
     name : str, default 'preres_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -277,7 +277,7 @@ def preres_activation(x,
     name : str, default 'preres_activation'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -426,7 +426,7 @@ def get_preresnet(blocks,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -519,7 +519,7 @@ def preresnet10(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -539,7 +539,7 @@ def preresnet12(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -559,7 +559,7 @@ def preresnet14(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -594,7 +594,7 @@ def preresnet16(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -614,7 +614,7 @@ def preresnet18_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -634,7 +634,7 @@ def preresnet18_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -654,7 +654,7 @@ def preresnet18_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -673,7 +673,7 @@ def preresnet18(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -722,7 +722,7 @@ def preresnet34(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -756,7 +756,7 @@ def preresnet50(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -776,7 +776,7 @@ def preresnet50b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -795,7 +795,7 @@ def preresnet101(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -815,7 +815,7 @@ def preresnet101b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -834,7 +834,7 @@ def preresnet152(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -854,7 +854,7 @@ def preresnet152b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -873,7 +873,7 @@ def preresnet200(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -893,7 +893,7 @@ def preresnet200b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -913,7 +913,7 @@ def preresnet269b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

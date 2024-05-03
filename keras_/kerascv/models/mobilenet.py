@@ -37,7 +37,7 @@ def dws_conv_block(x,
     name : str, default 'dws_conv_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

@@ -35,7 +35,7 @@ def linear_bottleneck(x,
     name : str, default 'linear_bottleneck'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

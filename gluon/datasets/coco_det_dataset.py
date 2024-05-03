@@ -638,7 +638,7 @@ def get_post_transform(orig_w, orig_h, out_w, out_h):
     out_h : int
         Height of the output image after prediction.
 
-    Returns:
+    Returns
     -------
     numpy.ndarray
         Affine transform matrix 3x2.

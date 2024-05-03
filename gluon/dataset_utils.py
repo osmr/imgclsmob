@@ -37,7 +37,7 @@ def get_dataset_metainfo(dataset_name):
     dataset_name : str
         Dataset name.
 
-    Returns:
+    Returns
     -------
     DatasetMetaInfo
         Dataset metainfo.
@@ -83,7 +83,7 @@ def get_train_data_source(ds_metainfo,
     num_workers : int
         Number of background workers.
 
-    Returns:
+    Returns
     -------
     DataLoader or ImageRecordIter
         Data source.
@@ -143,7 +143,7 @@ def get_val_data_source(ds_metainfo,
     num_workers : int
         Number of background workers.
 
-    Returns:
+    Returns
     -------
     DataLoader or ImageRecordIter
         Data source.
@@ -191,7 +191,7 @@ def get_test_data_source(ds_metainfo,
     num_workers : int
         Number of background workers.
 
-    Returns:
+    Returns
     -------
     DataLoader or ImageRecordIter
         Data source.
@@ -233,7 +233,7 @@ def get_batch_fn(ds_metainfo):
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
 
-    Returns:
+    Returns
     -------
     func
         Desired function.

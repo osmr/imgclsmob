@@ -35,7 +35,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns:
+    Returns
     -------
     int
         Weighted number of channels.
@@ -102,7 +102,7 @@ def get_activation_layer(activation):
     activation : function or str
         Activation function or name of activation function.
 
-    Returns:
+    Returns
     -------
     function
         Activation layer.
@@ -1182,7 +1182,7 @@ def channel_shuffle(x,
     groups : int
         Number of groups.
 
-    Returns:
+    Returns
     -------
     chainer.Variable or numpy.ndarray or cupy.ndarray
         Resulted variable.
@@ -1230,7 +1230,7 @@ def channel_shuffle2(x,
     groups : int
         Number of groups.
 
-    Returns:
+    Returns
     -------
     chainer.Variable or numpy.ndarray or cupy.ndarray
         Resulted variable.

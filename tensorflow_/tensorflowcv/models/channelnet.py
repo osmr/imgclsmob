@@ -38,7 +38,7 @@ def dwconv3x3(x,
     name : str, default 'dwconv3x3'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -104,7 +104,7 @@ def channet_conv(x,
     name : str, default 'channet_conv'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -176,7 +176,7 @@ def channet_conv1x1(x,
     name : str, default 'channet_conv1x1'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -242,7 +242,7 @@ def channet_conv3x3(x,
     name : str, default 'channet_conv3x3'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -298,7 +298,7 @@ def channet_dws_conv_block(x,
     name : str, default 'channet_dws_conv_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -352,7 +352,7 @@ def simple_group_block(x,
     name : str, default 'simple_group_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -394,7 +394,7 @@ def channelwise_conv2d(x,
     name : str, default 'channelwise_conv2d'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -454,7 +454,7 @@ def conv_group_block(x,
     name : str, default 'conv_group_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -522,7 +522,7 @@ def channet_unit(x,
     name : str, default 'channet_unit'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.

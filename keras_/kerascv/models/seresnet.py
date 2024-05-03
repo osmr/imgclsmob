@@ -41,7 +41,7 @@ def seres_unit(x,
     name : str, default 'seres_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

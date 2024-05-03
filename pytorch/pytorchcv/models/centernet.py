@@ -286,7 +286,7 @@ def get_centernet(backbone,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     nn.Module
         A network.

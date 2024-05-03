@@ -288,7 +288,7 @@ def get_centernet(backbone,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     HybridBlock
         A network.

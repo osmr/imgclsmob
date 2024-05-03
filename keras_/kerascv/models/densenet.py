@@ -33,7 +33,7 @@ def dense_unit(x,
     name : str, default 'dense_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor.
@@ -84,7 +84,7 @@ def transition_block(x,
     name : str, default 'transition_block'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor.

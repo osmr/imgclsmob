@@ -70,7 +70,7 @@ def report_accuracy(metric,
     extended_log : bool, default False
         Whether to log more precise accuracy values.
 
-    Returns:
+    Returns
     -------
     str
         Report string.
@@ -109,7 +109,7 @@ def get_metric(metric_name, metric_extra_kwargs):
     metric_extra_kwargs : dict
         Metric extra parameters.
 
-    Returns:
+    Returns
     -------
     EvalMetric
         Metric object instance.
@@ -141,7 +141,7 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
     metric_extra_kwargs : list of dict
         Metric extra parameters list.
 
-    Returns:
+    Returns
     -------
     CompositeEvalMetric
         Metric object instance.
@@ -166,7 +166,7 @@ def get_metric_name(metric, index):
     index : int
         Index.
 
-    Returns:
+    Returns
     -------
     str
         Metric name.

@@ -35,7 +35,7 @@ def res_block(x,
     name : str, default 'res_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -82,7 +82,7 @@ def res_bottleneck_block(x,
     name : str, default 'res_bottleneck_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -137,7 +137,7 @@ def res_unit(x,
     name : str, default 'res_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -194,7 +194,7 @@ def res_init_block(x,
     name : str, default 'res_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

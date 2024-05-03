@@ -32,7 +32,7 @@ def prepare_mx_context(num_gpus,
     batch_size : int
         Batch size for each GPU.
 
-    Returns:
+    Returns
     -------
     Context
         MXNet context.
@@ -53,7 +53,7 @@ def get_initializer(initializer_name):
     initializer_name : str
         Initializer name.
 
-    Returns:
+    Returns
     -------
     Initializer
         Initializer.
@@ -113,7 +113,7 @@ def prepare_model(model_name,
     ctx : Context, default CPU
         MXNet context.
 
-    Returns:
+    Returns
     -------
     HybridBlock
         Model.
@@ -176,7 +176,7 @@ def calc_net_weight_count(net):
     net : HybridBlock
         Model.
 
-    Returns:
+    Returns
     -------
     int
         Number of parameters.
@@ -217,7 +217,7 @@ def validate(metric,
     ctx : Context
         MXNet context.
 
-    Returns:
+    Returns
     -------
     EvalMetric
         Metric object instance.
@@ -259,7 +259,7 @@ def validate_asr(metric,
     ctx : Context
         MXNet context.
 
-    Returns:
+    Returns
     -------
     EvalMetric
         Metric object instance.
@@ -287,7 +287,7 @@ def report_accuracy(metric,
     extended_log : bool, default False
         Whether to log more precise accuracy values.
 
-    Returns:
+    Returns
     -------
     str
         Report string.
@@ -326,7 +326,7 @@ def get_metric(metric_name, metric_extra_kwargs):
     metric_extra_kwargs : dict
         Metric extra parameters.
 
-    Returns:
+    Returns
     -------
     EvalMetric
         Metric object instance.
@@ -364,7 +364,7 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
     metric_extra_kwargs : list of dict
         Metric extra parameters list.
 
-    Returns:
+    Returns
     -------
     CompositeEvalMetric
         Metric object instance.
@@ -389,7 +389,7 @@ def get_metric_name(metric, index):
     index : int
         Index.
 
-    Returns:
+    Returns
     -------
     str
         Metric name.
@@ -414,7 +414,7 @@ def get_loss(loss_name, loss_extra_kwargs):
     loss_extra_kwargs : dict
         Loss extra parameters.
 
-    Returns:
+    Returns
     -------
     Loss
         Loss object instance.

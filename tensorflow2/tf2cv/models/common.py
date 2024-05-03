@@ -32,7 +32,7 @@ def is_channels_first(data_format):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     bool
         A flag.
@@ -49,7 +49,7 @@ def get_channel_axis(data_format):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     int
         Channel axis.
@@ -69,7 +69,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns:
+    Returns
     -------
     int
         Weighted number of channels.
@@ -92,7 +92,7 @@ def get_im_size(x,
     data_format : str
         The ordering of the dimensions in the tensor.
 
-    Returns:
+    Returns
     -------
     (int, int)
         Size (height x width).
@@ -119,7 +119,7 @@ def interpolate_im(x,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     tensor
         Resulted tensor.
@@ -269,7 +269,7 @@ def get_activation_layer(activation,
     activation : function, or str, or nn.Layer
         Activation function or name of activation function.
 
-    Returns:
+    Returns
     -------
     nn.Layer
         Activation layer.
@@ -313,7 +313,7 @@ def flatten(x,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -2318,7 +2318,7 @@ def channel_shuffle(x,
     data_format : str
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -2391,7 +2391,7 @@ def channel_shuffle2(x,
     data_format : str
         Number of channels per group.
 
-    Returns:
+    Returns
     -------
     keras.Tensor
         Resulted tensor.

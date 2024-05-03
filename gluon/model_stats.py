@@ -30,7 +30,7 @@ def calc_block_num_params2(net):
     net : Block
         Model/block.
 
-    Returns:
+    Returns
     -------
     int
         Number of parameters.
@@ -53,7 +53,7 @@ def calc_block_num_params(block):
     block : Block
         Model/block.
 
-    Returns:
+    Returns
     -------
     int
         Number of parameters.

@@ -38,7 +38,7 @@ def fire_conv(x,
     name : str, default 'fire_conv'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -86,7 +86,7 @@ def fire_unit(x,
     name : str, default 'fire_unit'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -151,7 +151,7 @@ def squeeze_init_block(x,
     name : str, default 'squeeze_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -311,7 +311,7 @@ def get_squeezenet(version,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -366,7 +366,7 @@ def squeezenet_v1_0(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -386,7 +386,7 @@ def squeezenet_v1_1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -406,7 +406,7 @@ def squeezeresnet_v1_0(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -426,7 +426,7 @@ def squeezeresnet_v1_1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

@@ -35,7 +35,7 @@ def calc_tf_padding(x,
     dilation : int, default 1
         Dilation value for convolution layer.
 
-    Returns:
+    Returns
     -------
     tuple of 4 int
         The size of the padding.
@@ -79,7 +79,7 @@ def effi_dws_conv_unit(x,
     name : str, default 'effi_dws_conv_unit'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -157,7 +157,7 @@ def effi_inv_res_unit(x,
     name : str, default 'effi_inv_res_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -236,7 +236,7 @@ def effi_init_block(x,
     name : str, default 'effi_init_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

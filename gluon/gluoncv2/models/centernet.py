@@ -311,7 +311,7 @@ def get_centernet(backbone,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     HybridBlock
         A network.

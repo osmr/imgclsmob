@@ -997,7 +997,7 @@ def cocohpe_val_transform(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     ImageDataGenerator
         Image transform sequence.
@@ -1023,7 +1023,7 @@ def cocohpe_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns:
+    Returns
     -------
     Sequential
         Image transform sequence.
@@ -1061,7 +1061,7 @@ def cocohpe_test_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns:
+    Returns
     -------
     Sequential
         Image transform sequence.

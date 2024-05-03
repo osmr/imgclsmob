@@ -41,7 +41,7 @@ def calc_tf_padding(x,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     tuple of 4 int
         The size of the padding.

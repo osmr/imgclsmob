@@ -40,7 +40,7 @@ def linear_bottleneck(x,
     name : str, default 'linear_bottleneck'
         Unit name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -215,7 +215,7 @@ def get_mobilenetv2(width_scale,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -269,7 +269,7 @@ def mobilenetv2_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -289,7 +289,7 @@ def mobilenetv2_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -309,7 +309,7 @@ def mobilenetv2_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -329,7 +329,7 @@ def mobilenetv2_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

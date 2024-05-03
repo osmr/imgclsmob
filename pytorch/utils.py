@@ -27,7 +27,7 @@ def prepare_pt_context(num_gpus,
     batch_size : int
         Batch size for each GPU.
 
-    Returns:
+    Returns
     -------
     bool
         Whether to use CUDA.
@@ -78,7 +78,7 @@ def prepare_model(model_name,
     remove_module : bool, default False
         Whether to remove module from loaded model.
 
-    Returns:
+    Returns
     -------
     Module
         Model.
@@ -133,7 +133,7 @@ def calc_net_weight_count(net):
     net : Module
         Model.
 
-    Returns:
+    Returns
     -------
     int
         Number of parameters.
@@ -164,7 +164,7 @@ def validate(metric,
     use_cuda : bool
         Whether to use CUDA.
 
-    Returns:
+    Returns
     -------
     EvalMetric
         Metric object instance.
@@ -192,7 +192,7 @@ def report_accuracy(metric,
     extended_log : bool, default False
         Whether to log more precise accuracy values.
 
-    Returns:
+    Returns
     -------
     str
         Report string.
@@ -265,7 +265,7 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
     metric_extra_kwargs : list of dict
         Metric extra parameters list.
 
-    Returns:
+    Returns
     -------
     CompositeEvalMetric
         Metric object instance.
@@ -290,7 +290,7 @@ def get_metric_name(metric, index):
     index : int
         Index.
 
-    Returns:
+    Returns
     -------
     str
         Metric name.

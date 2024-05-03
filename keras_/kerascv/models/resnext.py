@@ -45,7 +45,7 @@ def resnext_bottleneck(x,
     name : str, default 'resnext_bottleneck'
         Block name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
@@ -102,7 +102,7 @@ def resnext_unit(x,
     name : str, default 'resnext_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.

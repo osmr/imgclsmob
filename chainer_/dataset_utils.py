@@ -28,7 +28,7 @@ def get_dataset_metainfo(dataset_name):
     dataset_name : str
         Dataset name.
 
-    Returns:
+    Returns
     -------
     DatasetMetaInfo
         Dataset metainfo.

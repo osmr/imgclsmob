@@ -28,7 +28,7 @@ def get_dataset_metainfo(dataset_name):
     dataset_name : str
         Dataset name.
 
-    Returns:
+    Returns
     -------
     DatasetMetaInfo
         Dataset metainfo.
@@ -68,7 +68,7 @@ def get_train_data_source(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     DataLoader
         Data source.
@@ -103,7 +103,7 @@ def get_val_data_source(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     DataLoader
         Data source.
@@ -140,7 +140,7 @@ def get_test_data_source(ds_metainfo,
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     DataLoader
         Data source.

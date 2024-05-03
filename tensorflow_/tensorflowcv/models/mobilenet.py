@@ -42,7 +42,7 @@ def dws_conv_block(x,
     name : str, default 'dws_conv_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -183,7 +183,7 @@ def get_mobilenet(version,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -232,7 +232,7 @@ def mobilenet_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -252,7 +252,7 @@ def mobilenet_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -272,7 +272,7 @@ def mobilenet_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -292,7 +292,7 @@ def mobilenet_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -312,7 +312,7 @@ def fdmobilenet_w1(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -332,7 +332,7 @@ def fdmobilenet_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -352,7 +352,7 @@ def fdmobilenet_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -372,7 +372,7 @@ def fdmobilenet_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

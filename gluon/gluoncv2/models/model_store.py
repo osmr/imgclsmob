@@ -686,7 +686,7 @@ def get_model_file(model_name,
     local_model_store_dir_path : str, default $MXNET_HOME/models
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     file_path
         Path to the requested pretrained model file.

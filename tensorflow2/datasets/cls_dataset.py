@@ -22,7 +22,7 @@ def img_normalization(img,
     std_rgb : tuple of 3 float
         STD of RGB channels in the dataset.
 
-    Returns:
+    Returns
     -------
     np.array
         Output image.

@@ -626,7 +626,7 @@ def get_model_file(model_name,
     local_model_store_dir_path : str, default $TORCH_HOME/models
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     file_path
         Path to the requested pretrained model file.
@@ -689,7 +689,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     verify_ssl : bool, default True
         Verify SSL certificates.
 
-    Returns:
+    Returns
     -------
     str
         The file path of the downloaded file.
@@ -764,7 +764,7 @@ def _check_sha1(file_name, sha1_hash):
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
 
-    Returns:
+    Returns
     -------
     bool
         Whether the file content matches the expected hash.

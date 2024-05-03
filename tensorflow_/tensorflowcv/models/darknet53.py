@@ -37,7 +37,7 @@ def dark_unit(x,
     name : str, default 'dark_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.

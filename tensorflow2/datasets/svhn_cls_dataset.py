@@ -28,7 +28,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     verify_ssl : bool, default True
         Verify SSL certificates.
 
-    Returns:
+    Returns
     -------
     str
         The file path of the downloaded file.
@@ -101,7 +101,7 @@ def _check_sha1(filename, sha1_hash):
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
 
-    Returns:
+    Returns
     -------
     bool
         Whether the file content matches the expected hash.
@@ -185,7 +185,7 @@ def svhn_train_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns:
+    Returns
     -------
     Sequential
         Image transform sequence.
@@ -217,7 +217,7 @@ def svhn_val_generator(data_generator,
     batch_size : int
         Batch size.
 
-    Returns:
+    Returns
     -------
     Sequential
         Image transform sequence.

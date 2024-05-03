@@ -27,7 +27,7 @@ def channel_squeeze(x,
     channels_per_group : int
         Number of channels per group.
 
-    Returns:
+    Returns
     -------
     NDArray
         Resulted tensor.

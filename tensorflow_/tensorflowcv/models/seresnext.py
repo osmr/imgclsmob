@@ -45,7 +45,7 @@ def seresnext_unit(x,
     name : str, default 'seresnext_unit'
         Unit name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -214,7 +214,7 @@ def get_seresnext(blocks,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -264,7 +264,7 @@ def seresnext50_32x4d(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -283,7 +283,7 @@ def seresnext101_32x4d(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.
@@ -302,7 +302,7 @@ def seresnext101_64x4d(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Returns:
+    Returns
     -------
     functor
         Functor for model graph creation with extra fields.

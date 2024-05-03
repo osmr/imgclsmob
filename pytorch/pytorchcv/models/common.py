@@ -32,7 +32,7 @@ def round_channels(channels,
     divisor : int, default 8
         Alignment value.
 
-    Returns:
+    Returns
     -------
     int
         Weighted number of channels.
@@ -114,7 +114,7 @@ def get_activation_layer(activation):
     activation : function, or str, or nn.Module
         Activation function or name of activation function.
 
-    Returns:
+    Returns
     -------
     nn.Module
         Activation layer.
@@ -1433,7 +1433,7 @@ def channel_shuffle(x,
     groups : int
         Number of groups.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -1490,7 +1490,7 @@ def channel_shuffle2(x,
     groups : int
         Number of groups.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.

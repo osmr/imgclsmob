@@ -22,7 +22,7 @@ def prepare_logger(logging_dir_path,
     logging_file_name : str
         Name of logging file.
 
-    Returns:
+    Returns
     -------
     Logger
         Logger instance.
@@ -70,7 +70,7 @@ def initialize_logging(logging_dir_path,
     log_pip_packages : bool
         Whether to log pip-packages info.
 
-    Returns:
+    Returns
     -------
     Logger
         Logger instance.

@@ -29,7 +29,7 @@ def outmask_fill(F, x, x_len, value=0.0):
     value : float, default 0.0
         Filled value.
 
-    Returns:
+    Returns
     -------
     tensor
         Resulted tensor.
@@ -56,7 +56,7 @@ def masked_normalize2(F, x, x_len):
     x_len : tensor
         Tensor with lengths.
 
-    Returns:
+    Returns
     -------
     tensor
         Resulted tensor.

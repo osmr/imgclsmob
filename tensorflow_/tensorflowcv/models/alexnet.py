@@ -47,7 +47,7 @@ def alex_conv(x,
     name : str, default 'alex_conv'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -90,7 +90,7 @@ def alex_dense(x,
     name : str, default 'alex_dense'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.
@@ -129,7 +129,7 @@ def alex_output_block(x,
     name : str, default 'alex_output_block'
         Block name.
 
-    Returns:
+    Returns
     -------
     Tensor
         Resulted tensor.

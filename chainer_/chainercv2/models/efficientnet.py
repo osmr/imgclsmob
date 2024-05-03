@@ -41,7 +41,7 @@ def calc_tf_padding(x,
     dilation : int, default 1
         Dilation value for convolution layer.
 
-    Returns:
+    Returns
     -------
     tuple of 4 int
         The size of the padding.

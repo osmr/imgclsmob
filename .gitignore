@@ -1,14 +1,10 @@
 # PyCharm ###
-.idea
-.idea/*
+.idea/
 
 # Visual Studio ###
-Release
-Release/*
-Debug
-Debug/*
-.vs
-.vs/*
+Release/
+Debug/
+.vs/
 *.VC.db
 *.sdf
 *.suo

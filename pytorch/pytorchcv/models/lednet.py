@@ -9,8 +9,8 @@ __all__ = ['LEDNet', 'lednet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, asym_conv3x3_block, ChannelShuffle,\
-    InterpolationBlock, Hourglass, BreakBlock
+from .common import (conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, asym_conv3x3_block, ChannelShuffle,
+                     InterpolationBlock, Hourglass, BreakBlock)
 from .enet import ENetMixDownBlock
 
 

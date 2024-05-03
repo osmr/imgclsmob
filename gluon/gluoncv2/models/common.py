@@ -18,8 +18,8 @@ import mxnet as mx
 from mxnet.gluon import nn, HybridBlock
 
 
-def round_channels(channels,
-                   divisor=8):
+def round_channels(channels: int | float,
+                   divisor: int = 8) -> int:
     """
     Round weighted channel number (make divisible operation).
 
@@ -52,7 +52,7 @@ class BreakBlock(HybridBlock):
         return None
 
     def __repr__(self):
-        return '{name}()'.format(name=self.__class__.__name__)
+        return "{name}()".format(name=self.__class__.__name__)
 
 
 class ReLU6(HybridBlock):
@@ -66,7 +66,7 @@ class ReLU6(HybridBlock):
         return F.clip(x, 0.0, 6.0, name="relu6")
 
     def __repr__(self):
-        return '{name}()'.format(name=self.__class__.__name__)
+        return "{name}()".format(name=self.__class__.__name__)
 
 
 class PReLU2(HybridBlock):
@@ -92,7 +92,7 @@ class PReLU2(HybridBlock):
         return F.LeakyReLU(x, gamma=alpha, act_type="prelu", name="fwd")
 
     def __repr__(self):
-        s = '{name}(in_channels={in_channels})'
+        s = "{name}(in_channels={in_channels})"
         return s.format(
             name=self.__class__.__name__,
             in_channels=self.alpha.shape[0])

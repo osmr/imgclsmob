@@ -19,9 +19,9 @@ class SegNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each stage in encoder and decoder.
-    layers : list of list of int
+    layers : list(list(int))
         Number of layers for each stage in encoder and decoder.
     aux : bool, default False
         Whether to output an auxiliary result.
@@ -29,19 +29,19 @@ class SegNet(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.
     """
     def __init__(self,
-                 channels,
-                 layers,
-                 aux=False,
-                 fixed_size=False,
-                 in_channels=3,
-                 in_size=(1024, 2048),
-                 num_classes=19):
+                 channels: list[list[int]],
+                 layers: list[list[int]],
+                 aux: bool = False,
+                 fixed_size: bool = False,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (1024, 2048),
+                 num_classes: int = 19):
         super(SegNet, self).__init__()
         assert (aux is not None)
         assert (fixed_size is not None)
@@ -122,10 +122,10 @@ class SegNet(nn.Module):
         return x
 
 
-def get_segnet(model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
-               **kwargs):
+def get_segnet(model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
+               **kwargs) -> nn.Module:
     """
     Create SegNet model with specific parameters.
 
@@ -137,6 +137,11 @@ def get_segnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels = [[64, 128, 256, 512, 512], [512, 256, 128, 64, 64]]
     layers = [[3, 3, 4, 4, 4], [4, 4, 4, 3, 2]]
@@ -158,7 +163,7 @@ def get_segnet(model_name=None,
     return net
 
 
-def segnet_cityscapes(num_classes=19, **kwargs):
+def segnet_cityscapes(num_classes: int = 19, **kwargs) -> nn.Module:
     """
     SegNet model for Cityscapes from 'SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation,'
     https://arxiv.org/abs/1511.00561.
@@ -171,6 +176,11 @@ def segnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_segnet(num_classes=num_classes, model_name="segnet_cityscapes", **kwargs)
 

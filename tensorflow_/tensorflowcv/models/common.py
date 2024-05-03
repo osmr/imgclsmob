@@ -14,8 +14,8 @@ import tensorflow as tf
 # tf.disable_v2_behavior()
 
 
-def round_channels(channels,
-                   divisor=8):
+def round_channels(channels: int | float,
+                   divisor: int = 8) -> int:
     """
     Round weighted channel number (make divisible operation).
 

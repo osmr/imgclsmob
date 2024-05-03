@@ -18,10 +18,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+from typing import Callable
 
 
-def round_channels(channels,
-                   divisor=8):
+def round_channels(channels: int | float,
+                   divisor: int = 8) -> int:
     """
     Round weighted channel number (make divisible operation).
 
@@ -54,7 +55,7 @@ class Identity(nn.Module):
         return x
 
     def __repr__(self):
-        return '{name}()'.format(name=self.__class__.__name__)
+        return "{name}()".format(name=self.__class__.__name__)
 
 
 class BreakBlock(nn.Module):
@@ -68,7 +69,7 @@ class BreakBlock(nn.Module):
         return None
 
     def __repr__(self):
-        return '{name}()'.format(name=self.__class__.__name__)
+        return "{name}()".format(name=self.__class__.__name__)
 
 
 class Swish(nn.Module):
@@ -97,7 +98,7 @@ class HSwish(nn.Module):
     inplace : bool
         Whether to use inplace version of the module.
     """
-    def __init__(self, inplace=False):
+    def __init__(self, inplace: bool = False):
         super(HSwish, self).__init__()
         self.inplace = inplace
 
@@ -105,13 +106,13 @@ class HSwish(nn.Module):
         return x * F.relu6(x + 3.0, inplace=self.inplace) / 6.0
 
 
-def get_activation_layer(activation):
+def get_activation_layer(activation: Callable | str | nn.Module) -> nn.Module:
     """
     Create activation layer from string/function.
 
     Parameters
     ----------
-    activation : function, or str, or nn.Module
+    activation : function or str or nn.Module
         Activation function or name of activation function.
 
     Returns
@@ -160,10 +161,10 @@ class SelectableDense(nn.Module):
         Number of selectable options.
     """
     def __init__(self,
-                 in_features,
-                 out_features,
-                 bias=False,
-                 num_options=1):
+                 in_features: int,
+                 out_features: int,
+                 bias: bool = False,
+                 num_options: int = 1):
         super(SelectableDense, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -210,12 +211,12 @@ class DenseBlock(nn.Module):
         Activation function or name of activation function.
     """
     def __init__(self,
-                 in_features,
-                 out_features,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 in_features: int,
+                 out_features: int,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(DenseBlock, self).__init__()
         self.activate = (activation is not None)
         self.use_bn = use_bn
@@ -256,7 +257,7 @@ class ConvBlock1d(nn.Module):
         Strides of the convolution.
     padding : int
         Padding value for convolution layer.
-    dilation : int
+    dilation : int, default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -270,17 +271,17 @@ class ConvBlock1d(nn.Module):
         Activation function or name of activation function.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int,
+                 stride: int,
+                 padding: int,
+                 dilation: int = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(ConvBlock1d, self).__init__()
         self.activate = (activation is not None)
         self.use_bn = use_bn
@@ -310,11 +311,11 @@ class ConvBlock1d(nn.Module):
         return x
 
 
-def conv1x1(in_channels,
-            out_channels,
-            stride=1,
-            groups=1,
-            bias=False):
+def conv1x1(in_channels: int,
+            out_channels: int,
+            stride: int | tuple[int, int] = 1,
+            groups: int = 1,
+            bias: bool = False) -> nn.Module:
     """
     Convolution 1x1 layer.
 
@@ -324,12 +325,17 @@ def conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return nn.Conv2d(
         in_channels=in_channels,
@@ -340,13 +346,13 @@ def conv1x1(in_channels,
         bias=bias)
 
 
-def conv3x3(in_channels,
-            out_channels,
-            stride=1,
-            padding=1,
-            dilation=1,
-            groups=1,
-            bias=False):
+def conv3x3(in_channels: int,
+            out_channels: int,
+            stride: int | tuple[int, int] = 1,
+            padding: int | tuple[int, int] = 1,
+            dilation: int | tuple[int, int] = 1,
+            groups: int = 1,
+            bias: bool = False) -> nn.Module:
     """
     Convolution 3x3 layer.
 
@@ -356,16 +362,21 @@ def conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return nn.Conv2d(
         in_channels=in_channels,
@@ -378,11 +389,11 @@ def conv3x3(in_channels,
         bias=bias)
 
 
-def depthwise_conv3x3(channels,
-                      stride=1,
-                      padding=1,
-                      dilation=1,
-                      bias=False):
+def depthwise_conv3x3(channels: int,
+                      stride: int | tuple[int, int] = 1,
+                      padding: int | tuple[int, int] = 1,
+                      dilation: int | tuple[int, int] = 1,
+                      bias: bool = False) -> nn.Module:
     """
     Depthwise convolution 3x3 layer.
 
@@ -390,14 +401,19 @@ def depthwise_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return nn.Conv2d(
         in_channels=channels,
@@ -420,13 +436,13 @@ class ConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+    padding : int or tuple(int, int) or tuple(int, int, int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -440,17 +456,17 @@ class ConvBlock(nn.Module):
         Activation function or name of activation function.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int] | tuple[int, int, int, int],
+                 dilation: int | tuple[int, int] = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(ConvBlock, self).__init__()
         self.activate = (activation is not None)
         self.use_bn = use_bn
@@ -486,15 +502,15 @@ class ConvBlock(nn.Module):
         return x
 
 
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  padding=0,
-                  groups=1,
-                  bias=False,
-                  use_bn=True,
-                  bn_eps=1e-5,
-                  activation=(lambda: nn.ReLU(inplace=True))):
+def conv1x1_block(in_channels: int,
+                  out_channels: int,
+                  stride: int | tuple[int, int] = 1,
+                  padding: int | tuple[int, int] | tuple[int, int, int, int] = 0,
+                  groups: int = 1,
+                  bias: bool = False,
+                  use_bn: bool = True,
+                  bn_eps: float = 1e-5,
+                  activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     1x1 version of the standard convolution block.
 
@@ -504,9 +520,9 @@ def conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 0
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 0
         Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -518,6 +534,11 @@ def conv1x1_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -532,16 +553,16 @@ def conv1x1_block(in_channels,
         activation=activation)
 
 
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  padding=1,
-                  dilation=1,
-                  groups=1,
-                  bias=False,
-                  use_bn=True,
-                  bn_eps=1e-5,
-                  activation=(lambda: nn.ReLU(inplace=True))):
+def conv3x3_block(in_channels: int,
+                  out_channels: int,
+                  stride: int | tuple[int, int] = 1,
+                  padding: int | tuple[int, int] | tuple[int, int, int, int] = 0,
+                  dilation: int | tuple[int, int] = 1,
+                  groups: int = 1,
+                  bias: bool = False,
+                  use_bn: bool = True,
+                  bn_eps: float = 1e-5,
+                  activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     3x3 version of the standard convolution block.
 
@@ -551,11 +572,11 @@ def conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 1
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -567,6 +588,11 @@ def conv3x3_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -601,11 +627,11 @@ def conv5x5_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 2
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 2
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -651,11 +677,11 @@ def conv7x7_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 1
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 3
+    padding : int or tuple(int, int), default 3
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -701,13 +727,13 @@ def dwconv_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 1
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -749,11 +775,11 @@ def dwconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 1
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -791,11 +817,11 @@ def dwconv5x5_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 2
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 2
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -826,13 +852,13 @@ class DwsConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+    padding : int or tuple(int, int) or tuple(int, int, int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -905,11 +931,11 @@ def dwsconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 1
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -944,13 +970,13 @@ class PreConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -1020,7 +1046,7 @@ def pre_conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -1061,11 +1087,11 @@ def pre_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -1206,17 +1232,17 @@ class DeconvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the deconvolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for deconvolution layer.
     ext_padding : tuple/list of 4 int, default None
         Extra padding value for deconvolution layer.
-    out_padding : int or tuple/list of 2 int
+    out_padding : int or tuple(int, int)
         Output padding value for deconvolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for deconvolution layer.
     groups : int, default 1
         Number of groups.
@@ -1290,15 +1316,15 @@ def deconv3x3_block(padding=1,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the deconvolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for deconvolution layer.
     ext_padding : tuple/list of 4 int, default None
         Extra padding value for deconvolution layer.
-    out_padding : int or tuple/list of 2 int, default 1
+    out_padding : int or tuple(int, int), default 1
         Output padding value for deconvolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for deconvolution layer.
     groups : int, default 1
         Number of groups.
@@ -1690,13 +1716,13 @@ class SAConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+    padding : int or tuple(int, int) or tuple(int, int, int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -1775,9 +1801,9 @@ def saconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
     """
     return SAConvBlock(
@@ -2110,12 +2136,12 @@ class SesquialteralHourglass(nn.Module):
         Type of concatenation of up and skip outputs.
     """
     def __init__(self,
-                 down1_seq,
-                 skip1_seq,
-                 up_seq,
-                 skip2_seq,
-                 down2_seq,
-                 merge_type="cat"):
+                 down1_seq: nn.Sequential,
+                 skip1_seq: nn.Sequential,
+                 up_seq: nn.Sequential,
+                 skip2_seq: nn.Sequential,
+                 down2_seq: nn.Sequential,
+                 merge_type: str = "cat"):
         super(SesquialteralHourglass, self).__init__()
         assert (len(down1_seq) == len(up_seq))
         assert (len(down1_seq) == len(down2_seq))
@@ -2178,9 +2204,9 @@ class MultiOutputSequential(nn.Sequential):
         Whether to forcibly return last value.
     """
     def __init__(self,
-                 multi_output=True,
-                 dual_output=False,
-                 return_last=True):
+                 multi_output: bool = True,
+                 dual_output: bool = False,
+                 return_last: bool = True):
         super(MultiOutputSequential, self).__init__()
         self.multi_output = multi_output
         self.dual_output = dual_output
@@ -2193,7 +2219,7 @@ class MultiOutputSequential(nn.Sequential):
             if hasattr(module, "do_output") and module.do_output:
                 outs.append(x)
             elif hasattr(module, "do_output2") and module.do_output2:
-                assert (type(x) == tuple)
+                assert isinstance(x, tuple)
                 outs.extend(x[1])
                 x = x[0]
         if self.multi_output:
@@ -2217,8 +2243,8 @@ class ParallelConcurent(nn.Sequential):
         Type of branch merging.
     """
     def __init__(self,
-                 axis=1,
-                 merge_type="list"):
+                 axis: int = 1,
+                 merge_type: str = "list"):
         super(ParallelConcurent, self).__init__()
         assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
         self.axis = axis
@@ -2254,8 +2280,8 @@ class DualPathParallelConcurent(nn.Sequential):
         Type of branch merging.
     """
     def __init__(self,
-                 axis=1,
-                 merge_type="list"):
+                 axis: int = 1,
+                 merge_type: str = "list"):
         super(DualPathParallelConcurent, self).__init__()
         assert (merge_type is None) or (merge_type in ["list", "cat", "stack", "sum"])
         self.axis = axis

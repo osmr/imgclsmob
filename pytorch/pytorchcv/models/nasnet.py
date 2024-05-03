@@ -20,10 +20,10 @@ class NasDualPathScheme(object):
     Parameters
     ----------
     can_skip_input : bool
-        Whether can skip input for some modules.
+        Whether we can skip input for some modules.
     """
     def __init__(self,
-                 can_skip_input):
+                 can_skip_input: bool):
         super(NasDualPathScheme, self).__init__()
         self.can_skip_input = can_skip_input
 
@@ -34,32 +34,32 @@ class NasDualPathScheme(object):
     ----------
     module : nn.Module
         A module.
-    x : Tensor
+    x : torch.Tensor
         Current processed tensor.
-    x_prev : Tensor
+    x_prev : torch.Tensor
         Previous processed tensor.
 
     Returns
     -------
-    x_next : Tensor
+    x_next : torch.Tensor
         Next processed tensor.
-    x : Tensor
+    x : torch.Tensor
         Current processed tensor.
     """
     def __call__(self,
-                 module,
-                 x,
-                 x_prev):
+                 module: nn.Module,
+                 x: torch.Tensor,
+                 x_prev: torch.Tensor):
         x_next = module(x, x_prev)
-        if type(x_next) == tuple:
+        if isinstance(x_next, tuple):
             x_next, x = x_next
         if self.can_skip_input and hasattr(module, 'skip_input') and module.skip_input:
             x = x_prev
         return x_next, x
 
 
-def nasnet_dual_path_scheme_ordinal(module,
-                                    x,
+def nasnet_dual_path_scheme_ordinal(module: nn.Module,
+                                    x: torch.Tensor,
                                     _):
     """
     NASNet specific scheme of dual path response for an ordinal module with dual inputs/outputs in a DualPathSequential
@@ -69,14 +69,14 @@ def nasnet_dual_path_scheme_ordinal(module,
     ----------
     module : nn.Module
         A module.
-    x : Tensor
+    x : torch.Tensor
         Current processed tensor.
 
     Returns
     -------
-    x_next : Tensor
+    x_next : torch.Tensor
         Next processed tensor.
-    x : Tensor
+    x : torch.Tensor
         Current processed tensor.
     """
     return module(x), x

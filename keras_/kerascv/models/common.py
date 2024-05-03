@@ -16,8 +16,8 @@ from keras import layers as nn
 from keras.engine.base_layer import Layer
 
 
-def round_channels(channels,
-                   divisor=8):
+def round_channels(channels: int | float,
+                   divisor: int = 8) -> int:
     """
     Round weighted channel number (make divisible operation).
 

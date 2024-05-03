@@ -10,8 +10,8 @@ __all__ = ['MobileNetV3', 'mobilenetv3_small_w7d20', 'mobilenetv3_small_wd2', 'm
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
-    HSwish
+from .common import (round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,
+                     HSwish)
 
 
 class MobileNetV3Unit(nn.Module):

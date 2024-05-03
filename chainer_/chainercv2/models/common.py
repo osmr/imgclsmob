@@ -23,8 +23,8 @@ from chainer.initializers import _get_initializer
 from chainer.variable import Parameter
 
 
-def round_channels(channels,
-                   divisor=8):
+def round_channels(channels: int | float,
+                   divisor: int = 8) -> int:
     """
     Round weighted channel number (make divisible operation).
 
@@ -57,7 +57,7 @@ class BreakBlock(Chain):
         return None
 
     def __repr__(self):
-        return '{name}()'.format(name=self.__class__.__name__)
+        return "{name}()".format(name=self.__class__.__name__)
 
 
 class ReLU6(Chain):

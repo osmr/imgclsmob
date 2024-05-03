@@ -8,14 +8,13 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pytorchcv',
-    version='0.0.67',
     description='Image classification and segmentation models for PyTorch',
-    license='MIT',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
     url='https://github.com/osmr/imgclsmob',
     author='Oleg Sémery',
     author_email='osemery@gmail.com',
+    license='MIT',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -30,6 +29,7 @@ setup(
              'proxylessnas dianet efficientnet mixnet image-segmentation voc ade20k cityscapes coco pspnet deeplabv3 '
              'fcn',
     packages=find_packages(exclude=['datasets', 'metrics', 'others', '*.others', 'others.*', '*.others.*']),
-    include_package_data=True,
     install_requires=['numpy', 'requests'],
+    python_requires='>=3.10',
+    include_package_data=True,
 )

@@ -9,8 +9,8 @@ __all__ = ['SINet', 'sinet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,\
-    Concurrent, InterpolationBlock, ChannelShuffle
+from .common import (conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,
+                     Concurrent, InterpolationBlock, ChannelShuffle)
 
 
 class SEBlock(nn.Module):

@@ -15,15 +15,15 @@ from .common import conv1x1, conv3x3, Flatten
 from .resnet import resnet50b
 
 
-def hard_nms(cdds,
-             top_n=10,
-             iou_thresh=0.25):
+def hard_nms(cdds: np.ndarray,
+             top_n: int = 10,
+             iou_thresh: float = 0.25):
     """
     Hard Non-Maximum Suppression.
 
     Parameters
     ----------
-    cdds : np.array
+    cdds : np.ndarray
         Borders.
     top_n : int, default 10
         Number of top-K informative regions.
@@ -32,10 +32,10 @@ def hard_nms(cdds,
 
     Returns
     -------
-    np.array
+    np.ndarray
         Filtered borders.
     """
-    assert (type(cdds) == np.ndarray)
+    assert (isinstance(cdds, np.ndarray))
     assert (len(cdds.shape) == 2)
     assert (cdds.shape[1] >= 5)
 

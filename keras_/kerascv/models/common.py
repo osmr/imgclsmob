@@ -1491,7 +1491,7 @@ class GluonBatchNormalization(BatchNormalization):
                 Apply native MXNet/Gluon batch normalization on x with given moving_mean, moving_var, beta and gamma.
 
 
-                Parameters:
+                Parameters
                 ----------
                 x : keras.backend tensor/variable/symbol
                     Input tensor/variable/symbol.
@@ -1513,7 +1513,7 @@ class GluonBatchNormalization(BatchNormalization):
                 fix_gamma : bool, default False
                     Fix gamma while training.
 
-                Returns:
+                Returns
                 -------
                 keras.backend tensor/variable/symbol
                     Resulted tensor/variable/symbol.

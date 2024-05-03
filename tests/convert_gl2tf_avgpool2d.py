@@ -30,7 +30,7 @@ class GluonModel(mx.gluon.HybridBlock):
 #     """
 #     Average pooling operation for two dimensional (spatial) data.
 #
-#     Parameters:
+#     Parameters
 #     ----------
 #     x : Tensor
 #         Input tensor.

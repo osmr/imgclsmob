@@ -230,7 +230,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
     """
     Calculate mean AP for object detection task
 
-    Parameters:
+    Parameters
     ---------
     iou_thresh : float
         IOU overlap threshold for TP
@@ -529,7 +529,7 @@ class VOC07MApMetric(VOCMApMetric):
     """
     Mean average precision metric for PASCAL V0C 07 dataset.
 
-    Parameters:
+    Parameters
     ---------
     iou_thresh : float
         IOU overlap threshold for TP

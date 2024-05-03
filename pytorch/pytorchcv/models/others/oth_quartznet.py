@@ -56,7 +56,7 @@ class CtcDecoder(object):
 #     """
 #     Word Error Rate (WER).
 #
-#     Parameters:
+#     Parameters
 #     ----------
 #     vocabulary : list of str
 #         Vocabulary of the dataset.

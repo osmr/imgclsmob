@@ -198,20 +198,28 @@ def load_image_imagenet1k_val(path,
     """
     Wraps keras_preprocessing.image.utils.load_img and apply center crop as in ImageNet-1K validation procedure.
 
-    # Arguments
-        path: Path to image file.
-        color_mode: One of "grayscale", 'rgb', 'rgba'. Default: 'rgb'.
-            The desired image format.
-        target_size: Either `None` (default to original size)
-            or tuple of ints `(img_height, img_width)`.
-        interpolation: Interpolation and crop methods used to resample and crop the image
-            if the target size is different from that of the loaded image.
-            Methods are delimited by ":" where first part is interpolation and second is an inverted ratio for input
-            image crop, e.g. 'lanczos:0.875'.
-            Supported interpolation methods are 'nearest', 'bilinear', 'bicubic', 'lanczos',
-            'box', 'hamming' By default, 'nearest' is used.
+    Parameters
+    ----------
+    path: str
+        Path to image file.
+    grayscale: bool, default False
+        Whether to convert to grayscale?
+    color_mode: str, default `rgb`
+        One of "grayscale", 'rgb', 'rgba'. Default: 'rgb'.
+        The desired image format.
+    target_size: tuple of ints or None, default None
+        Either `None` (default to original size) or tuple of ints `(img_height, img_width)`.
+    interpolation: str, default `nearest`
+        Interpolation and crop methods used to resample and crop the image
+        if the target size is different from that of the loaded image.
+        Methods are delimited by ":" where first part is interpolation and second is an inverted ratio for input
+        image crop, e.g. 'lanczos:0.875'.
+        Supported interpolation methods are 'nearest', 'bilinear', 'bicubic', 'lanczos',
+        'box', 'hamming' By default, 'nearest' is used.
 
-    # Returns:
+    Returns
+    -------
+    PIL.Image
         A PIL Image instance.
 
     # Raises

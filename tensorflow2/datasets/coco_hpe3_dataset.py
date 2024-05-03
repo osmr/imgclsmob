@@ -615,12 +615,17 @@ class CocoHpeDirectoryIterator(DirectoryIterator):
         self.index_generator = self._flow_index()
 
     def _get_batches_of_transformed_samples(self, index_array):
-        """Gets a batch of transformed samples.
+        """
+        Gets a batch of transformed samples.
 
-        # Arguments
-            index_array: Array of sample indices to include in batch.
+        Parameters
+        ----------
+        index_array: list
+            Array of sample indices to include in batch.
 
-        # Returns:
+        Returns
+        -------
+        np.ndarray
             A batch of transformed samples.
         """
         batch_x = None

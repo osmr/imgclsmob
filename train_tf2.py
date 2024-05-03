@@ -164,7 +164,7 @@ def parse_args():
     """
     Parse python script parameters (common part).
 
-    Returns:
+    Returns
     -------
     ArgumentParser
         Resulted args.

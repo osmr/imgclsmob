@@ -122,7 +122,7 @@ def parse_args():
     """
     Create python script parameters (common part).
 
-    Returns:
+    Returns
     -------
     ArgumentParser
         Resulted args.
@@ -199,7 +199,7 @@ def calc_model_accuracy(net,
     extended_log : bool, default False
         Whether to log more precise accuracy values.
 
-    Returns:
+    Returns
     -------
     list of floats
         Accuracy values.
@@ -252,7 +252,7 @@ def test_model(args):
     args : ArgumentParser
         Main script arguments.
 
-    Returns:
+    Returns
     -------
     float
         Main accuracy value.

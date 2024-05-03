@@ -18,7 +18,7 @@ def parse_args():
     """
     Parse python script parameters.
 
-    Returns:
+    Returns
     -------
     ArgumentParser
         Resulted args.

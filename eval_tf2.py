@@ -109,7 +109,7 @@ def parse_args():
     """
     Create python script parameters (common part).
 
-    Returns:
+    Returns
     -------
     ArgumentParser
         Resulted args.
@@ -156,7 +156,7 @@ def test_model(args,
     data_format : str
         The ordering of the dimensions in tensors.
 
-    Returns:
+    Returns
     -------
     float
         Main accuracy value.

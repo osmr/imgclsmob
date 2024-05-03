@@ -16,7 +16,7 @@ def parse_args():
     """
     Parse python script parameters.
 
-    Returns:
+    Returns
     -------
     ArgumentParser
         Resulted args.
@@ -53,7 +53,7 @@ def calc_sha1(file_name):
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
 
-    Returns:
+    Returns
     -------
     str
         sha1 hex digest.
@@ -93,7 +93,7 @@ def post_process(dst_dir_path,
     log_line_num : int
         Log file last line number for analysis.
 
-    Returns:
+    Returns
     -------
     top5_err : str
         top5 error value.

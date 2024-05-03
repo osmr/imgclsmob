@@ -17,7 +17,7 @@ class FCU(nn.Module):
     """
     Factorized convolution unit.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -79,7 +79,7 @@ class ERFNet(nn.Module):
     ERFNet model from 'ERFNet: Efficient Residual Factorized ConvNet for Real-time Semantic Segmentation,'
     http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for the first unit of each stage.
@@ -198,7 +198,7 @@ def get_erfnet(model_name=None,
     """
     Create ERFNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -237,7 +237,7 @@ def erfnet_cityscapes(num_classes=19, **kwargs):
     ERFNet model for Cityscapes from 'ERFNet: Efficient Residual Factorized ConvNet for Real-time Semantic
     Segmentation,' http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

@@ -26,7 +26,7 @@ def mobilenetv3_unit(x,
     """
     MobileNetV3 unit.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -112,7 +112,7 @@ def mobilenetv3_final_block(x,
     """
     MobileNetV3 final block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -156,7 +156,7 @@ def mobilenetv3_classifier(x,
     """
     MobileNetV3 classifier.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -214,7 +214,7 @@ def mobilenetv3(channels,
     """
     MobileNetV3 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -309,7 +309,7 @@ def get_mobilenetv3(version,
     """
     Create MobileNetV3 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of MobileNetV3 ('small' or 'large').
@@ -383,7 +383,7 @@ def mobilenetv3_small_w7d20(**kwargs):
     """
     MobileNetV3 Small 224/0.35 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -397,7 +397,7 @@ def mobilenetv3_small_wd2(**kwargs):
     """
     MobileNetV3 Small 224/0.5 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -411,7 +411,7 @@ def mobilenetv3_small_w3d4(**kwargs):
     """
     MobileNetV3 Small 224/0.75 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -425,7 +425,7 @@ def mobilenetv3_small_w1(**kwargs):
     """
     MobileNetV3 Small 224/1.0 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -439,7 +439,7 @@ def mobilenetv3_small_w5d4(**kwargs):
     """
     MobileNetV3 Small 224/1.25 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -453,7 +453,7 @@ def mobilenetv3_large_w7d20(**kwargs):
     """
     MobileNetV3 Small 224/0.35 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -467,7 +467,7 @@ def mobilenetv3_large_wd2(**kwargs):
     """
     MobileNetV3 Large 224/0.5 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -481,7 +481,7 @@ def mobilenetv3_large_w3d4(**kwargs):
     """
     MobileNetV3 Large 224/0.75 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -495,7 +495,7 @@ def mobilenetv3_large_w1(**kwargs):
     """
     MobileNetV3 Large 224/1.0 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -509,7 +509,7 @@ def mobilenetv3_large_w5d4(**kwargs):
     """
     MobileNetV3 Large 224/1.25 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

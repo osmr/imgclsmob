@@ -23,7 +23,7 @@ class CIFARPyramidNet(tf.keras.Model):
     """
     PyramidNet model for CIFAR from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -108,7 +108,7 @@ def get_pyramidnet_cifar(classes,
     """
     Create PyramidNet for CIFAR model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -173,7 +173,7 @@ def pyramidnet110_a48_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=48) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -195,7 +195,7 @@ def pyramidnet110_a48_cifar100(classes=100, **kwargs):
     """
     PyramidNet-110 (a=48) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -217,7 +217,7 @@ def pyramidnet110_a48_svhn(classes=10, **kwargs):
     """
     PyramidNet-110 (a=48) model for SVHN from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -239,7 +239,7 @@ def pyramidnet110_a84_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=84) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -261,7 +261,7 @@ def pyramidnet110_a84_cifar100(classes=100, **kwargs):
     """
     PyramidNet-110 (a=84) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -283,7 +283,7 @@ def pyramidnet110_a84_svhn(classes=10, **kwargs):
     """
     PyramidNet-110 (a=84) model for SVHN from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -305,7 +305,7 @@ def pyramidnet110_a270_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=270) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -328,7 +328,7 @@ def pyramidnet110_a270_cifar100(classes=100, **kwargs):
     PyramidNet-110 (a=270) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -350,7 +350,7 @@ def pyramidnet110_a270_svhn(classes=10, **kwargs):
     """
     PyramidNet-110 (a=270) model for SVHN from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -373,7 +373,7 @@ def pyramidnet164_a270_bn_cifar10(classes=10, **kwargs):
     PyramidNet-164 (a=270, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -396,7 +396,7 @@ def pyramidnet164_a270_bn_cifar100(classes=100, **kwargs):
     PyramidNet-164 (a=270, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -419,7 +419,7 @@ def pyramidnet164_a270_bn_svhn(classes=10, **kwargs):
     PyramidNet-164 (a=270, bn) model for SVHN from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -442,7 +442,7 @@ def pyramidnet200_a240_bn_cifar10(classes=10, **kwargs):
     PyramidNet-200 (a=240, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -465,7 +465,7 @@ def pyramidnet200_a240_bn_cifar100(classes=100, **kwargs):
     PyramidNet-200 (a=240, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -488,7 +488,7 @@ def pyramidnet200_a240_bn_svhn(classes=10, **kwargs):
     PyramidNet-200 (a=240, bn) model for SVHN from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -511,7 +511,7 @@ def pyramidnet236_a220_bn_cifar10(classes=10, **kwargs):
     PyramidNet-236 (a=220, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -534,7 +534,7 @@ def pyramidnet236_a220_bn_cifar100(classes=100, **kwargs):
     PyramidNet-236 (a=220, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -557,7 +557,7 @@ def pyramidnet236_a220_bn_svhn(classes=10, **kwargs):
     PyramidNet-236 (a=220, bn) model for SVHN from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -580,7 +580,7 @@ def pyramidnet272_a200_bn_cifar10(classes=10, **kwargs):
     PyramidNet-272 (a=200, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -603,7 +603,7 @@ def pyramidnet272_a200_bn_cifar100(classes=100, **kwargs):
     PyramidNet-272 (a=200, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -626,7 +626,7 @@ def pyramidnet272_a200_bn_svhn(classes=10, **kwargs):
     PyramidNet-272 (a=200, bn) model for SVHN from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

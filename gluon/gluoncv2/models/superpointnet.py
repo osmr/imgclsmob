@@ -19,7 +19,7 @@ def interpolate_bilinear(p,
     """
     Bilinear interpolation.
 
-    Parameters:
+    Parameters
     ----------
     p : NDArray
         Float coordinates.
@@ -77,7 +77,7 @@ class SPHead(HybridBlock):
     """
     SuperPointNet head block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -113,7 +113,7 @@ class SPDetector(HybridBlock):
     """
     SuperPointNet detector.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -271,7 +271,7 @@ class SPDescriptor(HybridBlock):
     """
     SuperPointNet descriptor generator.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -374,7 +374,7 @@ class SuperPointNet(HybridBlock):
     SuperPointNet model from 'SuperPoint: Self-Supervised Interest Point Detection and Description,'
     https://arxiv.org/abs/1712.07629.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -453,7 +453,7 @@ def get_superpointnet(model_name=None,
     """
     Create SuperPointNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -492,7 +492,7 @@ def superpointnet(**kwargs):
     SuperPointNet model from 'SuperPoint: Self-Supervised Interest Point Detection and Description,'
     https://arxiv.org/abs/1712.07629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

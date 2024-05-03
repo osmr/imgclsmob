@@ -16,7 +16,7 @@ class McvDataset(AsrDataset):
     """
     Mozilla Common Voice dataset for Automatic Speech Recognition (ASR).
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.torch/datasets/mcv'
         Path to the folder stored the dataset.
@@ -210,7 +210,7 @@ class McvDataset(AsrDataset):
         """
         Get the vocabulary for a language.
 
-        Parameters:
+        Parameters
         ----------
         lang : str, default 'en'
             Language.
@@ -282,7 +282,7 @@ class McvMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for dataset specific metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -306,7 +306,7 @@ class McvMetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -321,7 +321,7 @@ class McvMetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

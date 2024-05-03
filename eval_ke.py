@@ -128,7 +128,7 @@ def test(net,
     """
     Main test routine.
 
-    Parameters:
+    Parameters
     ----------
     net : Model
         Model.

@@ -14,7 +14,7 @@ class CUB200_2011(dataset.Dataset):
     """
     CUB-200-2011 fine-grained classification dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.mxnet/datasets/CUB_200_2011'
         Path to the folder stored the dataset.

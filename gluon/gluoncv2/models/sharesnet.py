@@ -19,7 +19,7 @@ class ShaConvBlock(HybridBlock):
     """
     Shared convolution block with Batch normalization and ReLU/ReLU6 activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -114,7 +114,7 @@ def sha_conv3x3_block(in_channels,
     """
     3x3 version of the shared convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -159,7 +159,7 @@ class ShaResBlock(HybridBlock):
     """
     Simple ShaResNet block for residual path in ShaResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -204,7 +204,7 @@ class ShaResBottleneck(HybridBlock):
     """
     ShaResNet bottleneck block for residual path in ShaResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -263,7 +263,7 @@ class ShaResUnit(HybridBlock):
     """
     ShaResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -333,7 +333,7 @@ class ShaResNet(HybridBlock):
     ShaResNet model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -419,7 +419,7 @@ def get_sharesnet(blocks,
     """
     Create ShaResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -486,7 +486,7 @@ def sharesnet18(**kwargs):
     ShaResNet-18 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -503,7 +503,7 @@ def sharesnet34(**kwargs):
     ShaResNet-34 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -520,7 +520,7 @@ def sharesnet50(**kwargs):
     ShaResNet-50 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -537,7 +537,7 @@ def sharesnet50b(**kwargs):
     ShaResNet-50b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
     network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -554,7 +554,7 @@ def sharesnet101(**kwargs):
     ShaResNet-101 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -571,7 +571,7 @@ def sharesnet101b(**kwargs):
     ShaResNet-101b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
     network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -588,7 +588,7 @@ def sharesnet152(**kwargs):
     ShaResNet-152 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -605,7 +605,7 @@ def sharesnet152b(**kwargs):
     ShaResNet-152b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
     network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

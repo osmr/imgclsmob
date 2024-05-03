@@ -13,7 +13,7 @@ def jasperdr10x5_en(num_classes=29, **kwargs):
     Jasper DR 10x5 model for English language from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 29
         Number of classification classes (number of graphemes).
@@ -31,7 +31,7 @@ def jasperdr10x5_en_nr(num_classes=29, **kwargs):
     Jasper DR 10x5 model for English language (with presence of noise) from 'Jasper: An End-to-End Convolutional Neural
     Acoustic Model,' https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 29
         Number of classification classes (number of graphemes).

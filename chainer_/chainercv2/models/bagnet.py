@@ -19,7 +19,7 @@ class BagNetBottleneck(Chain):
     """
     BagNet bottleneck block for residual path in BagNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -67,7 +67,7 @@ class BagNetUnit(Chain):
     """
     BagNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -118,7 +118,7 @@ class BagNetInitBlock(Chain):
     """
     BagNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -149,7 +149,7 @@ class BagNet(Chain):
     BagNet model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -226,7 +226,7 @@ def get_bagnet(field,
     """
     Create BagNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -282,7 +282,7 @@ def bagnet9(**kwargs):
     BagNet-9 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -297,7 +297,7 @@ def bagnet17(**kwargs):
     BagNet-17 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -312,7 +312,7 @@ def bagnet33(**kwargs):
     BagNet-33 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

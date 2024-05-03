@@ -18,7 +18,7 @@ class LffdDetectionBranch(HybridBlock):
     """
     LFFD specific detection branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -59,7 +59,7 @@ class LffdDetectionBlock(HybridBlock):
     """
     LFFD specific detection block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -105,7 +105,7 @@ class LFFD(HybridBlock):
     """
     LFFD model from 'LFFD: A Light and Fast Face Detector for Edge Devices,' https://arxiv.org/abs/1904.10633.
 
-    Parameters:
+    Parameters
     ----------
     enc_channels : list of int
         Number of output channels for each encoder stage.
@@ -226,7 +226,7 @@ def get_lffd(blocks,
     """
     Create LFFD model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -291,7 +291,7 @@ def lffd20x5s320v2_widerface(**kwargs):
     LFFD-320-20L-5S-V2 model for WIDER FACE from 'LFFD: A Light and Fast Face Detector for Edge Devices,'
     https://arxiv.org/abs/1904.10633.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -308,7 +308,7 @@ def lffd25x8s560v1_widerface(**kwargs):
     LFFD-560-25L-8S-V1 model for WIDER FACE from 'LFFD: A Light and Fast Face Detector for Edge Devices,'
     https://arxiv.org/abs/1904.10633.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

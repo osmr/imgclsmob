@@ -18,7 +18,7 @@ class NINConv(Chain):
     """
     NIN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -59,7 +59,7 @@ class CIFARNIN(Chain):
     """
     NIN model for CIFAR from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -144,7 +144,7 @@ def get_nin_cifar(classes,
     """
     Create NIN model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -182,7 +182,7 @@ def nin_cifar10(classes=10, **kwargs):
     """
     NIN model for CIFAR-10 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -198,7 +198,7 @@ def nin_cifar100(classes=100, **kwargs):
     """
     NIN model for CIFAR-100 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -214,7 +214,7 @@ def nin_svhn(classes=10, **kwargs):
     """
     NIN model for SVHN from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

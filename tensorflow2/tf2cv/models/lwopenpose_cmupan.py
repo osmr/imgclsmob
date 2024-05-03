@@ -18,7 +18,7 @@ class LwopResBottleneck(nn.Layer):
     """
     Bottleneck block for residual path in the residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -79,7 +79,7 @@ class LwopResUnit(nn.Layer):
     """
     ResNet-like residual unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -149,7 +149,7 @@ class LwopEncoderFinalBlock(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific encoder final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -201,7 +201,7 @@ class LwopRefinementBlock(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific refinement block for decoder units.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -252,7 +252,7 @@ class LwopDecoderBend(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific decoder bend block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -294,7 +294,7 @@ class LwopDecoderInitBlock(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific decoder init block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -348,7 +348,7 @@ class LwopDecoderUnit(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific decoder init.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -405,7 +405,7 @@ class LwopDecoderFeaturesBend(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific decoder 3D features bend.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -448,7 +448,7 @@ class LwopDecoderFinalBlock(nn.Layer):
     """
     Lightweight OpenPose 2D/3D specific decoder final block for calcualation 3D poses.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -510,7 +510,7 @@ class LwOpenPose(tf.keras.Model):
     Lightweight OpenPose 2D/3D model from 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
     https://arxiv.org/abs/1811.12004.
 
-    Parameters:
+    Parameters
     ----------
     encoder_channels : list of list of int
         Number of output channels for each encoder unit.
@@ -629,7 +629,7 @@ def get_lwopenpose(calc_3d_features,
     """
     Create Lightweight OpenPose 2D/3D model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     calc_3d_features : bool, default False
         Whether to calculate 3D features.
@@ -679,7 +679,7 @@ def lwopenpose2d_mobilenet_cmupan_coco(keypoints=19, data_format="channels_last"
     Lightweight OpenPose 2D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
 
-    Parameters:
+    Parameters
     ----------
     keypoints : int, default 19
         Number of keypoints.
@@ -699,7 +699,7 @@ def lwopenpose3d_mobilenet_cmupan_coco(keypoints=19, data_format="channels_last"
     Lightweight OpenPose 3D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
 
-    Parameters:
+    Parameters
     ----------
     keypoints : int, default 19
         Number of keypoints.

@@ -16,7 +16,7 @@ class UNetBlock(nn.Module):
     """
     U-Net specific base block (double convolution).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -49,7 +49,7 @@ class UNetDownStage(nn.Module):
     """
     U-Net specific downscale (encoder) stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -79,7 +79,7 @@ class UNetUpStage(nn.Module):
     """
     U-Net specific upscale (decoder) stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -111,7 +111,7 @@ class UNetHead(nn.Module):
     """
     U-Net specific head.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -146,7 +146,7 @@ class UNet(nn.Module):
     U-Net model from 'U-Net: Convolutional Networks for Biomedical Image Segmentation,'
     https://arxiv.org/abs/1505.04597.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each stage in encoder and decoder.
@@ -244,7 +244,7 @@ def get_unet(model_name=None,
     """
     Create U-Net model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -278,7 +278,7 @@ def unet_cityscapes(num_classes=19, **kwargs):
     U-Net model for Cityscapes from 'U-Net: Convolutional Networks for Biomedical Image Segmentation,'
     https://arxiv.org/abs/1505.04597.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

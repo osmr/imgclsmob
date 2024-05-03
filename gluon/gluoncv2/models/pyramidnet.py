@@ -16,7 +16,7 @@ class PyrBlock(HybridBlock):
     """
     Simple PyramidNet block for residual path in PyramidNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -56,7 +56,7 @@ class PyrBottleneck(HybridBlock):
     """
     PyramidNet bottleneck block for residual path in PyramidNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -103,7 +103,7 @@ class PyrUnit(HybridBlock):
     """
     PyramidNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class PyrInitBlock(HybridBlock):
     """
     PyramidNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -213,7 +213,7 @@ class PyramidNet(HybridBlock):
     """
     PyramidNet model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -293,7 +293,7 @@ def get_pyramidnet(blocks,
     """
     Create PyramidNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -371,7 +371,7 @@ def pyramidnet101_a360(**kwargs):
     """
     PyramidNet-101 model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

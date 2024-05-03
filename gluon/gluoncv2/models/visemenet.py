@@ -15,7 +15,7 @@ class VisemeDenseBranch(HybridBlock):
     """
     VisemeNet dense branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -51,7 +51,7 @@ class VisemeRnnBranch(HybridBlock):
     """
     VisemeNet RNN branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -90,7 +90,7 @@ class VisemeNet(HybridBlock):
     """
     VisemeNet model from 'VisemeNet: Audio-Driven Animator-Centric Speech Animation,' https://arxiv.org/abs/1805.09488.
 
-    Parameters:
+    Parameters
     ----------
     audio_features : int, default 195
         Number of audio features (characters/sounds).
@@ -194,7 +194,7 @@ def get_visemenet(model_name=None,
     """
     Create VisemeNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -226,7 +226,7 @@ def visemenet20(**kwargs):
     VisemeNet model for 20 visemes (without co-articulation rules) from 'VisemeNet: Audio-Driven Animator-Centric
     Speech Animation,' https://arxiv.org/abs/1805.09488.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

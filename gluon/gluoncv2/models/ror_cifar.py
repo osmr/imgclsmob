@@ -17,7 +17,7 @@ class RoRBlock(HybridBlock):
     """
     RoR-3 block for residual path in residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -62,7 +62,7 @@ class RoRResUnit(HybridBlock):
     """
     RoR-3 residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -116,7 +116,7 @@ class RoRResStage(HybridBlock):
     """
     RoR-3 residual stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -177,7 +177,7 @@ class RoRResBody(HybridBlock):
     """
     RoR-3 residual body (main feature path).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -228,7 +228,7 @@ class CIFARRoR(HybridBlock):
     RoR-3 model for CIFAR from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -298,7 +298,7 @@ def get_ror_cifar(classes,
     """
     Create RoR-3 model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -347,7 +347,7 @@ def ror3_56_cifar10(classes=10, **kwargs):
     RoR-3-56 model for CIFAR-10 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -366,7 +366,7 @@ def ror3_56_cifar100(classes=100, **kwargs):
     RoR-3-56 model for CIFAR-100 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -385,7 +385,7 @@ def ror3_56_svhn(classes=10, **kwargs):
     RoR-3-56 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -404,7 +404,7 @@ def ror3_110_cifar10(classes=10, **kwargs):
     RoR-3-110 model for CIFAR-10 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -423,7 +423,7 @@ def ror3_110_cifar100(classes=100, **kwargs):
     RoR-3-110 model for CIFAR-100 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -442,7 +442,7 @@ def ror3_110_svhn(classes=10, **kwargs):
     RoR-3-110 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -461,7 +461,7 @@ def ror3_164_cifar10(classes=10, **kwargs):
     RoR-3-164 model for CIFAR-10 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -480,7 +480,7 @@ def ror3_164_cifar100(classes=100, **kwargs):
     RoR-3-164 model for CIFAR-100 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -499,7 +499,7 @@ def ror3_164_svhn(classes=10, **kwargs):
     RoR-3-164 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

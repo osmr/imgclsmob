@@ -17,7 +17,7 @@ class FBNetUnit(nn.Layer):
     """
     FBNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -102,7 +102,7 @@ class FBNetInitBlock(nn.Layer):
     """
     FBNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -148,7 +148,7 @@ class FBNet(tf.keras.Model):
     FBNet model from 'FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural Architecture Search,'
     https://arxiv.org/abs/1812.03443.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -247,7 +247,7 @@ def get_fbnet(version,
     """
     Create FBNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of MobileNetV3 ('a', 'b' or 'c').
@@ -299,7 +299,7 @@ def fbnet_cb(**kwargs):
     FBNet-Cb model (bn_eps=1e-3) from 'FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural
     Architecture Search,' https://arxiv.org/abs/1812.03443.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

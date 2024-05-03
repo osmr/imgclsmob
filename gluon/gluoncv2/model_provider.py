@@ -1271,7 +1271,7 @@ def get_model(name, **kwargs):
     """
     Get supported model.
 
-    Parameters:
+    Parameters
     ----------
     name : str
         Name of model.

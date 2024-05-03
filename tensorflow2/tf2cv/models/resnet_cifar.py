@@ -23,7 +23,7 @@ class CIFARResNet(tf.keras.Model):
     """
     ResNet model for CIFAR from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -103,7 +103,7 @@ def get_resnet_cifar(classes,
     """
     Create ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -162,7 +162,7 @@ def resnet20_cifar10(classes=10, **kwargs):
     """
     ResNet-20 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -178,7 +178,7 @@ def resnet20_cifar100(classes=100, **kwargs):
     """
     ResNet-20 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -194,7 +194,7 @@ def resnet20_svhn(classes=10, **kwargs):
     """
     ResNet-20 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -210,7 +210,7 @@ def resnet56_cifar10(classes=10, **kwargs):
     """
     ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -226,7 +226,7 @@ def resnet56_cifar100(classes=100, **kwargs):
     """
     ResNet-56 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -242,7 +242,7 @@ def resnet56_svhn(classes=10, **kwargs):
     """
     ResNet-56 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -258,7 +258,7 @@ def resnet110_cifar10(classes=10, **kwargs):
     """
     ResNet-110 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -275,7 +275,7 @@ def resnet110_cifar100(classes=100, **kwargs):
     ResNet-110 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -291,7 +291,7 @@ def resnet110_svhn(classes=10, **kwargs):
     """
     ResNet-110 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -308,7 +308,7 @@ def resnet164bn_cifar10(classes=10, **kwargs):
     ResNet-164(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -325,7 +325,7 @@ def resnet164bn_cifar100(classes=100, **kwargs):
     ResNet-164(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -342,7 +342,7 @@ def resnet164bn_svhn(classes=10, **kwargs):
     ResNet-164(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -359,7 +359,7 @@ def resnet272bn_cifar10(classes=10, **kwargs):
     ResNet-272(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -376,7 +376,7 @@ def resnet272bn_cifar100(classes=100, **kwargs):
     ResNet-272(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -393,7 +393,7 @@ def resnet272bn_svhn(classes=10, **kwargs):
     ResNet-272(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -410,7 +410,7 @@ def resnet542bn_cifar10(classes=10, **kwargs):
     ResNet-542(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -427,7 +427,7 @@ def resnet542bn_cifar100(classes=100, **kwargs):
     ResNet-542(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -444,7 +444,7 @@ def resnet542bn_svhn(classes=10, **kwargs):
     ResNet-272(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -461,7 +461,7 @@ def resnet1001_cifar10(classes=10, **kwargs):
     ResNet-1001 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -478,7 +478,7 @@ def resnet1001_cifar100(classes=100, **kwargs):
     ResNet-1001 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -495,7 +495,7 @@ def resnet1001_svhn(classes=10, **kwargs):
     ResNet-1001 model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -512,7 +512,7 @@ def resnet1202_cifar10(classes=10, **kwargs):
     ResNet-1202 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -529,7 +529,7 @@ def resnet1202_cifar100(classes=100, **kwargs):
     ResNet-1202 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -546,7 +546,7 @@ def resnet1202_svhn(classes=10, **kwargs):
     ResNet-1202 model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

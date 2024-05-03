@@ -19,7 +19,7 @@ class PreActivation(nn.Layer):
     """
     PreResNet like pure pre-activation block without convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -47,7 +47,7 @@ class ShortcutBlock(nn.Layer):
     """
     ESPNetv2 shortcut block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -85,7 +85,7 @@ class HierarchicalConcurrent(SimpleSequential):
     """
     A container for hierarchical concatenation of blocks with parameters.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -114,7 +114,7 @@ class ESPBlock(nn.Layer):
     """
     ESPNetv2 block (so-called EESP block).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -193,7 +193,7 @@ class DownsampleBlock(nn.Layer):
     """
     ESPNetv2 downsample block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -255,7 +255,7 @@ class ESPInitBlock(nn.Layer):
     """
     ESPNetv2 initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -294,7 +294,7 @@ class ESPFinalBlock(nn.Layer):
     """
     ESPNetv2 final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -338,7 +338,7 @@ class ESPNetv2(tf.keras.Model):
     ESPNetv2 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network,'
     https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -448,7 +448,7 @@ def get_espnetv2(width_scale,
     """
     Create ESPNetv2 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -506,7 +506,7 @@ def espnetv2_wd2(**kwargs):
     ESPNetv2 x0.5 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -521,7 +521,7 @@ def espnetv2_w1(**kwargs):
     ESPNetv2 x1.0 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -536,7 +536,7 @@ def espnetv2_w5d4(**kwargs):
     ESPNetv2 x1.25 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -551,7 +551,7 @@ def espnetv2_w3d2(**kwargs):
     ESPNetv2 x1.5 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -566,7 +566,7 @@ def espnetv2_w2(**kwargs):
     ESPNetv2 x2.0 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

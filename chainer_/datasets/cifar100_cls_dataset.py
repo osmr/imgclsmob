@@ -13,7 +13,7 @@ class CIFAR100(DatasetMixin):
     CIFAR-100 image classification dataset.
 
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.chainer/datasets/cifar100'
         Path to temp folder for storing data.

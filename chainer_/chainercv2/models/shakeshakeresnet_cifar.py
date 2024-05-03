@@ -48,7 +48,7 @@ class ShakeShakeShortcut(Chain):
     """
     Shake-Shake-ResNet shortcut.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -96,7 +96,7 @@ class ShakeShakeResUnit(Chain):
     """
     Shake-Shake-ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -148,7 +148,7 @@ class CIFARShakeShakeResNet(Chain):
     """
     Shake-Shake-ResNet model for CIFAR from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -224,7 +224,7 @@ def get_shakeshakeresnet_cifar(classes,
     """
     Create Shake-Shake-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -284,7 +284,7 @@ def shakeshakeresnet20_2x16d_cifar10(classes=10, **kwargs):
     """
     Shake-Shake-ResNet-20-2x16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -301,7 +301,7 @@ def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
     """
     Shake-Shake-ResNet-20-2x16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -318,7 +318,7 @@ def shakeshakeresnet20_2x16d_svhn(classes=10, **kwargs):
     """
     Shake-Shake-ResNet-20-2x16d model for SVHN from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -335,7 +335,7 @@ def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
     """
     Shake-Shake-ResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -352,7 +352,7 @@ def shakeshakeresnet26_2x32d_cifar100(classes=100, **kwargs):
     """
     Shake-Shake-ResNet-26-2x32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -369,7 +369,7 @@ def shakeshakeresnet26_2x32d_svhn(classes=10, **kwargs):
     """
     Shake-Shake-ResNet-26-2x32d model for SVHN from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

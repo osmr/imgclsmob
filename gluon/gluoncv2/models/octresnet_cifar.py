@@ -19,7 +19,7 @@ class CIFAROctResNet(HybridBlock):
     Oct-ResNet model for CIFAR from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
     Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -116,7 +116,7 @@ def get_octresnet_cifar(classes,
     """
     Create Oct-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -178,7 +178,7 @@ def octresnet20_ad2_cifar10(classes=10, **kwargs):
     Oct-ResNet-20 (alpha=1/2) model for CIFAR-10 from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -198,7 +198,7 @@ def octresnet20_ad2_cifar100(classes=100, **kwargs):
     Oct-ResNet-20 (alpha=1/2) model for CIFAR-100 from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -218,7 +218,7 @@ def octresnet20_ad2_svhn(classes=10, **kwargs):
     Oct-ResNet-20 (alpha=1/2) model for SVHN from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -238,7 +238,7 @@ def octresnet56_ad2_cifar10(classes=10, **kwargs):
     Oct-ResNet-56 (alpha=1/2) model for CIFAR-10 from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -258,7 +258,7 @@ def octresnet56_ad2_cifar100(classes=100, **kwargs):
     Oct-ResNet-56 (alpha=1/2) model for CIFAR-100 from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -278,7 +278,7 @@ def octresnet56_ad2_svhn(classes=10, **kwargs):
     Oct-ResNet-56 (alpha=1/2) model for SVHN from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional
     Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

@@ -18,7 +18,7 @@ class EffiEdgeResUnit(nn.Layer):
     """
     EfficientNet-Edge edge residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -98,7 +98,7 @@ class EfficientNetEdge(tf.keras.Model):
     EfficientNet-Edge model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -235,7 +235,7 @@ def get_efficientnet_edge(version,
     """
     Create EfficientNet-Edge model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of EfficientNet ('small', 'medium', 'large').
@@ -334,7 +334,7 @@ def efficientnet_edge_small_b(in_size=(224, 224), **kwargs):
     EfficientNet-Edge-Small-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
@@ -352,7 +352,7 @@ def efficientnet_edge_medium_b(in_size=(240, 240), **kwargs):
     EfficientNet-Edge-Medium-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (240, 240)
         Spatial size of the expected input image.
@@ -370,7 +370,7 @@ def efficientnet_edge_large_b(in_size=(300, 300), **kwargs):
     EfficientNet-Edge-Large-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (300, 300)
         Spatial size of the expected input image.

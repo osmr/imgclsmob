@@ -16,7 +16,7 @@ def seresnet10_cub(classes=200, **kwargs):
     SE-ResNet-10 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -35,7 +35,7 @@ def seresnet12_cub(classes=200, **kwargs):
     SE-ResNet-12 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -54,7 +54,7 @@ def seresnet14_cub(classes=200, **kwargs):
     SE-ResNet-14 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -73,7 +73,7 @@ def seresnetbc14b_cub(classes=200, **kwargs):
     SE-ResNet-BC-14b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -93,7 +93,7 @@ def seresnet16_cub(classes=200, **kwargs):
     SE-ResNet-16 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -111,7 +111,7 @@ def seresnet18_cub(classes=200, **kwargs):
     """
     SE-ResNet-18 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -130,7 +130,7 @@ def seresnet26_cub(classes=200, **kwargs):
     SE-ResNet-26 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -149,7 +149,7 @@ def seresnetbc26b_cub(classes=200, **kwargs):
     SE-ResNet-BC-26b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -168,7 +168,7 @@ def seresnet34_cub(classes=200, **kwargs):
     """
     SE-ResNet-34 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -187,7 +187,7 @@ def seresnetbc38b_cub(classes=200, **kwargs):
     SE-ResNet-BC-38b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -206,7 +206,7 @@ def seresnet50_cub(classes=200, **kwargs):
     """
     SE-ResNet-50 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -225,7 +225,7 @@ def seresnet50b_cub(classes=200, **kwargs):
     SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation Networks,'
     https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -243,7 +243,7 @@ def seresnet101_cub(classes=200, **kwargs):
     """
     SE-ResNet-101 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -262,7 +262,7 @@ def seresnet101b_cub(classes=200, **kwargs):
     SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -280,7 +280,7 @@ def seresnet152_cub(classes=200, **kwargs):
     """
     SE-ResNet-152 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -299,7 +299,7 @@ def seresnet152b_cub(classes=200, **kwargs):
     SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -318,7 +318,7 @@ def seresnet200_cub(classes=200, **kwargs):
     SE-ResNet-200 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -337,7 +337,7 @@ def seresnet200b_cub(classes=200, **kwargs):
     SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.

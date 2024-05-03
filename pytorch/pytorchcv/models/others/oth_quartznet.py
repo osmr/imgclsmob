@@ -13,7 +13,7 @@ class CtcDecoder(object):
     """
     CTC decoder (to decode a sequence of labels to words).
 
-    Parameters:
+    Parameters
     ----------
     vocabulary : list of str
         Vocabulary of the dataset.
@@ -29,7 +29,7 @@ class CtcDecoder(object):
         """
         Decode a sequence of labels to words.
 
-        Parameters:
+        Parameters
         ----------
         predictions : np.array of int or list of list of int
             Tensor with predicted labels.

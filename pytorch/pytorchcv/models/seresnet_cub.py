@@ -16,7 +16,7 @@ def seresnet10_cub(num_classes=200, **kwargs):
     SE-ResNet-10 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -33,7 +33,7 @@ def seresnet12_cub(num_classes=200, **kwargs):
     SE-ResNet-12 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -50,7 +50,7 @@ def seresnet14_cub(num_classes=200, **kwargs):
     SE-ResNet-14 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -67,7 +67,7 @@ def seresnetbc14b_cub(num_classes=200, **kwargs):
     SE-ResNet-BC-14b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -85,7 +85,7 @@ def seresnet16_cub(num_classes=200, **kwargs):
     SE-ResNet-16 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -101,7 +101,7 @@ def seresnet18_cub(num_classes=200, **kwargs):
     """
     SE-ResNet-18 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -118,7 +118,7 @@ def seresnet26_cub(num_classes=200, **kwargs):
     SE-ResNet-26 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -135,7 +135,7 @@ def seresnetbc26b_cub(num_classes=200, **kwargs):
     SE-ResNet-BC-26b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -152,7 +152,7 @@ def seresnet34_cub(num_classes=200, **kwargs):
     """
     SE-ResNet-34 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -169,7 +169,7 @@ def seresnetbc38b_cub(num_classes=200, **kwargs):
     SE-ResNet-BC-38b model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -186,7 +186,7 @@ def seresnet50_cub(num_classes=200, **kwargs):
     """
     SE-ResNet-50 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -203,7 +203,7 @@ def seresnet50b_cub(num_classes=200, **kwargs):
     SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation Networks,'
     https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -219,7 +219,7 @@ def seresnet101_cub(num_classes=200, **kwargs):
     """
     SE-ResNet-101 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -236,7 +236,7 @@ def seresnet101b_cub(num_classes=200, **kwargs):
     SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -253,7 +253,7 @@ def seresnet152_cub(num_classes=200, **kwargs):
     """
     SE-ResNet-152 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -270,7 +270,7 @@ def seresnet152b_cub(num_classes=200, **kwargs):
     SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -288,7 +288,7 @@ def seresnet200_cub(num_classes=200, **kwargs):
     SE-ResNet-200 model for CUB-200-2011 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.
@@ -305,7 +305,7 @@ def seresnet200b_cub(num_classes=200, **kwargs):
     SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification num_classes.

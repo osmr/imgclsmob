@@ -16,7 +16,7 @@ class HierarchicalConcurrent(nn.Sequential):
     """
     A container for hierarchical concatenation of modules on the base of the sequential container.
 
-    Parameters:
+    Parameters
     ----------
     exclude_first : bool, default False
         Whether to exclude the first branch in the intermediate sum.
@@ -48,7 +48,7 @@ class ESPBlock(nn.Module):
     """
     ESPNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -111,7 +111,7 @@ class ESPUnit(nn.Module):
     """
     ESPNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -156,7 +156,7 @@ class ESPStage(nn.Module):
     """
     ESPNet stage.
 
-    Parameters:
+    Parameters
     ----------
     x_channels : int
         Number of input/output channels for x.
@@ -212,7 +212,7 @@ class ESPCNet(nn.Module):
     ESPNet-C model from 'ESPNet: Efficient Spatial Pyramid of Dilated Convolutions for Semantic Segmentation,'
     https://arxiv.org/abs/1803.06815.
 
-    Parameters:
+    Parameters
     ----------
     layers : list of int
         Number of layers for each unit.
@@ -307,7 +307,7 @@ def get_espcnet(model_name=None,
     """
     Create ESPNet-C model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -347,7 +347,7 @@ def espcnet_cityscapes(num_classes=19, **kwargs):
     ESPNet-C model for Cityscapes from 'ESPNet: Efficient Spatial Pyramid of Dilated Convolutions for Semantic
     Segmentation,' https://arxiv.org/abs/1803.06815.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

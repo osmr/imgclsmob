@@ -26,7 +26,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
 
         lr = warmup_lr
 
-    Parameters:
+    Parameters
     ----------
     mode : str
         Modes for learning rate scheduler. Currently it supports 'step', 'poly' and 'cosine'.

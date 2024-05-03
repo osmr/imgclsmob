@@ -14,7 +14,7 @@ class LibriSpeech(AsrDataset):
     """
     LibriSpeech dataset for Automatic Speech Recognition (ASR).
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to folder storing the dataset.
@@ -95,7 +95,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for dataset specific metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -114,7 +114,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -127,7 +127,7 @@ class LibriSpeechMetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

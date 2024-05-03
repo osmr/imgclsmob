@@ -15,7 +15,7 @@ class CocoHpe1Dataset(data.Dataset):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.
@@ -274,7 +274,7 @@ class CocoHpe1Dataset(data.Dataset):
 
         All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
 
-        Parameters:
+        Parameters
         ----------
         xyxy : list, tuple or numpy.ndarray
             The bbox in format (xmin, ymin, xmax, ymax).
@@ -314,7 +314,7 @@ class CocoHpe1Dataset(data.Dataset):
         """
         Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
 
-        Parameters:
+        Parameters
         ----------
         xywh : list, tuple or numpy.ndarray
             The bbox in format (x, y, w, h).
@@ -804,7 +804,7 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -829,7 +829,7 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -853,7 +853,7 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

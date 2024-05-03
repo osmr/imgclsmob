@@ -13,7 +13,7 @@ class CIFAR10Fine(CIFAR10):
     CIFAR-10 image classification dataset.
 
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.torch/datasets/cifar10'
         Path to temp folder for storing data.

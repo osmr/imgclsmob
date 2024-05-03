@@ -23,7 +23,7 @@ class CIFARPreResNet(tf.keras.Model):
     """
     PreResNet model for CIFAR from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -107,7 +107,7 @@ def get_preresnet_cifar(classes,
     """
     Create PreResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -167,7 +167,7 @@ def preresnet20_cifar10(classes=10, **kwargs):
     PreResNet-20 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -184,7 +184,7 @@ def preresnet20_cifar100(classes=100, **kwargs):
     PreResNet-20 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -202,7 +202,7 @@ def preresnet20_svhn(classes=10, **kwargs):
     PreResNet-20 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -219,7 +219,7 @@ def preresnet56_cifar10(classes=10, **kwargs):
     PreResNet-56 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -236,7 +236,7 @@ def preresnet56_cifar100(classes=100, **kwargs):
     PreResNet-56 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -254,7 +254,7 @@ def preresnet56_svhn(classes=10, **kwargs):
     PreResNet-56 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -271,7 +271,7 @@ def preresnet110_cifar10(classes=10, **kwargs):
     PreResNet-110 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -289,7 +289,7 @@ def preresnet110_cifar100(classes=100, **kwargs):
     PreResNet-110 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -307,7 +307,7 @@ def preresnet110_svhn(classes=10, **kwargs):
     PreResNet-110 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -325,7 +325,7 @@ def preresnet164bn_cifar10(classes=10, **kwargs):
     PreResNet-164(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -343,7 +343,7 @@ def preresnet164bn_cifar100(classes=100, **kwargs):
     PreResNet-164(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -361,7 +361,7 @@ def preresnet164bn_svhn(classes=10, **kwargs):
     PreResNet-164(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -379,7 +379,7 @@ def preresnet272bn_cifar10(classes=10, **kwargs):
     PreResNet-272(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -397,7 +397,7 @@ def preresnet272bn_cifar100(classes=100, **kwargs):
     PreResNet-272(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -415,7 +415,7 @@ def preresnet272bn_svhn(classes=10, **kwargs):
     PreResNet-272(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -433,7 +433,7 @@ def preresnet542bn_cifar10(classes=10, **kwargs):
     PreResNet-542(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -451,7 +451,7 @@ def preresnet542bn_cifar100(classes=100, **kwargs):
     PreResNet-542(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -469,7 +469,7 @@ def preresnet542bn_svhn(classes=10, **kwargs):
     PreResNet-542(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -487,7 +487,7 @@ def preresnet1001_cifar10(classes=10, **kwargs):
     PreResNet-1001 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -505,7 +505,7 @@ def preresnet1001_cifar100(classes=100, **kwargs):
     PreResNet-1001 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -523,7 +523,7 @@ def preresnet1001_svhn(classes=10, **kwargs):
     PreResNet-1001 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -541,7 +541,7 @@ def preresnet1202_cifar10(classes=10, **kwargs):
     PreResNet-1202 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -559,7 +559,7 @@ def preresnet1202_cifar100(classes=100, **kwargs):
     PreResNet-1202 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -577,7 +577,7 @@ def preresnet1202_svhn(classes=10, **kwargs):
     PreResNet-1202 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

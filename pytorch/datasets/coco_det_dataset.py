@@ -17,7 +17,7 @@ class CocoDetDataset(data.Dataset):
     """
     MS COCO detection dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to folder storing the dataset.
@@ -131,7 +131,7 @@ class CocoDetDataset(data.Dataset):
     def _parse_image_path(self, entry):
         """How to parse image dir and path from entry.
 
-        Parameters:
+        Parameters
         ----------
         entry : dict
             COCO entry, e.g. including width, height, image path, etc..
@@ -238,7 +238,7 @@ class CocoDetDataset(data.Dataset):
 
         All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
 
-        Parameters:
+        Parameters
         ----------
         xyxy : list, tuple or numpy.ndarray
             The bbox in format (xmin, ymin, xmax, ymax).
@@ -278,7 +278,7 @@ class CocoDetDataset(data.Dataset):
         """
         Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
 
-        Parameters:
+        Parameters
         ----------
         xywh : list, tuple or numpy.ndarray
             The bbox in format (x, y, w, h).
@@ -354,7 +354,7 @@ class CocoDetValTransform(object):
         """
         Get affine transform matrix given center, scale and rotation.
 
-        Parameters:
+        Parameters
         ----------
         center : tuple of float
             Center point.
@@ -407,7 +407,7 @@ class CocoDetValTransform(object):
         """
         Get rotation direction.
 
-        Parameters:
+        Parameters
         ----------
         src_point : tuple of float
             Original point.
@@ -432,7 +432,7 @@ class CocoDetValTransform(object):
         """
         Get the 3rd point position given first two points.
 
-        Parameters:
+        Parameters
         ----------
         a : tuple of float
             First point.
@@ -452,7 +452,7 @@ class CocoDetValTransform(object):
         """
         Apply affine transform to a bounding box given transform matrix t.
 
-        Parameters:
+        Parameters
         ----------
         pt : numpy.ndarray
             Bounding box with shape (1, 2).
@@ -484,7 +484,7 @@ class Tuple(object):
         """
         Batchify the input data.
 
-        Parameters:
+        Parameters
         ----------
         data : list
             The samples to batchfy. Each sample should contain N attributes.
@@ -507,7 +507,7 @@ class Stack(object):
         """
         Batchify the input data.
 
-        Parameters:
+        Parameters
         ----------
         data : list
             The input data samples
@@ -553,7 +553,7 @@ class Pad(object):
         """
         Batchify the input data.
 
-        Parameters:
+        Parameters
         ----------
         data : list
             A list of N samples. Each sample can be 1) ndarray or
@@ -627,7 +627,7 @@ def get_post_transform(orig_w, orig_h, out_w, out_h):
     """Get the post prediction affine transforms. This will be used to adjust the prediction results
     according to original coco image resolutions.
 
-    Parameters:
+    Parameters
     ----------
     orig_w : int
         Original width of the image.
@@ -696,7 +696,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -716,7 +716,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -731,7 +731,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

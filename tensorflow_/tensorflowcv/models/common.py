@@ -19,7 +19,7 @@ def round_channels(channels,
     """
     Round weighted channel number (make divisible operation).
 
-    Parameters:
+    Parameters
     ----------
     channels : int or float
         Original number of channels.
@@ -43,7 +43,7 @@ def hsigmoid(x,
     Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
     https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -63,7 +63,7 @@ def hswish(x,
     """
     H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -84,7 +84,7 @@ def get_activation_layer(x,
     """
     Create activation layer from string/function.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -117,7 +117,7 @@ def is_channels_first(data_format):
     """
     Is tested data format channels first.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -134,7 +134,7 @@ def get_channel_axis(data_format):
     """
     Get channel axis.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -152,7 +152,7 @@ def flatten(x,
     """
     Flattens the input to two dimensional.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -179,7 +179,7 @@ def batchnorm(x,
     """
     Batch normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -219,7 +219,7 @@ def maxpool2d(x,
     """
     Max pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -283,7 +283,7 @@ def avgpool2d(x,
     """
     Average pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -359,7 +359,7 @@ def conv2d(x,
     """
     Convolution 2D layer wrapper.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -470,7 +470,7 @@ def conv1x1(x,
     """
     Convolution 1x1 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -518,7 +518,7 @@ def conv3x3(x,
     """
     Convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -565,7 +565,7 @@ def depthwise_conv3x3(x,
     """
     Depthwise convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -613,7 +613,7 @@ def conv_block(x,
     """
     Standard convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -688,7 +688,7 @@ def conv1x1_block(x,
     """
     1x1 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -747,7 +747,7 @@ def conv3x3_block(x,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -813,7 +813,7 @@ def conv5x5_block(x,
     """
     5x5 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -874,7 +874,7 @@ def conv7x7_block(x,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -930,7 +930,7 @@ def dwconv3x3_block(x,
     """
     3x3 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -989,7 +989,7 @@ def dwconv5x5_block(x,
     """
     5x5 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1047,7 +1047,7 @@ def pre_conv_block(x,
     """
     Convolution block with Batch normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1110,7 +1110,7 @@ def pre_conv1x1_block(x,
     """
     1x1 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1158,7 +1158,7 @@ def pre_conv3x3_block(x,
     """
     3x3 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1202,7 +1202,7 @@ def channel_shuffle(x,
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1248,7 +1248,7 @@ def channel_shuffle2(x,
     https://arxiv.org/abs/1707.01083.
     The alternative version.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -1297,7 +1297,7 @@ def se_block(x,
     """
     Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.

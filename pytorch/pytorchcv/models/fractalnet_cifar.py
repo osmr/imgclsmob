@@ -17,7 +17,7 @@ class DropConvBlock(nn.Module):
     """
     Convolution block with Batch normalization, ReLU activation, and Dropout layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -75,7 +75,7 @@ def drop_conv3x3_block(in_channels,
     """
     3x3 version of the convolution block with dropout.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -104,7 +104,7 @@ class FractalBlock(nn.Module):
     """
     FractalNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -151,7 +151,7 @@ class FractalBlock(nn.Module):
         """
         Calculate drop path mask.
 
-        Parameters:
+        Parameters
         ----------
         batch_size : int
             Size of batch.
@@ -196,7 +196,7 @@ class FractalBlock(nn.Module):
         """
         Join outputs for current level of block.
 
-        Parameters:
+        Parameters
         ----------
         raw_outs : list of Tensor
             Current outputs from active columns.
@@ -267,7 +267,7 @@ class FractalUnit(nn.Module):
     """
     FractalNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -308,7 +308,7 @@ class CIFARFractalNet(nn.Module):
     FractalNet model for CIFAR from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
     https://arxiv.org/abs/1605.07648.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit.
@@ -384,7 +384,7 @@ def get_fractalnet_cifar(num_classes,
     """
     Create WRN model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int
         Number of classification classes.
@@ -428,7 +428,7 @@ def fractalnet_cifar10(num_classes=10, **kwargs):
     FractalNet model for CIFAR-10 from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
     https://arxiv.org/abs/1605.07648.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -445,7 +445,7 @@ def fractalnet_cifar100(num_classes=100, **kwargs):
     FractalNet model for CIFAR-100 from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
     https://arxiv.org/abs/1605.07648.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.

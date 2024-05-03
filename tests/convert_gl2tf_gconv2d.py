@@ -38,7 +38,7 @@ def conv2d(x,
     """
     Convolution 2D layer wrapper.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.

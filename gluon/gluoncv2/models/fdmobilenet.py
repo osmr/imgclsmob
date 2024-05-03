@@ -20,7 +20,7 @@ def get_fdmobilenet(width_scale,
     """
     Create FD-MobileNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -62,7 +62,7 @@ def fdmobilenet_w1(**kwargs):
     FD-MobileNet 1.0x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -79,7 +79,7 @@ def fdmobilenet_w3d4(**kwargs):
     FD-MobileNet 0.75x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -96,7 +96,7 @@ def fdmobilenet_wd2(**kwargs):
     FD-MobileNet 0.5x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -113,7 +113,7 @@ def fdmobilenet_wd4(**kwargs):
     FD-MobileNet 0.25x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

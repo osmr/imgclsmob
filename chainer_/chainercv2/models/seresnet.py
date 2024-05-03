@@ -21,7 +21,7 @@ class SEResUnit(Chain):
     """
     SE-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -80,7 +80,7 @@ class SEResNet(Chain):
     """
     SE-ResNet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -159,7 +159,7 @@ def get_seresnet(blocks,
     """
     Create SE-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -247,7 +247,7 @@ def seresnet10(**kwargs):
     SE-ResNet-10 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -262,7 +262,7 @@ def seresnet12(**kwargs):
     SE-ResNet-12 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -277,7 +277,7 @@ def seresnet14(**kwargs):
     SE-ResNet-14 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -292,7 +292,7 @@ def seresnet16(**kwargs):
     SE-ResNet-16 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -306,7 +306,7 @@ def seresnet18(**kwargs):
     """
     SE-ResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -321,7 +321,7 @@ def seresnet26(**kwargs):
     SE-ResNet-26 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -336,7 +336,7 @@ def seresnetbc26b(**kwargs):
     SE-ResNet-BC-26b model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -350,7 +350,7 @@ def seresnet34(**kwargs):
     """
     SE-ResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -365,7 +365,7 @@ def seresnetbc38b(**kwargs):
     SE-ResNet-BC-38b model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -379,7 +379,7 @@ def seresnet50(**kwargs):
     """
     SE-ResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -394,7 +394,7 @@ def seresnet50b(**kwargs):
     SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -408,7 +408,7 @@ def seresnet101(**kwargs):
     """
     SE-ResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -423,7 +423,7 @@ def seresnet101b(**kwargs):
     SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -437,7 +437,7 @@ def seresnet152(**kwargs):
     """
     SE-ResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -452,7 +452,7 @@ def seresnet152b(**kwargs):
     SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -467,7 +467,7 @@ def seresnet200(**kwargs):
     SE-ResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -482,7 +482,7 @@ def seresnet200b(**kwargs):
     SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

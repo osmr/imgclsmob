@@ -17,7 +17,7 @@ class AsymConvBlock(HybridBlock):
     """
     Asymmetric separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -103,7 +103,7 @@ def asym_conv3x3_block(padding=1,
     """
     3x3 asymmetric separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -140,7 +140,7 @@ class LEDDownBlock(HybridBlock):
     """
     LEDNet specific downscale block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -203,7 +203,7 @@ class LEDBranch(HybridBlock):
     """
     LEDNet encoder branch.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -262,7 +262,7 @@ class LEDUnit(HybridBlock):
     """
     LEDNet encoder unit (Split-Shuffle-non-bottleneck).
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -326,7 +326,7 @@ class PoolingBranch(HybridBlock):
     """
     Pooling branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -383,7 +383,7 @@ class APN(HybridBlock):
     """
     Attention pyramid network block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -506,7 +506,7 @@ class LEDNet(HybridBlock):
     LEDNet model from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1905.02423.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit.
@@ -604,7 +604,7 @@ def get_lednet(model_name=None,
     """
     Create LEDNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -646,7 +646,7 @@ def lednet_cityscapes(classes=19, **kwargs):
     LEDNet model for Cityscapes from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic
     Segmentation,' https://arxiv.org/abs/1905.02423.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 19
         Number of segmentation classes.

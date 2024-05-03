@@ -14,7 +14,7 @@ class WRNConv(HybridBlock):
     """
     WRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -65,7 +65,7 @@ def wrn_conv1x1(in_channels,
     """
     1x1 version of the WRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -92,7 +92,7 @@ def wrn_conv3x3(in_channels,
     """
     3x3 version of the WRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -116,7 +116,7 @@ class WRNBottleneck(HybridBlock):
     """
     WRN bottleneck block for residual path in WRN unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -164,7 +164,7 @@ class WRNUnit(HybridBlock):
     """
     WRN unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -213,7 +213,7 @@ class WRNInitBlock(HybridBlock):
     """
     WRN specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -248,7 +248,7 @@ class WRN(HybridBlock):
     """
     WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -319,7 +319,7 @@ def get_wrn(blocks,
     """
     Create WRN model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -374,7 +374,7 @@ def wrn50_2(**kwargs):
     """
     WRN-50-2 model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

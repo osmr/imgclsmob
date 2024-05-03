@@ -16,7 +16,7 @@ class DiracConv(nn.Layer):
     """
     DiracNetV2 specific convolution block with pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -64,7 +64,7 @@ def dirac_conv3x3(in_channels,
     """
     3x3 version of the DiracNetV2 specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -87,7 +87,7 @@ class DiracInitBlock(nn.Layer):
     """
     DiracNetV2 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -129,7 +129,7 @@ class DiracNetV2(tf.keras.Model):
     DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -208,7 +208,7 @@ def get_diracnetv2(blocks,
     """
     Create DiracNetV2 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -257,7 +257,7 @@ def diracnet18v2(**kwargs):
     DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -272,7 +272,7 @@ def diracnet34v2(**kwargs):
     DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

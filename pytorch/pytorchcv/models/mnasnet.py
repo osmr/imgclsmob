@@ -15,7 +15,7 @@ class DwsExpSEResUnit(nn.Module):
     """
     Depthwise separable expanded residual unit with SE-block. Here it used as MnasNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -90,7 +90,7 @@ class MnasInitBlock(nn.Module):
     """
     MnasNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -126,7 +126,7 @@ class MnasFinalBlock(nn.Module):
     """
     MnasNet specific final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -163,7 +163,7 @@ class MnasNet(nn.Module):
     MnasNet model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
     https://arxiv.org/abs/1807.11626.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -266,7 +266,7 @@ def get_mnasnet(version,
     """
     Create MnasNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of MobileNetV3 ('b1', 'a1' or 'small').
@@ -341,7 +341,7 @@ def mnasnet_b1(**kwargs):
     MnasNet-B1 model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
     https://arxiv.org/abs/1807.11626.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -356,7 +356,7 @@ def mnasnet_a1(**kwargs):
     MnasNet-A1 model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
     https://arxiv.org/abs/1807.11626.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -371,7 +371,7 @@ def mnasnet_small(**kwargs):
     MnasNet-Small model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
     https://arxiv.org/abs/1807.11626.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

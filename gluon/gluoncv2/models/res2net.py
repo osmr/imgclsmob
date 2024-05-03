@@ -18,7 +18,7 @@ class HierarchicalConcurrent(nn.HybridSequential):
     """
     A container for hierarchical concatenation of blocks with parameters.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -55,7 +55,7 @@ class Res2NetUnit(HybridBlock):
     """
     Res2Net unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -136,7 +136,7 @@ class Res2Net(HybridBlock):
     """
     Res2Net model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -218,7 +218,7 @@ def get_res2net(blocks,
     """
     Create Res2Net model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -281,7 +281,7 @@ def res2net50_w14_s8(**kwargs):
     """
     Res2Net-50 (14wx8s) model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -297,7 +297,7 @@ def res2net50_w26_s8(**kwargs):
     """
     Res2Net-50 (26wx8s) model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -17,7 +17,7 @@ class Conv3x3Branch(nn.Module):
     """
     InceptionV4 specific convolutional 3x3 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -47,7 +47,7 @@ class ConvSeq3x3Branch(nn.Module):
     """
     InceptionV4 specific convolutional sequence branch block with splitting by 3x3.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -111,7 +111,7 @@ class InceptionAUnit(nn.Module):
     """
     InceptionV4 type Inception-A unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -155,7 +155,7 @@ class ReductionAUnit(nn.Module):
     """
     InceptionV4 type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -191,7 +191,7 @@ class InceptionBUnit(nn.Module):
     """
     InceptionV4 type Inception-B unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -235,7 +235,7 @@ class ReductionBUnit(nn.Module):
     """
     InceptionV4 type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -271,7 +271,7 @@ class InceptionCUnit(nn.Module):
     """
     InceptionV4 type Inception-C unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -317,7 +317,7 @@ class InceptBlock3a(nn.Module):
     """
     InceptionV4 type Mixed-3a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -341,7 +341,7 @@ class InceptBlock4a(nn.Module):
     """
     InceptionV4 type Mixed-4a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -374,7 +374,7 @@ class InceptBlock5a(nn.Module):
     """
     InceptionV4 type Mixed-5a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -398,7 +398,7 @@ class InceptInitBlock(nn.Module):
     """
     InceptionV4 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -446,7 +446,7 @@ class InceptionV4(nn.Module):
     InceptionV4 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
@@ -521,7 +521,7 @@ def get_inceptionv4(model_name=None,
     """
     Create InceptionV4 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -549,7 +549,7 @@ def inceptionv4(**kwargs):
     InceptionV4 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

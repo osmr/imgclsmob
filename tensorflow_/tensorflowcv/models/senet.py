@@ -23,7 +23,7 @@ def senet_bottleneck(x,
     """
     SENet bottleneck block for residual path in SENet unit.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -94,7 +94,7 @@ def senet_unit(x,
     """
     SENet unit.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -179,7 +179,7 @@ def senet_init_block(x,
     """
     SENet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -237,7 +237,7 @@ class SENet(object):
     """
     SENet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -283,7 +283,7 @@ class SENet(object):
         """
         Build a model graph.
 
-        Parameters:
+        Parameters
         ----------
         x : Tensor
             Input tensor.
@@ -350,7 +350,7 @@ def get_senet(blocks,
     """
     Create SENet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -419,7 +419,7 @@ def senet16(**kwargs):
     """
     SENet-16 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -438,7 +438,7 @@ def senet28(**kwargs):
     """
     SENet-28 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -457,7 +457,7 @@ def senet40(**kwargs):
     """
     SENet-40 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -476,7 +476,7 @@ def senet52(**kwargs):
     """
     SENet-52 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -495,7 +495,7 @@ def senet103(**kwargs):
     """
     SENet-103 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -514,7 +514,7 @@ def senet154(**kwargs):
     """
     SENet-154 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

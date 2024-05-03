@@ -17,7 +17,7 @@ class ProxylessBlock(nn.Layer):
     """
     ProxylessNAS block for residual path in ProxylessNAS unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -88,7 +88,7 @@ class ProxylessUnit(nn.Layer):
     """
     ProxylessNAS unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -152,7 +152,7 @@ class ProxylessNAS(tf.keras.Model):
     ProxylessNAS model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -267,7 +267,7 @@ def get_proxylessnas(version,
     """
     Create ProxylessNAS model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of ProxylessNAS ('cpu', 'gpu', 'mobile' or 'mobile14').
@@ -347,7 +347,7 @@ def proxylessnas_cpu(**kwargs):
     ProxylessNAS (CPU) model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -362,7 +362,7 @@ def proxylessnas_gpu(**kwargs):
     ProxylessNAS (GPU) model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -377,7 +377,7 @@ def proxylessnas_mobile(**kwargs):
     ProxylessNAS (Mobile) model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -392,7 +392,7 @@ def proxylessnas_mobile14(**kwargs):
     ProxylessNAS (Mobile-14) model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

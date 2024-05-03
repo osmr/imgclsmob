@@ -16,7 +16,7 @@ class LinearBottleneck(nn.Module):
     """
     So-called 'Linear Bottleneck' layer. It is used as a MobileNetV2 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -71,7 +71,7 @@ class MobileNetV2(nn.Module):
     """
     MobileNetV2 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -159,7 +159,7 @@ def get_mobilenetv2(width_scale,
     """
     Create MobileNetV2 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -215,7 +215,7 @@ def mobilenetv2_w1(**kwargs):
     1.0 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -230,7 +230,7 @@ def mobilenetv2_w3d4(**kwargs):
     0.75 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -245,7 +245,7 @@ def mobilenetv2_wd2(**kwargs):
     0.5 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -260,7 +260,7 @@ def mobilenetv2_wd4(**kwargs):
     0.25 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -275,7 +275,7 @@ def mobilenetv2b_w1(**kwargs):
     1.0 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -290,7 +290,7 @@ def mobilenetv2b_w3d4(**kwargs):
     0.75 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -305,7 +305,7 @@ def mobilenetv2b_wd2(**kwargs):
     0.5 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -320,7 +320,7 @@ def mobilenetv2b_wd4(**kwargs):
     0.25 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
     https://arxiv.org/abs/1801.04381.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -28,7 +28,7 @@ def is_channels_first(data_format):
     """
     Is tested data format channels first.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -45,7 +45,7 @@ def get_channel_axis(data_format):
     """
     Get channel axis.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -62,7 +62,7 @@ class BatchNorm(nn.BatchNormalization):
     """
     MXNet/Gluon-like batch normalization.
 
-    Parameters:
+    Parameters
     ----------
     momentum : float, default 0.9
         Momentum for the moving average.

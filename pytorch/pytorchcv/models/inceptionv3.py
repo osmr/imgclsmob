@@ -32,7 +32,7 @@ class AvgPoolBranch(nn.Module):
     """
     Inception specific average pooling branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -69,7 +69,7 @@ class Conv1x1Branch(nn.Module):
     """
     Inception specific convolutional 1x1 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -97,7 +97,7 @@ class ConvSeqBranch(nn.Module):
     """
     Inception specific convolutional sequence branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -145,7 +145,7 @@ class ConvSeq3x3Branch(nn.Module):
     """
     InceptionV3 specific convolutional sequence branch block with splitting by 3x3.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -206,7 +206,7 @@ class InceptionAUnit(nn.Module):
     """
     InceptionV3 type Inception-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -256,7 +256,7 @@ class ReductionAUnit(nn.Module):
     """
     InceptionV3 type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -299,7 +299,7 @@ class InceptionBUnit(nn.Module):
     """
     InceptionV3 type Inception-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -352,7 +352,7 @@ class ReductionBUnit(nn.Module):
     """
     InceptionV3 type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -395,7 +395,7 @@ class InceptionCUnit(nn.Module):
     """
     InceptionV3 type Inception-C unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -444,7 +444,7 @@ class InceptInitBlock(nn.Module):
     """
     InceptionV3 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -515,7 +515,7 @@ class InceptionV3(nn.Module):
     InceptionV3 model from 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -610,7 +610,7 @@ def get_inceptionv3(model_name=None,
     """
     Create InceptionV3 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -648,7 +648,7 @@ def inceptionv3(**kwargs):
     InceptionV3 model from 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

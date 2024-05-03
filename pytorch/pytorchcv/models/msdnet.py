@@ -51,7 +51,7 @@ class MSDBaseBlock(nn.Module):
     """
     MSDNet base block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -95,7 +95,7 @@ class MSDFirstScaleBlock(nn.Module):
     """
     MSDNet first scale dense block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -133,7 +133,7 @@ class MSDScaleBlock(nn.Module):
     """
     MSDNet ordinary scale dense block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_prev : int
         Number of input channels for the previous scale.
@@ -186,7 +186,7 @@ class MSDInitLayer(nn.Module):
     """
     MSDNet initial (so-called first) layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -220,7 +220,7 @@ class MSDLayer(nn.Module):
     """
     MSDNet ordinary layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : list/tuple of int
         Number of input channels for each input scale.
@@ -277,7 +277,7 @@ class MSDTransitionLayer(nn.Module):
     """
     MSDNet transition layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : list/tuple of int
         Number of input channels for each scale.
@@ -306,7 +306,7 @@ class MSDFeatureBlock(nn.Module):
     """
     MSDNet feature block (stage of cascade, so-called block).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : list of list of int
         Number of input channels for each layer and for each input scale.
@@ -347,7 +347,7 @@ class MSDClassifier(nn.Module):
     """
     MSDNet classifier.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -388,7 +388,7 @@ class MSDNet(nn.Module):
     MSDNet model from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of list of int
         Number of output channels for each unit.
@@ -468,7 +468,7 @@ def get_msdnet(blocks,
     """
     Create MSDNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -568,7 +568,7 @@ def msdnet22(**kwargs):
     MSDNet-22 model from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

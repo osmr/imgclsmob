@@ -18,7 +18,7 @@ class ResDropResUnit(HybridBlock):
     """
     ResDrop-ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -79,7 +79,7 @@ class CIFARResDropResNet(HybridBlock):
     """
     ResDrop-ResNet model for CIFAR from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -163,7 +163,7 @@ def get_resdropresnet_cifar(classes,
     """
     Create ResDrop-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -226,7 +226,7 @@ def resdropresnet20_cifar10(classes=10, **kwargs):
     """
     ResDrop-ResNet-20 model for CIFAR-10 from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -245,7 +245,7 @@ def resdropresnet20_cifar100(classes=100, **kwargs):
     """
     ResDrop-ResNet-20 model for CIFAR-100 from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -264,7 +264,7 @@ def resdropresnet20_svhn(classes=10, **kwargs):
     """
     ResDrop-ResNet-20 model for SVHN from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

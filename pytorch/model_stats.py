@@ -25,7 +25,7 @@ def calc_block_num_params2(net):
     """
     Calculate number of trainable parameters in the block (not iterative).
 
-    Parameters:
+    Parameters
     ----------
     net : Module
         Model/block.
@@ -46,7 +46,7 @@ def calc_block_num_params(module):
     """
     Calculate number of trainable parameters in the block (iterative).
 
-    Parameters:
+    Parameters
     ----------
     module : Module
         Model/block.
@@ -70,7 +70,7 @@ def measure_model(model,
     """
     Calculate model statistics.
 
-    Parameters:
+    Parameters
     ----------
     model : HybridBlock
         Tested model.

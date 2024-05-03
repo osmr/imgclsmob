@@ -30,7 +30,7 @@ class Conv2D1bit(nn.Conv2D):
     """
     Standard convolution block with binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -89,7 +89,7 @@ def conv1x1_1bit(in_channels,
     """
     Convolution 1x1 layer with binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -125,7 +125,7 @@ def conv3x3_1bit(in_channels,
     """
     Convolution 3x3 layer with binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -158,7 +158,7 @@ class ConvBlock1bit(HybridBlock):
     """
     Standard convolution block with Batch normalization and ReLU activation, and binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -242,7 +242,7 @@ def conv1x1_block_1bit(in_channels,
     """
     1x1 version of the standard convolution block with binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -283,7 +283,7 @@ class PreConvBlock1bit(HybridBlock):
     """
     Convolution block with Batch normalization and ReLU pre-activation, and binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -372,7 +372,7 @@ def pre_conv3x3_block_1bit(in_channels,
     """
     3x3 version of the pre-activated convolution block with binarization.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -413,7 +413,7 @@ class PreResBlock1bit(HybridBlock):
     """
     Simple PreResNet block for residual path in ResNet unit (with binarization).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -460,7 +460,7 @@ class PreResUnit1bit(HybridBlock):
     """
     PreResNet unit with residual connection (with binarization).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -510,7 +510,7 @@ class PreResActivation(HybridBlock):
     """
     PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -543,7 +543,7 @@ class CIFARWRN1bit(HybridBlock):
     """
     WRN-1bit model for CIFAR from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -628,7 +628,7 @@ def get_wrn1bit_cifar(classes,
     """
     Create WRN-1bit model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -680,7 +680,7 @@ def wrn20_10_1bit_cifar10(classes=10, **kwargs):
     """
     WRN-20-10-1bit model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -699,7 +699,7 @@ def wrn20_10_1bit_cifar100(classes=100, **kwargs):
     """
     WRN-20-10-1bit model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -718,7 +718,7 @@ def wrn20_10_1bit_svhn(classes=10, **kwargs):
     """
     WRN-20-10-1bit model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -737,7 +737,7 @@ def wrn20_10_32bit_cifar10(classes=10, **kwargs):
     """
     WRN-20-10-32bit model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -756,7 +756,7 @@ def wrn20_10_32bit_cifar100(classes=100, **kwargs):
     """
     WRN-20-10-32bit model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -775,7 +775,7 @@ def wrn20_10_32bit_svhn(classes=10, **kwargs):
     """
     WRN-20-10-32bit model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

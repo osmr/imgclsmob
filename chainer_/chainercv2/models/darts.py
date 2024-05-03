@@ -19,7 +19,7 @@ class DwsConv(Chain):
     """
     Standard dilated depthwise separable convolution block with.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -70,7 +70,7 @@ class DartsConv(Chain):
     """
     DARTS specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -123,7 +123,7 @@ def darts_conv1x1(in_channels,
     """
     1x1 version of the DARTS specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -147,7 +147,7 @@ def darts_conv3x3_s2(in_channels,
     """
     3x3 version of the DARTS specific convolution block with stride 2.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class DartsDwsConv(Chain):
     """
     DARTS specific dilated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -217,7 +217,7 @@ class DartsDwsBranch(Chain):
     """
     DARTS specific block with depthwise separable convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -265,7 +265,7 @@ class DartsReduceBranch(Chain):
     """
     DARTS specific factorized reduce block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -310,7 +310,7 @@ class Stem1Unit(Chain):
     """
     DARTS Stem1 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -344,7 +344,7 @@ def stem2_unit(in_channels,
     """
     DARTS Stem2 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -362,7 +362,7 @@ def darts_maxpool3x3(channels,
     """
     DARTS specific 3x3 Max pooling layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels. Unused parameter.
@@ -383,7 +383,7 @@ def darts_skip_connection(channels,
     """
     DARTS specific skip connection layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -406,7 +406,7 @@ def darts_dws_conv3x3(channels,
     """
     3x3 version of DARTS specific dilated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -427,7 +427,7 @@ def darts_dws_branch3x3(channels,
     """
     3x3 version of DARTS specific dilated convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -455,7 +455,7 @@ class DartsMainBlock(Chain):
     """
     DARTS main block, described by genotype.
 
-    Parameters:
+    Parameters
     ----------
     genotype : list of tuples (str, int)
         List of genotype elements (operations and linked indices).
@@ -502,7 +502,7 @@ class DartsUnit(Chain):
     """
     DARTS unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -557,7 +557,7 @@ class DARTS(Chain):
     """
     DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -642,7 +642,7 @@ def get_darts(model_name=None,
     """
     Create DARTS model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -699,7 +699,7 @@ def darts(**kwargs):
     """
     DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

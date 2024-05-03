@@ -19,7 +19,7 @@ class ShuffleUnit(nn.Module):
     """
     ShuffleNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -89,7 +89,7 @@ class ShuffleInitBlock(nn.Module):
     """
     ShuffleNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -125,7 +125,7 @@ class ShuffleNet(nn.Module):
     ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -202,7 +202,7 @@ def get_shufflenet(groups,
     """
     Create ShuffleNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     groups : int
         Number of groups in convolution layers.
@@ -261,7 +261,7 @@ def shufflenet_g1_w1(**kwargs):
     ShuffleNet 1x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -276,7 +276,7 @@ def shufflenet_g2_w1(**kwargs):
     ShuffleNet 1x (g=2) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -291,7 +291,7 @@ def shufflenet_g3_w1(**kwargs):
     ShuffleNet 1x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -306,7 +306,7 @@ def shufflenet_g4_w1(**kwargs):
     ShuffleNet 1x (g=4) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -321,7 +321,7 @@ def shufflenet_g8_w1(**kwargs):
     ShuffleNet 1x (g=8) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -336,7 +336,7 @@ def shufflenet_g1_w3d4(**kwargs):
     ShuffleNet 0.75x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -351,7 +351,7 @@ def shufflenet_g3_w3d4(**kwargs):
     ShuffleNet 0.75x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -366,7 +366,7 @@ def shufflenet_g1_wd2(**kwargs):
     ShuffleNet 0.5x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -381,7 +381,7 @@ def shufflenet_g3_wd2(**kwargs):
     ShuffleNet 0.5x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -396,7 +396,7 @@ def shufflenet_g1_wd4(**kwargs):
     ShuffleNet 0.25x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -411,7 +411,7 @@ def shufflenet_g3_wd4(**kwargs):
     ShuffleNet 0.25x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
     Devices,' https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

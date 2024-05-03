@@ -19,7 +19,7 @@ class ScDownBlock(HybridBlock):
     """
     SCNet specific convolutional downscale block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -61,7 +61,7 @@ class ScConv(HybridBlock):
     """
     Self-calibrated convolutional block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -124,7 +124,7 @@ class ScBottleneck(HybridBlock):
     """
     SCNet specific bottleneck block for residual path in SCNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -217,7 +217,7 @@ class ScUnit(HybridBlock):
     """
     SCNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -289,7 +289,7 @@ class SCNet(HybridBlock):
     SCNet model from 'Improving Convolutional Networks with Self-Calibrated Convolutions,'
     http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -383,7 +383,7 @@ def get_scnet(blocks,
     """
     Create SCNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -463,7 +463,7 @@ def scnet50(**kwargs):
     SCNet-50 model from 'Improving Convolutional Networks with Self-Calibrated Convolutions,'
      http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -478,7 +478,7 @@ def scnet101(**kwargs):
     SCNet-101 model from 'Improving Convolutional Networks with Self-Calibrated Convolutions,'
     http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -495,7 +495,7 @@ def scneta50(**kwargs):
     SCNet(A)-50 with average downsampling model from 'Improving Convolutional Networks with Self-Calibrated
     Convolutions,' http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -512,7 +512,7 @@ def scneta101(**kwargs):
     SCNet(A)-101 with average downsampling model from 'Improving Convolutional Networks with Self-Calibrated
     Convolutions,' http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

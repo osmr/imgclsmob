@@ -15,7 +15,7 @@ class GRMIPoseLite(tf.keras.Model):
     GRMIPose (Google PoseNet) model from 'Towards Accurate Multi-person Pose Estimation in the Wild,'
     https://arxiv.org/abs/1701.01779.
 
-    Parameters:
+    Parameters
     ----------
     interpreter : obj
         Instance of the TFLite model interpreter.
@@ -125,7 +125,7 @@ def get_grmiposelite(model_path,
     """
     Create GRMIPose (Google PoseNet) model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_path : str
         Path to pretrained model.
@@ -159,7 +159,7 @@ def grmiposelite_mobilenet_w1_coco(model_path, keypoints=17, data_format="channe
     GRMIPose (Google PoseNet) model on the base of 1.0 MobileNet-224 for COCO Keypoint from 'Towards Accurate
     Multi-person Pose Estimation in the Wild,' https://arxiv.org/abs/1701.01779.
 
-    Parameters:
+    Parameters
     ----------
     model_path : str
         Path to pretrained model.

@@ -20,7 +20,7 @@ class VGGDense(Chain):
     """
     VGG specific dense block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -52,7 +52,7 @@ class VGGOutputBlock(Chain):
     """
     VGG specific output block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -88,7 +88,7 @@ class VGG(Chain):
     VGG models from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -160,7 +160,7 @@ def get_vgg(blocks,
     """
     Create VGG model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -213,7 +213,7 @@ def vgg11(**kwargs):
     VGG-11 model from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -228,7 +228,7 @@ def vgg13(**kwargs):
     VGG-13 model from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -243,7 +243,7 @@ def vgg16(**kwargs):
     VGG-16 model from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -258,7 +258,7 @@ def vgg19(**kwargs):
     VGG-19 model from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -273,7 +273,7 @@ def bn_vgg11(**kwargs):
     VGG-11 model with batch normalization from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -288,7 +288,7 @@ def bn_vgg13(**kwargs):
     VGG-13 model with batch normalization from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -303,7 +303,7 @@ def bn_vgg16(**kwargs):
     VGG-16 model with batch normalization from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -318,7 +318,7 @@ def bn_vgg19(**kwargs):
     VGG-19 model with batch normalization from 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -333,7 +333,7 @@ def bn_vgg11b(**kwargs):
     VGG-11 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
     Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -348,7 +348,7 @@ def bn_vgg13b(**kwargs):
     VGG-13 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
     Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -363,7 +363,7 @@ def bn_vgg16b(**kwargs):
     VGG-16 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
     Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -378,7 +378,7 @@ def bn_vgg19b(**kwargs):
     VGG-19 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
     Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

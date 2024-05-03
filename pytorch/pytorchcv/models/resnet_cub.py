@@ -15,7 +15,7 @@ def resnet10_cub(num_classes=200, **kwargs):
     ResNet-10 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -32,7 +32,7 @@ def resnet12_cub(num_classes=200, **kwargs):
     ResNet-12 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -49,7 +49,7 @@ def resnet14_cub(num_classes=200, **kwargs):
     ResNet-14 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -66,7 +66,7 @@ def resnetbc14b_cub(num_classes=200, **kwargs):
     ResNet-BC-14b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -84,7 +84,7 @@ def resnet16_cub(num_classes=200, **kwargs):
     ResNet-16 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -101,7 +101,7 @@ def resnet18_cub(num_classes=200, **kwargs):
     ResNet-18 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -118,7 +118,7 @@ def resnet26_cub(num_classes=200, **kwargs):
     ResNet-26 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -135,7 +135,7 @@ def resnetbc26b_cub(num_classes=200, **kwargs):
     ResNet-BC-26b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -153,7 +153,7 @@ def resnet34_cub(num_classes=200, **kwargs):
     ResNet-34 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -170,7 +170,7 @@ def resnetbc38b_cub(num_classes=200, **kwargs):
     ResNet-BC-38b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -188,7 +188,7 @@ def resnet50_cub(num_classes=200, **kwargs):
     ResNet-50 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -205,7 +205,7 @@ def resnet50b_cub(num_classes=200, **kwargs):
     ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -222,7 +222,7 @@ def resnet101_cub(num_classes=200, **kwargs):
     ResNet-101 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -239,7 +239,7 @@ def resnet101b_cub(num_classes=200, **kwargs):
     ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -256,7 +256,7 @@ def resnet152_cub(num_classes=200, **kwargs):
     ResNet-152 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -273,7 +273,7 @@ def resnet152b_cub(num_classes=200, **kwargs):
     ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -290,7 +290,7 @@ def resnet200_cub(num_classes=200, **kwargs):
     ResNet-200 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -307,7 +307,7 @@ def resnet200b_cub(num_classes=200, **kwargs):
     ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.

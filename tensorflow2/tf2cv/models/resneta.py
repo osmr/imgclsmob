@@ -17,7 +17,7 @@ class ResADownBlock(nn.Layer):
     """
     ResNet(A) downsample block for the identity branch of a residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -61,7 +61,7 @@ class ResAUnit(nn.Layer):
     """
     ResNet(A) unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -136,7 +136,7 @@ class ResNetA(tf.keras.Model):
     ResNet(A) with average downsampling model from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -227,7 +227,7 @@ def get_resneta(blocks,
     """
     Create ResNet(A) with average downsampling model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -325,7 +325,7 @@ def resneta10(**kwargs):
     ResNet(A)-10 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -340,7 +340,7 @@ def resnetabc14b(**kwargs):
     ResNet(A)-BC-14b with average downsampling model from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -355,7 +355,7 @@ def resneta18(**kwargs):
     ResNet(A)-18 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -370,7 +370,7 @@ def resneta50b(**kwargs):
     ResNet(A)-50 with average downsampling model with stride at the second convolution in bottleneck block
     from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -385,7 +385,7 @@ def resneta101b(**kwargs):
     ResNet(A)-101 with average downsampling model with stride at the second convolution in bottleneck
     block from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -400,7 +400,7 @@ def resneta152b(**kwargs):
     ResNet(A)-152 with average downsampling model with stride at the second convolution in bottleneck
     block from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

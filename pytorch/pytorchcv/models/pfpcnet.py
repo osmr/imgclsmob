@@ -17,7 +17,7 @@ class PFPCNet(nn.Module):
     PFPCNet model from 'Production-Level Facial Performance Capture Using Deep Convolutional Neural Networks,'
     https://arxiv.org/abs/1609.06536.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -89,7 +89,7 @@ def get_pfpcnet(model_name=None,
     """
     Create PFPCNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -126,7 +126,7 @@ def pfpcnet(**kwargs):
     PFPCNet model from 'Production-Level Facial Performance Capture Using Deep Convolutional Neural Networks,'
     https://arxiv.org/abs/1609.06536.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

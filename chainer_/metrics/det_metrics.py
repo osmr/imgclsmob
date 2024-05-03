@@ -13,7 +13,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
     """
     Detection metric for COCO bbox task.
 
-    Parameters:
+    Parameters
     ----------
     img_height : int
         Processed image height.
@@ -115,7 +115,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         Update internal buffer with latest predictions. Note that the statistics are not available until you call
         self.get() to return the metrics.
 
-        Parameters:
+        Parameters
         ----------
         pred_bboxes : mxnet.NDArray or numpy.ndarray
             Prediction bounding boxes with shape `B, N, 4`.
@@ -196,7 +196,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         """
         Apply affine transform to a bounding box given transform matrix t.
 
-        Parameters:
+        Parameters
         ----------
         pt : numpy.ndarray
             Bounding box with shape (1, 2).

@@ -18,7 +18,7 @@ def sparsenet_exponential_fetch(lst):
     """
     SparseNet's specific exponential fetch.
 
-    Parameters:
+    Parameters
     ----------
     lst : list
         List of something.
@@ -35,7 +35,7 @@ class SparseBlock(HybridBlock):
     """
     SparseNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -81,7 +81,7 @@ class SparseStage(HybridBlock):
     """
     SparseNet stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -139,7 +139,7 @@ class SparseNet(HybridBlock):
     """
     SparseNet model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -218,7 +218,7 @@ def get_sparsenet(num_layers,
     """
     Create SparseNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_layers : int
         Number of layers.
@@ -287,7 +287,7 @@ def sparsenet121(**kwargs):
     """
     SparseNet-121 model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -303,7 +303,7 @@ def sparsenet161(**kwargs):
     """
     SparseNet-161 model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -319,7 +319,7 @@ def sparsenet169(**kwargs):
     """
     SparseNet-169 model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -335,7 +335,7 @@ def sparsenet201(**kwargs):
     """
     SparseNet-201 model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -351,7 +351,7 @@ def sparsenet264(**kwargs):
     """
     SparseNet-264 model from 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

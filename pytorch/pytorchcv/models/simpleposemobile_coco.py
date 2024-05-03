@@ -22,7 +22,7 @@ class SimplePoseMobile(nn.Module):
     SimplePose(Mobile) model from 'Simple Baselines for Human Pose Estimation and Tracking,'
     https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -105,7 +105,7 @@ def get_simpleposemobile(backbone,
     """
     Create SimplePose(Mobile) model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -148,7 +148,7 @@ def simplepose_mobile_resnet18_coco(pretrained_backbone=False, keypoints=17, **k
     SimplePose(Mobile) model on the base of ResNet-18 for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -170,7 +170,7 @@ def simplepose_mobile_resnet50b_coco(pretrained_backbone=False, keypoints=17, **
     SimplePose(Mobile) model on the base of ResNet-50b for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -192,7 +192,7 @@ def simplepose_mobile_mobilenet_w1_coco(pretrained_backbone=False, keypoints=17,
     SimplePose(Mobile) model on the base of 1.0 MobileNet-224 for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -214,7 +214,7 @@ def simplepose_mobile_mobilenetv2b_w1_coco(pretrained_backbone=False, keypoints=
     SimplePose(Mobile) model on the base of 1.0 MobileNetV2b-224 for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -236,7 +236,7 @@ def simplepose_mobile_mobilenetv3_small_w1_coco(pretrained_backbone=False, keypo
     SimplePose(Mobile) model on the base of MobileNetV3 Small 224/1.0 for COCO Keypoint from 'Simple Baselines for Human
     Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -258,7 +258,7 @@ def simplepose_mobile_mobilenetv3_large_w1_coco(pretrained_backbone=False, keypo
     SimplePose(Mobile) model on the base of MobileNetV3 Large 224/1.0 for COCO Keypoint from 'Simple Baselines for Human
     Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

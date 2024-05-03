@@ -20,7 +20,7 @@ class CIFARDIAResNet(HybridBlock):
     """
     DIA-ResNet model for CIFAR from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -104,7 +104,7 @@ def get_diaresnet_cifar(classes,
     """
     Create DIA-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -164,7 +164,7 @@ def diaresnet20_cifar10(classes=10, **kwargs):
     DIA-ResNet-20 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -184,7 +184,7 @@ def diaresnet20_cifar100(classes=100, **kwargs):
     DIA-ResNet-20 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -203,7 +203,7 @@ def diaresnet20_svhn(classes=10, **kwargs):
     """
     DIA-ResNet-20 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -223,7 +223,7 @@ def diaresnet56_cifar10(classes=10, **kwargs):
     DIA-ResNet-56 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -243,7 +243,7 @@ def diaresnet56_cifar100(classes=100, **kwargs):
     DIA-ResNet-56 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -262,7 +262,7 @@ def diaresnet56_svhn(classes=10, **kwargs):
     """
     DIA-ResNet-56 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -282,7 +282,7 @@ def diaresnet110_cifar10(classes=10, **kwargs):
     DIA-ResNet-110 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -302,7 +302,7 @@ def diaresnet110_cifar100(classes=100, **kwargs):
     DIA-ResNet-110 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -321,7 +321,7 @@ def diaresnet110_svhn(classes=10, **kwargs):
     """
     DIA-ResNet-110 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -341,7 +341,7 @@ def diaresnet164bn_cifar10(classes=10, **kwargs):
     DIA-ResNet-164(BN) model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -361,7 +361,7 @@ def diaresnet164bn_cifar100(classes=100, **kwargs):
     DIA-ResNet-164(BN) model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -381,7 +381,7 @@ def diaresnet164bn_svhn(classes=10, **kwargs):
     DIA-ResNet-164(BN) model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -401,7 +401,7 @@ def diaresnet1001_cifar10(classes=10, **kwargs):
     DIA-ResNet-1001 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -421,7 +421,7 @@ def diaresnet1001_cifar100(classes=100, **kwargs):
     DIA-ResNet-1001 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -441,7 +441,7 @@ def diaresnet1001_svhn(classes=10, **kwargs):
     DIA-ResNet-1001 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -461,7 +461,7 @@ def diaresnet1202_cifar10(classes=10, **kwargs):
     DIA-ResNet-1202 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -481,7 +481,7 @@ def diaresnet1202_cifar100(classes=100, **kwargs):
     DIA-ResNet-1202 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -501,7 +501,7 @@ def diaresnet1202_svhn(classes=10, **kwargs):
     DIA-ResNet-1202 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

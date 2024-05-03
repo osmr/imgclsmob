@@ -601,7 +601,7 @@ def get_model_file(model_name,
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str
         Name of the model.
@@ -654,7 +654,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     """
     Download an given URL
 
-    Parameters:
+    Parameters
     ----------
     url : str
         URL to download
@@ -738,7 +738,7 @@ def _check_sha1(filename, sha1_hash):
     """
     Check whether the sha1 hash of the file content matches the expected hash.
 
-    Parameters:
+    Parameters
     ----------
     filename : str
         Path to the file.

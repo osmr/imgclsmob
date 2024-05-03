@@ -21,7 +21,7 @@ class OctConvolution2D(L.Convolution2D):
     """
     Octave convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -172,7 +172,7 @@ class OctConvBlock(Chain):
     """
     Octave convolution block with Batch normalization and ReLU/ReLU6 activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -280,7 +280,7 @@ def oct_conv1x1_block(in_channels,
     """
     1x1 version of the octave convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -333,7 +333,7 @@ def oct_conv3x3_block(in_channels,
     """
     3x3 version of the octave convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -380,7 +380,7 @@ class OctResBlock(Chain):
     """
     Simple Oct-ResNet block for residual path in Oct-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -425,7 +425,7 @@ class OctResBottleneck(Chain):
     """
     Oct-ResNet bottleneck block for residual path in Oct-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -493,7 +493,7 @@ class OctResUnit(Chain):
     """
     Oct-ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -576,7 +576,7 @@ class OctResNet(Chain):
     Oct-ResNet model from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave
     Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -673,7 +673,7 @@ def get_octresnet(blocks,
     """
     Create Oct-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -771,7 +771,7 @@ def octresnet10_ad2(**kwargs):
     Oct-ResNet-10 (alpha=1/2) model from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
     with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -786,7 +786,7 @@ def octresnet50b_ad2(**kwargs):
     Oct-ResNet-50b (alpha=1/2) model from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
     with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

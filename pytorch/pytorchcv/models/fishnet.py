@@ -19,7 +19,7 @@ def channel_squeeze(x,
     """
     Channel squeeze operation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -41,7 +41,7 @@ class ChannelSqueeze(nn.Module):
     """
     Channel squeeze layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -64,7 +64,7 @@ class PreSEAttBlock(nn.Module):
     """
     FishNet specific Squeeze-and-Excitation attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -109,7 +109,7 @@ class FishBottleneck(nn.Module):
     """
     FishNet bottleneck block for residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -152,7 +152,7 @@ class FishBlock(nn.Module):
     """
     FishNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -207,7 +207,7 @@ class DownUnit(nn.Module):
     """
     FishNet down unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -238,7 +238,7 @@ class UpUnit(nn.Module):
     """
     FishNet up unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -273,7 +273,7 @@ class SkipUnit(nn.Module):
     """
     FishNet skip connection unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -300,7 +300,7 @@ class SkipAttUnit(nn.Module):
     """
     FishNet skip connection unit with attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -347,7 +347,7 @@ class FishFinalBlock(nn.Module):
     """
     FishNet final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -374,7 +374,7 @@ class FishNet(nn.Module):
     FishNet model from 'FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction,'
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 
-    Parameters:
+    Parameters
     ----------
     direct_channels : list of list of list of int
         Number of output channels for each unit along the straight path.
@@ -502,7 +502,7 @@ def get_fishnet(blocks,
     """
     Create FishNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -556,7 +556,7 @@ def fishnet99(**kwargs):
     FishNet-99 model from 'FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction,'
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -571,7 +571,7 @@ def fishnet150(**kwargs):
     FishNet-150 model from 'FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction,'
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

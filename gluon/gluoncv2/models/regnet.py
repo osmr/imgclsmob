@@ -19,7 +19,7 @@ class RegNetBottleneck(HybridBlock):
     """
     RegNet bottleneck block for residual path in RegNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -90,7 +90,7 @@ class RegNetUnit(HybridBlock):
     """
     RegNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -153,7 +153,7 @@ class RegNet(HybridBlock):
     """
     RegNet model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -243,7 +243,7 @@ def get_regnet(channels_init,
     """
     Create RegNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     channels_init : float
         Initial value for channels/widths.
@@ -312,7 +312,7 @@ def regnetx002(**kwargs):
     """
     RegNetX-200MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -329,7 +329,7 @@ def regnetx004(**kwargs):
     """
     RegNetX-400MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -346,7 +346,7 @@ def regnetx006(**kwargs):
     """
     RegNetX-600MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -363,7 +363,7 @@ def regnetx008(**kwargs):
     """
     RegNetX-800MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -380,7 +380,7 @@ def regnetx016(**kwargs):
     """
     RegNetX-1.6GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -397,7 +397,7 @@ def regnetx032(**kwargs):
     """
     RegNetX-3.2GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -414,7 +414,7 @@ def regnetx040(**kwargs):
     """
     RegNetX-4.0GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -431,7 +431,7 @@ def regnetx064(**kwargs):
     """
     RegNetX-6.4GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -448,7 +448,7 @@ def regnetx080(**kwargs):
     """
     RegNetX-8.0GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -465,7 +465,7 @@ def regnetx120(**kwargs):
     """
     RegNetX-12GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -482,7 +482,7 @@ def regnetx160(**kwargs):
     """
     RegNetX-16GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -499,7 +499,7 @@ def regnetx320(**kwargs):
     """
     RegNetX-32GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -516,7 +516,7 @@ def regnety002(**kwargs):
     """
     RegNetY-200MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -533,7 +533,7 @@ def regnety004(**kwargs):
     """
     RegNetY-400MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -550,7 +550,7 @@ def regnety006(**kwargs):
     """
     RegNetY-600MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -567,7 +567,7 @@ def regnety008(**kwargs):
     """
     RegNetY-800MF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -584,7 +584,7 @@ def regnety016(**kwargs):
     """
     RegNetY-1.6GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -601,7 +601,7 @@ def regnety032(**kwargs):
     """
     RegNetY-3.2GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -618,7 +618,7 @@ def regnety040(**kwargs):
     """
     RegNetY-4.0GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -635,7 +635,7 @@ def regnety064(**kwargs):
     """
     RegNetY-6.4GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -652,7 +652,7 @@ def regnety080(**kwargs):
     """
     RegNetY-8.0GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -669,7 +669,7 @@ def regnety120(**kwargs):
     """
     RegNetY-12GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -686,7 +686,7 @@ def regnety160(**kwargs):
     """
     RegNetY-16GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -703,7 +703,7 @@ def regnety320(**kwargs):
     """
     RegNetY-32GF model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -720,7 +720,7 @@ def regnetz002(**kwargs):
     """
     RegNetZ-200MF experimental model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -737,7 +737,7 @@ def regnetw002(**kwargs):
     """
     RegNetW-200MF experimental model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

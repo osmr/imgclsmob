@@ -19,7 +19,7 @@ class SimplePose(Chain):
     """
     SimplePose model from 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -92,7 +92,7 @@ def get_simplepose(backbone,
     """
     Create SimplePose model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -134,7 +134,7 @@ def simplepose_resnet18_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     SimplePose model on the base of ResNet-18 for COCO Keypoint from 'Simple Baselines for Human Pose Estimation and
     Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -156,7 +156,7 @@ def simplepose_resnet50b_coco(pretrained_backbone=False, keypoints=17, **kwargs)
     SimplePose model on the base of ResNet-50b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation and
     Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -178,7 +178,7 @@ def simplepose_resnet101b_coco(pretrained_backbone=False, keypoints=17, **kwargs
     SimplePose model on the base of ResNet-101b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -200,7 +200,7 @@ def simplepose_resnet152b_coco(pretrained_backbone=False, keypoints=17, **kwargs
     SimplePose model on the base of ResNet-152b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -222,7 +222,7 @@ def simplepose_resneta50b_coco(pretrained_backbone=False, keypoints=17, **kwargs
     SimplePose model on the base of ResNet(A)-50b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -244,7 +244,7 @@ def simplepose_resneta101b_coco(pretrained_backbone=False, keypoints=17, **kwarg
     SimplePose model on the base of ResNet(A)-101b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -266,7 +266,7 @@ def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, **kwarg
     SimplePose model on the base of ResNet(A)-152b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

@@ -28,7 +28,7 @@ class GhostConvBlock(HybridBlock):
     """
     GhostNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -72,7 +72,7 @@ class GhostExpBlock(HybridBlock):
     """
     GhostNet expansion block for residual path in GhostNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -142,7 +142,7 @@ class GhostUnit(HybridBlock):
     """
     GhostNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -203,7 +203,7 @@ class GhostClassifier(HybridBlock):
     """
     GhostNet classifier.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -237,7 +237,7 @@ class GhostNet(HybridBlock):
     """
     GhostNet model from 'GhostNet: More Features from Cheap Operations,' https://arxiv.org/abs/1911.11907.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -340,7 +340,7 @@ def get_ghostnet(width_scale=1.0,
     """
     Create GhostNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float, default 1.0
         Scale factor for width of layers.
@@ -396,7 +396,7 @@ def ghostnet(**kwargs):
     """
     GhostNet model from 'GhostNet: More Features from Cheap Operations,' https://arxiv.org/abs/1911.11907.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

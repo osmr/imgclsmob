@@ -16,7 +16,7 @@ class FPEBlock(nn.Module):
     """
     FPENet block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -53,7 +53,7 @@ class FPEUnit(nn.Module):
     """
     FPENet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -115,7 +115,7 @@ class FPEStage(nn.Module):
     """
     FPENet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class MEUBlock(nn.Module):
     """
     FPENet specific mutual embedding upsample (MEU) block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_high : int
         Number of input channels for x_high.
@@ -231,7 +231,7 @@ class FPENet(nn.Module):
     FPENet model from 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
 
-    Parameters:
+    Parameters
     ----------
     layers : list of int
         Number of layers for each unit.
@@ -335,7 +335,7 @@ def get_fpenet(model_name=None,
     """
     Create FPENet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -376,7 +376,7 @@ def fpenet_cityscapes(num_classes=19, **kwargs):
     FPENet model for Cityscapes from 'Feature Pyramid Encoding Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1909.08599.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

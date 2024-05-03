@@ -13,7 +13,7 @@ class WeightedRandomSampler(Sampler):
     """
     Samples elements from [0, length) randomly without replacement.
 
-    Parameters:
+    Parameters
     ----------
     length : int
         Length of the sequence.

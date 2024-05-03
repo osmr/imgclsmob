@@ -25,7 +25,7 @@ class Conv1x1Branch(nn.Module):
     """
     InceptionResNetV2 specific convolutional 1x1 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -53,7 +53,7 @@ class ConvSeqBranch(nn.Module):
     """
     InceptionResNetV2 specific convolutional sequence branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -101,7 +101,7 @@ class InceptionAUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-A unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -150,7 +150,7 @@ class ReductionAUnit(nn.Module):
     """
     InceptionResNetV1 type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -186,7 +186,7 @@ class InceptionBUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-B unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -228,7 +228,7 @@ class ReductionBUnit(nn.Module):
     """
     InceptionResNetV1 type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -271,7 +271,7 @@ class InceptionCUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-C unit.
 
-    Parameters:
+    Parameters
     ----------
     scale : float, default 1.0
         Scale value for residual branch.
@@ -322,7 +322,7 @@ class InceptInitBlock(nn.Module):
     """
     InceptionResNetV1 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -389,7 +389,7 @@ class InceptHead(nn.Module):
     """
     InceptionResNetV1 specific classification block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.

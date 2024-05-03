@@ -18,7 +18,7 @@ def get_zfnet(version="a",
     """
     Create ZFNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str, default 'a'
         Version of ZFNet ('a' or 'b').
@@ -68,7 +68,7 @@ def zfnet(**kwargs):
     """
     ZFNet model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -82,7 +82,7 @@ def zfnetb(**kwargs):
     """
     ZFNet-b model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

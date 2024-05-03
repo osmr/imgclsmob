@@ -23,7 +23,7 @@ def shuffle_unit(x,
     """
     ShuffleNetV2 unit.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -130,7 +130,7 @@ def shuffle_init_block(x,
     """
     ShuffleNetV2 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -174,7 +174,7 @@ def shufflenetv2(channels,
     ShuffleNetV2 model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -247,7 +247,7 @@ def get_shufflenetv2(width_scale,
     """
     Create ShuffleNetV2 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -294,7 +294,7 @@ def shufflenetv2_wd2(**kwargs):
     ShuffleNetV2 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -309,7 +309,7 @@ def shufflenetv2_w1(**kwargs):
     ShuffleNetV2 1x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -324,7 +324,7 @@ def shufflenetv2_w3d2(**kwargs):
     ShuffleNetV2 1.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -339,7 +339,7 @@ def shufflenetv2_w2(**kwargs):
     ShuffleNetV2 2x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

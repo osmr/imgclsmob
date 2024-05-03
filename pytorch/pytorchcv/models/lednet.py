@@ -18,7 +18,7 @@ class LEDBranch(nn.Module):
     """
     LEDNet encoder branch.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -65,7 +65,7 @@ class LEDUnit(nn.Module):
     """
     LEDNet encoder unit (Split-Shuffle-non-bottleneck).
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -117,7 +117,7 @@ class PoolingBranch(nn.Module):
     """
     Pooling branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -164,7 +164,7 @@ class APN(nn.Module):
     """
     Attention pyramid network block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -263,7 +263,7 @@ class LEDNet(nn.Module):
     LEDNet model from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1905.02423.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit.
@@ -358,7 +358,7 @@ def get_lednet(model_name=None,
     """
     Create LEDNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -396,7 +396,7 @@ def lednet_cityscapes(num_classes=19, **kwargs):
     LEDNet model for Cityscapes from 'LEDNet: A Lightweight Encoder-Decoder Network for Real-Time Semantic
     Segmentation,' https://arxiv.org/abs/1905.02423.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

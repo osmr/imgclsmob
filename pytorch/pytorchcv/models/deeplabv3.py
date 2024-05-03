@@ -20,7 +20,7 @@ class DeepLabv3FinalBlock(nn.Module):
     """
     DeepLabv3 final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -58,7 +58,7 @@ class ASPPAvgBranch(nn.Module):
     """
     ASPP branch with average pooling.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -91,7 +91,7 @@ class AtrousSpatialPyramidPooling(nn.Module):
     """
     Atrous Spatial Pyramid Pooling (ASPP) module.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -138,7 +138,7 @@ class DeepLabv3(nn.Module):
     DeepLabv3 model from 'Rethinking Atrous Convolution for Semantic Image Segmentation,'
     https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -218,7 +218,7 @@ def get_deeplabv3(backbone,
     """
     Create DeepLabv3 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -257,7 +257,7 @@ def deeplabv3_resnetd50b_voc(pretrained_backbone=False, num_classes=21, aux=True
     DeepLabv3 model on the base of ResNet(D)-50b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -281,7 +281,7 @@ def deeplabv3_resnetd101b_voc(pretrained_backbone=False, num_classes=21, aux=Tru
     DeepLabv3 model on the base of ResNet(D)-101b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -305,7 +305,7 @@ def deeplabv3_resnetd152b_voc(pretrained_backbone=False, num_classes=21, aux=Tru
     DeepLabv3 model on the base of ResNet(D)-152b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -329,7 +329,7 @@ def deeplabv3_resnetd50b_coco(pretrained_backbone=False, num_classes=21, aux=Tru
     DeepLabv3 model on the base of ResNet(D)-50b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -353,7 +353,7 @@ def deeplabv3_resnetd101b_coco(pretrained_backbone=False, num_classes=21, aux=Tr
     DeepLabv3 model on the base of ResNet(D)-101b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -377,7 +377,7 @@ def deeplabv3_resnetd152b_coco(pretrained_backbone=False, num_classes=21, aux=Tr
     DeepLabv3 model on the base of ResNet(D)-152b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -401,7 +401,7 @@ def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, num_classes=150, aux=
     DeepLabv3 model on the base of ResNet(D)-50b for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -425,7 +425,7 @@ def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, num_classes=150, aux
     DeepLabv3 model on the base of ResNet(D)-101b for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -449,7 +449,7 @@ def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, num_classes=19, a
     DeepLabv3 model on the base of ResNet(D)-50b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -473,7 +473,7 @@ def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, 
     DeepLabv3 model on the base of ResNet(D)-101b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

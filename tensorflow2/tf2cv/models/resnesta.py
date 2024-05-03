@@ -17,7 +17,7 @@ class ResNeStABlock(nn.Layer):
     """
     Simple ResNeSt(A) block for residual path in ResNeSt(A) unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -78,7 +78,7 @@ class ResNeStABottleneck(nn.Layer):
     """
     ResNeSt(A) bottleneck block for residual path in ResNeSt(A) unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -139,7 +139,7 @@ class ResNeStADownBlock(nn.Layer):
     """
     ResNeSt(A) downsample block for the identity branch of a residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -180,7 +180,7 @@ class ResNeStAUnit(nn.Layer):
     """
     ResNeSt(A) unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -242,7 +242,7 @@ class ResNeStA(tf.keras.Model):
     ResNeSt(A) with average downsampling model from 'ResNeSt: Split-Attention Networks,'
     https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -326,7 +326,7 @@ def get_resnesta(blocks,
     """
     Create ResNeSt(A) with average downsampling model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -426,7 +426,7 @@ def resnestabc14(**kwargs):
     ResNeSt(A)-BC-14 with average downsampling model from 'ResNeSt: Split-Attention Networks,'
     https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -441,7 +441,7 @@ def resnesta18(**kwargs):
     ResNeSt(A)-18 with average downsampling model from 'ResNeSt: Split-Attention Networks,'
     https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -456,7 +456,7 @@ def resnestabc26(**kwargs):
     ResNeSt(A)-BC-26 with average downsampling model from 'ResNeSt: Split-Attention Networks,'
     https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -471,7 +471,7 @@ def resnesta50(**kwargs):
     ResNeSt(A)-50 with average downsampling model with stride at the second convolution in bottleneck block
     from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -486,7 +486,7 @@ def resnesta101(**kwargs):
     ResNeSt(A)-101 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -501,7 +501,7 @@ def resnesta152(**kwargs):
     ResNeSt(A)-152 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -516,7 +516,7 @@ def resnesta200(in_size=(256, 256), **kwargs):
     ResNeSt(A)-200 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (256, 256)
         Spatial size of the expected input image.
@@ -533,7 +533,7 @@ def resnesta269(in_size=(320, 320), **kwargs):
     ResNeSt(A)-269 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (320, 320)
         Spatial size of the expected input image.

@@ -22,7 +22,7 @@ def hard_nms(cdds,
     """
     Hard Non-Maximum Suppression.
 
-    Parameters:
+    Parameters
     ----------
     cdds : np.array
         Borders.
@@ -70,7 +70,7 @@ class NavigatorBranch(Chain):
     """
     Navigator branch block for Navigator unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -138,7 +138,7 @@ class NTSNet(Chain):
     """
     NTS-Net model from 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -247,7 +247,7 @@ class NTSNet(Chain):
         """
         Generate default anchor maps.
 
-        Parameters:
+        Parameters
         ----------
         input_shape : tuple of 2 int
             Input image size.
@@ -320,7 +320,7 @@ def get_ntsnet(backbone,
     """
     Create NTS-Net model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -355,7 +355,7 @@ def ntsnet_cub(pretrained_backbone=False, aux=True, **kwargs):
     """
     NTS-Net model from 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

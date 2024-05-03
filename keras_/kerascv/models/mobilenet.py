@@ -24,7 +24,7 @@ def dws_conv_block(x,
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
     a MobileNet unit.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -66,7 +66,7 @@ def mobilenet(channels,
     https://arxiv.org/abs/1704.04861. Also this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet
     with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -128,7 +128,7 @@ def get_mobilenet(version,
     """
     Create MobileNet or FD-MobileNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of SqueezeNet ('orig' or 'fd').
@@ -176,7 +176,7 @@ def mobilenet_w1(**kwargs):
     1.0 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -191,7 +191,7 @@ def mobilenet_w3d4(**kwargs):
     0.75 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -206,7 +206,7 @@ def mobilenet_wd2(**kwargs):
     0.5 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -221,7 +221,7 @@ def mobilenet_wd4(**kwargs):
     0.25 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -236,7 +236,7 @@ def fdmobilenet_w1(**kwargs):
     FD-MobileNet 1.0x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -251,7 +251,7 @@ def fdmobilenet_w3d4(**kwargs):
     FD-MobileNet 0.75x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -266,7 +266,7 @@ def fdmobilenet_wd2(**kwargs):
     FD-MobileNet 0.5x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -281,7 +281,7 @@ def fdmobilenet_wd4(**kwargs):
     FD-MobileNet 0.25x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

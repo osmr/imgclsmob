@@ -21,7 +21,7 @@ def dwconv3x3(x,
     """
     3x3 depthwise version of the standard convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -73,7 +73,7 @@ def channet_conv(x,
     """
     ChannelNet specific convolution block with Batch normalization and ReLU6 activation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -151,7 +151,7 @@ def channet_conv1x1(x,
     """
     1x1 version of ChannelNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -213,7 +213,7 @@ def channet_conv3x3(x,
     """
     3x3 version of ChannelNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -277,7 +277,7 @@ def channet_dws_conv_block(x,
     ChannelNet specific depthwise separable convolution block with BatchNorms and activations at last convolution
     layers.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -333,7 +333,7 @@ def simple_group_block(x,
     """
     ChannelNet specific block with a sequence of depthwise separable group convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -381,7 +381,7 @@ def channelwise_conv2d(x,
     """
     ChannelNet specific block with channel-wise convolution.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -435,7 +435,7 @@ def conv_group_block(x,
     """
     ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -495,7 +495,7 @@ def channet_unit(x,
     """
     ChannelNet unit.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -595,7 +595,7 @@ class ChannelNet(object):
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of list of int
         Number of output channels for each unit.
@@ -650,7 +650,7 @@ class ChannelNet(object):
         """
         Build a model graph.
 
-        Parameters:
+        Parameters
         ----------
         x : Tensor
             Input tensor.
@@ -708,7 +708,7 @@ def get_channelnet(model_name=None,
     """
     Create ChannelNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -750,7 +750,7 @@ def channelnet(**kwargs):
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

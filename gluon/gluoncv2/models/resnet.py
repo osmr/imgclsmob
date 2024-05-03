@@ -18,7 +18,7 @@ class ResBlock(HybridBlock):
     """
     Simple ResNet block for residual path in ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -73,7 +73,7 @@ class ResBottleneck(HybridBlock):
     """
     ResNet bottleneck block for residual path in ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -141,7 +141,7 @@ class ResUnit(HybridBlock):
     """
     ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -229,7 +229,7 @@ class ResInitBlock(HybridBlock):
     """
     ResNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -269,7 +269,7 @@ class ResNet(HybridBlock):
     """
     ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -357,7 +357,7 @@ def get_resnet(blocks,
     """
     Create ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -456,7 +456,7 @@ def resnet10(**kwargs):
     ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -473,7 +473,7 @@ def resnet12(**kwargs):
     ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -490,7 +490,7 @@ def resnet14(**kwargs):
     ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -507,7 +507,7 @@ def resnetbc14b(**kwargs):
     ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -524,7 +524,7 @@ def resnet16(**kwargs):
     ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -541,7 +541,7 @@ def resnet18_wd4(**kwargs):
     ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -558,7 +558,7 @@ def resnet18_wd2(**kwargs):
     ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -575,7 +575,7 @@ def resnet18_w3d4(**kwargs):
     ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -591,7 +591,7 @@ def resnet18(**kwargs):
     """
     ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -608,7 +608,7 @@ def resnet26(**kwargs):
     ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -625,7 +625,7 @@ def resnetbc26b(**kwargs):
     ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -641,7 +641,7 @@ def resnet34(**kwargs):
     """
     ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -658,7 +658,7 @@ def resnetbc38b(**kwargs):
     ResNet-BC-38b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -674,7 +674,7 @@ def resnet50(**kwargs):
     """
     ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -691,7 +691,7 @@ def resnet50b(**kwargs):
     ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -707,7 +707,7 @@ def resnet101(**kwargs):
     """
     ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -724,7 +724,7 @@ def resnet101b(**kwargs):
     ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -740,7 +740,7 @@ def resnet152(**kwargs):
     """
     ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -757,7 +757,7 @@ def resnet152b(**kwargs):
     ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -774,7 +774,7 @@ def resnet200(**kwargs):
     ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -791,7 +791,7 @@ def resnet200b(**kwargs):
     ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

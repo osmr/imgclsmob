@@ -15,7 +15,7 @@ class VocaEncoder(nn.Layer):
     """
     VOCA encoder.
 
-    Parameters:
+    Parameters
     ----------
     audio_features : int
         Number of audio features (characters/sounds).
@@ -95,7 +95,7 @@ class VOCA(tf.keras.Model):
     """
     VOCA model from 'Capture, Learning, and Synthesis of 3D Speaking Styles,' https://arxiv.org/abs/1905.03079.
 
-    Parameters:
+    Parameters
     ----------
     audio_features : int, default 29
         Number of audio features (characters/sounds).
@@ -152,7 +152,7 @@ def get_voca(base_persons,
     """
     Create VOCA model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     base_persons : int
         Number of base persons (subjects).
@@ -191,7 +191,7 @@ def voca8flame(**kwargs):
     VOCA-8-FLAME model for 8 base persons and FLAME topology from 'Capture, Learning, and Synthesis of 3D Speaking
     Styles,' https://arxiv.org/abs/1905.03079.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

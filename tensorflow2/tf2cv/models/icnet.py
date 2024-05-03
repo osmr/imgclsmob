@@ -18,7 +18,7 @@ class ICInitBlock(nn.Layer):
     """
     ICNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -65,7 +65,7 @@ class PSPBlock(nn.Layer):
     """
     ICNet specific PSPNet reduced head block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -111,7 +111,7 @@ class CFFBlock(nn.Layer):
     """
     Cascade Feature Fusion block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_low : int
         Number of input channels (low input).
@@ -171,7 +171,7 @@ class ICHeadBlock(nn.Layer):
     """
     ICNet head block.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -237,7 +237,7 @@ class ICNet(tf.keras.Model):
     ICNet model from 'ICNet for Real-Time Semantic Segmentation on High-Resolution Images,'
     https://arxiv.org/abs/1704.08545.
 
-    Parameters:
+    Parameters
     ----------
     backbones : tuple of nn.Sequential
         Feature extractors.
@@ -347,7 +347,7 @@ def get_icnet(backbones,
     """
     Create ICNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbones : tuple of nn.Sequential
         Feature extractors.
@@ -403,7 +403,7 @@ def icnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     ICNet model on the base of ResNet(D)-50b for Cityscapes from 'ICNet for Real-Time Semantic Segmentation on
     High-Resolution Images,' https://arxiv.org/abs/1704.08545.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

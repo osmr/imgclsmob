@@ -21,7 +21,7 @@ def round_channels(channels,
     """
     Round weighted channel number (make divisible operation).
 
-    Parameters:
+    Parameters
     ----------
     channels : int or float
         Original number of channels.
@@ -43,7 +43,7 @@ class ReLU6(Layer):
     """
     ReLU6 activation layer.
 
-    Parameters:
+    Parameters
     ----------
     name : str, default 'ReLU6'
         Layer name.
@@ -62,7 +62,7 @@ class HSigmoid(Layer):
     Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
     https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     name : str, default 'HSigmoid'
         Layer name.
@@ -80,7 +80,7 @@ class HSwish(Layer):
     """
     H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
-    Parameters:
+    Parameters
     ----------
     name : str, default 'HSwish'
         Layer name.
@@ -99,7 +99,7 @@ def swish(x,
     """
     Swish activation function from 'Searching for Activation Functions,' https://arxiv.org/abs/1710.05941.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -122,7 +122,7 @@ def get_activation_layer(x,
     """
     Create activation layer from string/function.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -183,7 +183,7 @@ def update_keras_shape(x):
     """
     Update Keras shape property.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -197,7 +197,7 @@ def flatten(x,
     """
     Flattens the input to two dimensional.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -231,7 +231,7 @@ def batchnorm(x,
     """
     Batch normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -270,7 +270,7 @@ def lrn(x,
     """
     Local response normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -345,7 +345,7 @@ def maxpool2d(x,
     """
     Max pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -421,7 +421,7 @@ def avgpool2d(x,
     """
     Average pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -506,7 +506,7 @@ def conv2d(x,
     """
     Convolution 2D layer wrapper.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -626,7 +626,7 @@ def conv1x1(x,
     """
     Convolution 1x1 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -669,7 +669,7 @@ def conv3x3(x,
     """
     Convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -710,7 +710,7 @@ def depthwise_conv3x3(x,
     """
     Depthwise convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -754,7 +754,7 @@ def conv_block(x,
     """
     Standard convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -824,7 +824,7 @@ def conv1x1_block(x,
     """
     1x1 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -879,7 +879,7 @@ def conv3x3_block(x,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -941,7 +941,7 @@ def conv5x5_block(x,
     """
     5x5 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -997,7 +997,7 @@ def conv7x7_block(x,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1046,7 +1046,7 @@ def dwconv3x3_block(x,
     """
     3x3 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1101,7 +1101,7 @@ def dwconv5x5_block(x,
     """
     5x5 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1154,7 +1154,7 @@ def pre_conv_block(x,
     """
     Convolution block with Batch normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1208,7 +1208,7 @@ def pre_conv1x1_block(x,
     """
     1x1 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1248,7 +1248,7 @@ def pre_conv3x3_block(x,
     """
     3x3 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1285,7 +1285,7 @@ def channel_shuffle(x,
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1325,7 +1325,7 @@ def channel_shuffle_lambda(channels,
     """
     Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -1352,7 +1352,7 @@ def se_block(x,
     """
     Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -1406,7 +1406,7 @@ class GluonBatchNormalization(BatchNormalization):
     """
     Batch normalization layer wrapper for implementation of the Gluon type of BatchNorm default parameters.
 
-    Parameters:
+    Parameters
     ----------
     momentum : float, default 0.9
         Momentum for the moving average.

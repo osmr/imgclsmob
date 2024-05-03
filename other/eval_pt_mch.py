@@ -19,7 +19,7 @@ def add_eval_parser_arguments(parser):
     """
     Create python script parameters (for eval specific subpart).
 
-    Parameters:
+    Parameters
     ----------
     parser : ArgumentParser
         ArgumentParser instance.

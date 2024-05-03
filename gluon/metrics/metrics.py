@@ -15,7 +15,7 @@ class LossValue(EvalMetric):
     """
     Computes simple loss value fake metric.
 
-    Parameters:
+    Parameters
     ----------
     name : str
         Name of this metric instance for display.
@@ -39,7 +39,7 @@ class LossValue(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : None
             Unused argument.

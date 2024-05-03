@@ -23,7 +23,7 @@ class CIFARSEResNet(nn.Module):
     """
     SE-ResNet model for CIFAR from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -100,7 +100,7 @@ def get_seresnet_cifar(num_classes,
     """
     Create SE-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int
         Number of classification num_classes.
@@ -155,7 +155,7 @@ def seresnet20_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-20 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -172,7 +172,7 @@ def seresnet20_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-20 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -189,7 +189,7 @@ def seresnet20_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-20 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -206,7 +206,7 @@ def seresnet56_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-56 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -223,7 +223,7 @@ def seresnet56_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-56 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -240,7 +240,7 @@ def seresnet56_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-56 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -257,7 +257,7 @@ def seresnet110_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-110 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -274,7 +274,7 @@ def seresnet110_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-110 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -291,7 +291,7 @@ def seresnet110_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-110 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -308,7 +308,7 @@ def seresnet164bn_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-164(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -325,7 +325,7 @@ def seresnet164bn_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-164(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -342,7 +342,7 @@ def seresnet164bn_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-164(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -359,7 +359,7 @@ def seresnet272bn_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-272(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -376,7 +376,7 @@ def seresnet272bn_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-272(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -393,7 +393,7 @@ def seresnet272bn_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-272(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -410,7 +410,7 @@ def seresnet542bn_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-542(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -427,7 +427,7 @@ def seresnet542bn_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-542(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -444,7 +444,7 @@ def seresnet542bn_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-542(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -461,7 +461,7 @@ def seresnet1001_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-1001 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -478,7 +478,7 @@ def seresnet1001_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-1001 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -495,7 +495,7 @@ def seresnet1001_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-1001 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -512,7 +512,7 @@ def seresnet1202_cifar10(num_classes=10, **kwargs):
     """
     SE-ResNet-1202 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.
@@ -529,7 +529,7 @@ def seresnet1202_cifar100(num_classes=100, **kwargs):
     """
     SE-ResNet-1202 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification num_classes.
@@ -546,7 +546,7 @@ def seresnet1202_svhn(num_classes=10, **kwargs):
     """
     SE-ResNet-1202 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification num_classes.

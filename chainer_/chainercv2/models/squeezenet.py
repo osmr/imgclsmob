@@ -19,7 +19,7 @@ class FireConv(Chain):
     """
     SqueezeNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -53,7 +53,7 @@ class FireUnit(Chain):
     """
     SqueezeNet unit, so-called 'Fire' unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -108,7 +108,7 @@ class SqueezeInitBlock(Chain):
     """
     SqueezeNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -140,7 +140,7 @@ class SqueezeNet(Chain):
     SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
     https://arxiv.org/abs/1602.07360.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -229,7 +229,7 @@ def get_squeezenet(version,
     """
     Create SqueezeNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of SqueezeNet ('1.0' or '1.1').
@@ -284,7 +284,7 @@ def squeezenet_v1_0(**kwargs):
     SqueezeNet 'vanilla' model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model
     size,' https://arxiv.org/abs/1602.07360.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -299,7 +299,7 @@ def squeezenet_v1_1(**kwargs):
     SqueezeNet v1.1 model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model
     size,' https://arxiv.org/abs/1602.07360.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -314,7 +314,7 @@ def squeezeresnet_v1_0(**kwargs):
     SqueezeNet model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and
     <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -329,7 +329,7 @@ def squeezeresnet_v1_1(**kwargs):
     SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
     and <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

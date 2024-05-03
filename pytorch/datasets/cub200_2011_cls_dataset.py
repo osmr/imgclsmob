@@ -14,7 +14,7 @@ class CUB200_2011(data.Dataset):
     """
     CUB-200-2011 fine-grained classification dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.torch/datasets/CUB_200_2011'
         Path to the folder stored the dataset.
@@ -137,7 +137,7 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
         """
         Update CUB-200-2011 dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.

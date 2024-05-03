@@ -19,7 +19,7 @@ class MLP(Chain):
     """
     Multilayer perceptron block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -53,7 +53,7 @@ class ChannelGate(Chain):
     """
     CBAM channel gate block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -107,7 +107,7 @@ class CbamBlock(Chain):
     """
     CBAM attention block for CBAM-ResNet.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -134,7 +134,7 @@ class CbamResUnit(Chain):
     """
     CBAM-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -190,7 +190,7 @@ class CbamResNet(Chain):
     """
     CBAM-ResNet model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -263,7 +263,7 @@ def get_resnet(blocks,
     """
     Create CBAM-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -328,7 +328,7 @@ def cbam_resnet18(**kwargs):
     """
     CBAM-ResNet-18 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -342,7 +342,7 @@ def cbam_resnet34(**kwargs):
     """
     CBAM-ResNet-34 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -356,7 +356,7 @@ def cbam_resnet50(**kwargs):
     """
     CBAM-ResNet-50 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -370,7 +370,7 @@ def cbam_resnet101(**kwargs):
     """
     CBAM-ResNet-101 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -384,7 +384,7 @@ def cbam_resnet152(**kwargs):
     """
     CBAM-ResNet-152 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

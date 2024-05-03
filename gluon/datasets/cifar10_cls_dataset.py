@@ -16,7 +16,7 @@ class CIFAR10Fine(CIFAR10):
     CIFAR-10 image classification dataset.
 
 
-    Parameters:
+    Parameters
     ----------
     root : str, default $MXNET_HOME/datasets/cifar10
         Path to temp folder for storing data.
@@ -66,7 +66,7 @@ class RandomCrop(Block):
     Padding is optional.
     Upsample result if `src` is smaller than `size`.
 
-    Parameters:
+    Parameters
     ----------
     size : int or tuple of (W, H)
         Size of the final output.

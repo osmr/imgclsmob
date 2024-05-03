@@ -17,7 +17,7 @@ class NasDualPathScheme(object):
     """
     NASNet specific scheme of dual path response for a block in a DualPathSequential module.
 
-    Parameters:
+    Parameters
     ----------
     can_skip_input : bool
         Whether can skip input for some blocks.
@@ -35,7 +35,7 @@ class NasDualPathScheme(object):
         """
         Scheme function.
 
-        Parameters:
+        Parameters
         ----------
         block : nn.HybridBlock
             A block.
@@ -69,7 +69,7 @@ def nasnet_dual_path_scheme_ordinal(block,
     NASNet specific scheme of dual path response for an ordinal block with dual inputs/outputs in a DualPathSequential
     block.
 
-    Parameters:
+    Parameters
     ----------
     block : nn.HybridBlock
         A block.
@@ -96,7 +96,7 @@ def nasnet_dual_path_sequential(return_two=True,
     """
     NASNet specific dual path sequential container.
 
-    Parameters:
+    Parameters
     ----------
     return_two : bool, default True
         Whether to return two output after execution.
@@ -126,7 +126,7 @@ def nasnet_batch_norm(channels,
     """
     NASNet specific Batch normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels in input data.
@@ -146,7 +146,7 @@ def nasnet_avgpool1x1_s2(data_format="channels_last",
     """
     NASNet specific 1x1 Average pooling layer with stride 2.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -164,7 +164,7 @@ def nasnet_avgpool3x3_s1(data_format="channels_last",
     """
     NASNet specific 3x3 Average pooling layer with stride 1.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -183,7 +183,7 @@ def nasnet_avgpool3x3_s2(data_format="channels_last",
     """
     NASNet specific 3x3 Average pooling layer with stride 2.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -201,7 +201,7 @@ class NasMaxPoolBlock(nn.Layer):
     """
     NASNet specific Max pooling layer with extra padding.
 
-    Parameters:
+    Parameters
     ----------
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -243,7 +243,7 @@ class NasAvgPoolBlock(nn.Layer):
     """
     NASNet specific 3x3 Average pooling layer with extra padding.
 
-    Parameters:
+    Parameters
     ----------
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -286,7 +286,7 @@ class NasConv(nn.Layer):
     """
     NASNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -343,7 +343,7 @@ def nas_conv1x1(in_channels,
     """
     1x1 version of the NASNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -367,7 +367,7 @@ class DwsConv(nn.Layer):
     """
     Standard depthwise separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -421,7 +421,7 @@ class NasDwsConv(nn.Layer):
     """
     NASNet specific depthwise separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -488,7 +488,7 @@ class DwsBranch(nn.Layer):
     """
     NASNet specific block with depthwise separable convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -553,7 +553,7 @@ def dws_branch_k3_s1_p1(in_channels,
     """
     3x3/1/1 version of the NASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -583,7 +583,7 @@ def dws_branch_k5_s1_p2(in_channels,
     """
     5x5/1/2 version of the NASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -614,7 +614,7 @@ def dws_branch_k5_s2_p2(in_channels,
     """
     5x5/2/2 version of the NASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -648,7 +648,7 @@ def dws_branch_k7_s2_p3(in_channels,
     """
     7x7/2/3 version of the NASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -677,7 +677,7 @@ class NasPathBranch(nn.Layer):
     """
     NASNet specific `path` branch (auxiliary block).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -727,7 +727,7 @@ class NasPathBlock(nn.Layer):
     """
     NASNet specific `path` block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -775,7 +775,7 @@ class Stem1Unit(nn.Layer):
     """
     NASNet Stem1 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -864,7 +864,7 @@ class Stem2Unit(nn.Layer):
     """
     NASNet Stem2 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -967,7 +967,7 @@ class FirstUnit(nn.Layer):
     """
     NASNet First unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1057,7 +1057,7 @@ class NormalUnit(nn.Layer):
     """
     NASNet Normal unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1146,7 +1146,7 @@ class ReductionBaseUnit(nn.Layer):
     """
     NASNet Reduction base unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1250,7 +1250,7 @@ class Reduction1Unit(ReductionBaseUnit):
     """
     NASNet Reduction1 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1280,7 +1280,7 @@ class Reduction2Unit(ReductionBaseUnit):
     """
     NASNet Reduction2 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1313,7 +1313,7 @@ class NASNetInitBlock(nn.Layer):
     """
     NASNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1353,7 +1353,7 @@ class NASNet(tf.keras.Model):
     NASNet-A model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -1493,7 +1493,7 @@ def get_nasnet(repeat,
     """
     Create NASNet-A model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     repeat : int
         NNumber of cell repeats.
@@ -1557,7 +1557,7 @@ def nasnet_4a1056(**kwargs):
     NASNet-A 4@1056 (NASNet-A-Mobile) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -1581,7 +1581,7 @@ def nasnet_6a4032(**kwargs):
     NASNet-A 6@4032 (NASNet-A-Large) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

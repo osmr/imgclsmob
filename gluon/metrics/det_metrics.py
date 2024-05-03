@@ -16,7 +16,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
     """
     Detection metric for COCO bbox task.
 
-    Parameters:
+    Parameters
     ----------
     img_height : int
         Processed image height.
@@ -118,7 +118,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         Update internal buffer with latest predictions. Note that the statistics are not available until you call
         self.get() to return the metrics.
 
-        Parameters:
+        Parameters
         ----------
         pred_bboxes : mxnet.NDArray or np.ndarray
             Prediction bounding boxes with shape `B, N, 4`.
@@ -184,7 +184,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : list of `NDArray`
             The labels of the data.
@@ -209,7 +209,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         """
         Apply affine transform to a bounding box given transform matrix t.
 
-        Parameters:
+        Parameters
         ----------
         pt : np.ndarray
             Bounding box with shape (1, 2).
@@ -303,7 +303,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
         """
         Update internal buffer with latest prediction and gt pairs.
 
-        Parameters:
+        Parameters
         ----------
         pred_bboxes : mxnet.NDArray or np.ndarray
             Prediction bounding boxes with shape `B, N, 4`.
@@ -496,7 +496,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
         """
         Calculate Intersection-Over-Union(IOU) of two bounding boxes.
 
-        Parameters:
+        Parameters
         ----------
         bbox_a : np.ndarray
             An ndarray with shape :math:`(N, 4)`.
@@ -572,7 +572,7 @@ class WiderfaceDetMetric(mx.metric.EvalMetric):
     """
     Detection metric for WIDER FACE detection task.
 
-    Parameters:
+    Parameters
     ----------
     receptive_field_center_starts : list of int
         The start location of the first receptive field of each scale.
@@ -615,7 +615,7 @@ class WiderfaceDetMetric(mx.metric.EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : list of `NDArray`
             The labels of the data.

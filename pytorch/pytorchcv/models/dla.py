@@ -18,7 +18,7 @@ class DLABottleneck(ResBottleneck):
     """
     DLA bottleneck block for residual path in residual block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -45,7 +45,7 @@ class DLABottleneckX(ResNeXtBottleneck):
     """
     DLA ResNeXt-like bottleneck block for residual path in residual block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -76,7 +76,7 @@ class DLAResBlock(nn.Module):
     """
     DLA residual block with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -133,7 +133,7 @@ class DLARoot(nn.Module):
     """
     DLA root block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class DLATree(nn.Module):
     """
     DLA tree unit. It's like iterative stage.
 
-    Parameters:
+    Parameters
     ----------
     levels : int
         Number of levels in the stage.
@@ -274,7 +274,7 @@ class DLAInitBlock(nn.Module):
     """
     DLA specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -309,7 +309,7 @@ class DLA(nn.Module):
     """
     DLA model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     levels : int
         Number of levels in each stage.
@@ -397,7 +397,7 @@ def get_dla(levels,
     """
     Create DLA model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     levels : int
         Number of levels in each stage.
@@ -440,7 +440,7 @@ def dla34(**kwargs):
     """
     DLA-34 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -455,7 +455,7 @@ def dla46c(**kwargs):
     """
     DLA-46-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -470,7 +470,7 @@ def dla46xc(**kwargs):
     """
     DLA-X-46-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -485,7 +485,7 @@ def dla60(**kwargs):
     """
     DLA-60 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -500,7 +500,7 @@ def dla60x(**kwargs):
     """
     DLA-X-60 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -515,7 +515,7 @@ def dla60xc(**kwargs):
     """
     DLA-X-60-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -530,7 +530,7 @@ def dla102(**kwargs):
     """
     DLA-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -545,7 +545,7 @@ def dla102x(**kwargs):
     """
     DLA-X-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -560,7 +560,7 @@ def dla102x2(**kwargs):
     """
     DLA-X2-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -579,7 +579,7 @@ def dla169(**kwargs):
     """
     DLA-169 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

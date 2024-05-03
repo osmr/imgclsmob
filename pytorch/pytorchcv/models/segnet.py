@@ -17,7 +17,7 @@ class SegNet(nn.Module):
     SegNet model from 'SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation,'
     https://arxiv.org/abs/1511.00561.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each stage in encoder and decoder.
@@ -129,7 +129,7 @@ def get_segnet(model_name=None,
     """
     Create SegNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -163,7 +163,7 @@ def segnet_cityscapes(num_classes=19, **kwargs):
     SegNet model for Cityscapes from 'SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation,'
     https://arxiv.org/abs/1511.00561.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

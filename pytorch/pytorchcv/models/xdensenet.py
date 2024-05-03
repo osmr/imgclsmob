@@ -20,7 +20,7 @@ class XConv2d(nn.Conv2d):
     """
     X-Convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -79,7 +79,7 @@ class PreXConvBlock(nn.Module):
     """
     X-Convolution block with Batch normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -153,7 +153,7 @@ def pre_xconv1x1_block(in_channels,
     """
     1x1 version of the pre-activated x-convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -193,7 +193,7 @@ def pre_xconv3x3_block(in_channels,
     """
     3x3 version of the pre-activated x-convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -228,7 +228,7 @@ class XDenseUnit(nn.Module):
     """
     X-DenseNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -276,7 +276,7 @@ class XDenseNet(nn.Module):
     X-DenseNet model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -359,7 +359,7 @@ def get_xdensenet(blocks,
     """
     Create X-DenseNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -424,7 +424,7 @@ def xdensenet121_2(**kwargs):
     X-DenseNet-121-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -439,7 +439,7 @@ def xdensenet161_2(**kwargs):
     X-DenseNet-161-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -454,7 +454,7 @@ def xdensenet169_2(**kwargs):
     X-DenseNet-169-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -469,7 +469,7 @@ def xdensenet201_2(**kwargs):
     X-DenseNet-201-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

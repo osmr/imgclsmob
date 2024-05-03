@@ -62,7 +62,7 @@ class DatasetMetaInfo(object):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

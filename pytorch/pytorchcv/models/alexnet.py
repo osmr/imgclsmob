@@ -17,7 +17,7 @@ class AlexConv(ConvBlock):
     """
     AlexNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -60,7 +60,7 @@ class AlexDense(nn.Module):
     """
     AlexNet specific dense block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -88,7 +88,7 @@ class AlexOutputBlock(nn.Module):
     """
     AlexNet specific output block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -123,7 +123,7 @@ class AlexNet(nn.Module):
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -203,7 +203,7 @@ def get_alexnet(version="a",
     """
     Create AlexNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str, default 'a'
         Version of AlexNet ('a' or 'b').
@@ -254,7 +254,7 @@ def alexnet(**kwargs):
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -269,7 +269,7 @@ def alexnetb(**kwargs):
     AlexNet-b model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997. Non-standard version.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

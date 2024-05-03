@@ -16,7 +16,7 @@ class DwsConv(nn.Layer):
     """
     Depthwise separable convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -68,7 +68,7 @@ class DwsConvBlock(nn.Layer):
     """
     Depthwise separable convolution block with batchnorm and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -127,7 +127,7 @@ def dws_conv3x3_block(in_channels,
     """
     3x3 version of the depthwise separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -153,7 +153,7 @@ class XceptionUnit(nn.Layer):
     """
     Xception unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -232,7 +232,7 @@ class XceptionInitBlock(nn.Layer):
     """
     Xception specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -269,7 +269,7 @@ class XceptionFinalBlock(nn.Layer):
     """
     Xception specific final block.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -310,7 +310,7 @@ class Xception(tf.keras.Model):
     Xception model from 'Xception: Deep Learning with Depthwise Separable Convolutions,'
     https://arxiv.org/abs/1610.02357.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -378,7 +378,7 @@ def get_xception(model_name=None,
     """
     Create Xception model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -415,7 +415,7 @@ def xception(**kwargs):
     Xception model from 'Xception: Deep Learning with Depthwise Separable Convolutions,'
     https://arxiv.org/abs/1610.02357.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

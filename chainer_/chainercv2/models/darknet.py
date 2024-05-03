@@ -21,7 +21,7 @@ def dark_convYxY(in_channels,
     """
     DarkNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -52,7 +52,7 @@ class DarkNet(Chain):
     """
     DarkNet model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -137,7 +137,7 @@ def get_darknet(version,
     """
     Create DarkNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of SqueezeNet ('ref', 'tiny' or '19').
@@ -192,7 +192,7 @@ def darknet_ref(**kwargs):
     """
     DarkNet 'Reference' model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -206,7 +206,7 @@ def darknet_tiny(**kwargs):
     """
     DarkNet Tiny model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -220,7 +220,7 @@ def darknet19(**kwargs):
     """
     DarkNet-19 model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

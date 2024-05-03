@@ -20,7 +20,7 @@ class PolyConv(HybridBlock):
     shared between Inception blocks and therefore the number of BatchNorm layers is equal to the number of Inception
     blocks inside a poly-N module.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -76,7 +76,7 @@ def poly_conv1x1(in_channels,
     """
     1x1 version of the PolyNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -119,7 +119,7 @@ class Conv1x1Branch(HybridBlock):
     """
     PolyNet specific convolutional 1x1 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -149,7 +149,7 @@ class Conv3x3Branch(HybridBlock):
     """
     PolyNet specific convolutional 3x3 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -181,7 +181,7 @@ class ConvSeqBranch(HybridBlock):
     """
     PolyNet specific convolutional sequence branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -231,7 +231,7 @@ class PolyConvSeqBranch(HybridBlock):
     """
     PolyNet specific convolutional sequence branch block with internal PolyNet specific convolution blocks.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -285,7 +285,7 @@ class TwoWayABlock(HybridBlock):
     """
     PolyNet type Inception-A block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -332,7 +332,7 @@ class TwoWayBBlock(HybridBlock):
     """
     PolyNet type Inception-B block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -372,7 +372,7 @@ class TwoWayCBlock(HybridBlock):
     """
     PolyNet type Inception-C block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -412,7 +412,7 @@ class PolyPreBBlock(HybridBlock):
     """
     PolyNet type PolyResidual-Pre-B block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -455,7 +455,7 @@ class PolyPreCBlock(HybridBlock):
     """
     PolyNet type PolyResidual-Pre-C block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -498,7 +498,7 @@ def poly_res_b_block(bn_use_global_stats):
     """
     PolyNet type PolyResidual-Res-B block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -515,7 +515,7 @@ def poly_res_c_block(bn_use_global_stats):
     """
     PolyNet type PolyResidual-Res-C block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -532,7 +532,7 @@ class MultiResidual(HybridBlock):
     """
     Base class for constructing N-way modules (2-way, 3-way, and so on). Actually it is for 2-way modules.
 
-    Parameters:
+    Parameters
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
@@ -572,7 +572,7 @@ class PolyResidual(HybridBlock):
     """
     The other base class for constructing N-way poly-modules. Actually it is for 3-way poly-modules.
 
-    Parameters:
+    Parameters
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
@@ -621,7 +621,7 @@ class PolyBaseUnit(HybridBlock):
     """
     PolyNet unit base class.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -677,7 +677,7 @@ class PolyAUnit(PolyBaseUnit):
     """
     PolyNet type A unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -703,7 +703,7 @@ class PolyBUnit(PolyBaseUnit):
     """
     PolyNet type B unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -731,7 +731,7 @@ class PolyCUnit(PolyBaseUnit):
     """
     PolyNet type C unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -759,7 +759,7 @@ class ReductionAUnit(HybridBlock):
     """
     PolyNet type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -797,7 +797,7 @@ class ReductionBUnit(HybridBlock):
     """
     PolyNet type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -842,7 +842,7 @@ class PolyBlock3a(HybridBlock):
     """
     PolyNet type Mixed-3a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -868,7 +868,7 @@ class PolyBlock4a(HybridBlock):
     """
     PolyNet type Mixed-4a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -903,7 +903,7 @@ class PolyBlock5a(HybridBlock):
     """
     PolyNet type Mixed-5a block.
 
-    Parameters:
+    Parameters
     ----------
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -929,7 +929,7 @@ class PolyInitBlock(HybridBlock):
     """
     PolyNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -976,7 +976,7 @@ class PolyNet(HybridBlock):
     PolyNet model from 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scales : list of list of floats
         Two way scale values for each normal unit.
@@ -1054,7 +1054,7 @@ def get_polynet(model_name=None,
     """
     Create PolyNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -1097,7 +1097,7 @@ def polynet(**kwargs):
     PolyNet model from 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

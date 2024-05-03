@@ -18,7 +18,7 @@ class CIFAR10MSDInitLayer(nn.Module):
     """
     MSDNet initial (so-called first) layer for CIFAR-10.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -49,7 +49,7 @@ class CIFAR10MSDClassifier(nn.Module):
     """
     MSDNet classifier for CIFAR-10.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -92,7 +92,7 @@ class CIFAR10MSDNet(nn.Module):
     MSDNet model for CIFAR-10 from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of list of int
         Number of output channels for each unit.
@@ -172,7 +172,7 @@ def get_msdnet_cifar10(blocks,
     """
     Create MSDNet model for CIFAR-10 with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -272,7 +272,7 @@ def msdnet22_cifar10(**kwargs):
     MSDNet-22 model for CIFAR-10 from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

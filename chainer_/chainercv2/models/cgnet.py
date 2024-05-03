@@ -20,7 +20,7 @@ class CGBlock(Chain):
     """
     CGNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -108,7 +108,7 @@ class CGUnit(Chain):
     """
     CGNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -164,7 +164,7 @@ class CGStage(Chain):
     """
     CGNet stage.
 
-    Parameters:
+    Parameters
     ----------
     x_channels : int
         Number of input/output channels for x.
@@ -230,7 +230,7 @@ class CGInitBlock(Chain):
     """
     CGNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -275,7 +275,7 @@ class CGNet(Chain):
     CGNet model from 'CGNet: A Light-weight Context Guided Network for Semantic Segmentation,'
     https://arxiv.org/abs/1811.08201.
 
-    Parameters:
+    Parameters
     ----------
     layers : list of int
         Number of layers for each unit.
@@ -370,7 +370,7 @@ def get_cgnet(model_name=None,
     """
     Create CGNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -415,7 +415,7 @@ def cgnet_cityscapes(classes=19, **kwargs):
     CGNet model for Cityscapes from 'CGNet: A Light-weight Context Guided Network for Semantic Segmentation,'
     https://arxiv.org/abs/1811.08201.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 19
         Number of segmentation classes.

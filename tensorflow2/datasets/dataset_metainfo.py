@@ -44,7 +44,7 @@ class DatasetMetaInfo(object):
         """
         Create python script parameters (for dataset specific metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -72,7 +72,7 @@ class DatasetMetaInfo(object):
         """
         Update dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -86,7 +86,7 @@ class DatasetMetaInfo(object):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

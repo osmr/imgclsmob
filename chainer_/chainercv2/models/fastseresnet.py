@@ -19,7 +19,7 @@ class FastSEResUnit(Chain):
     """
     Fast-SE-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -88,7 +88,7 @@ class FastSEResNet(Chain):
     """
     Fast-SE-ResNet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -170,7 +170,7 @@ def get_fastseresnet(blocks,
     """
     Create Fast-SE-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -258,7 +258,7 @@ def fastseresnet101b(**kwargs):
     Fast-SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

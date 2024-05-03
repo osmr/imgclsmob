@@ -46,7 +46,7 @@ class NewtonSchulzSqrt(mx.autograd.Function):
     """
     Newton-Schulz iterative matrix square root function.
 
-    Parameters:
+    Parameters
     ----------
     n : int
         Number of iterations (n > 1).
@@ -146,7 +146,7 @@ class iSQRTCOVPool(HybridBlock):
     """
     iSQRT-COV pooling layer.
 
-    Parameters:
+    Parameters
     ----------
     num_iter : int, default 5
         Number of iterations (num_iter > 1).
@@ -172,7 +172,7 @@ class iSQRTCOVResNet(HybridBlock):
     iSQRT-COV-ResNet model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
     Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -259,7 +259,7 @@ def get_isqrtcovresnet(blocks,
     """
     Create iSQRT-COV-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -328,7 +328,7 @@ def isqrtcovresnet18(**kwargs):
     iSQRT-COV-ResNet-18 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
     Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -345,7 +345,7 @@ def isqrtcovresnet34(**kwargs):
     iSQRT-COV-ResNet-34 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
     Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -362,7 +362,7 @@ def isqrtcovresnet50(**kwargs):
     iSQRT-COV-ResNet-50 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
     Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -380,7 +380,7 @@ def isqrtcovresnet50b(**kwargs):
     of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization,'
     https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -397,7 +397,7 @@ def isqrtcovresnet101(**kwargs):
     iSQRT-COV-ResNet-101 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
     Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -415,7 +415,7 @@ def isqrtcovresnet101b(**kwargs):
     of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization,'
     https://arxiv.org/abs/1712.01034.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -24,7 +24,7 @@ def conv4x4_block(in_channels,
     """
     4x4 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -76,7 +76,7 @@ def deconv4x4_block(in_channels,
     """
     4x4 version of the standard deconvolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -123,7 +123,7 @@ class PRResBottleneck(nn.Module):
     """
     PRNet specific bottleneck block for residual path in residual unit unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -173,7 +173,7 @@ class PRResUnit(nn.Module):
     """
     PRNet specific ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -225,7 +225,7 @@ class PROutputBlock(nn.Module):
     """
     PRNet specific output block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -265,7 +265,7 @@ class PRNet(nn.Module):
     PRNet model from 'Joint 3D Face Reconstruction and Dense Alignment with Position Map Regression Network,'
     https://arxiv.org/abs/1803.07835.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of list of int
         Number of output channels for each unit.
@@ -359,7 +359,7 @@ def get_prnet(model_name=None,
     """
     Create PRNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -395,7 +395,7 @@ def prnet(**kwargs):
     PRNet model for AFLW2000-3D from 'Joint 3D Face Reconstruction and Dense Alignment with Position Map Regression
     Network,' https://arxiv.org/abs/1803.07835.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

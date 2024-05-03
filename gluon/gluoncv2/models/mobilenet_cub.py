@@ -18,7 +18,7 @@ def mobilenet_w1_cub(classes=200, **kwargs):
     1.0 MobileNet-224 model for CUB-200-2011 from 'MobileNets: Efficient Convolutional Neural Networks for Mobile
     Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -37,7 +37,7 @@ def mobilenet_w3d4_cub(classes=200, **kwargs):
     0.75 MobileNet-224 model for CUB-200-2011 from 'MobileNets: Efficient Convolutional Neural Networks for Mobile
     Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -56,7 +56,7 @@ def mobilenet_wd2_cub(classes=200, **kwargs):
     0.5 MobileNet-224 model for CUB-200-2011 from 'MobileNets: Efficient Convolutional Neural Networks for Mobile
     Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -75,7 +75,7 @@ def mobilenet_wd4_cub(classes=200, **kwargs):
     0.25 MobileNet-224 model for CUB-200-2011 from 'MobileNets: Efficient Convolutional Neural Networks for Mobile
     Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -94,7 +94,7 @@ def fdmobilenet_w1_cub(classes=200, **kwargs):
     FD-MobileNet 1.0x model for CUB-200-2011 from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -113,7 +113,7 @@ def fdmobilenet_w3d4_cub(classes=200, **kwargs):
     FD-MobileNet 0.75x model for CUB-200-2011 from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -132,7 +132,7 @@ def fdmobilenet_wd2_cub(classes=200, **kwargs):
     FD-MobileNet 0.5x model for CUB-200-2011 from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.
@@ -151,7 +151,7 @@ def fdmobilenet_wd4_cub(classes=200, **kwargs):
     FD-MobileNet 0.25x model for CUB-200-2011 from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 200
         Number of classification classes.

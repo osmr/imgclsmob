@@ -27,7 +27,7 @@ def resnext_bottleneck(x,
     """
     ResNeXt bottleneck block for residual path in ResNeXt unit.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -98,7 +98,7 @@ def resnext_unit(x,
     """
     ResNeXt unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -159,7 +159,7 @@ class ResNeXt(object):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -205,7 +205,7 @@ class ResNeXt(object):
         """
         Build a model graph.
 
-        Parameters:
+        Parameters
         ----------
         x : Tensor
             Input tensor.
@@ -267,7 +267,7 @@ def get_resnext(blocks,
     """
     Create ResNeXt model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -334,7 +334,7 @@ def resnext14_16x4d(**kwargs):
     ResNeXt-14 (16x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -354,7 +354,7 @@ def resnext14_32x2d(**kwargs):
     ResNeXt-14 (32x2d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -374,7 +374,7 @@ def resnext14_32x4d(**kwargs):
     ResNeXt-14 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -394,7 +394,7 @@ def resnext26_16x4d(**kwargs):
     ResNeXt-26 (16x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -414,7 +414,7 @@ def resnext26_32x2d(**kwargs):
     ResNeXt-26 (32x2d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -434,7 +434,7 @@ def resnext26_32x4d(**kwargs):
     ResNeXt-26 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -454,7 +454,7 @@ def resnext38_32x4d(**kwargs):
     ResNeXt-38 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -474,7 +474,7 @@ def resnext50_32x4d(**kwargs):
     ResNeXt-50 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -494,7 +494,7 @@ def resnext101_32x4d(**kwargs):
     ResNeXt-101 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -514,7 +514,7 @@ def resnext101_64x4d(**kwargs):
     ResNeXt-101 (64x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

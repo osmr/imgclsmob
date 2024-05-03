@@ -19,7 +19,7 @@ class Inception3x3Branch(Chain):
     """
     BN-Inception 3x3 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -65,7 +65,7 @@ class InceptionDouble3x3Branch(Chain):
     """
     BN-Inception double 3x3 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -117,7 +117,7 @@ class InceptionPoolBranch(Chain):
     """
     BN-Inception avg-pool branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -167,7 +167,7 @@ class StemBlock(Chain):
     """
     BN-Inception stem block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -225,7 +225,7 @@ class InceptionBlock(Chain):
     """
     BN-Inception unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -287,7 +287,7 @@ class ReductionBlock(Chain):
     """
     BN-Inception reduction block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -344,7 +344,7 @@ class BNInception(Chain):
     BN-Inception model from 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
     Shift,' https://arxiv.org/abs/1502.03167.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -440,7 +440,7 @@ def get_bninception(model_name=None,
     """
     Create BN-Inception model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -501,7 +501,7 @@ def bninception(**kwargs):
     BN-Inception model from 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
     Shift,' https://arxiv.org/abs/1502.03167.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

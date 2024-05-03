@@ -16,7 +16,7 @@ def get_pip_versions(package_list,
     """
     Get packages information by using 'pip show' command.
 
-    Parameters:
+    Parameters
     ----------
     package_list : list of str
         List of package names.
@@ -45,7 +45,7 @@ def get_package_versions(package_list):
     """
     Get packages information by inspecting __version__ attribute.
 
-    Parameters:
+    Parameters
     ----------
     package_list : list of str
         List of package names.
@@ -76,7 +76,7 @@ def get_pyenv_info(packages,
     Get all available information about Python environment: packages information, Python version, current path,
     git revision.
 
-    Parameters:
+    Parameters
     ----------
     packages : list of str
         list of package names to inspect only __version__.
@@ -143,7 +143,7 @@ def pretty_print_dict2str(d):
     """
     Pretty print of dictionary d to json-formated string.
 
-    Parameters:
+    Parameters
     ----------
     d : dict
         Dictionary with module descriptions.
@@ -166,7 +166,7 @@ def get_env_stats(packages,
     """
     Get environment statistics.
 
-    Parameters:
+    Parameters
     ----------
     packages : list of str
         list of package names to inspect only __version__.

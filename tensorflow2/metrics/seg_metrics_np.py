@@ -17,7 +17,7 @@ def seg_pixel_accuracy_np(label_imask,
     """
     The segmentation pixel accuracy.
 
-    Parameters:
+    Parameters
     ----------
     label_imask : np.array
         Ground truth index mask (maybe batch of).
@@ -60,7 +60,7 @@ def segm_mean_accuracy_hmasks(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
@@ -104,7 +104,7 @@ def segm_mean_accuracy(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
@@ -149,7 +149,7 @@ def segm_mean_iou_imasks(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
@@ -193,7 +193,7 @@ def seg_mean_iou_np(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
@@ -238,7 +238,7 @@ def segm_mean_iou2(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask (batch of).
@@ -281,7 +281,7 @@ def seg_mean_iou_imasks_np(label_imask,
     """
     The segmentation mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_imask : nd.array
         Ground truth index mask (batch of).
@@ -357,7 +357,7 @@ def segm_fw_iou_hmasks(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.
@@ -396,7 +396,7 @@ def segm_fw_iou(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : np.array
         Ground truth one-hot mask.

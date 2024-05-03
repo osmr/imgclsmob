@@ -17,7 +17,7 @@ class PnasMaxPoolBlock(nn.Layer):
     """
     PNASNet specific Max pooling layer with extra padding.
 
-    Parameters:
+    Parameters
     ----------
     strides : int or tuple/list of 2 int, default 2
         Strides of the convolution.
@@ -66,7 +66,7 @@ def pnas_conv1x1(in_channels,
     """
     1x1 version of the PNASNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -92,7 +92,7 @@ class DwsBranch(nn.Layer):
     """
     PNASNet specific block with depthwise separable convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -157,7 +157,7 @@ def dws_branch_k3(in_channels,
     """
     3x3 version of the PNASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -193,7 +193,7 @@ def dws_branch_k5(in_channels,
     """
     5x5 version of the PNASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -228,7 +228,7 @@ def dws_branch_k7(in_channels,
     """
     7x7 version of the PNASNet specific depthwise separable convolution branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -256,7 +256,7 @@ class PnasMaxPathBlock(nn.Layer):
     """
     PNASNet specific `max path` auxiliary block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -295,7 +295,7 @@ class PnasBaseUnit(nn.Layer):
     """
     PNASNet base unit.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -326,7 +326,7 @@ class Stem1Unit(PnasBaseUnit):
     """
     PNASNet Stem1 unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -415,7 +415,7 @@ class PnasUnit(PnasBaseUnit):
     """
     PNASNet ordinary unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -545,7 +545,7 @@ class PNASNet(tf.keras.Model):
     """
     PNASNet model from 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -646,7 +646,7 @@ def get_pnasnet(model_name=None,
     """
     Create PNASNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -689,7 +689,7 @@ def pnasnet5large(**kwargs):
     """
     PNASNet-5-Large model from 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

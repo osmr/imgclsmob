@@ -119,7 +119,7 @@ def test(net,
     """
     Main test routine.
 
-    Parameters:
+    Parameters
     ----------
     net : obj
         Model.

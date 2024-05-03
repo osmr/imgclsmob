@@ -17,7 +17,7 @@ class SVHN(gluon.data.dataset._DownloadedDataset):
     Note: The SVHN dataset assigns the label `10` to the digit `0`. However, in this Dataset,
     we assign the label `0` to the digit `0`.
 
-    Parameters:
+    Parameters
     ----------
     root : str, default $MXNET_HOME/datasets/svhn
         Path to temp folder for storing data.

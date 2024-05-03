@@ -19,7 +19,7 @@ class CenterNetDecoderUnit(HybridBlock):
     """
     CenterNet decoder unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -58,7 +58,7 @@ class CenterNetHeadBlock(HybridBlock):
     """
     CenterNet simple head block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -91,7 +91,7 @@ class CenterNetHeatmapBlock(HybridBlock):
     """
     CenterNet heatmap block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -135,7 +135,7 @@ class CenterNetHeatmapMaxDet(HybridBlock):
     """
     CenterNet decoder for heads (heatmap, wh, reg).
 
-    Parameters:
+    Parameters
     ----------
     topk : int, default 40
         Keep only `topk` detections.
@@ -207,7 +207,7 @@ class CenterNet(HybridBlock):
     """
     CenterNet model from 'Objects as Points,' https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -294,7 +294,7 @@ def get_centernet(backbone,
     """
     Create CenterNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -343,7 +343,7 @@ def centernet_resnet18_voc(pretrained_backbone=False, classes=20, **kwargs):
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -366,7 +366,7 @@ def centernet_resnet18_coco(pretrained_backbone=False, classes=80, **kwargs):
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -389,7 +389,7 @@ def centernet_resnet50b_voc(pretrained_backbone=False, classes=20, **kwargs):
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -412,7 +412,7 @@ def centernet_resnet50b_coco(pretrained_backbone=False, classes=80, **kwargs):
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -435,7 +435,7 @@ def centernet_resnet101b_voc(pretrained_backbone=False, classes=20, **kwargs):
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -458,7 +458,7 @@ def centernet_resnet101b_coco(pretrained_backbone=False, classes=80, **kwargs):
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

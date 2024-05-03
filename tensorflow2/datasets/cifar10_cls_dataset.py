@@ -43,7 +43,7 @@ def cifar10_train_transform(ds_metainfo,
     """
     Create image transform sequence for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -72,7 +72,7 @@ def cifar10_val_transform(ds_metainfo,
     """
     Create image transform sequence for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -99,7 +99,7 @@ def cifar10_train_generator(data_generator,
     """
     Create image generator for training subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -129,7 +129,7 @@ def cifar10_val_generator(data_generator,
     """
     Create image generator for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.

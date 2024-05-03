@@ -14,7 +14,7 @@ class ADE20KSegDataset(SegDataset):
     """
     ADE20K semantic segmentation dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to a folder with `ADEChallengeData2016` subfolder.

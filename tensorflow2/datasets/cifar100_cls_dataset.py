@@ -23,7 +23,7 @@ def cifar100_train_generator(data_generator,
     """
     Create image generator for training subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -53,7 +53,7 @@ def cifar100_val_generator(data_generator,
     """
     Create image generator for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.

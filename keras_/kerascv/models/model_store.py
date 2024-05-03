@@ -188,7 +188,7 @@ def get_model_file(model_name,
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str
         Name of the model.
@@ -240,7 +240,7 @@ def get_model_file(model_name,
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
     """Download an given URL
 
-    Parameters:
+    Parameters
     ----------
     url : str
         URL to download
@@ -322,7 +322,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
 def _check_sha1(filename, sha1_hash):
     """Check whether the sha1 hash of the file content matches the expected hash.
 
-    Parameters:
+    Parameters
     ----------
     filename : str
         Path to the file.
@@ -350,7 +350,7 @@ def _preprocess_weights_for_loading(layer,
     """
     Converts layers weights.
 
-    Parameters:
+    Parameters
     ----------
     layer : Layer
         Layer instance.
@@ -378,7 +378,7 @@ def _load_weights_from_hdf5_group(f,
     """
     Implements topological (order-based) weight loading.
 
-    Parameters:
+    Parameters
     ----------
     f : File
         A pointer to a HDF5 group.
@@ -435,7 +435,7 @@ def _load_weights_from_hdf5_group_by_name(f,
     """
     Implements name-based weight loading.
 
-    Parameters:
+    Parameters
     ----------
     f : File
         A pointer to a HDF5 group.
@@ -485,7 +485,7 @@ def load_model(net,
     """
     Load model state dictionary from a file.
 
-    Parameters:
+    Parameters
     ----------
     net : Model
         Network in which weights are loaded.
@@ -521,7 +521,7 @@ def download_model(net,
     """
     Load model state dictionary from a file with downloading it if necessary.
 
-    Parameters:
+    Parameters
     ----------
     net : Module
         Network in which weights are loaded.

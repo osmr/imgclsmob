@@ -16,7 +16,7 @@ class FireBlock(nn.Module):
     """
     SQNet specific encoder block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -71,7 +71,7 @@ class ParallelDilatedConv(nn.Module):
     """
     SQNet specific decoder block (parallel dilated convolution).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -113,7 +113,7 @@ class SQNetUpStage(nn.Module):
     """
     SQNet upscale stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -170,7 +170,7 @@ class SQNet(nn.Module):
     SQNet model from 'Speeding up Semantic Segmentation for Autonomous Driving,'
     https://openreview.net/pdf?id=S1uHiFyyg.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each stage in encoder and decoder.
@@ -293,7 +293,7 @@ def get_sqnet(model_name=None,
     """
     Create SQNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -329,7 +329,7 @@ def sqnet_cityscapes(num_classes=19, **kwargs):
     SQNet model for Cityscapes from 'Speeding up Semantic Segmentation for Autonomous Driving,'
     https://openreview.net/pdf?id=S1uHiFyyg.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

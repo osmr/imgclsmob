@@ -24,7 +24,7 @@ def add_eval_parser_arguments(parser):
     """
     Create python script parameters (for eval specific subpart).
 
-    Parameters:
+    Parameters
     ----------
     parser : ArgumentParser
         ArgumentParser instance.
@@ -172,7 +172,7 @@ def calc_model_accuracy(net,
     """
     Main test routine.
 
-    Parameters:
+    Parameters
     ----------
     net : HybridBlock
         Model.
@@ -258,7 +258,7 @@ def test_model(args):
     """
     Main test routine.
 
-    Parameters:
+    Parameters
     ----------
     args : ArgumentParser
         Main script arguments.

@@ -20,7 +20,7 @@ class MobileNet(Chain):
     MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -100,7 +100,7 @@ def get_mobilenet(width_scale,
     """
     Create MobileNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -151,7 +151,7 @@ def mobilenet_w1(**kwargs):
     1.0 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -166,7 +166,7 @@ def mobilenet_w3d4(**kwargs):
     0.75 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -181,7 +181,7 @@ def mobilenet_wd2(**kwargs):
     0.5 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -196,7 +196,7 @@ def mobilenet_wd4(**kwargs):
     0.25 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

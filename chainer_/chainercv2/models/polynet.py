@@ -23,7 +23,7 @@ class PolyConv(Chain):
     shared between Inception blocks and therefore the number of BatchNorm layers is equal to the number of Inception
     blocks inside a poly-N module.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -74,7 +74,7 @@ def poly_conv1x1(in_channels,
     """
     1x1 version of the PolyNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -115,7 +115,7 @@ class Conv1x1Branch(Chain):
     """
     PolyNet specific convolutional 1x1 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -140,7 +140,7 @@ class Conv3x3Branch(Chain):
     """
     PolyNet specific convolutional 3x3 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -167,7 +167,7 @@ class ConvSeqBranch(Chain):
     """
     PolyNet specific convolutional sequence branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -213,7 +213,7 @@ class PolyConvSeqBranch(Chain):
     """
     PolyNet specific convolutional sequence branch block with internal PolyNet specific convolution blocks.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -362,7 +362,7 @@ class PolyPreBBlock(Chain):
     """
     PolyNet type PolyResidual-Pre-B block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -400,7 +400,7 @@ class PolyPreCBlock(Chain):
     """
     PolyNet type PolyResidual-Pre-C block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -460,7 +460,7 @@ class MultiResidual(Chain):
     """
     Base class for constructing N-way modules (2-way, 3-way, and so on). Actually it is for 2-way modules.
 
-    Parameters:
+    Parameters
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
@@ -496,7 +496,7 @@ class PolyResidual(Chain):
     """
     The other base class for constructing N-way poly-modules. Actually it is for 3-way poly-modules.
 
-    Parameters:
+    Parameters
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
@@ -539,7 +539,7 @@ class PolyBaseUnit(Chain):
     """
     PolyNet unit base class.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -588,7 +588,7 @@ class PolyAUnit(PolyBaseUnit):
     """
     PolyNet type A unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -608,7 +608,7 @@ class PolyBUnit(PolyBaseUnit):
     """
     PolyNet type B unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -630,7 +630,7 @@ class PolyCUnit(PolyBaseUnit):
     """
     PolyNet type C unit.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
@@ -783,7 +783,7 @@ class PolyInitBlock(Chain):
     """
     PolyNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -823,7 +823,7 @@ class PolyNet(Chain):
     PolyNet model from 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 
-    Parameters:
+    Parameters
     ----------
     two_way_scales : list of list of floats
         Two way scale values for each normal unit.
@@ -903,7 +903,7 @@ def get_polynet(model_name=None,
     """
     Create PolyNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -944,7 +944,7 @@ def polynet(**kwargs):
     PolyNet model from 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -15,7 +15,7 @@ def prepare_logger(logging_dir_path,
     """
     Prepare logger.
 
-    Parameters:
+    Parameters
     ----------
     logging_dir_path : str
         Path to logging directory.
@@ -57,7 +57,7 @@ def initialize_logging(logging_dir_path,
     """
     Initialize logging subsystem.
 
-    Parameters:
+    Parameters
     ----------
     logging_dir_path : str
         Path to logging directory.

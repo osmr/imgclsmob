@@ -18,7 +18,7 @@ class CondenseSimpleConv(nn.Module):
     """
     CondenseNet specific simple convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -65,7 +65,7 @@ def condense_simple_conv3x3(in_channels,
     """
     3x3 version of the CondenseNet specific simple convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -87,7 +87,7 @@ class CondenseComplexConv(nn.Module):
     """
     CondenseNet specific complex convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -141,7 +141,7 @@ def condense_complex_conv1x1(in_channels,
     """
     1x1 version of the CondenseNet specific complex convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -163,7 +163,7 @@ class CondenseUnit(nn.Module):
     """
     CondenseNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -203,7 +203,7 @@ class TransitionBlock(nn.Module):
     CondenseNet's auxiliary block, which can be treated as the initial part of the DenseNet unit, triggered only in the
     first unit of each stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -226,7 +226,7 @@ class CondenseInitBlock(nn.Module):
     """
     CondenseNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -254,7 +254,7 @@ class PostActivation(nn.Module):
     """
     CondenseNet final block, which performs the same function of postactivation as in PreResNet.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -275,7 +275,7 @@ class CondenseLinear(nn.Module):
     """
     CondenseNet specific linear block.
 
-    Parameters:
+    Parameters
     ----------
     in_features : int
         Number of input channels.
@@ -307,7 +307,7 @@ class CondenseNet(nn.Module):
     CondenseNet model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -388,7 +388,7 @@ def get_condensenet(num_layers,
     """
     Create CondenseNet (converted) model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_layers : int
         Number of layers.
@@ -441,7 +441,7 @@ def condensenet74_c4_g4(**kwargs):
     CondenseNet-74 (C=G=4) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -456,7 +456,7 @@ def condensenet74_c8_g8(**kwargs):
     CondenseNet-74 (C=G=8) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

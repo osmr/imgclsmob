@@ -100,7 +100,7 @@ class ReversibleBlock(nn.Module):
     """
     RevNet reversible block.
 
-    Parameters:
+    Parameters
     ----------
     fm : nn.Module
         Fm-function.
@@ -143,7 +143,7 @@ class RevResBlock(nn.Module):
     """
     Simple RevNet block for residual path in RevNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -184,7 +184,7 @@ class RevResBottleneck(nn.Module):
     """
     RevNet bottleneck block for residual path in RevNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -233,7 +233,7 @@ class RevUnit(nn.Module):
     """
     RevNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -299,7 +299,7 @@ class RevPostActivation(nn.Module):
     """
     RevNet specific post-activation block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -321,7 +321,7 @@ class RevNet(nn.Module):
     RevNet model from 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
     https://arxiv.org/abs/1707.04585.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -398,7 +398,7 @@ def get_revnet(blocks,
     """
     Create RevNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -452,7 +452,7 @@ def revnet38(**kwargs):
     RevNet-38 model from 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
     https://arxiv.org/abs/1707.04585.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -467,7 +467,7 @@ def revnet110(**kwargs):
     RevNet-110 model from 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
     https://arxiv.org/abs/1707.04585.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -482,7 +482,7 @@ def revnet164(**kwargs):
     RevNet-164 model from 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
     https://arxiv.org/abs/1707.04585.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

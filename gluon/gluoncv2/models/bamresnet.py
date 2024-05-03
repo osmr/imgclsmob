@@ -16,7 +16,7 @@ class DenseBlock(HybridBlock):
     """
     Standard dense block with Batch normalization and ReLU activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input features.
@@ -51,7 +51,7 @@ class ChannelGate(HybridBlock):
     """
     BAM channel gate block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -103,7 +103,7 @@ class SpatialGate(HybridBlock):
     """
     BAM spatial gate block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -162,7 +162,7 @@ class BamBlock(HybridBlock):
     """
     BAM attention block for BAM-ResNet.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -193,7 +193,7 @@ class BamResUnit(HybridBlock):
     """
     BAM-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -240,7 +240,7 @@ class BamResNet(HybridBlock):
     """
     BAM-ResNet model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -316,7 +316,7 @@ def get_resnet(blocks,
     """
     Create BAM-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -383,7 +383,7 @@ def bam_resnet18(**kwargs):
     """
     BAM-ResNet-18 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -399,7 +399,7 @@ def bam_resnet34(**kwargs):
     """
     BAM-ResNet-34 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -415,7 +415,7 @@ def bam_resnet50(**kwargs):
     """
     BAM-ResNet-50 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -431,7 +431,7 @@ def bam_resnet101(**kwargs):
     """
     BAM-ResNet-101 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -447,7 +447,7 @@ def bam_resnet152(**kwargs):
     """
     BAM-ResNet-152 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

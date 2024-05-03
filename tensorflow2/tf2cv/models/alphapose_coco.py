@@ -15,7 +15,7 @@ class AlphaPose(tf.keras.Model):
     """
     AlphaPose model from 'RMPE: Regional Multi-person Pose Estimation,' https://arxiv.org/abs/1612.00137.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -100,7 +100,7 @@ def get_alphapose(backbone,
     """
     Create AlphaPose model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -148,7 +148,7 @@ def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, dat
     AlphaPose model on the base of ResNet-101b for COCO Keypoint from 'RMPE: Regional Multi-person Pose Estimation,'
     https://arxiv.org/abs/1612.00137.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

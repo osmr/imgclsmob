@@ -18,7 +18,7 @@ class MEUnit(nn.Layer):
     """
     MENet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -165,7 +165,7 @@ class MEInitBlock(nn.Layer):
     """
     MENet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -214,7 +214,7 @@ class MENet(tf.keras.Model):
     MENet model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
     https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -299,7 +299,7 @@ def get_menet(first_stage_channels,
     """
     Create MENet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     first_stage_channels : int
         Number of output channels at the first stage.
@@ -374,7 +374,7 @@ def menet108_8x1_g3(**kwargs):
     108-MENet-8x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -389,7 +389,7 @@ def menet128_8x1_g4(**kwargs):
     128-MENet-8x1 (g=4) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -404,7 +404,7 @@ def menet160_8x1_g8(**kwargs):
     160-MENet-8x1 (g=8) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -419,7 +419,7 @@ def menet228_12x1_g3(**kwargs):
     228-MENet-12x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -434,7 +434,7 @@ def menet256_12x1_g4(**kwargs):
     256-MENet-12x1 (g=4) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -449,7 +449,7 @@ def menet348_12x1_g3(**kwargs):
     348-MENet-12x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -464,7 +464,7 @@ def menet352_12x1_g8(**kwargs):
     352-MENet-12x1 (g=8) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -479,7 +479,7 @@ def menet456_24x1_g3(**kwargs):
     456-MENet-24x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
     Applications,' https://arxiv.org/abs/1803.09127.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

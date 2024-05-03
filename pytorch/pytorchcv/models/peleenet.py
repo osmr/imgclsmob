@@ -16,7 +16,7 @@ class PeleeBranch1(nn.Module):
     """
     PeleeNet branch type 1 block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -51,7 +51,7 @@ class PeleeBranch2(nn.Module):
     """
     PeleeNet branch type 2 block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -86,7 +86,7 @@ class StemBlock(nn.Module):
     """
     PeleeNet stem block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -131,7 +131,7 @@ class DenseBlock(nn.Module):
     """
     PeleeNet dense block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -168,7 +168,7 @@ class TransitionBlock(nn.Module):
     """
     PeleeNet's transition block, like in DensNet, but with ordinary convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -198,7 +198,7 @@ class PeleeNet(nn.Module):
     PeleeNet model from 'Pelee: A Real-Time Object Detection System on Mobile Devices,'
     https://arxiv.org/abs/1804.06882.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -282,7 +282,7 @@ def get_peleenet(model_name=None,
     """
     Create PeleeNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -328,7 +328,7 @@ def peleenet(**kwargs):
     PeleeNet model from 'Pelee: A Real-Time Object Detection System on Mobile Devices,'
     https://arxiv.org/abs/1804.06882.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

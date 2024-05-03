@@ -17,7 +17,7 @@ class PyramidPoolingZeroBranch(nn.Module):
     """
     Pyramid pooling zero branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -54,7 +54,7 @@ class AttentionRefinementBlock(nn.Module):
     """
     Attention refinement block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -86,7 +86,7 @@ class PyramidPoolingMainBranch(nn.Module):
     """
     Pyramid pooling main branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -123,7 +123,7 @@ class FeatureFusion(nn.Module):
     """
     Feature fusion block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class PyramidPooling(nn.Module):
     """
     Pyramid Pooling module.
 
-    Parameters:
+    Parameters
     ----------
     x16_in_channels : int
         Number of input channels for x16.
@@ -216,7 +216,7 @@ class BiSeHead(nn.Module):
     """
     BiSeNet head (final) block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -248,7 +248,7 @@ class BiSeNet(nn.Module):
     BiSeNet model from 'BiSeNet: Bilateral Segmentation Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1808.00897.
 
-    Parameters:
+    Parameters
     ----------
     backbone : func -> nn.Sequential
         Feature extractor.
@@ -340,7 +340,7 @@ def get_bisenet(model_name=None,
     """
     Create BiSeNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -369,7 +369,7 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **k
     BiSeNet model on the base of ResNet-18 for face segmentation on CelebAMask-HQ from 'BiSeNet: Bilateral Segmentation
     Network for Real-time Semantic Segmentation,' https://arxiv.org/abs/1808.00897.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

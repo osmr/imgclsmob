@@ -40,7 +40,7 @@ class CIFARResNeXt(tf.keras.Model):
     ResNeXt model for CIFAR from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -124,7 +124,7 @@ def get_resnext_cifar(classes,
     """
     ResNeXt model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -177,7 +177,7 @@ def resnext20_1x64d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (1x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -195,7 +195,7 @@ def resnext20_1x64d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (1x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -213,7 +213,7 @@ def resnext20_1x64d_svhn(classes=10, **kwargs):
     ResNeXt-20 (1x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -231,7 +231,7 @@ def resnext20_2x32d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (2x32d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -249,7 +249,7 @@ def resnext20_2x32d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (2x32d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -267,7 +267,7 @@ def resnext20_2x32d_svhn(classes=10, **kwargs):
     ResNeXt-20 (2x32d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -285,7 +285,7 @@ def resnext20_2x64d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (2x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -303,7 +303,7 @@ def resnext20_2x64d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (2x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -321,7 +321,7 @@ def resnext20_2x64d_svhn(classes=10, **kwargs):
     ResNeXt-20 (2x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -339,7 +339,7 @@ def resnext20_4x16d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (4x16d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -357,7 +357,7 @@ def resnext20_4x16d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (4x16d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -375,7 +375,7 @@ def resnext20_4x16d_svhn(classes=10, **kwargs):
     ResNeXt-20 (4x16d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -393,7 +393,7 @@ def resnext20_4x32d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (4x32d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -411,7 +411,7 @@ def resnext20_4x32d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (4x32d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -429,7 +429,7 @@ def resnext20_4x32d_svhn(classes=10, **kwargs):
     ResNeXt-20 (4x32d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -447,7 +447,7 @@ def resnext20_8x8d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (8x8d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -465,7 +465,7 @@ def resnext20_8x8d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (8x8d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -483,7 +483,7 @@ def resnext20_8x8d_svhn(classes=10, **kwargs):
     ResNeXt-20 (8x8d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -501,7 +501,7 @@ def resnext20_8x16d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (8x16d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -519,7 +519,7 @@ def resnext20_8x16d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (8x16d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -537,7 +537,7 @@ def resnext20_8x16d_svhn(classes=10, **kwargs):
     ResNeXt-20 (8x16d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -555,7 +555,7 @@ def resnext20_16x4d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (16x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -573,7 +573,7 @@ def resnext20_16x4d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (16x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -591,7 +591,7 @@ def resnext20_16x4d_svhn(classes=10, **kwargs):
     ResNeXt-20 (16x4d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -609,7 +609,7 @@ def resnext20_16x8d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (16x8d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -627,7 +627,7 @@ def resnext20_16x8d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (16x8d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -645,7 +645,7 @@ def resnext20_16x8d_svhn(classes=10, **kwargs):
     ResNeXt-20 (16x8d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -663,7 +663,7 @@ def resnext20_32x2d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (32x2d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -681,7 +681,7 @@ def resnext20_32x2d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (32x2d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -699,7 +699,7 @@ def resnext20_32x2d_svhn(classes=10, **kwargs):
     ResNeXt-20 (32x2d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -717,7 +717,7 @@ def resnext20_32x4d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (32x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -735,7 +735,7 @@ def resnext20_32x4d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (32x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -753,7 +753,7 @@ def resnext20_32x4d_svhn(classes=10, **kwargs):
     ResNeXt-20 (32x4d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -771,7 +771,7 @@ def resnext20_64x1d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (64x1d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -789,7 +789,7 @@ def resnext20_64x1d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (64x1d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -807,7 +807,7 @@ def resnext20_64x1d_svhn(classes=10, **kwargs):
     ResNeXt-20 (64x1d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -825,7 +825,7 @@ def resnext20_64x2d_cifar10(classes=10, **kwargs):
     ResNeXt-20 (64x2d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -843,7 +843,7 @@ def resnext20_64x2d_cifar100(classes=100, **kwargs):
     ResNeXt-20 (64x2d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -861,7 +861,7 @@ def resnext20_64x2d_svhn(classes=10, **kwargs):
     ResNeXt-20 (64x1d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -879,7 +879,7 @@ def resnext29_32x4d_cifar10(classes=10, **kwargs):
     ResNeXt-29 (32x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -897,7 +897,7 @@ def resnext29_32x4d_cifar100(classes=100, **kwargs):
     ResNeXt-29 (32x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -915,7 +915,7 @@ def resnext29_32x4d_svhn(classes=10, **kwargs):
     ResNeXt-29 (32x4d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -933,7 +933,7 @@ def resnext29_16x64d_cifar10(classes=10, **kwargs):
     ResNeXt-29 (16x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -951,7 +951,7 @@ def resnext29_16x64d_cifar100(classes=100, **kwargs):
     ResNeXt-29 (16x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -969,7 +969,7 @@ def resnext29_16x64d_svhn(classes=10, **kwargs):
     ResNeXt-29 (16x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -987,7 +987,7 @@ def resnext56_1x64d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (1x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1005,7 +1005,7 @@ def resnext56_1x64d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (1x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1023,7 +1023,7 @@ def resnext56_1x64d_svhn(classes=10, **kwargs):
     ResNeXt-56 (1x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1041,7 +1041,7 @@ def resnext56_2x32d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (2x32d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1059,7 +1059,7 @@ def resnext56_2x32d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (2x32d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1077,7 +1077,7 @@ def resnext56_2x32d_svhn(classes=10, **kwargs):
     ResNeXt-56 (2x32d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1095,7 +1095,7 @@ def resnext56_4x16d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (4x16d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1113,7 +1113,7 @@ def resnext56_4x16d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (4x16d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1131,7 +1131,7 @@ def resnext56_4x16d_svhn(classes=10, **kwargs):
     ResNeXt-56 (4x16d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1149,7 +1149,7 @@ def resnext56_8x8d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (8x8d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1167,7 +1167,7 @@ def resnext56_8x8d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (8x8d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1185,7 +1185,7 @@ def resnext56_8x8d_svhn(classes=10, **kwargs):
     ResNeXt-56 (8x8d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1203,7 +1203,7 @@ def resnext56_16x4d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (16x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1221,7 +1221,7 @@ def resnext56_16x4d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (16x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1239,7 +1239,7 @@ def resnext56_16x4d_svhn(classes=10, **kwargs):
     ResNeXt-56 (16x4d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1257,7 +1257,7 @@ def resnext56_32x2d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (32x2d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1275,7 +1275,7 @@ def resnext56_32x2d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (32x2d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1293,7 +1293,7 @@ def resnext56_32x2d_svhn(classes=10, **kwargs):
     ResNeXt-56 (32x2d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1311,7 +1311,7 @@ def resnext56_64x1d_cifar10(classes=10, **kwargs):
     ResNeXt-56 (64x1d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1329,7 +1329,7 @@ def resnext56_64x1d_cifar100(classes=100, **kwargs):
     ResNeXt-56 (64x1d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1347,7 +1347,7 @@ def resnext56_64x1d_svhn(classes=10, **kwargs):
     ResNeXt-56 (64x1d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1365,7 +1365,7 @@ def resnext272_1x64d_cifar10(classes=10, **kwargs):
     ResNeXt-272 (1x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1383,7 +1383,7 @@ def resnext272_1x64d_cifar100(classes=100, **kwargs):
     ResNeXt-272 (1x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1401,7 +1401,7 @@ def resnext272_1x64d_svhn(classes=10, **kwargs):
     ResNeXt-272 (1x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1419,7 +1419,7 @@ def resnext272_2x32d_cifar10(classes=10, **kwargs):
     ResNeXt-272 (2x32d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -1437,7 +1437,7 @@ def resnext272_2x32d_cifar100(classes=100, **kwargs):
     ResNeXt-272 (2x32d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -1455,7 +1455,7 @@ def resnext272_2x32d_svhn(classes=10, **kwargs):
     ResNeXt-272 (2x32d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

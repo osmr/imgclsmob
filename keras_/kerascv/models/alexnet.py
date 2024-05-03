@@ -23,7 +23,7 @@ def alex_conv(x,
     """
     AlexNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -69,7 +69,7 @@ def alex_dense(x,
     """
     AlexNet specific dense block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -103,7 +103,7 @@ def alex_output_block(x,
     """
     AlexNet specific output block.
 
-    Parameters:
+    Parameters
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
@@ -150,7 +150,7 @@ def alexnet_model(channels,
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -216,7 +216,7 @@ def get_alexnet(version="a",
     """
     Create AlexNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str, default 'a'
         Version of AlexNet ('a' or 'b').
@@ -267,7 +267,7 @@ def alexnet(**kwargs):
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -282,7 +282,7 @@ def alexnetb(**kwargs):
     AlexNet-b model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997. Non-standard version.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

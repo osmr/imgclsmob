@@ -19,7 +19,7 @@ def add_train_cls_parser_arguments(parser):
     """
     Create python script parameters (for training/classification specific subpart).
 
-    Parameters:
+    Parameters
     ----------
     parser : ArgumentParser
         ArgumentParser instance.

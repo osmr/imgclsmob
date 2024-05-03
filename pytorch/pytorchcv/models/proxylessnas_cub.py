@@ -14,7 +14,7 @@ def proxylessnas_cpu_cub(num_classes=200, **kwargs):
     ProxylessNAS (CPU) model for CUB-200-2011 from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and
     Hardware,' https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification classes.
@@ -31,7 +31,7 @@ def proxylessnas_gpu_cub(num_classes=200, **kwargs):
     ProxylessNAS (GPU) model for CUB-200-2011 from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and
     Hardware,' https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification classes.
@@ -48,7 +48,7 @@ def proxylessnas_mobile_cub(num_classes=200, **kwargs):
     ProxylessNAS (Mobile) model for CUB-200-2011 from 'ProxylessNAS: Direct Neural Architecture Search on Target Task
     and Hardware,' https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification classes.
@@ -65,7 +65,7 @@ def proxylessnas_mobile14_cub(num_classes=200, **kwargs):
     ProxylessNAS (Mobile-14) model for CUB-200-2011 from 'ProxylessNAS: Direct Neural Architecture Search on Target Task
     and Hardware,' https://arxiv.org/abs/1812.00332.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 200
         Number of classification classes.

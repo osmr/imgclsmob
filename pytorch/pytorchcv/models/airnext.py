@@ -18,7 +18,7 @@ class AirNeXtBottleneck(nn.Module):
     """
     AirNet bottleneck block for residual path in ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -80,7 +80,7 @@ class AirNeXtUnit(nn.Module):
     """
     AirNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -136,7 +136,7 @@ class AirNeXt(nn.Module):
     AirNet model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -222,7 +222,7 @@ def get_airnext(blocks,
     """
     Create AirNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -280,7 +280,7 @@ def airnext50_32x4d_r2(**kwargs):
     AirNeXt50-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -302,7 +302,7 @@ def airnext101_32x4d_r2(**kwargs):
     AirNeXt101-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -324,7 +324,7 @@ def airnext101_32x4d_r16(**kwargs):
     AirNeXt101-32x4d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

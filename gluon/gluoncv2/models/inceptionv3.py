@@ -36,7 +36,7 @@ class AvgPoolBranch(HybridBlock):
     """
     Inception specific average pooling branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -79,7 +79,7 @@ class Conv1x1Branch(HybridBlock):
     """
     Inception specific convolutional 1x1 branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -113,7 +113,7 @@ class ConvSeqBranch(HybridBlock):
     """
     Inception specific convolutional sequence branch block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -167,7 +167,7 @@ class ConvSeq3x3Branch(HybridBlock):
     """
     InceptionV3 specific convolutional sequence branch block with splitting by 3x3.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -236,7 +236,7 @@ class InceptionAUnit(HybridBlock):
     """
     InceptionV3 type Inception-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -295,7 +295,7 @@ class ReductionAUnit(HybridBlock):
     """
     InceptionV3 type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -345,7 +345,7 @@ class InceptionBUnit(HybridBlock):
     """
     InceptionV3 type Inception-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -407,7 +407,7 @@ class ReductionBUnit(HybridBlock):
     """
     InceptionV3 type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -457,7 +457,7 @@ class InceptionCUnit(HybridBlock):
     """
     InceptionV3 type Inception-C unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -515,7 +515,7 @@ class InceptInitBlock(HybridBlock):
     """
     InceptionV3 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -596,7 +596,7 @@ class InceptionV3(HybridBlock):
     InceptionV3 model from 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -693,7 +693,7 @@ def get_inceptionv3(model_name=None,
     """
     Create InceptionV3 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -734,7 +734,7 @@ def inceptionv3(**kwargs):
     InceptionV3 model from 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -751,7 +751,7 @@ def inceptionv3_gl(**kwargs):
     InceptionV3 model (Gluon-like) from 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

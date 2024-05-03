@@ -19,7 +19,7 @@ def dwconv3x3(in_channels,
     """
     3x3 depthwise version of the standard convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -44,7 +44,7 @@ class ChannetConv(nn.Module):
     """
     ChannelNet specific convolution block with Batch normalization and ReLU6 activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -117,7 +117,7 @@ def channet_conv1x1(in_channels,
     """
     1x1 version of ChannelNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -158,7 +158,7 @@ def channet_conv3x3(in_channels,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -197,7 +197,7 @@ class ChannetDwsConvBlock(nn.Module):
     ChannelNet specific depthwise separable convolution block with BatchNorms and activations at last convolution
     layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -237,7 +237,7 @@ class SimpleGroupBlock(nn.Module):
     """
     ChannelNet specific block with a sequence of depthwise separable group convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -272,7 +272,7 @@ class ChannelwiseConv2d(nn.Module):
     """
     ChannelNet specific block with channel-wise convolution.
 
-    Parameters:
+    Parameters
     ----------
     groups : int
         Number of groups.
@@ -309,7 +309,7 @@ class ConvGroupBlock(nn.Module):
     """
     ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -345,7 +345,7 @@ class ChannetUnit(nn.Module):
     """
     ChannelNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -428,7 +428,7 @@ class ChannelNet(nn.Module):
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of list of int
         Number of output channels for each unit.
@@ -513,7 +513,7 @@ def get_channelnet(model_name=None,
     """
     Create ChannelNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -554,7 +554,7 @@ def channelnet(**kwargs):
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -15,7 +15,7 @@ class InvDwsConvBlock(nn.Module):
     """
     Inverse depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -90,7 +90,7 @@ def invdwsconv3x3_block(in_channels,
     """
     3x3 inverse depthwise separable version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -128,7 +128,7 @@ class HarDUnit(nn.Module):
     """
     HarDNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_list : list of int
         Number of input channels for each block.
@@ -225,7 +225,7 @@ class HarDInitBlock(nn.Module):
     """
     HarDNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -277,7 +277,7 @@ class HarDNet(nn.Module):
     """
     HarDNet model from 'HarDNet: A Low Memory Traffic Network,' https://arxiv.org/abs/1909.00948.
 
-    Parameters:
+    Parameters
     ----------
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -377,7 +377,7 @@ def get_hardnet(blocks,
     """
     Create HarDNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -527,7 +527,7 @@ def hardnet39ds(**kwargs):
     HarDNet-39DS (Depthwise Separable) model from 'HarDNet: A Low Memory Traffic Network,'
     https://arxiv.org/abs/1909.00948.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -542,7 +542,7 @@ def hardnet68ds(**kwargs):
     HarDNet-68DS (Depthwise Separable) model from 'HarDNet: A Low Memory Traffic Network,'
     https://arxiv.org/abs/1909.00948.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -556,7 +556,7 @@ def hardnet68(**kwargs):
     """
     HarDNet-68 model from 'HarDNet: A Low Memory Traffic Network,' https://arxiv.org/abs/1909.00948.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -570,7 +570,7 @@ def hardnet85(**kwargs):
     """
     HarDNet-85 model from 'HarDNet: A Low Memory Traffic Network,' https://arxiv.org/abs/1909.00948.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

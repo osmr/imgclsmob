@@ -13,7 +13,7 @@ class MealDiscriminator(HybridBlock):
     """
     MEALv2 discriminator.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 1000
         Number of classification classes.
@@ -60,7 +60,7 @@ class MealAdvLoss(SigmoidBinaryCrossEntropyLoss):
     """
     MEALv2 adversarial loss.
 
-    Parameters:
+    Parameters
     ----------
     from_sigmoid : bool, default is `False`
         Whether the input is from the output of sigmoid. Set this to false will make

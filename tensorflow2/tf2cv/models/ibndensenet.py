@@ -19,7 +19,7 @@ class IBNPreConvBlock(nn.Layer):
     """
     IBN-Net specific convolution block with BN/IBN normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -99,7 +99,7 @@ def ibn_pre_conv1x1_block(in_channels,
     """
     1x1 version of the IBN-Net specific pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -130,7 +130,7 @@ class IBNDenseUnit(nn.Layer):
     """
     IBN-DenseNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -188,7 +188,7 @@ class IBNDenseNet(tf.keras.Model):
     IBN-DenseNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -276,7 +276,7 @@ def get_ibndensenet(num_layers,
     """
     Create IBN-DenseNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_layers : int
         Number of layers.
@@ -341,7 +341,7 @@ def ibn_densenet121(**kwargs):
     IBN-DenseNet-121 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -356,7 +356,7 @@ def ibn_densenet161(**kwargs):
     IBN-DenseNet-161 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -371,7 +371,7 @@ def ibn_densenet169(**kwargs):
     IBN-DenseNet-169 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -386,7 +386,7 @@ def ibn_densenet201(**kwargs):
     IBN-DenseNet-201 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

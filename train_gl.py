@@ -28,7 +28,7 @@ def add_train_cls_parser_arguments(parser):
     """
     Create python script parameters (for training/classification specific subpart).
 
-    Parameters:
+    Parameters
     ----------
     parser : ArgumentParser
         ArgumentParser instance.
@@ -290,7 +290,7 @@ def init_rand(seed):
     """
     Initialize all random generators by seed.
 
-    Parameters:
+    Parameters
     ----------
     seed : int
         Seed value.
@@ -333,7 +333,7 @@ def prepare_trainer(net,
     """
     Prepare trainer.
 
-    Parameters:
+    Parameters
     ----------
     net : HybridBlock
         Model.
@@ -447,7 +447,7 @@ def save_params(file_stem,
     """
     Save current model/trainer parameters.
 
-    Parameters:
+    Parameters
     ----------
     file_stem : str
         File stem (with path).
@@ -483,7 +483,7 @@ def train_epoch(epoch,
     """
     Train model on particular epoch.
 
-    Parameters:
+    Parameters
     ----------
     epoch : int
         Epoch number.
@@ -638,7 +638,7 @@ def train_net(batch_size,
     """
     Main procedure for training model.
 
-    Parameters:
+    Parameters
     ----------
     batch_size : int
         Training batch size.

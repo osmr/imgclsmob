@@ -17,7 +17,7 @@ class IBNbConvBlock(HybridBlock):
     """
     IBN(b)-ResNet specific convolution block with Instance normalization and ReLU activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -86,7 +86,7 @@ def ibnb_conv7x7_block(in_channels,
     """
     7x7 version of the IBN(b)-ResNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -115,7 +115,7 @@ class IBNbResUnit(HybridBlock):
     """
     IBN(b)-ResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -176,7 +176,7 @@ class IBNbResInitBlock(HybridBlock):
     """
     IBN(b)-ResNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -209,7 +209,7 @@ class IBNbResNet(HybridBlock):
     IBN(b)-ResNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -282,7 +282,7 @@ def get_ibnbresnet(blocks,
     """
     Create IBN(b)-ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -332,7 +332,7 @@ def ibnb_resnet50(**kwargs):
     IBN(b)-ResNet-50 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -349,7 +349,7 @@ def ibnb_resnet101(**kwargs):
     IBN(b)-ResNet-101 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -366,7 +366,7 @@ def ibnb_resnet152(**kwargs):
     IBN(b)-ResNet-152 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

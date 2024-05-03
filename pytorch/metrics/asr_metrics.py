@@ -11,7 +11,7 @@ class WER(EvalMetric):
     """
     Computes Word Error Rate (WER) for Automatic Speech Recognition (ASR).
 
-    Parameters:
+    Parameters
     ----------
     vocabulary : list of str
         Vocabulary of the dataset.
@@ -41,7 +41,7 @@ class WER(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : torch.Tensor
             The labels of the data with class indices as values, one per sample.
@@ -81,7 +81,7 @@ class CtcDecoder(object):
     """
     CTC decoder (to decode a sequence of labels to words).
 
-    Parameters:
+    Parameters
     ----------
     vocabulary : list of str
         Vocabulary of the dataset.
@@ -97,7 +97,7 @@ class CtcDecoder(object):
         """
         Decode a sequence of labels to words.
 
-        Parameters:
+        Parameters
         ----------
         predictions : np.array of int or list of list of int
             Tensor with predicted labels.

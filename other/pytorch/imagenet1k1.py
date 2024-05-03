@@ -56,7 +56,7 @@ class CvResize(object):
     """
     Resize the input PIL Image to the given size via OpenCV.
 
-    Parameters:
+    Parameters
     ----------
     size : int or tuple of (W, H)
         Size of output image.
@@ -74,7 +74,7 @@ class CvResize(object):
         """
         Resize image.
 
-        Parameters:
+        Parameters
         ----------
         img : PIL.Image
             input image.

@@ -20,7 +20,7 @@ class PreResBlock(nn.Layer):
     """
     Simple PreResNet block for residual path in PreResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -71,7 +71,7 @@ class PreResBottleneck(nn.Layer):
     """
     PreResNet bottleneck block for residual path in PreResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -124,7 +124,7 @@ class PreResUnit(nn.Layer):
     """
     PreResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -195,7 +195,7 @@ class PreResInitBlock(nn.Layer):
     """
     PreResNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -241,7 +241,7 @@ class PreResActivation(nn.Layer):
     """
     PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -270,7 +270,7 @@ class PreResNet(tf.keras.Model):
     """
     PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -358,7 +358,7 @@ def get_preresnet(blocks,
     """
     Create PreResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -458,7 +458,7 @@ def preresnet10(**kwargs):
     PreResNet-10 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -473,7 +473,7 @@ def preresnet12(**kwargs):
     PreResNet-12 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -488,7 +488,7 @@ def preresnet14(**kwargs):
     PreResNet-14 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -503,7 +503,7 @@ def preresnetbc14b(**kwargs):
     PreResNet-BC-14b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -518,7 +518,7 @@ def preresnet16(**kwargs):
     PreResNet-16 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -533,7 +533,7 @@ def preresnet18_wd4(**kwargs):
     PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -548,7 +548,7 @@ def preresnet18_wd2(**kwargs):
     PreResNet-18 model with 0.5 width scale from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -563,7 +563,7 @@ def preresnet18_w3d4(**kwargs):
     PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027. It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -577,7 +577,7 @@ def preresnet18(**kwargs):
     """
     PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -592,7 +592,7 @@ def preresnet26(**kwargs):
     PreResNet-26 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -607,7 +607,7 @@ def preresnetbc26b(**kwargs):
     PreResNet-BC-26b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -621,7 +621,7 @@ def preresnet34(**kwargs):
     """
     PreResNet-34 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -636,7 +636,7 @@ def preresnetbc38b(**kwargs):
     PreResNet-BC-38b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -650,7 +650,7 @@ def preresnet50(**kwargs):
     """
     PreResNet-50 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -665,7 +665,7 @@ def preresnet50b(**kwargs):
     PreResNet-50 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
     Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -679,7 +679,7 @@ def preresnet101(**kwargs):
     """
     PreResNet-101 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -694,7 +694,7 @@ def preresnet101b(**kwargs):
     PreResNet-101 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
     Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -708,7 +708,7 @@ def preresnet152(**kwargs):
     """
     PreResNet-152 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -723,7 +723,7 @@ def preresnet152b(**kwargs):
     PreResNet-152 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
     Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -737,7 +737,7 @@ def preresnet200(**kwargs):
     """
     PreResNet-200 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -752,7 +752,7 @@ def preresnet200b(**kwargs):
     PreResNet-200 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
     Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -767,7 +767,7 @@ def preresnet269b(**kwargs):
     PreResNet-269 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
     Residual Networks,' https://arxiv.org/abs/1603.05027.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

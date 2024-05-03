@@ -19,7 +19,7 @@ class CRUConvBlock(HybridBlock):
     """
     CRU-Net specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -92,7 +92,7 @@ def cru_conv1x1_block(in_channels,
     """
     1x1 version of the CRU-Net specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -122,7 +122,7 @@ class ResBottleneck(HybridBlock):
     """
     Pre-ResNeXt bottleneck block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -177,7 +177,7 @@ class CRUBottleneck(HybridBlock):
     """
     CRU-Net bottleneck block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -240,7 +240,7 @@ class ResUnit(HybridBlock):
     """
     CRU-Net residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -295,7 +295,7 @@ class CRUUnit(HybridBlock):
     """
     CRU-Net collective residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -366,7 +366,7 @@ class CRUNetb(HybridBlock):
     CRU-Net(b) model from 'Sharing Residual Units Through Collective Tensor Factorization To Improve Deep Neural
     Networks,' https://www.ijcai.org/proceedings/2018/88.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -478,7 +478,7 @@ def get_crunetb(blocks,
     """
     Create CRU-Net(b) model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -537,7 +537,7 @@ def crunet56b(**kwargs):
     CRU-Net-56(b) model from 'Sharing Residual Units Through Collective Tensor Factorization To Improve Deep Neural
     Networks,' https://www.ijcai.org/proceedings/2018/88.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -554,7 +554,7 @@ def crunet116b(**kwargs):
     CRU-Net-116(b) model from 'Sharing Residual Units Through Collective Tensor Factorization To Improve Deep Neural
     Networks,' https://www.ijcai.org/proceedings/2018/88.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

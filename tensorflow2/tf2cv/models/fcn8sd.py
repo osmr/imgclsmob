@@ -18,7 +18,7 @@ class FCNFinalBlock(nn.Layer):
     """
     FCN-8s(d) final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -68,7 +68,7 @@ class FCN8sd(tf.keras.Model):
     FCN-8s(d) model from 'Fully Convolutional Networks for Semantic Segmentation,' https://arxiv.org/abs/1411.4038.
     It is an experimental model mixed FCN-8s and PSPNet.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -142,7 +142,7 @@ def get_fcn8sd(backbone,
     """
     Create FCN-8s(d) model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -189,7 +189,7 @@ def fcn8sd_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, data_
     FCN-8s(d) model on the base of ResNet(D)-50b for Pascal VOC from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -216,7 +216,7 @@ def fcn8sd_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, data
     FCN-8s(d) model on the base of ResNet(D)-101b for Pascal VOC from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -243,7 +243,7 @@ def fcn8sd_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, data
     FCN-8s(d) model on the base of ResNet(D)-50b for COCO from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -270,7 +270,7 @@ def fcn8sd_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, dat
     FCN-8s(d) model on the base of ResNet(D)-101b for COCO from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -297,7 +297,7 @@ def fcn8sd_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, d
     FCN-8s(d) model on the base of ResNet(D)-50b for ADE20K from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -324,7 +324,7 @@ def fcn8sd_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
     FCN-8s(d) model on the base of ResNet(D)-101b for ADE20K from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -352,7 +352,7 @@ def fcn8sd_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     FCN-8s(d) model on the base of ResNet(D)-50b for Cityscapes from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -380,7 +380,7 @@ def fcn8sd_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=Tru
     FCN-8s(d) model on the base of ResNet(D)-101b for Cityscapes from 'Fully Convolutional Networks for Semantic
     Segmentation,' https://arxiv.org/abs/1411.4038.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

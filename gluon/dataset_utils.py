@@ -32,7 +32,7 @@ def get_dataset_metainfo(dataset_name):
     """
     Get dataset metainfo by name of dataset.
 
-    Parameters:
+    Parameters
     ----------
     dataset_name : str
         Dataset name.
@@ -74,7 +74,7 @@ def get_train_data_source(ds_metainfo,
     """
     Get data source for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
@@ -134,7 +134,7 @@ def get_val_data_source(ds_metainfo,
     """
     Get data source for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
@@ -182,7 +182,7 @@ def get_test_data_source(ds_metainfo,
     """
     Get data source for testing subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
@@ -228,7 +228,7 @@ def get_batch_fn(ds_metainfo):
     """
     Get function for splitting data after extraction from data loader.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.

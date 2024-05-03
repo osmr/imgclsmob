@@ -22,7 +22,7 @@ def add_eval_cls_parser_arguments(parser):
     """
     Create python script parameters (for eval specific subpart).
 
-    Parameters:
+    Parameters
     ----------
     parser : ArgumentParser
         ArgumentParser instance.
@@ -156,7 +156,7 @@ def prepare_dataset_metainfo(args):
     """
     Get dataset metainfo by name of dataset.
 
-    Parameters:
+    Parameters
     ----------
     args : ArgumentParser
         Main script arguments.
@@ -180,7 +180,7 @@ def prepare_data_source(ds_metainfo,
     """
     Prepare data loader.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
@@ -213,7 +213,7 @@ def prepare_metric(ds_metainfo,
     """
     Prepare metric.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Dataset metainfo.
@@ -243,7 +243,7 @@ def update_input_image_size(net,
     """
     Update input image size for model.
 
-    Parameters:
+    Parameters
     ----------
     net : Module
         Model.
@@ -275,7 +275,7 @@ def calc_model_accuracy(net,
     """
     Estimating particular model accuracy.
 
-    Parameters:
+    Parameters
     ----------
     net : Module
         Model.
@@ -349,7 +349,7 @@ def test_model(args):
     """
     Main test routine.
 
-    Parameters:
+    Parameters
     ----------
     args : ArgumentParser
         Main script arguments.

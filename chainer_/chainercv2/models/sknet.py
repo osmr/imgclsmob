@@ -19,7 +19,7 @@ class SKConvBlock(Chain):
     """
     SKNet specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -94,7 +94,7 @@ class SKNetBottleneck(Chain):
     """
     SKNet bottleneck block for residual path in SKNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -137,7 +137,7 @@ class SKNetUnit(Chain):
     """
     SKNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -181,7 +181,7 @@ class SKNet(Chain):
     """
     SKNet model from 'Selective Kernel Networks,' https://arxiv.org/abs/1903.06586.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -250,7 +250,7 @@ def get_sknet(blocks,
     """
     Create SKNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -297,7 +297,7 @@ def sknet50(**kwargs):
     """
     SKNet-50 model from 'Selective Kernel Networks,' https://arxiv.org/abs/1903.06586.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -311,7 +311,7 @@ def sknet101(**kwargs):
     """
     SKNet-101 model from 'Selective Kernel Networks,' https://arxiv.org/abs/1903.06586.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -325,7 +325,7 @@ def sknet152(**kwargs):
     """
     SKNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

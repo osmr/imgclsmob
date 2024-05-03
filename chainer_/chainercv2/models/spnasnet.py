@@ -19,7 +19,7 @@ class SPNASUnit(Chain):
     """
     Single-Path NASNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -89,7 +89,7 @@ class SPNASInitBlock(Chain):
     """
     Single-Path NASNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -126,7 +126,7 @@ class SPNASFinalBlock(Chain):
     """
     Single-Path NASNet specific final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -163,7 +163,7 @@ class SPNASNet(Chain):
     Single-Path NASNet model from 'Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours,'
     https://arxiv.org/abs/1904.02877.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -251,7 +251,7 @@ def get_spnasnet(model_name=None,
     """
     Create Single-Path NASNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -292,7 +292,7 @@ def spnasnet(**kwargs):
     Single-Path NASNet model from 'Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours,'
     https://arxiv.org/abs/1904.02877.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

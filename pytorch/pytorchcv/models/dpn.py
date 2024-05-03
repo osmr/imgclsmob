@@ -16,7 +16,7 @@ class GlobalAvgMaxPool2D(nn.Module):
     """
     Global average+max pooling operation for spatial data.
 
-    Parameters:
+    Parameters
     ----------
     output_size : int, default 1
         The target output size.
@@ -38,7 +38,7 @@ def dpn_batch_norm(channels):
     """
     DPN specific Batch normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels in input data.
@@ -52,7 +52,7 @@ class PreActivation(nn.Module):
     """
     DPN specific block, which performs the preactivation like in RreResNet.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -73,7 +73,7 @@ class DPNConv(nn.Module):
     """
     DPN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -120,7 +120,7 @@ def dpn_conv1x1(in_channels,
     """
     1x1 version of the DPN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -145,7 +145,7 @@ def dpn_conv3x3(in_channels,
     """
     3x3 version of the DPN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -169,7 +169,7 @@ class DPNUnit(nn.Module):
     """
     DPN unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -259,7 +259,7 @@ class DPNInitBlock(nn.Module):
     """
     DPN specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -302,7 +302,7 @@ class DPNFinalBlock(nn.Module):
     """
     DPN final block, which performs the preactivation with cutting.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -323,7 +323,7 @@ class DPN(nn.Module):
     """
     DPN model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -447,7 +447,7 @@ def get_dpn(num_layers,
     """
     Create DPN model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_layers : int
         Number of layers.
@@ -547,7 +547,7 @@ def dpn68(**kwargs):
     """
     DPN-68 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -561,7 +561,7 @@ def dpn68b(**kwargs):
     """
     DPN-68b model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -575,7 +575,7 @@ def dpn98(**kwargs):
     """
     DPN-98 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -589,7 +589,7 @@ def dpn107(**kwargs):
     """
     DPN-107 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -603,7 +603,7 @@ def dpn131(**kwargs):
     """
     DPN-131 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

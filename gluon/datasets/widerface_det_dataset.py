@@ -15,7 +15,7 @@ class WiderfaceDetDataset(dataset.Dataset):
     """
     WIDER FACE detection dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to folder storing the dataset.
@@ -131,7 +131,7 @@ class WiderfaceDetMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -150,7 +150,7 @@ class WiderfaceDetMetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.

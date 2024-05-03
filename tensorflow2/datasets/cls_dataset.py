@@ -13,7 +13,7 @@ def img_normalization(img,
     """
     Normalization as in the ImageNet-1K validation procedure.
 
-    Parameters:
+    Parameters
     ----------
     img : np.array
         input image.

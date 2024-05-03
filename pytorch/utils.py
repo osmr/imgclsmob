@@ -20,7 +20,7 @@ def prepare_pt_context(num_gpus,
     """
     Correct batch size.
 
-    Parameters:
+    Parameters
     ----------
     num_gpus : int
         Number of GPU.
@@ -53,7 +53,7 @@ def prepare_model(model_name,
     """
     Create and initialize model by name.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str
         Model name.
@@ -128,7 +128,7 @@ def calc_net_weight_count(net):
     """
     Calculate number of model trainable parameters.
 
-    Parameters:
+    Parameters
     ----------
     net : Module
         Model.
@@ -153,7 +153,7 @@ def validate(metric,
     """
     Core validation/testing routine.
 
-    Parameters:
+    Parameters
     ----------
     metric : EvalMetric
         Metric object instance.
@@ -185,7 +185,7 @@ def report_accuracy(metric,
     """
     Make report string for composite metric.
 
-    Parameters:
+    Parameters
     ----------
     metric : EvalMetric
         Metric object instance.
@@ -224,7 +224,7 @@ def get_metric(metric_name, metric_extra_kwargs):
     """
     Get metric by name.
 
-    Parameters:
+    Parameters
     ----------
     metric_name : str
         Metric name.
@@ -258,7 +258,7 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
     """
     Get composite metric by list of metric names.
 
-    Parameters:
+    Parameters
     ----------
     metric_names : list of str
         Metric name list.
@@ -283,7 +283,7 @@ def get_metric_name(metric, index):
     """
     Get metric name by index in the composite metric.
 
-    Parameters:
+    Parameters
     ----------
     metric : CompositeEvalMetric or EvalMetric
         Metric object instance.

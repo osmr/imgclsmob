@@ -247,7 +247,7 @@ def get_model(name, **kwargs):
     """
     Get supported model.
 
-    Parameters:
+    Parameters
     ----------
     name : str
         Name of model.
@@ -270,7 +270,7 @@ def init_variables_from_state_dict(sess,
     """
     Initialize model variables from state dictionary.
 
-    Parameters:
+    Parameters
     ----------
     sess: Session
         A Session to use to load the weights.

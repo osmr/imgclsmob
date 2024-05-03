@@ -20,7 +20,7 @@ class DIAPreResUnit(nn.Module):
     """
     DIA-PreResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -77,7 +77,7 @@ class DIAPreResNet(nn.Module):
     """
     DIA-PreResNet model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -163,7 +163,7 @@ def get_diapreresnet(blocks,
     """
     Create DIA-PreResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -259,7 +259,7 @@ def diapreresnet10(**kwargs):
     DIA-PreResNet-10 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -274,7 +274,7 @@ def diapreresnet12(**kwargs):
     DIA-PreResNet-12 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -289,7 +289,7 @@ def diapreresnet14(**kwargs):
     DIA-PreResNet-14 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -304,7 +304,7 @@ def diapreresnetbc14b(**kwargs):
     DIA-PreResNet-BC-14b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -319,7 +319,7 @@ def diapreresnet16(**kwargs):
     DIA-PreResNet-16 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -333,7 +333,7 @@ def diapreresnet18(**kwargs):
     """
     DIA-PreResNet-18 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -348,7 +348,7 @@ def diapreresnet26(**kwargs):
     DIA-PreResNet-26 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -363,7 +363,7 @@ def diapreresnetbc26b(**kwargs):
     DIA-PreResNet-BC-26b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -377,7 +377,7 @@ def diapreresnet34(**kwargs):
     """
     DIA-PreResNet-34 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -392,7 +392,7 @@ def diapreresnetbc38b(**kwargs):
     DIA-PreResNet-BC-38b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -406,7 +406,7 @@ def diapreresnet50(**kwargs):
     """
     DIA-PreResNet-50 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -421,7 +421,7 @@ def diapreresnet50b(**kwargs):
     DIA-PreResNet-50 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -435,7 +435,7 @@ def diapreresnet101(**kwargs):
     """
     DIA-PreResNet-101 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -450,7 +450,7 @@ def diapreresnet101b(**kwargs):
     DIA-PreResNet-101 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -464,7 +464,7 @@ def diapreresnet152(**kwargs):
     """
     DIA-PreResNet-152 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -479,7 +479,7 @@ def diapreresnet152b(**kwargs):
     DIA-PreResNet-152 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -493,7 +493,7 @@ def diapreresnet200(**kwargs):
     """
     DIA-PreResNet-200 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -508,7 +508,7 @@ def diapreresnet200b(**kwargs):
     DIA-PreResNet-200 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -523,7 +523,7 @@ def diapreresnet269b(**kwargs):
     DIA-PreResNet-269 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

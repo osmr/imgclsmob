@@ -17,7 +17,7 @@ class CocoHpe3Dataset(data.Dataset):
     """
     COCO keypoint detection (2D multiple human pose estimation) dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.
@@ -516,7 +516,7 @@ class CocoHpe3MetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -540,7 +540,7 @@ class CocoHpe3MetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -554,7 +554,7 @@ class CocoHpe3MetaInfo(DatasetMetaInfo):
         """
         Update dataset metainfo after a dataset class instance creation.
 
-        Parameters:
+        Parameters
         ----------
         args : obj
             A dataset class instance.

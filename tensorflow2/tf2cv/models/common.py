@@ -27,7 +27,7 @@ def is_channels_first(data_format):
     """
     Is tested data format channels first.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -44,7 +44,7 @@ def get_channel_axis(data_format):
     """
     Get channel axis.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -62,7 +62,7 @@ def round_channels(channels,
     """
     Round weighted channel number (make divisible operation).
 
-    Parameters:
+    Parameters
     ----------
     channels : int or float
         Original number of channels.
@@ -85,7 +85,7 @@ def get_im_size(x,
     """
     Get spatial size for a tensor.
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         A tensor.
@@ -108,7 +108,7 @@ def interpolate_im(x,
     """
     Bilinear change spatial size for a tensor.
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         A tensor.
@@ -197,7 +197,7 @@ class PReLU2(nn.PReLU):
     """
     Parametric leaky version of a Rectified Linear Unit (with wide alpha).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -264,7 +264,7 @@ def get_activation_layer(activation,
     """
     Create activation layer from string/function.
 
-    Parameters:
+    Parameters
     ----------
     activation : function, or str, or nn.Layer
         Activation function or name of activation function.
@@ -306,7 +306,7 @@ def flatten(x,
     """
     Flattens the input to two dimensional.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -328,7 +328,7 @@ class MaxPool2d(nn.Layer):
     """
     Max pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     pool_size : int or tuple/list of 2 int
         Size of the max pooling windows.
@@ -410,7 +410,7 @@ class AvgPool2d(nn.Layer):
     """
     Average pooling operation for two dimensional (spatial) data.
 
-    Parameters:
+    Parameters
     ----------
     pool_size : int or tuple/list of 2 int
         Size of the max pooling windows.
@@ -502,7 +502,7 @@ class GlobalAvgPool2d(nn.GlobalAvgPool2D):
     """
     Global average pooling.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -523,7 +523,7 @@ class BatchNorm(nn.BatchNormalization):
     """
     MXNet/Gluon-like batch normalization.
 
-    Parameters:
+    Parameters
     ----------
     momentum : float, default 0.9
         Momentum for the moving average.
@@ -549,7 +549,7 @@ class InstanceNorm(nn.Layer):
     MXNet/Gluon-like instance normalization layer as in 'Instance Normalization: The Missing Ingredient for Fast
     Stylization' (https://arxiv.org/abs/1607.08022). On the base of `tensorflow_addons` implementation.
 
-    Parameters:
+    Parameters
     ----------
     epsilon : float, default 1e-5
         Small float added to variance to avoid dividing by zero.
@@ -740,7 +740,7 @@ class IBN(nn.Layer):
     Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -798,7 +798,7 @@ class Conv1d(nn.Layer):
     """
     Standard 1D convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -890,7 +890,7 @@ class Conv2d(nn.Layer):
     """
     Standard convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1043,7 +1043,7 @@ class SelectableDense(nn.Layer):
     """
     Selectable dense layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input features.
@@ -1135,7 +1135,7 @@ class DenseBlock(nn.Layer):
     """
     Standard dense block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input features.
@@ -1191,7 +1191,7 @@ class ConvBlock1d(nn.Layer):
     """
     Standard 1D convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1279,7 +1279,7 @@ def conv1x1(in_channels,
     """
     Convolution 1x1 layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1317,7 +1317,7 @@ def conv3x3(in_channels,
     """
     Convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1359,7 +1359,7 @@ def depthwise_conv3x3(channels,
     """
     Depthwise convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -1391,7 +1391,7 @@ class ConvBlock(nn.Layer):
     """
     Standard convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1483,7 +1483,7 @@ def conv1x1_block(in_channels,
     """
     1x1 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1536,7 +1536,7 @@ def conv3x3_block(in_channels,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1591,7 +1591,7 @@ def conv5x5_block(in_channels,
     """
     5x5 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1642,7 +1642,7 @@ def conv7x7_block(in_channels,
     """
     7x7 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1692,7 +1692,7 @@ def dwconv_block(in_channels,
     """
     Depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1746,7 +1746,7 @@ def dwconv3x3_block(in_channels,
     """
     3x3 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1794,7 +1794,7 @@ def dwconv5x5_block(in_channels,
     """
     5x5 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1833,7 +1833,7 @@ class DwsConvBlock(nn.Layer):
     """
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1929,7 +1929,7 @@ def dwsconv3x3_block(in_channels,
     """
     3x3 depthwise separable version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1969,7 +1969,7 @@ class PreConvBlock(nn.Layer):
     """
     Convolution block with Batch normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2059,7 +2059,7 @@ def pre_conv1x1_block(in_channels,
     """
     1x1 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2107,7 +2107,7 @@ def pre_conv3x3_block(in_channels,
     """
     3x3 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2152,7 +2152,7 @@ class Deconv2d(nn.Layer):
     """
     Standard deconvolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2224,7 +2224,7 @@ class DeconvBlock(nn.Layer):
     """
     Deconvolution block with batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2309,7 +2309,7 @@ def channel_shuffle(x,
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -2351,7 +2351,7 @@ class ChannelShuffle(nn.Layer):
     """
     Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -2382,7 +2382,7 @@ def channel_shuffle2(x,
     https://arxiv.org/abs/1707.01083.
     The alternative version.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -2425,7 +2425,7 @@ class ChannelShuffle2(nn.Layer):
     Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
     The alternative version.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -2452,7 +2452,7 @@ class SEBlock(nn.Layer):
     """
     Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -2537,7 +2537,7 @@ class SABlock(nn.Layer):
     """
     Split-Attention block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     out_channels : int
         Number of output channels.
@@ -2652,7 +2652,7 @@ class SAConvBlock(nn.Layer):
     """
     Split-Attention convolution block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2749,7 +2749,7 @@ def saconv3x3_block(in_channels,
     """
     3x3 version of the Split-Attention convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2774,7 +2774,7 @@ class PixelShuffle(nn.Layer):
     Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
     Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
 
-    Parameters:
+    Parameters
     ----------
     scale_factor : int
         Multiplier for spatial size.
@@ -2828,7 +2828,7 @@ class PixelShuffle2(nn.Layer):
     Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
     Convolutional Neural Network,' https://arxiv.org/abs/1609.05158. Alternative implementation.
 
-    Parameters:
+    Parameters
     ----------
     scale_factor : int
         Multiplier for spatial size.
@@ -2854,7 +2854,7 @@ class DucBlock(nn.Layer):
     Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
     https://arxiv.org/abs/1702.08502.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2947,7 +2947,7 @@ class DualPathSequential(SimpleSequential):
     A sequential container for layers with dual inputs/outputs.
     Layers will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     return_two : bool, default True
         Whether to return two output after execution.
@@ -2991,7 +2991,7 @@ class Concurrent(SimpleSequential):
     """
     A container for concatenation of layers.
 
-    Parameters:
+    Parameters
     ----------
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
@@ -3034,7 +3034,7 @@ class SequentialConcurrent(SimpleSequential):
     A sequential container with concatenated outputs.
     Blocks will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
@@ -3069,7 +3069,7 @@ class ParametricConcurrent(SimpleSequential):
     """
     A container for concatenation of layers with parameters.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -3093,7 +3093,7 @@ class MultiOutputSequential(SimpleSequential):
     A sequential container with multiple outputs.
     Layers will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     multi_output : bool, default True
         Whether to return multiple output.
@@ -3135,7 +3135,7 @@ class ParallelConcurent(SimpleSequential):
     A sequential container with multiple inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     merge_type : str, default None
         Type of branch merging.
@@ -3174,7 +3174,7 @@ class DualPathParallelConcurent(SimpleSequential):
     A sequential container with multiple dual-path inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     merge_type : str, default 'list'
         Type of branch merging.
@@ -3217,7 +3217,7 @@ class NormActivation(nn.Layer):
     """
     Activation block with preliminary batch normalization. It's used by itself as the final block in PreResNet.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -3253,7 +3253,7 @@ class InterpolationBlock(nn.Layer):
     """
     Bilinear interpolation block.
 
-    Parameters:
+    Parameters
     ----------
     scale_factor : int, default 1
         Multiplier for spatial size.
@@ -3307,7 +3307,7 @@ class Hourglass(nn.Layer):
     """
     A hourglass block.
 
-    Parameters:
+    Parameters
     ----------
     down_seq : nn.HybridSequential
         Down modules as sequential.
@@ -3380,7 +3380,7 @@ class HeatmapMaxDetBlock(nn.Layer):
     """
     Heatmap maximum detector block (for human pose estimation task).
 
-    Parameters:
+    Parameters
     ----------
     tune : bool, default True
         Whether to tune point positions.

@@ -17,7 +17,7 @@ class CIFARWRN(nn.Module):
     """
     WRN model for CIFAR from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -92,7 +92,7 @@ def get_wrn_cifar(num_classes,
     """
     Create WRN model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int
         Number of classification classes.
@@ -137,7 +137,7 @@ def wrn16_10_cifar10(num_classes=10, **kwargs):
     """
     WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -153,7 +153,7 @@ def wrn16_10_cifar100(num_classes=100, **kwargs):
     """
     WRN-16-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -169,7 +169,7 @@ def wrn16_10_svhn(num_classes=10, **kwargs):
     """
     WRN-16-10 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -185,7 +185,7 @@ def wrn28_10_cifar10(num_classes=10, **kwargs):
     """
     WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -201,7 +201,7 @@ def wrn28_10_cifar100(num_classes=100, **kwargs):
     """
     WRN-28-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -217,7 +217,7 @@ def wrn28_10_svhn(num_classes=10, **kwargs):
     """
     WRN-28-10 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -233,7 +233,7 @@ def wrn40_8_cifar10(num_classes=10, **kwargs):
     """
     WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -249,7 +249,7 @@ def wrn40_8_cifar100(num_classes=100, **kwargs):
     """
     WRN-40-8 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -265,7 +265,7 @@ def wrn40_8_svhn(num_classes=10, **kwargs):
     """
     WRN-40-8 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.

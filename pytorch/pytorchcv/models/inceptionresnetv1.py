@@ -17,7 +17,7 @@ class InceptionAUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -72,7 +72,7 @@ class InceptionBUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -120,7 +120,7 @@ class InceptionCUnit(nn.Module):
     """
     InceptionResNetV1 type Inception-C unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -177,7 +177,7 @@ class ReductionAUnit(nn.Module):
     """
     InceptionResNetV1 type Reduction-A unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -217,7 +217,7 @@ class ReductionBUnit(nn.Module):
     """
     InceptionResNetV1 type Reduction-B unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -264,7 +264,7 @@ class InceptInitBlock(nn.Module):
     """
     InceptionResNetV1 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -331,7 +331,7 @@ class InceptHead(nn.Module):
     """
     InceptionResNetV1 specific classification block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -377,7 +377,7 @@ class InceptionResNetV1(nn.Module):
     InceptionResNetV1 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
@@ -466,7 +466,7 @@ def get_inceptionresnetv1(model_name=None,
     """
     Create InceptionResNetV1 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -494,7 +494,7 @@ def inceptionresnetv1(**kwargs):
     InceptionResNetV1 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

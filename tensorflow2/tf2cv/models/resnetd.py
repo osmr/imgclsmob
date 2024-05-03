@@ -17,7 +17,7 @@ class ResNetD(tf.keras.Model):
     """
     ResNet(D) with dilation model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -121,7 +121,7 @@ def get_resnetd(blocks,
     """
     Create ResNet(D) with dilation model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -203,7 +203,7 @@ def resnetd50b(**kwargs):
     ResNet(D)-50 with dilation model with stride at the second convolution in bottleneck block from 'Deep Residual
     Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -218,7 +218,7 @@ def resnetd101b(**kwargs):
     ResNet(D)-101 with dilation model with stride at the second convolution in bottleneck block from 'Deep Residual
     Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -233,7 +233,7 @@ def resnetd152b(**kwargs):
     ResNet(D)-152 with dilation model with stride at the second convolution in bottleneck block from 'Deep Residual
     Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

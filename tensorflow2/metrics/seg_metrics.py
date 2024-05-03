@@ -13,7 +13,7 @@ class PixelAccuracyMetric(EvalMetric):
     """
     Computes the pixel-wise accuracy.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default -1
         The axis that represents classes.
@@ -62,7 +62,7 @@ class PixelAccuracyMetric(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : tensor
             The labels of the data.
@@ -128,7 +128,7 @@ class MeanIoUMetric(EvalMetric):
     """
     Computes the mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default -1
         The axis that represents classes
@@ -192,7 +192,7 @@ class MeanIoUMetric(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : tensor
             The labels of the data.

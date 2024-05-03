@@ -18,7 +18,7 @@ def seg_pixel_accuracy_nd(label_imask,
     """
     The segmentation pixel accuracy (for MXNet nd-arrays).
 
-    Parameters:
+    Parameters
     ----------
     label_imask : mx.nd.array
         Ground truth index mask (maybe batch of).
@@ -62,7 +62,7 @@ def segm_mean_accuracy(label_hmask,
     """
     The segmentation mean accuracy.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
@@ -107,7 +107,7 @@ def segm_mean_iou(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
@@ -152,7 +152,7 @@ def seg_mean_iou2_nd(label_hmask,
     """
     The segmentation mean intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask (batch of).
@@ -189,7 +189,7 @@ def segm_fw_iou(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.
@@ -229,7 +229,7 @@ def segm_fw_iou2(label_hmask,
     """
     The segmentation frequency weighted intersection over union.
 
-    Parameters:
+    Parameters
     ----------
     label_hmask : nd.array
         Ground truth one-hot mask.

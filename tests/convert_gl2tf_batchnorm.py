@@ -31,7 +31,7 @@ def batchnorm(x,
     """
     Batch normalization layer.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.

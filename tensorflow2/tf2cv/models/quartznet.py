@@ -17,7 +17,7 @@ def quartznet5x5_en_ls(classes=29, **kwargs):
     QuartzNet 5x5 model for English language (trained on LibriSpeech dataset) from 'QuartzNet: Deep Automatic Speech
     Recognition with 1D Time-Channel Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 29
         Number of classification classes (number of graphemes).
@@ -37,7 +37,7 @@ def quartznet15x5_en(classes=29, **kwargs):
     QuartzNet 15x5 model for English language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 29
         Number of classification classes (number of graphemes).
@@ -57,7 +57,7 @@ def quartznet15x5_en_nr(classes=29, **kwargs):
     QuartzNet 15x5 model for English language (with presence of noise) from 'QuartzNet: Deep Automatic Speech
     Recognition with 1D Time-Channel Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 29
         Number of classification classes (number of graphemes).
@@ -77,7 +77,7 @@ def quartznet15x5_fr(classes=43, **kwargs):
     QuartzNet 15x5 model for French language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 43
         Number of classification classes (number of graphemes).
@@ -98,7 +98,7 @@ def quartznet15x5_de(classes=32, **kwargs):
     QuartzNet 15x5 model for German language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 32
         Number of classification classes (number of graphemes).
@@ -118,7 +118,7 @@ def quartznet15x5_it(classes=39, **kwargs):
     QuartzNet 15x5 model for Italian language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 39
         Number of classification classes (number of graphemes).
@@ -138,7 +138,7 @@ def quartznet15x5_es(classes=36, **kwargs):
     QuartzNet 15x5 model for Spanish language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 36
         Number of classification classes (number of graphemes).
@@ -158,7 +158,7 @@ def quartznet15x5_ca(classes=39, **kwargs):
     QuartzNet 15x5 model for Spanish language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 39
         Number of classification classes (number of graphemes).
@@ -178,7 +178,7 @@ def quartznet15x5_pl(classes=34, **kwargs):
     QuartzNet 15x5 model for Spanish language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 34
         Number of classification classes (number of graphemes).
@@ -198,7 +198,7 @@ def quartznet15x5_ru(classes=35, **kwargs):
     QuartzNet 15x5 model for Russian language from 'QuartzNet: Deep Automatic Speech Recognition with 1D Time-Channel
     Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 35
         Number of classification classes (number of graphemes).
@@ -218,7 +218,7 @@ def quartznet15x5_ru34(classes=34, **kwargs):
     QuartzNet 15x5 model for Russian language (32 graphemes) from 'QuartzNet: Deep Automatic Speech Recognition with 1D
     Time-Channel Separable Convolutions,' https://arxiv.org/abs/1910.10261.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 34
         Number of classification classes (number of graphemes).

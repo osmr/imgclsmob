@@ -19,7 +19,7 @@ class SEBlock(nn.Layer):
     SINet version of Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,'
     https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -79,7 +79,7 @@ class DwsConvBlock(nn.Layer):
     """
     SINet version of depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -186,7 +186,7 @@ def dwsconv3x3_block(in_channels,
     """
     3x3 depthwise separable version of the standard convolution block (SINet version).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -246,7 +246,7 @@ def dwconv3x3_block(in_channels,
     """
     3x3 depthwise version of the standard convolution block (SINet version).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -285,7 +285,7 @@ class FDWConvBlock(nn.Layer):
     """
     Factorized depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -377,7 +377,7 @@ def fdwconv3x3_block(in_channels,
     """
     3x3 factorized depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -429,7 +429,7 @@ def fdwconv5x5_block(in_channels,
     """
     5x5 factorized depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -471,7 +471,7 @@ class SBBlock(nn.Layer):
     """
     SB-block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -560,7 +560,7 @@ class PreActivation(nn.Layer):
     """
     PreResNet like pure pre-activation block without convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -593,7 +593,7 @@ class ESPBlock(nn.Layer):
     """
     ESP block, which is based on the following principle: Reduce ---> Split ---> Transform --> Merge.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -682,7 +682,7 @@ class SBStage(nn.Layer):
     """
     SB stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -768,7 +768,7 @@ class SBEncoderInitBlock(nn.Layer):
     """
     SB encoder specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -819,7 +819,7 @@ class SBEncoder(nn.Layer):
     """
     SB encoder for SINet.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -913,7 +913,7 @@ class SBDecodeBlock(nn.Layer):
     """
     SB decoder block for SINet.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of output classes.
@@ -958,7 +958,7 @@ class SBDecoder(nn.Layer):
     """
     SB decoder for SINet.
 
-    Parameters:
+    Parameters
     ----------
     dim2 : int
         Size of dimension #2.
@@ -1027,7 +1027,7 @@ class SINet(tf.keras.Model):
     SINet model from 'SINet: Extreme Lightweight Portrait Segmentation Networks with Spatial Squeeze Modules and
     Information Blocking Decoder,' https://arxiv.org/abs/1911.09099.
 
-    Parameters:
+    Parameters
     ----------
     down_channels_list : list of int
         Number of downsample channels for each residual block.
@@ -1120,7 +1120,7 @@ def get_sinet(model_name=None,
     """
     Create SINet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -1182,7 +1182,7 @@ def sinet_cityscapes(classes=19, **kwargs):
     SINet model for Cityscapes from 'SINet: Extreme Lightweight Portrait Segmentation Networks with Spatial Squeeze
     Modules and Information Blocking Decoder,' https://arxiv.org/abs/1911.09099.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 19
         Number of segmentation classes.

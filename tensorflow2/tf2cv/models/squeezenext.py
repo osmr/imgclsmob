@@ -15,7 +15,7 @@ class SqnxtUnit(nn.Layer):
     """
     SqueezeNext unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -110,7 +110,7 @@ class SqnxtInitBlock(nn.Layer):
     """
     SqueezeNext specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -150,7 +150,7 @@ class SqueezeNext(tf.keras.Model):
     """
     SqueezeNext model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -234,7 +234,7 @@ def get_squeezenext(version,
     """
     Create SqueezeNext model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of SqueezeNet ('23' or '23v5').
@@ -292,7 +292,7 @@ def sqnxt23_w1(**kwargs):
     """
     1.0-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -306,7 +306,7 @@ def sqnxt23_w3d2(**kwargs):
     """
     1.5-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -320,7 +320,7 @@ def sqnxt23_w2(**kwargs):
     """
     2.0-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -334,7 +334,7 @@ def sqnxt23v5_w1(**kwargs):
     """
     1.0-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -348,7 +348,7 @@ def sqnxt23v5_w3d2(**kwargs):
     """
     1.5-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -362,7 +362,7 @@ def sqnxt23v5_w2(**kwargs):
     """
     2.0-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

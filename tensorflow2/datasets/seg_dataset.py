@@ -9,7 +9,7 @@ class SegDataset(object):
     """
     Segmentation base dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to data folder.

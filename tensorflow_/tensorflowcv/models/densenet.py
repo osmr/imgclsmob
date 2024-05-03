@@ -21,7 +21,7 @@ def dense_unit(x,
     """
     DenseNet unit.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -86,7 +86,7 @@ def transition_block(x,
     DenseNet's auxiliary block, which can be treated as the initial part of the DenseNet unit, triggered only in the
     first unit of each stage.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -125,7 +125,7 @@ class DenseNet(object):
     """
     DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -167,7 +167,7 @@ class DenseNet(object):
         """
         Build a model graph.
 
-        Parameters:
+        Parameters
         ----------
         x : Tensor
             Input tensor.
@@ -238,7 +238,7 @@ def get_densenet(blocks,
     """
     Create DenseNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -306,7 +306,7 @@ def densenet121(**kwargs):
     """
     DenseNet-121 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -325,7 +325,7 @@ def densenet161(**kwargs):
     """
     DenseNet-161 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -344,7 +344,7 @@ def densenet169(**kwargs):
     """
     DenseNet-169 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -363,7 +363,7 @@ def densenet201(**kwargs):
     """
     DenseNet-201 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

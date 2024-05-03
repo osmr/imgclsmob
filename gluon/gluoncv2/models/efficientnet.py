@@ -26,7 +26,7 @@ def calc_tf_padding(in_size,
     """
     Calculate TF-same like padding size.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of 2 int
         Spatial size of input image.
@@ -55,7 +55,7 @@ class EffiDwsConvUnit(HybridBlock):
     EfficientNet specific depthwise separable convolution block/unit with BatchNorms and activations at each convolution
     layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -127,7 +127,7 @@ class EffiInvResUnit(HybridBlock):
     """
     EfficientNet inverted residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -226,7 +226,7 @@ class EffiInitBlock(HybridBlock):
     """
     EfficientNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -283,7 +283,7 @@ class EfficientNet(HybridBlock):
     EfficientNet(-B0) model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -420,7 +420,7 @@ def get_efficientnet(version,
     """
     Create EfficientNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of EfficientNet ('b0'...'b7').
@@ -547,7 +547,7 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
     EfficientNet-B0 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
@@ -566,7 +566,7 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
     EfficientNet-B1 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (240, 240)
         Spatial size of the expected input image.
@@ -585,7 +585,7 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
     EfficientNet-B2 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (260, 260)
         Spatial size of the expected input image.
@@ -604,7 +604,7 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
     EfficientNet-B3 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (300, 300)
         Spatial size of the expected input image.
@@ -623,7 +623,7 @@ def efficientnet_b4(in_size=(380, 380), **kwargs):
     EfficientNet-B4 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (380, 380)
         Spatial size of the expected input image.
@@ -642,7 +642,7 @@ def efficientnet_b5(in_size=(456, 456), **kwargs):
     EfficientNet-B5 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (456, 456)
         Spatial size of the expected input image.
@@ -661,7 +661,7 @@ def efficientnet_b6(in_size=(528, 528), **kwargs):
     EfficientNet-B6 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (528, 528)
         Spatial size of the expected input image.
@@ -680,7 +680,7 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
     EfficientNet-B7 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (600, 600)
         Spatial size of the expected input image.
@@ -699,7 +699,7 @@ def efficientnet_b8(in_size=(672, 672), **kwargs):
     EfficientNet-B8 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (672, 672)
         Spatial size of the expected input image.
@@ -716,7 +716,7 @@ def efficientnet_b0b(in_size=(224, 224), **kwargs):
     EfficientNet-B0-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
@@ -736,7 +736,7 @@ def efficientnet_b1b(in_size=(240, 240), **kwargs):
     EfficientNet-B1-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (240, 240)
         Spatial size of the expected input image.
@@ -756,7 +756,7 @@ def efficientnet_b2b(in_size=(260, 260), **kwargs):
     EfficientNet-B2-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (260, 260)
         Spatial size of the expected input image.
@@ -776,7 +776,7 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
     EfficientNet-B3-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (300, 300)
         Spatial size of the expected input image.
@@ -796,7 +796,7 @@ def efficientnet_b4b(in_size=(380, 380), **kwargs):
     EfficientNet-B4-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (380, 380)
         Spatial size of the expected input image.
@@ -816,7 +816,7 @@ def efficientnet_b5b(in_size=(456, 456), **kwargs):
     EfficientNet-B5-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (456, 456)
         Spatial size of the expected input image.
@@ -836,7 +836,7 @@ def efficientnet_b6b(in_size=(528, 528), **kwargs):
     EfficientNet-B6-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (528, 528)
         Spatial size of the expected input image.
@@ -856,7 +856,7 @@ def efficientnet_b7b(in_size=(600, 600), **kwargs):
     EfficientNet-B7-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (600, 600)
         Spatial size of the expected input image.
@@ -876,7 +876,7 @@ def efficientnet_b0c(in_size=(224, 224), **kwargs):
     EfficientNet-B0-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
@@ -896,7 +896,7 @@ def efficientnet_b1c(in_size=(240, 240), **kwargs):
     EfficientNet-B1-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (240, 240)
         Spatial size of the expected input image.
@@ -916,7 +916,7 @@ def efficientnet_b2c(in_size=(260, 260), **kwargs):
     EfficientNet-B2-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (260, 260)
         Spatial size of the expected input image.
@@ -936,7 +936,7 @@ def efficientnet_b3c(in_size=(300, 300), **kwargs):
     EfficientNet-B3-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (300, 300)
         Spatial size of the expected input image.
@@ -956,7 +956,7 @@ def efficientnet_b4c(in_size=(380, 380), **kwargs):
     EfficientNet-B4-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (380, 380)
         Spatial size of the expected input image.
@@ -976,7 +976,7 @@ def efficientnet_b5c(in_size=(456, 456), **kwargs):
     EfficientNet-B5-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (456, 456)
         Spatial size of the expected input image.
@@ -996,7 +996,7 @@ def efficientnet_b6c(in_size=(528, 528), **kwargs):
     EfficientNet-B6-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (528, 528)
         Spatial size of the expected input image.
@@ -1016,7 +1016,7 @@ def efficientnet_b7c(in_size=(600, 600), **kwargs):
     EfficientNet-B7-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (600, 600)
         Spatial size of the expected input image.
@@ -1036,7 +1036,7 @@ def efficientnet_b8c(in_size=(672, 672), **kwargs):
     EfficientNet-B8-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
 
-    Parameters:
+    Parameters
     ----------
     in_size : tuple of two ints, default (672, 672)
         Spatial size of the expected input image.

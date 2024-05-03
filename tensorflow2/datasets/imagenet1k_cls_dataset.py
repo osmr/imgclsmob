@@ -56,7 +56,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -97,7 +97,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -122,7 +122,7 @@ def resize(img,
     """
     Resize the input PIL Image to the given size via OpenCV.
 
-    Parameters:
+    Parameters
     ----------
     img : PIL.Image
         input image.
@@ -169,7 +169,7 @@ def center_crop(img,
     """
     Crop the given PIL Image.
 
-    Parameters:
+    Parameters
     ----------
     img : PIL.Image
         input image.
@@ -264,7 +264,7 @@ def imagenet_train_transform(ds_metainfo,
     """
     Create image transform sequence for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -293,7 +293,7 @@ def imagenet_val_transform(ds_metainfo,
     """
     Create image transform sequence for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -320,7 +320,7 @@ def imagenet_train_generator(data_generator,
     """
     Create image generator for training subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -353,7 +353,7 @@ def imagenet_val_generator(data_generator,
     """
     Create image generator for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.

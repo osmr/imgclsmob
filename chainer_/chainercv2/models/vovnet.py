@@ -19,7 +19,7 @@ class VoVUnit(Chain):
     """
     VoVNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -82,7 +82,7 @@ class VoVInitBlock(Chain):
     """
     VoVNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -120,7 +120,7 @@ class VoVNet(Chain):
     VoVNet model from 'An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection,'
     https://arxiv.org/abs/1904.09730.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -198,7 +198,7 @@ def get_vovnet(blocks,
     """
     Create ResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -256,7 +256,7 @@ def vovnet27s(**kwargs):
     VoVNet-27-slim model from 'An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection,'
     https://arxiv.org/abs/1904.09730.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -271,7 +271,7 @@ def vovnet39(**kwargs):
     VoVNet-39 model from 'An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection,'
     https://arxiv.org/abs/1904.09730.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -286,7 +286,7 @@ def vovnet57(**kwargs):
     VoVNet-57 model from 'An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection,'
     https://arxiv.org/abs/1904.09730.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

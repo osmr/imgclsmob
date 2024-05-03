@@ -9,7 +9,7 @@ class TrainLogParamSaver(object):
     2. save several the best model checkpoints, to prevent overfitting,
     3. save pure evaluation metric values to log-file for observer.
 
-    Parameters:
+    Parameters
     ----------
     checkpoint_file_name_prefix : str
         prefix for checkpoint file name (without parent dir)

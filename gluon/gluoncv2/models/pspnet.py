@@ -19,7 +19,7 @@ class PSPFinalBlock(HybridBlock):
     """
     PSPNet final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -59,7 +59,7 @@ class PyramidPoolingBranch(HybridBlock):
     """
     Pyramid Pooling branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -97,7 +97,7 @@ class PyramidPooling(HybridBlock):
     """
     Pyramid Pooling module.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -133,7 +133,7 @@ class PSPNet(HybridBlock):
     """
     PSPNet model from 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -208,7 +208,7 @@ def get_pspnet(backbone,
     """
     Create PSPNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -250,7 +250,7 @@ def pspnet_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, **kwa
     PSPNet model on the base of ResNet(D)-50b for Pascal VOC from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -274,7 +274,7 @@ def pspnet_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, **kw
     PSPNet model on the base of ResNet(D)-101b for Pascal VOC from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -298,7 +298,7 @@ def pspnet_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, **kw
     PSPNet model on the base of ResNet(D)-50b for COCO from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -322,7 +322,7 @@ def pspnet_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, **k
     PSPNet model on the base of ResNet(D)-101b for COCO from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -346,7 +346,7 @@ def pspnet_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, *
     PSPNet model on the base of ResNet(D)-50b for ADE20K from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -370,7 +370,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
     PSPNet model on the base of ResNet(D)-101b for ADE20K from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -394,7 +394,7 @@ def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     PSPNet model on the base of ResNet(D)-50b for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -418,7 +418,7 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=Tru
     PSPNet model on the base of ResNet(D)-101b for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

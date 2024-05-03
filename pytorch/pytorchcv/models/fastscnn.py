@@ -15,7 +15,7 @@ class Stem(nn.Module):
     """
     Fast-SCNN specific stem block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -53,7 +53,7 @@ class LinearBottleneck(nn.Module):
     """
     Fast-SCNN specific Linear Bottleneck layer from MobileNetV2.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -97,7 +97,7 @@ class FeatureExtractor(nn.Module):
     """
     Fast-SCNN specific feature extractor/encoder.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -129,7 +129,7 @@ class PoolingBranch(nn.Module):
     """
     Fast-SCNN specific pooling branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -168,7 +168,7 @@ class FastPyramidPooling(nn.Module):
     """
     Fast-SCNN specific fast pyramid pooling block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -207,7 +207,7 @@ class FeatureFusion(nn.Module):
     """
     Fast-SCNN specific feature fusion block.
 
-    Parameters:
+    Parameters
     ----------
     x_in_channels : int
         Number of high resolution (x) input channels.
@@ -258,7 +258,7 @@ class Head(nn.Module):
     """
     Fast-SCNN head (classifier) block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -293,7 +293,7 @@ class AuxHead(nn.Module):
     """
     Fast-SCNN auxiliary (after stem) head (classifier) block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -327,7 +327,7 @@ class FastSCNN(nn.Module):
     """
     Fast-SCNN from 'Fast-SCNN: Fast Semantic Segmentation Network,' https://arxiv.org/abs/1902.04502.
 
-    Parameters:
+    Parameters
     ----------
     aux : bool, default False
         Whether to output an auxiliary result.
@@ -420,7 +420,7 @@ def get_fastscnn(model_name=None,
     """
     Create Fast-SCNN model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -449,7 +449,7 @@ def fastscnn_cityscapes(num_classes=19, aux=True, **kwargs):
     Fast-SCNN model for Cityscapes from 'Fast-SCNN: Fast Semantic Segmentation Network,'
     https://arxiv.org/abs/1902.04502.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

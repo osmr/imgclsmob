@@ -17,7 +17,7 @@ class DecoderStage(nn.Module):
     """
     LinkNet specific decoder stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -65,7 +65,7 @@ class LinkNetHead(nn.Module):
     """
     LinkNet head block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -108,7 +108,7 @@ class LinkNet(nn.Module):
     LinkNet model from 'LinkNet: Exploiting Encoder Representations for Efficient Semantic Segmentation,'
     https://arxiv.org/abs/1707.03718.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -212,7 +212,7 @@ def get_linknet(backbone,
     """
     Create LinkNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -254,7 +254,7 @@ def linknet_cityscapes(pretrained_backbone=False, num_classes=19, **kwargs):
     LinkNet model for Cityscapes from 'LinkNet: Exploiting Encoder Representations for Efficient Semantic Segmentation,'
     https://arxiv.org/abs/1707.03718.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

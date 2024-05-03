@@ -28,7 +28,7 @@ def round_channels(channels,
     """
     Round weighted channel number (make divisible operation).
 
-    Parameters:
+    Parameters
     ----------
     channels : int or float
         Original number of channels.
@@ -97,7 +97,7 @@ def get_activation_layer(activation):
     """
     Create activation layer from string/function.
 
-    Parameters:
+    Parameters
     ----------
     activation : function or str
         Activation function or name of activation function.
@@ -144,7 +144,7 @@ class SelectableDense(link.Link):
     """
     Selectable dense layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input features.
@@ -213,7 +213,7 @@ class DenseBlock(Chain):
     """
     Standard dense block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -264,7 +264,7 @@ class ConvBlock1d(Chain):
     """
     Standard 1D convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -339,7 +339,7 @@ def conv1x1(in_channels,
     """
     Convolution 1x1 layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -371,7 +371,7 @@ def conv3x3(in_channels,
     """
     Convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -407,7 +407,7 @@ def depthwise_conv3x3(channels,
     """
     Depthwise convolution 3x3 layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -435,7 +435,7 @@ class ConvBlock(Chain):
     """
     Standard convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -514,7 +514,7 @@ def conv1x1_block(in_channels,
     """
     1x1 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -561,7 +561,7 @@ def conv3x3_block(in_channels,
     """
     3x3 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -610,7 +610,7 @@ def conv5x5_block(in_channels,
     """
     5x5 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -655,7 +655,7 @@ def conv7x7_block(in_channels,
     """
     7x7 version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -699,7 +699,7 @@ def dwconv_block(in_channels,
     """
     Depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -747,7 +747,7 @@ def dwconv3x3_block(in_channels,
     """
     3x3 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -789,7 +789,7 @@ def dwconv5x5_block(in_channels,
     """
     5x5 depthwise version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -824,7 +824,7 @@ class DwsConvBlock(Chain):
     """
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -904,7 +904,7 @@ def dwsconv3x3_block(in_channels,
     """
     3x3 depthwise separable version of the standard convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -943,7 +943,7 @@ class PreConvBlock(Chain):
     """
     Convolution block with Batch normalization and ReLU pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1022,7 +1022,7 @@ def pre_conv1x1_block(in_channels,
     """
     1x1 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1063,7 +1063,7 @@ def pre_conv3x3_block(in_channels,
     """
     3x3 version of the pre-activated convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1101,7 +1101,7 @@ class DeconvBlock(Chain):
     """
     Deconvolution block with batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1175,7 +1175,7 @@ def channel_shuffle(x,
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
-    Parameters:
+    Parameters
     ----------
     x : chainer.Variable or numpy.ndarray or cupy.ndarray
         Input variable.
@@ -1199,7 +1199,7 @@ class ChannelShuffle(Chain):
     """
     Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -1223,7 +1223,7 @@ def channel_shuffle2(x,
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083. The alternative version.
 
-    Parameters:
+    Parameters
     ----------
     x : chainer.Variable or numpy.ndarray or cupy.ndarray
         Input variable.
@@ -1248,7 +1248,7 @@ class ChannelShuffle2(Chain):
     Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
     The alternative version.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -1270,7 +1270,7 @@ class SEBlock(Chain):
     """
     Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -1340,7 +1340,7 @@ class SABlock(Chain):
     """
     Split-Attention block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     out_channels : int
         Number of output channels.
@@ -1423,7 +1423,7 @@ class SAConvBlock(Chain):
     """
     Split-Attention convolution block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1509,7 +1509,7 @@ def saconv3x3_block(in_channels,
     """
     3x3 version of the Split-Attention convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1534,7 +1534,7 @@ class PixelShuffle(Chain):
     Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
     Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
 
-    Parameters:
+    Parameters
     ----------
     scale_factor : int
         Multiplier for spatial size.
@@ -1567,7 +1567,7 @@ class DucBlock(Chain):
     Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
     https://arxiv.org/abs/1702.08502.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -1633,7 +1633,7 @@ class DualPathSequential(SimpleSequential):
     A sequential container for blocks with dual inputs/outputs.
     Blocks will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     return_two : bool, default True
         Whether to return two output after execution.
@@ -1677,7 +1677,7 @@ class Concurrent(SimpleSequential):
     """
     A container for concatenation of modules on the base of the sequential container.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -1718,7 +1718,7 @@ class SequentialConcurrent(SimpleSequential):
     A sequential container with concatenated outputs.
     Blocks will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -1766,7 +1766,7 @@ class ParametricConcurrent(SimpleSequential):
     """
     A container for concatenation of modules on the base of the sequential container.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -1787,7 +1787,7 @@ class Hourglass(Chain):
     """
     A hourglass block.
 
-    Parameters:
+    Parameters
     ----------
     down_seq : SimpleSequential
         Down modules as sequential.
@@ -1857,7 +1857,7 @@ class SesquialteralHourglass(Chain):
     """
     A sesquialteral hourglass block.
 
-    Parameters:
+    Parameters
     ----------
     down1_seq : SimpleSequential
         The first down modules as sequential.
@@ -1932,7 +1932,7 @@ class MultiOutputSequential(SimpleSequential):
     A sequential container with multiple outputs.
     Blocks will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     multi_output : bool, default True
         Whether to return multiple output.
@@ -1974,7 +1974,7 @@ class ParallelConcurent(SimpleSequential):
     A sequential container with multiple inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -2011,7 +2011,7 @@ class DualPathParallelConcurent(SimpleSequential):
     A sequential container with multiple dual-path inputs and single/multiple outputs.
     Modules will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
@@ -2069,7 +2069,7 @@ class NormActivation(Chain):
     """
     Activation block with preliminary batch normalization. It's used by itself as the final block in PreResNet.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -2100,7 +2100,7 @@ class InterpolationBlock(Chain):
     """
     Interpolation block.
 
-    Parameters:
+    Parameters
     ----------
     scale_factor : int
         Multiplier for spatial size.

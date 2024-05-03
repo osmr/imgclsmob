@@ -18,7 +18,7 @@ class IBNResNeXtBottleneck(nn.Module):
     """
     IBN-ResNeXt bottleneck block for residual path in IBN-ResNeXt unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -70,7 +70,7 @@ class IBNResNeXtUnit(nn.Module):
     """
     IBN-ResNeXt unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -126,7 +126,7 @@ class IBNResNeXt(nn.Module):
     IBN-ResNeXt model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -208,7 +208,7 @@ def get_ibnresnext(blocks,
     """
     Create IBN-ResNeXt model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -260,7 +260,7 @@ def ibn_resnext50_32x4d(**kwargs):
     IBN-ResNeXt-50 (32x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -275,7 +275,7 @@ def ibn_resnext101_32x4d(**kwargs):
     IBN-ResNeXt-101 (32x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -290,7 +290,7 @@ def ibn_resnext101_64x4d(**kwargs):
     IBN-ResNeXt-101 (64x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

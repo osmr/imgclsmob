@@ -16,7 +16,7 @@ class SelecSLSBlock(nn.Module):
     """
     SelecSLS block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -46,7 +46,7 @@ class SelecSLSUnit(nn.Module):
     """
     SelecSLS unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -103,7 +103,7 @@ class SelecSLS(nn.Module):
     SelecSLS model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -198,7 +198,7 @@ def get_selecsls(version,
     """
     Create SelecSLS model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of SelecSLS.
@@ -262,7 +262,7 @@ def selecsls42(**kwargs):
     SelecSLS-42 model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -277,7 +277,7 @@ def selecsls42b(**kwargs):
     SelecSLS-42b model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -292,7 +292,7 @@ def selecsls60(**kwargs):
     SelecSLS-60 model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -307,7 +307,7 @@ def selecsls60b(**kwargs):
     SelecSLS-60b model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -322,7 +322,7 @@ def selecsls84(**kwargs):
     SelecSLS-84 model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

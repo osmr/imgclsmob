@@ -18,7 +18,7 @@ def anti_aliased_downsample(x):
     """
     Anti-Aliased Downsample operation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -44,7 +44,7 @@ class TResBlock(nn.Module):
     """
     Simple TResNet block for residual path in TResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -88,7 +88,7 @@ class TResBottleneck(nn.Module):
     """
     TResNet bottleneck block for residual path in TResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -152,7 +152,7 @@ class ResADownBlock(nn.Module):
     """
     TResNet downsample block for the identity branch of a residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -188,7 +188,7 @@ class TResUnit(nn.Module):
     """
     TResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -248,7 +248,7 @@ def space_to_depth(x):
     """
     Space-to-Depth operation.
 
-    Parameters:
+    Parameters
     ----------
     x : Tensor
         Input tensor.
@@ -273,7 +273,7 @@ class TResInitBlock(nn.Module):
     """
     TResNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -305,7 +305,7 @@ class TResNet(nn.Module):
     """
     TResNet model from 'TResNet: High Performance GPU-Dedicated Architecture,' https://arxiv.org/abs/2003.13630.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -383,7 +383,7 @@ def get_tresnet(version,
     """
     Create TResNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of TResNet ('m', 'l' or 'xl').
@@ -447,7 +447,7 @@ def tresnet_m(**kwargs):
     """
     TResNet-M model from 'TResNet: High Performance GPU-Dedicated Architecture,' https://arxiv.org/abs/2003.13630.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -461,7 +461,7 @@ def tresnet_l(**kwargs):
     """
     TResNet-L model from 'TResNet: High Performance GPU-Dedicated Architecture,' https://arxiv.org/abs/2003.13630.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -475,7 +475,7 @@ def tresnet_xl(**kwargs):
     """
     TResNet-XL model from 'TResNet: High Performance GPU-Dedicated Architecture,' https://arxiv.org/abs/2003.13630.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

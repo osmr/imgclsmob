@@ -14,7 +14,7 @@ class VOCSegDataset(SegDataset):
     """
     Pascal VOC2012 semantic segmentation dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to VOCdevkit folder.
@@ -216,7 +216,7 @@ def voc_train_transform(ds_metainfo,
     """
     Create image transform sequence for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Pascal VOC2012 dataset metainfo.
@@ -239,7 +239,7 @@ def voc_val_transform(ds_metainfo,
     """
     Create image transform sequence for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         Pascal VOC2012 dataset metainfo.
@@ -263,7 +263,7 @@ def voc_train_generator(data_generator,
     """
     Create image generator for training subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -297,7 +297,7 @@ def voc_val_generator(data_generator,
     """
     Create image generator for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -335,7 +335,7 @@ def voc_test_generator(data_generator,
     """
     Create image generator for testing subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.

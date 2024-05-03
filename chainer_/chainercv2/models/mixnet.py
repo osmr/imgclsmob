@@ -19,7 +19,7 @@ class MixConv(Chain):
     """
     Mixed convolution layer from 'MixConv: Mixed Depthwise Convolutional Kernels,' https://arxiv.org/abs/1907.09595.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -108,7 +108,7 @@ class MixConvBlock(Chain):
     """
     Mixed convolution block with Batch normalization and activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -187,7 +187,7 @@ def mixconv1x1_block(in_channels,
     """
     1x1 version of the mixed convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -225,7 +225,7 @@ class MixUnit(Chain):
     """
     MixNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -330,7 +330,7 @@ class MixInitBlock(Chain):
     """
     MixNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -367,7 +367,7 @@ class MixNet(Chain):
     """
     MixNet model from 'MixConv: Mixed Depthwise Convolutional Kernels,' https://arxiv.org/abs/1907.09595.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -472,7 +472,7 @@ def get_mixnet(version,
     """
     Create MixNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of MobileNetV3 ('s' or 'm').
@@ -539,7 +539,7 @@ def mixnet_s(**kwargs):
     """
     MixNet-S model from 'MixConv: Mixed Depthwise Convolutional Kernels,' https://arxiv.org/abs/1907.09595.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -553,7 +553,7 @@ def mixnet_m(**kwargs):
     """
     MixNet-M model from 'MixConv: Mixed Depthwise Convolutional Kernels,' https://arxiv.org/abs/1907.09595.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -567,7 +567,7 @@ def mixnet_l(**kwargs):
     """
     MixNet-L model from 'MixConv: Mixed Depthwise Convolutional Kernels,' https://arxiv.org/abs/1907.09595.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

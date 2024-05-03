@@ -21,7 +21,7 @@ class InceptBlock5b(Chain):
     """
     InceptionResNetV2 type Mixed-5b block.
 
-    Parameters:
+    Parameters
     ----------
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -67,7 +67,7 @@ class InceptInitBlock(Chain):
     """
     InceptionResNetV2 specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -140,7 +140,7 @@ class InceptionResNetV2(Chain):
     InceptionResNetV2 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.
@@ -235,7 +235,7 @@ def get_inceptionresnetv2(model_name=None,
     """
     Create InceptionResNetV2 model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -264,7 +264,7 @@ def inceptionresnetv2(**kwargs):
     InceptionResNetV2 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

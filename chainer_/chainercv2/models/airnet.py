@@ -19,7 +19,7 @@ class AirBlock(Chain):
     """
     AirNet attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -73,7 +73,7 @@ class AirBottleneck(Chain):
     """
     AirNet bottleneck block for residual path in AirNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -126,7 +126,7 @@ class AirUnit(Chain):
     """
     AirNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -174,7 +174,7 @@ class AirInitBlock(Chain):
     """
     AirNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -218,7 +218,7 @@ class AirNet(Chain):
     AirNet model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -293,7 +293,7 @@ def get_airnet(blocks,
     """
     Create AirNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -346,7 +346,7 @@ def airnet50_1x64d_r2(**kwargs):
     AirNet50-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -361,7 +361,7 @@ def airnet50_1x64d_r16(**kwargs):
     AirNet50-1x64d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -376,7 +376,7 @@ def airnet101_1x64d_r2(**kwargs):
     AirNet101-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

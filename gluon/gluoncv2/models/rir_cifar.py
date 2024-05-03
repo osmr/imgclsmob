@@ -15,7 +15,7 @@ class PostActivation(HybridBlock):
     """
     Pure pre-activation block without convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -43,7 +43,7 @@ class RiRUnit(HybridBlock):
     """
     RiR unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -116,7 +116,7 @@ class RiRInitBlock(HybridBlock):
     """
     RiR initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -163,7 +163,7 @@ class CIFARRiR(HybridBlock):
     """
     RiR model for CIFAR from 'Resnet in Resnet: Generalizing Residual Architectures,' https://arxiv.org/abs/1603.08029.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -245,7 +245,7 @@ def get_rir_cifar(classes,
     """
     Create RiR model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -288,7 +288,7 @@ def rir_cifar10(classes=10, **kwargs):
     RiR model for CIFAR-10 from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -307,7 +307,7 @@ def rir_cifar100(classes=100, **kwargs):
     RiR model for CIFAR-100 from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -326,7 +326,7 @@ def rir_svhn(classes=10, **kwargs):
     RiR model for SVHN from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

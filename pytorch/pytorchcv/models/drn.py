@@ -14,7 +14,7 @@ class DRNConv(nn.Module):
     """
     DRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -69,7 +69,7 @@ def drn_conv1x1(in_channels,
     """
     1x1 version of the DRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -98,7 +98,7 @@ def drn_conv3x3(in_channels,
     """
     3x3 version of the DRN specific convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -125,7 +125,7 @@ class DRNBlock(nn.Module):
     """
     Simple DRN block for residual path in DRN unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -165,7 +165,7 @@ class DRNBottleneck(nn.Module):
     """
     DRN bottleneck block for residual path in DRN unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -212,7 +212,7 @@ class DRNUnit(nn.Module):
     """
     DRN unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -288,7 +288,7 @@ def drn_init_block(in_channels,
     """
     DRN specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -309,7 +309,7 @@ class DRN(nn.Module):
     """
     DRN-C&D model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -397,7 +397,7 @@ def get_drn(blocks,
     """
     Create DRN-C or DRN-D model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -489,7 +489,7 @@ def drnc26(**kwargs):
     """
     DRN-C-26 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -503,7 +503,7 @@ def drnc42(**kwargs):
     """
     DRN-C-42 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -517,7 +517,7 @@ def drnc58(**kwargs):
     """
     DRN-C-58 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -531,7 +531,7 @@ def drnd22(**kwargs):
     """
     DRN-D-58 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -545,7 +545,7 @@ def drnd38(**kwargs):
     """
     DRN-D-38 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -559,7 +559,7 @@ def drnd54(**kwargs):
     """
     DRN-D-54 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -573,7 +573,7 @@ def drnd105(**kwargs):
     """
     DRN-D-105 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

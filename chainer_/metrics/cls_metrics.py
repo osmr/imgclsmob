@@ -13,7 +13,7 @@ class Accuracy(EvalMetric):
     """
     Computes accuracy classification score.
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis that represents classes
@@ -43,7 +43,7 @@ class Accuracy(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : xp.array
             The labels of the data with class indices as values, one per sample.
@@ -71,7 +71,7 @@ class TopKAccuracy(EvalMetric):
     """
     Computes top k predictions accuracy.
 
-    Parameters:
+    Parameters
     ----------
     top_k : int, default 1
         Whether targets are in top k predictions.
@@ -103,7 +103,7 @@ class TopKAccuracy(EvalMetric):
         """
         Updates the internal evaluation result.
 
-        Parameters:
+        Parameters
         ----------
         labels : xp.array
             The labels of the data.
@@ -131,7 +131,7 @@ class Top1Error(Accuracy):
     """
     Computes top-1 error (inverted accuracy classification score).
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default 1
         The axis that represents classes.
@@ -176,7 +176,7 @@ class TopKError(TopKAccuracy):
     """
     Computes top-k error (inverted top k predictions accuracy).
 
-    Parameters:
+    Parameters
     ----------
     top_k : int
         Whether targets are out of top k predictions, default 1

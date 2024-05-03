@@ -14,7 +14,7 @@ def mobilenetb_w1(**kwargs):
     1.0 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
     Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -31,7 +31,7 @@ def mobilenetb_w3d4(**kwargs):
     0.75 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
     Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -48,7 +48,7 @@ def mobilenetb_wd2(**kwargs):
     0.5 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
     Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -65,7 +65,7 @@ def mobilenetb_wd4(**kwargs):
     0.25 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
     Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -49,7 +49,7 @@ class PosAttBlock(HybridBlock):
     Position attention block from 'Dual Attention Network for Scene Segmentation,' https://arxiv.org/abs/1809.02983.
     It captures long-range spatial contextual information.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -122,7 +122,7 @@ class DANetHeadBranch(HybridBlock):
     """
     DANet head branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -181,7 +181,7 @@ class DANetHead(HybridBlock):
     """
     DANet head block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -235,7 +235,7 @@ class DANet(HybridBlock):
     """
     DANet model from 'Dual Attention Network for Scene Segmentation,' https://arxiv.org/abs/1809.02983.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -308,7 +308,7 @@ def get_danet(backbone,
     """
     Create DANet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     backbone : nn.Sequential
         Feature extractor.
@@ -350,7 +350,7 @@ def danet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     DANet model on the base of ResNet(D)-50b for Cityscapes from 'Dual Attention Network for Scene Segmentation,'
     https://arxiv.org/abs/1809.02983.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
@@ -375,7 +375,7 @@ def danet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     DANet model on the base of ResNet(D)-101b for Cityscapes from 'Dual Attention Network for Scene Segmentation,'
     https://arxiv.org/abs/1809.02983.
 
-    Parameters:
+    Parameters
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.

@@ -19,7 +19,7 @@ class IbpResBottleneck(Chain):
     """
     Bottleneck block for residual path in the residual unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -73,7 +73,7 @@ class IbpResUnit(Chain):
     """
     ResNet-like residual unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -130,7 +130,7 @@ class IbpBackbone(Chain):
     """
     IBPPose backbone.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -190,7 +190,7 @@ class IbpDownBlock(Chain):
     """
     IBPPose down block for the hourglass.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -224,7 +224,7 @@ class IbpUpBlock(Chain):
     """
     IBPPose up block for the hourglass.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -267,7 +267,7 @@ class MergeBlock(Chain):
     """
     IBPPose merge block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -297,7 +297,7 @@ class IbpPreBlock(Chain):
     """
     IBPPose preliminary decoder block.
 
-    Parameters:
+    Parameters
     ----------
     out_channels : int
         Number of output channels.
@@ -340,7 +340,7 @@ class IbpPass(Chain):
     """
     IBPPose single pass decoder block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -434,7 +434,7 @@ class IbpPose(Chain):
     IBPPose model from 'Simple Pose: Rethinking and Improving a Bottom-up Approach for Multi-Person Pose Estimation,'
     https://arxiv.org/abs/1911.10529.
 
-    Parameters:
+    Parameters
     ----------
     passes : int
         Number of passes.
@@ -503,7 +503,7 @@ def get_ibppose(model_name=None,
     """
     Create IBPPose model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -546,7 +546,7 @@ def ibppose_coco(**kwargs):
     IBPPose model for COCO Keypoint from 'Simple Pose: Rethinking and Improving a Bottom-up Approach for Multi-Person
     Pose Estimation,' https://arxiv.org/abs/1911.10529.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

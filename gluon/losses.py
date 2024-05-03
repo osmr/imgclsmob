@@ -11,7 +11,7 @@ class SegSoftmaxCrossEntropyLoss(Loss):
     """
     SoftmaxCrossEntropyLoss with ignore labels (for segmentation task).
 
-    Parameters:
+    Parameters
     ----------
     axis : int, default -1
         The axis to sum over when computing softmax and entropy.
@@ -63,7 +63,7 @@ class MixSoftmaxCrossEntropyLoss(SegSoftmaxCrossEntropyLoss):
     """
     SegSoftmaxCrossEntropyLoss with auxiliary loss support.
 
-    Parameters:
+    Parameters
     ----------
     aux : bool, default True
         Whether to use auxiliary loss.

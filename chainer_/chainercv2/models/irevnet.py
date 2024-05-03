@@ -19,7 +19,7 @@ class IRevDualPathSequential(DualPathSequential):
     An invertible sequential container for blocks with dual inputs/outputs.
     Blocks will be executed in the order they are added.
 
-    Parameters:
+    Parameters
     ----------
     return_two : bool, default True
         Whether to return two output after execution.
@@ -69,7 +69,7 @@ class IRevDownscale(Chain):
     """
     i-RevNet specific downscale (so-called psi-block).
 
-    Parameters:
+    Parameters
     ----------
     scale : int
         Scale (downscale) value.
@@ -114,7 +114,7 @@ class IRevInjectivePad(Chain):
     """
     i-RevNet channel zero padding block.
 
-    Parameters:
+    Parameters
     ----------
     padding : int
         Size of the padding.
@@ -166,7 +166,7 @@ class IRevBottleneck(Chain):
     """
     iRevNet bottleneck block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -214,7 +214,7 @@ class IRevUnit(Chain):
     """
     iRevNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -279,7 +279,7 @@ class IRevPostActivation(Chain):
     """
     iRevNet specific post-activation block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -303,7 +303,7 @@ class IRevNet(Chain):
     """
     i-RevNet model from 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -392,7 +392,7 @@ def get_irevnet(blocks,
     """
     Create i-RevNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -440,7 +440,7 @@ def irevnet301(**kwargs):
     """
     i-RevNet-301 model from 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

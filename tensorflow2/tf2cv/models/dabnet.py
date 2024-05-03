@@ -17,7 +17,7 @@ class DwaConvBlock(nn.Layer):
     """
     Depthwise asymmetric separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -101,7 +101,7 @@ def dwa_conv3x3_block(channels,
     """
     3x3 version of the depthwise asymmetric separable convolution block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -140,7 +140,7 @@ class DABBlock(nn.Layer):
     """
     DABNet specific base block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -226,7 +226,7 @@ class DownBlock(nn.Layer):
     """
     DABNet specific downsample block for the main branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -282,7 +282,7 @@ class DABUnit(nn.Layer):
     """
     DABNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -332,7 +332,7 @@ class DABStage(nn.Layer):
     """
     DABNet stage.
 
-    Parameters:
+    Parameters
     ----------
     x_channels : int
         Number of input/output channels for x.
@@ -395,7 +395,7 @@ class DABInitBlock(nn.Layer):
     """
     DABNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -448,7 +448,7 @@ class DABNet(tf.keras.Model):
     DABNet model from 'DABNet: Depth-wise Asymmetric Bottleneck for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1907.11357.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit (for y-branch).
@@ -542,7 +542,7 @@ def get_dabnet(model_name=None,
     """
     Create DABNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -586,7 +586,7 @@ def dabnet_cityscapes(classes=19, **kwargs):
     DABNet model for Cityscapes from 'DABNet: Depth-wise Asymmetric Bottleneck for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1907.11357.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 19
         Number of segmentation classes.

@@ -21,7 +21,7 @@ class SpatialDiceBranch(Chain):
     """
     Spatial element of DiCE block for selected dimension.
 
-    Parameters:
+    Parameters
     ----------
     sp_size : int
         Desired size for selected spatial dimension.
@@ -82,7 +82,7 @@ class DiceBaseBlock(Chain):
     """
     Base part of DiCE block (without attention).
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -134,7 +134,7 @@ class DiceAttBlock(Chain):
     """
     Pure attention part of DiCE block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -176,7 +176,7 @@ class DiceBlock(Chain):
     """
     DiCE block (volume-wise separable convolutions).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -218,7 +218,7 @@ class StridedDiceLeftBranch(Chain):
     """
     Left branch of the strided DiCE block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -249,7 +249,7 @@ class StridedDiceRightBranch(Chain):
     """
     Right branch of the strided DiCE block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -287,7 +287,7 @@ class StridedDiceBlock(Chain):
     """
     Strided DiCE block (strided volume-wise separable convolutions).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -325,7 +325,7 @@ class ShuffledDiceRightBranch(Chain):
     """
     Right branch of the shuffled DiCE block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -360,7 +360,7 @@ class ShuffledDiceBlock(Chain):
     """
     Shuffled DiCE block (shuffled volume-wise separable convolutions).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -400,7 +400,7 @@ class DiceInitBlock(Chain):
     """
     DiceNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -435,7 +435,7 @@ class DiceClassifier(Chain):
     """
     DiceNet specific classifier block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -477,7 +477,7 @@ class DiceNet(Chain):
     """
     DiCENet model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,' https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -557,7 +557,7 @@ def get_dicenet(width_scale,
     """
     Create DiCENet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     width_scale : float
         Scale factor for width of layers.
@@ -631,7 +631,7 @@ def dicenet_wd5(**kwargs):
     DiCENet x0.2 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -646,7 +646,7 @@ def dicenet_wd2(**kwargs):
     DiCENet x0.5 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -661,7 +661,7 @@ def dicenet_w3d4(**kwargs):
     DiCENet x0.75 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -676,7 +676,7 @@ def dicenet_w1(**kwargs):
     DiCENet x1.0 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -691,7 +691,7 @@ def dicenet_w5d4(**kwargs):
     DiCENet x1.25 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -706,7 +706,7 @@ def dicenet_w3d2(**kwargs):
     DiCENet x1.5 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -721,7 +721,7 @@ def dicenet_w7d8(**kwargs):
     DiCENet x1.75 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -736,7 +736,7 @@ def dicenet_w2(**kwargs):
     DiCENet x2.0 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

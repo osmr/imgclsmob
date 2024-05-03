@@ -9,7 +9,7 @@ def is_channels_first(data_format):
     """
     Is tested data format channels first.
 
-    Parameters:
+    Parameters
     ----------
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

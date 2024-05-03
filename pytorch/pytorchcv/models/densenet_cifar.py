@@ -26,7 +26,7 @@ class DenseSimpleUnit(nn.Module):
     """
     DenseNet simple unit for CIFAR.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -63,7 +63,7 @@ class CIFARDenseNet(nn.Module):
     """
     DenseNet model for CIFAR from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -148,7 +148,7 @@ def get_densenet_cifar(num_classes,
     """
     Create DenseNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int
         Number of classification classes.
@@ -208,7 +208,7 @@ def densenet40_k12_cifar10(num_classes=10, **kwargs):
     DenseNet-40 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -226,7 +226,7 @@ def densenet40_k12_cifar100(num_classes=100, **kwargs):
     DenseNet-40 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -244,7 +244,7 @@ def densenet40_k12_svhn(num_classes=10, **kwargs):
     DenseNet-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -262,7 +262,7 @@ def densenet40_k12_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -280,7 +280,7 @@ def densenet40_k12_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-40 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -298,7 +298,7 @@ def densenet40_k12_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -316,7 +316,7 @@ def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -334,7 +334,7 @@ def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -352,7 +352,7 @@ def densenet40_k24_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -370,7 +370,7 @@ def densenet40_k36_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=36) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -388,7 +388,7 @@ def densenet40_k36_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-40 (k=36) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -406,7 +406,7 @@ def densenet40_k36_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-40 (k=36) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -424,7 +424,7 @@ def densenet100_k12_cifar10(num_classes=10, **kwargs):
     DenseNet-100 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -442,7 +442,7 @@ def densenet100_k12_cifar100(num_classes=100, **kwargs):
     DenseNet-100 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -460,7 +460,7 @@ def densenet100_k12_svhn(num_classes=10, **kwargs):
     DenseNet-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -478,7 +478,7 @@ def densenet100_k24_cifar10(num_classes=10, **kwargs):
     DenseNet-100 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -496,7 +496,7 @@ def densenet100_k24_cifar100(num_classes=100, **kwargs):
     DenseNet-100 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -514,7 +514,7 @@ def densenet100_k24_svhn(num_classes=10, **kwargs):
     DenseNet-100 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -532,7 +532,7 @@ def densenet100_k12_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-100 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -550,7 +550,7 @@ def densenet100_k12_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-100 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -568,7 +568,7 @@ def densenet100_k12_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -586,7 +586,7 @@ def densenet190_k40_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-190 (k=40) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -604,7 +604,7 @@ def densenet190_k40_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-190 (k=40) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -622,7 +622,7 @@ def densenet190_k40_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-190 (k=40) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -640,7 +640,7 @@ def densenet250_k24_bc_cifar10(num_classes=10, **kwargs):
     DenseNet-BC-250 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -658,7 +658,7 @@ def densenet250_k24_bc_cifar100(num_classes=100, **kwargs):
     DenseNet-BC-250 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -676,7 +676,7 @@ def densenet250_k24_bc_svhn(num_classes=10, **kwargs):
     DenseNet-BC-250 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.

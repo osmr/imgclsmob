@@ -21,7 +21,7 @@ class ShakeDrop(chainer.function.Function):
     """
     ShakeDrop function.
 
-    Parameters:
+    Parameters
     ----------
     p : float
         ShakeDrop specific probability (of life) for Bernoulli random variable.
@@ -59,7 +59,7 @@ class ShakeDropResUnit(Chain):
     """
     ShakeDrop-ResNet unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -113,7 +113,7 @@ class CIFARShakeDropResNet(Chain):
     ShakeDrop-ResNet model for CIFAR from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -194,7 +194,7 @@ def get_shakedropresnet_cifar(classes,
     """
     Create ShakeDrop-ResNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     classes : int
         Number of classification classes.
@@ -256,7 +256,7 @@ def shakedropresnet20_cifar10(classes=10, **kwargs):
     ShakeDrop-ResNet-20 model for CIFAR-10 from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.
@@ -274,7 +274,7 @@ def shakedropresnet20_cifar100(classes=100, **kwargs):
     ShakeDrop-ResNet-20 model for CIFAR-100 from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 100
         Number of classification classes.
@@ -292,7 +292,7 @@ def shakedropresnet20_svhn(classes=10, **kwargs):
     ShakeDrop-ResNet-20 model for SVHN from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
-    Parameters:
+    Parameters
     ----------
     classes : int, default 10
         Number of classification classes.

@@ -18,7 +18,7 @@ def outmask_fill(x, x_len, value=0.0):
     """
     Masked fill a tensor.
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         Input tensor.
@@ -43,7 +43,7 @@ def masked_normalize(x, x_len):
     """
     Normalize a tensor with mask.
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         Input tensor.
@@ -68,7 +68,7 @@ def masked_normalize2(x, x_len):
     """
     Normalize a tensor with mask (scheme #2).
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         Input tensor.
@@ -92,7 +92,7 @@ def masked_normalize3(x, x_len):
     """
     Normalize a tensor with mask (scheme #3).
 
-    Parameters:
+    Parameters
     ----------
     x : tensor
         Input tensor.
@@ -118,7 +118,7 @@ class NemoAudioReader(object):
     """
     Audio Reader from NVIDIA NEMO toolkit.
 
-    Parameters:
+    Parameters
     ----------
     desired_audio_sample_rate : int, default 16000
         Desired audio sample rate.
@@ -133,7 +133,7 @@ class NemoAudioReader(object):
         """
         Read audio from file.
 
-        Parameters:
+        Parameters
         ----------
         audio_file_path : str
             Path to audio file.
@@ -162,7 +162,7 @@ class NemoAudioReader(object):
         """
         Read audios from files.
 
-        Parameters:
+        Parameters
         ----------
         audio_file_paths : list of str
             Paths to audio files.
@@ -185,7 +185,7 @@ class NemoMelSpecExtractor(nn.Module):
     """
     Mel-Spectrogram Extractor from NVIDIA NEMO toolkit.
 
-    Parameters:
+    Parameters
     ----------
     sample_rate : int, default 16000
         Sample rate of the input audio data.
@@ -245,7 +245,7 @@ class NemoMelSpecExtractor(nn.Module):
         """
         Preprocess audio.
 
-        Parameters:
+        Parameters
         ----------
         xs : list of np.array
             Audio data.
@@ -292,7 +292,7 @@ class CtcDecoder(object):
     """
     CTC decoder (to decode a sequence of labels to words).
 
-    Parameters:
+    Parameters
     ----------
     vocabulary : list of str
         Vocabulary of the dataset.
@@ -308,7 +308,7 @@ class CtcDecoder(object):
         """
         Decode a sequence of labels to words.
 
-        Parameters:
+        Parameters
         ----------
         predictions : np.array of int or list of list of int
             Tensor with predicted labels.
@@ -339,7 +339,7 @@ def conv1d1(in_channels,
     """
     1-dim kernel version of the 1D convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -365,7 +365,7 @@ class MaskConv1d(nn.Conv1d):
     """
     Masked 1D convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -431,7 +431,7 @@ def mask_conv1d1(in_channels,
     """
     Masked 1-dim kernel version of the 1D convolution layer.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -457,7 +457,7 @@ class MaskConvBlock1d(nn.Module):
     """
     Masked 1D convolution block with batch normalization, activation, and dropout.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -539,7 +539,7 @@ def mask_conv1d1_block(in_channels,
     """
     1-dim kernel version of the masked 1D convolution block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -563,7 +563,7 @@ class ChannelShuffle1d(nn.Module):
     """
     1D version of the channel shuffle layer.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of channels.
@@ -597,7 +597,7 @@ class DwsConvBlock1d(nn.Module):
     Depthwise version of the 1D standard convolution block with batch normalization, activation, dropout, and channel
     shuffle.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -688,7 +688,7 @@ class JasperUnit(nn.Module):
     """
     Jasper unit with residual connection.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int or list of int
         Number of input channels.
@@ -785,7 +785,7 @@ class JasperFinalBlock(nn.Module):
     """
     Jasper specific final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -845,7 +845,7 @@ class Jasper(nn.Module):
     Jasper/DR/QuartzNet model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit and initial/final block.
@@ -980,7 +980,7 @@ def get_jasper(version,
     """
     Create Jasper/DR/QuartzNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : tuple of str
         Model type and configuration.
@@ -1050,7 +1050,7 @@ def jasper5x3(**kwargs):
     Jasper 5x3 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -1065,7 +1065,7 @@ def jasper10x4(**kwargs):
     Jasper 10x4 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -1080,7 +1080,7 @@ def jasper10x5(**kwargs):
     Jasper 10x5 model from 'Jasper: An End-to-End Convolutional Neural Acoustic Model,'
     https://arxiv.org/abs/1904.03288.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

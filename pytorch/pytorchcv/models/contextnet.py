@@ -16,7 +16,7 @@ class CtxShallowNet(nn.Module):
     """
     ContextNet specific shallow net (spatial detail encoder).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -62,7 +62,7 @@ class LinearBottleneck(nn.Module):
     """
     So-called 'Linear Bottleneck' layer (from MobileNetV2). It is used as a CtxDeepNet encoder unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -111,7 +111,7 @@ class CtxDeepNet(nn.Module):
     """
     ContextNet specific deep net (regular encoder).
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -155,7 +155,7 @@ class FeatureFusion(nn.Module):
     """
     ContextNet specific feature fusion block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_high : int
         Number of input channels for x_high.
@@ -203,7 +203,7 @@ class CtxHead(nn.Module):
     """
     ContextNet specific head/classifier block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -238,7 +238,7 @@ class CtxAuxHead(nn.Module):
     """
     ContextNet specific auxiliary head/classifier block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -271,7 +271,7 @@ class ContextNet(nn.Module):
     ContextNet model from 'ContextNet: Exploring Context and Detail for Semantic Segmentation in Real-time,'
     https://arxiv.org/abs/1805.04554.
 
-    Parameters:
+    Parameters
     ----------
     aux : bool, default False
         Whether to output an auxiliary result.
@@ -353,7 +353,7 @@ def get_ctxnet(model_name=None,
     """
     Create ContextNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -382,7 +382,7 @@ def ctxnet_cityscapes(num_classes=19, **kwargs):
     ContextNet model for Cityscapes from 'ContextNet: Exploring Context and Detail for Semantic Segmentation in
     Real-time,' https://arxiv.org/abs/1805.04554.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

@@ -22,7 +22,7 @@ class XDenseSimpleUnit(nn.Module):
     """
     X-DenseNet simple unit for CIFAR.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -64,7 +64,7 @@ class CIFARXDenseNet(nn.Module):
     X-DenseNet model for CIFAR from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -154,7 +154,7 @@ def get_xdensenet_cifar(num_classes,
     """
     Create X-DenseNet model for CIFAR with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int
         Number of classification classes.
@@ -217,7 +217,7 @@ def xdensenet40_2_k24_bc_cifar10(num_classes=10, **kwargs):
     X-DenseNet-BC-40-2 (k=24) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -235,7 +235,7 @@ def xdensenet40_2_k24_bc_cifar100(num_classes=100, **kwargs):
     X-DenseNet-BC-40-2 (k=24) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -253,7 +253,7 @@ def xdensenet40_2_k24_bc_svhn(num_classes=10, **kwargs):
     X-DenseNet-BC-40-2 (k=24) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -271,7 +271,7 @@ def xdensenet40_2_k36_bc_cifar10(num_classes=10, **kwargs):
     X-DenseNet-BC-40-2 (k=36) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.
@@ -289,7 +289,7 @@ def xdensenet40_2_k36_bc_cifar100(num_classes=100, **kwargs):
     X-DenseNet-BC-40-2 (k=36) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 100
         Number of classification classes.
@@ -307,7 +307,7 @@ def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs):
     X-DenseNet-BC-40-2 (k=36) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 10
         Number of classification classes.

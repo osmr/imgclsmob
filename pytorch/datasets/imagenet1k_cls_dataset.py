@@ -16,7 +16,7 @@ class ImageNet1K(ImageFolder):
     """
     ImageNet-1K classification dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str, default '~/.torch/datasets/imagenet'
         Path to the folder stored the dataset.
@@ -72,7 +72,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         """
         Create python script parameters (for ImageNet-1K dataset metainfo).
 
-        Parameters:
+        Parameters
         ----------
         parser : ArgumentParser
             ArgumentParser instance.
@@ -117,7 +117,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         """
         Update ImageNet-1K dataset metainfo after user customizing.
 
-        Parameters:
+        Parameters
         ----------
         args : ArgumentParser
             Main script arguments.
@@ -135,7 +135,7 @@ def imagenet_train_transform(ds_metainfo,
     """
     Create image transform sequence for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -166,7 +166,7 @@ def imagenet_val_transform(ds_metainfo):
     """
     Create image transform sequence for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
@@ -195,7 +195,7 @@ class CvResize(object):
     """
     Resize the input PIL Image to the given size via OpenCV.
 
-    Parameters:
+    Parameters
     ----------
     size : int or tuple of (W, H)
         Size of output image.
@@ -213,7 +213,7 @@ class CvResize(object):
         """
         Resize image.
 
-        Parameters:
+        Parameters
         ----------
         img : PIL.Image
             input image.
@@ -256,7 +256,7 @@ def calc_val_resize_value(input_image_size=(224, 224),
     """
     Calculate image resize value for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     input_image_size : tuple of 2 int
         Main script arguments.

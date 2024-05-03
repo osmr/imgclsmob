@@ -17,7 +17,7 @@ class ESPFinalBlock(nn.Module):
     """
     ESPNet final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -56,7 +56,7 @@ class ESPNet(ESPCNet):
     ESPNet model from 'ESPNet: Efficient Spatial Pyramid of Dilated Convolutions for Semantic Segmentation,'
     https://arxiv.org/abs/1803.06815.
 
-    Parameters:
+    Parameters
     ----------
     layers : list of int
         Number of layers for each unit.
@@ -182,7 +182,7 @@ def get_espnet(model_name=None,
     """
     Create ESPNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -222,7 +222,7 @@ def espnet_cityscapes(num_classes=19, **kwargs):
     ESPNet model for Cityscapes from 'ESPNet: Efficient Spatial Pyramid of Dilated Convolutions for Semantic
     Segmentation,' https://arxiv.org/abs/1803.06815.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

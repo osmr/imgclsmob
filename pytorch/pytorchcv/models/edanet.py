@@ -16,7 +16,7 @@ class DownBlock(nn.Module):
     """
     EDANet specific downsample block for the main branch.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -61,7 +61,7 @@ class EDABlock(nn.Module):
     """
     EDANet base block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -109,7 +109,7 @@ class EDAUnit(nn.Module):
     """
     EDANet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -159,7 +159,7 @@ class EDANet(nn.Module):
     EDANet model from 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1809.06323.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for the first unit of each stage.
@@ -252,7 +252,7 @@ def get_edanet(model_name=None,
     """
     Create EDANet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -290,7 +290,7 @@ def edanet_cityscapes(num_classes=19, **kwargs):
     EDANet model for Cityscapes from 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic
     Segmentation,' https://arxiv.org/abs/1809.06323.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

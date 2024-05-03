@@ -18,7 +18,7 @@ class PFCUBranch(nn.Module):
     """
     Parallel factorized convolution unit's branch.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -63,7 +63,7 @@ class PFCU(nn.Module):
     """
     Parallel factorized convolution unit.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -116,7 +116,7 @@ class ESNet(nn.Module):
     ESNet model from 'ESNet: An Efficient Symmetric Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1906.09826.
 
-    Parameters:
+    Parameters
     ----------
     layers : list of list of int
         Number of layers in each stage of encoder and decoder.
@@ -246,7 +246,7 @@ def get_esnet(model_name=None,
     """
     Create ESNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -286,7 +286,7 @@ def esnet_cityscapes(num_classes=19, **kwargs):
     ESNet model for Cityscapes from 'ESNet: An Efficient Symmetric Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1906.09826.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

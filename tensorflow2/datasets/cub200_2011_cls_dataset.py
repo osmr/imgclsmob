@@ -198,7 +198,7 @@ def cub200_train_transform(ds_metainfo,
     """
     Create image transform sequence for training subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         CUB-200-2011 dataset metainfo.
@@ -227,7 +227,7 @@ def cub200_val_transform(ds_metainfo,
     """
     Create image transform sequence for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     ds_metainfo : DatasetMetaInfo
         CUB-200-2011 dataset metainfo.
@@ -254,7 +254,7 @@ def cub200_train_generator(data_generator,
     """
     Create image generator for training subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.
@@ -286,7 +286,7 @@ def cub200_val_generator(data_generator,
     """
     Create image generator for validation subset.
 
-    Parameters:
+    Parameters
     ----------
     data_generator : ImageDataGenerator
         Image transform sequence.

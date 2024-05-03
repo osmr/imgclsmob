@@ -46,7 +46,7 @@ def calc_sha1(file_name):
     """
     Calculate sha1 hash of the file content.
 
-    Parameters:
+    Parameters
     ----------
     file_name : str
         Path to the file.
@@ -78,7 +78,7 @@ def post_process(dst_dir_path,
     """
     Post-process weight/log files.
 
-    Parameters:
+    Parameters
     ----------
     dst_dir_path : str
         Destination dir path.
@@ -135,7 +135,7 @@ def process_fwk(prep_info_dict,
     """
     Process weights on specific framework.
 
-    Parameters:
+    Parameters
     ----------
     prep_info_dict : dict
         Dictionary with preparation meta-info.

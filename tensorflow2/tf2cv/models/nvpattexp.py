@@ -15,7 +15,7 @@ class NvpAttExpEncoder(nn.Layer):
     """
     Neural Voice Puppetry Audio-to-Expression encoder.
 
-    Parameters:
+    Parameters
     ----------
     audio_features : int
         Number of audio features (characters/sounds).
@@ -149,7 +149,7 @@ class NvpAttExp(tf.keras.Model):
     Neural Voice Puppetry Audio-to-Expression model from 'Neural Voice Puppetry: Audio-driven Facial Reenactment,'
     https://arxiv.org/abs/1912.05566.
 
-    Parameters:
+    Parameters
     ----------
     audio_features : int, default 29
         Number of audio features (characters/sounds).
@@ -209,7 +209,7 @@ def get_nvpattexp(base_persons,
     """
     Create Neural Voice Puppetry Audio-to-Expression model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     base_persons : int
         Number of base persons (subjects).
@@ -248,7 +248,7 @@ def nvpattexp116bazel76(**kwargs):
     Neural Voice Puppetry Audio-to-Expression model for 116 base persons and Bazel topology with 76 blendshapes from
     'Neural Voice Puppetry: Audio-driven Facial Reenactment,' https://arxiv.org/abs/1912.05566.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

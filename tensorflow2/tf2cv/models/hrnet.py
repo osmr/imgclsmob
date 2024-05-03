@@ -18,7 +18,7 @@ class UpSamplingBlock(nn.Layer):
     """
     HFNet specific upsampling block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -61,7 +61,7 @@ class HRBlock(nn.Layer):
     """
     HFNet block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_list : list of int
         Number of input channels.
@@ -164,7 +164,7 @@ class HRStage(nn.Layer):
     """
     HRNet stage block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_list : list of int
         Number of output channels from the previous layer.
@@ -245,7 +245,7 @@ class HRInitBlock(nn.Layer):
     """
     HRNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -301,7 +301,7 @@ class HRFinalBlock(nn.Layer):
     """
     HRNet specific final block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels_list : list of int
         Number of input channels per stage.
@@ -355,7 +355,7 @@ class HRNet(tf.keras.Model):
     HRNet model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for each unit.
@@ -443,7 +443,7 @@ def get_hrnet(version,
     """
     Create HRNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     version : str
         Version of MobileNetV3 ('s' or 'm').
@@ -533,7 +533,7 @@ def hrnet_w18_small_v1(**kwargs):
     HRNet-W18 Small V1 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -548,7 +548,7 @@ def hrnet_w18_small_v2(**kwargs):
     HRNet-W18 Small V2 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -563,7 +563,7 @@ def hrnetv2_w18(**kwargs):
     HRNetV2-W18 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -578,7 +578,7 @@ def hrnetv2_w30(**kwargs):
     HRNetV2-W30 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -593,7 +593,7 @@ def hrnetv2_w32(**kwargs):
     HRNetV2-W32 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -608,7 +608,7 @@ def hrnetv2_w40(**kwargs):
     HRNetV2-W40 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -623,7 +623,7 @@ def hrnetv2_w44(**kwargs):
     HRNetV2-W44 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -638,7 +638,7 @@ def hrnetv2_w48(**kwargs):
     HRNetV2-W48 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -653,7 +653,7 @@ def hrnetv2_w64(**kwargs):
     HRNetV2-W64 model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

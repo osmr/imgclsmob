@@ -13,7 +13,7 @@ class AsrDataset(data.Dataset):
     """
     Automatic Speech Recognition (ASR) abstract dataset.
 
-    Parameters:
+    Parameters
     ----------
     root : str
         Path to the folder stored the dataset.

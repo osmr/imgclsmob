@@ -17,7 +17,7 @@ class ENetMaxDownBlock(nn.Module):
     """
     ENet specific max-pooling downscale block.
 
-    Parameters:
+    Parameters
     ----------
     ext_channels : int
         Number of extra channels.
@@ -51,7 +51,7 @@ class ENetUpBlock(nn.Module):
     """
     ENet upscale block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -82,7 +82,7 @@ class ENetUnit(nn.Module):
     """
     ENet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -226,7 +226,7 @@ class ENetStage(nn.Module):
     """
     ENet stage.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -301,7 +301,7 @@ class ENetMixDownBlock(nn.Module):
     """
     ENet specific mixed downscale block, used as an initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -358,7 +358,7 @@ class ENet(nn.Module):
     ENet model from 'ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1606.02147.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of int
         Number of output channels for the first unit of each stage.
@@ -476,7 +476,7 @@ def get_enet(model_name=None,
     """
     Create ENet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -522,7 +522,7 @@ def enet_cityscapes(num_classes=19, **kwargs):
     ENet model for Cityscapes from 'ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1606.02147.
 
-    Parameters:
+    Parameters
     ----------
     num_classes : int, default 19
         Number of segmentation classes.

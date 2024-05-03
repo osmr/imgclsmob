@@ -19,7 +19,7 @@ class PreResBottleneck(Chain):
     """
     PreResNet bottleneck block for residual path in PreResNet unit.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -59,7 +59,7 @@ class ResBlock(Chain):
     """
     Residual block with pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -99,7 +99,7 @@ class InterpolationBlock(Chain):
     """
     Interpolation block.
 
-    Parameters:
+    Parameters
     ----------
     size : tuple of 2 int
         Spatial size of the output tensor for the bilinear upsampling operation.
@@ -117,7 +117,7 @@ class DoubleSkipBlock(Chain):
     """
     Double skip connection block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -142,7 +142,7 @@ class ResBlockSequence(Chain):
     """
     Sequence of residual blocks with pre-activation.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -173,7 +173,7 @@ class DownAttBlock(Chain):
     """
     Down sub-block for hourglass of attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -209,7 +209,7 @@ class UpAttBlock(Chain):
     """
     Up sub-block for hourglass of attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -243,7 +243,7 @@ class MiddleAttBlock(Chain):
     """
     Middle sub-block for attention block.
 
-    Parameters:
+    Parameters
     ----------
     channels : int
         Number of input/output channels.
@@ -270,7 +270,7 @@ class AttBlock(Chain):
     """
     Attention block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -350,7 +350,7 @@ class ResAttInitBlock(Chain):
     """
     ResAttNet specific initial block.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -383,7 +383,7 @@ class PreActivation(Chain):
     """
     Pre-activation block without convolution layer. It's used by itself as the final block in PreResNet.
 
-    Parameters:
+    Parameters
     ----------
     in_channels : int
         Number of input channels.
@@ -407,7 +407,7 @@ class ResAttNet(Chain):
     """
     ResAttNet model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     channels : list of list of int
         Number of output channels for each unit.
@@ -495,7 +495,7 @@ def get_resattnet(blocks,
     """
     Create ResAttNet model with specific parameters.
 
-    Parameters:
+    Parameters
     ----------
     blocks : int
         Number of blocks.
@@ -560,7 +560,7 @@ def resattnet56(**kwargs):
     """
     ResAttNet-56 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -574,7 +574,7 @@ def resattnet92(**kwargs):
     """
     ResAttNet-92 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -588,7 +588,7 @@ def resattnet128(**kwargs):
     """
     ResAttNet-128 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -602,7 +602,7 @@ def resattnet164(**kwargs):
     """
     ResAttNet-164 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -616,7 +616,7 @@ def resattnet200(**kwargs):
     """
     ResAttNet-200 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -630,7 +630,7 @@ def resattnet236(**kwargs):
     """
     ResAttNet-236 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -644,7 +644,7 @@ def resattnet452(**kwargs):
     """
     ResAttNet-452 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters:
+    Parameters
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

@@ -203,7 +203,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         t : numpy.ndarray
             Transformation matrix with shape (2, 3).
 
-        Returns:
+        Returns
         -------
         numpy.ndarray
             New bounding box with shape (1, 2).

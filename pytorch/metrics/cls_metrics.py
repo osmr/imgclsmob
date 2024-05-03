@@ -186,7 +186,7 @@ class Top1Error(Accuracy):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -237,7 +237,7 @@ class TopKError(TopKAccuracy):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.

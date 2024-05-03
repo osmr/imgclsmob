@@ -108,7 +108,7 @@ class PixelAccuracyMetric(EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -249,7 +249,7 @@ class MeanIoUMetric(EvalMetric):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.

@@ -249,7 +249,7 @@ class CocoHpe1Dataset(dataset.Dataset):
         height : int or float
             Boundary height.
 
-        Returns:
+        Returns
         -------
         tuple or np.array
             Description of returned object.
@@ -285,7 +285,7 @@ class CocoHpe1Dataset(dataset.Dataset):
             If numpy.ndarray is provided, we expect multiple bounding boxes with
             shape `(N, 4)`.
 
-        Returns:
+        Returns
         -------
         tuple or np.ndarray
             The converted bboxes in format (xmin, ymin, xmax, ymax).

@@ -137,7 +137,7 @@ class CocoDetDataset(dataset.Dataset):
         entry : dict
             COCO entry, e.g. including width, height, image path, etc..
 
-        Returns:
+        Returns
         -------
         abs_path : str
             Absolute path for corresponding image.
@@ -249,7 +249,7 @@ class CocoDetDataset(dataset.Dataset):
         height : int or float
             Boundary height.
 
-        Returns:
+        Returns
         -------
         tuple or np.array
             Description of returned object.
@@ -285,7 +285,7 @@ class CocoDetDataset(dataset.Dataset):
             If numpy.ndarray is provided, we expect multiple bounding boxes with
             shape `(N, 4)`.
 
-        Returns:
+        Returns
         -------
         tuple or np.ndarray
             The converted bboxes in format (xmin, ymin, xmax, ymax).
@@ -369,7 +369,7 @@ class CocoDetValTransform(object):
         inv : bool
             Whether inverse the computation.
 
-        Returns:
+        Returns
         -------
         numpy.ndarray
             Affine matrix.
@@ -414,7 +414,7 @@ class CocoDetValTransform(object):
         rot_rad : float
             Rotation radian.
 
-        Returns:
+        Returns
         -------
         tuple of float
             Rotation.
@@ -439,7 +439,7 @@ class CocoDetValTransform(object):
         b : tuple of float
             Second point.
 
-        Returns:
+        Returns
         -------
         tuple of float
             Third point.
@@ -459,7 +459,7 @@ class CocoDetValTransform(object):
         t : numpy.ndarray
             Transformation matrix with shape (2, 3).
 
-        Returns:
+        Returns
         -------
         numpy.ndarray
             New bounding box with shape (1, 2).
@@ -488,7 +488,7 @@ class Tuple(object):
         ----------
         data : list
             The samples to batchfy. Each sample should contain N attributes.
-        Returns:
+        Returns
         -------
         tuple
             A tuple of length N. Contains the batchified result of each attribute in the input.
@@ -512,7 +512,7 @@ class Stack(object):
         data : list
             The input data samples
 
-        Returns:
+        Returns
         -------
         NDArray
             Result.
@@ -558,7 +558,7 @@ class Pad(object):
         data : list
             A list of N samples. Each sample can be 1) ndarray or
              2) a list/tuple of ndarrays
-        Returns:
+        Returns
         -------
         NDArray
             Data in the minibatch. Shape is (N, ...)

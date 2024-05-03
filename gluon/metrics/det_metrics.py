@@ -216,7 +216,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         t : np.ndarray
             Transformation matrix with shape (2, 3).
 
-        Returns:
+        Returns
         -------
         np.ndarray
             New bounding box with shape (1, 2).
@@ -275,7 +275,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
         """
         Get the current evaluation result.
 
-        Returns:
+        Returns
         -------
         name : str
            Name of the metric.
@@ -468,7 +468,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
         prec : np.array
             cumulated precision
 
-        Returns:
+        Returns
         ----------
         float
             AP
@@ -507,7 +507,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
             (right - left + ``offset``).
             Note that the offset must be 0 for normalized bboxes, whose ranges are in ``[0, 1]``.
 
-        Returns:
+        Returns
         -------
         np.ndarray
             An ndarray with shape :math:`(N, M)` indicates IOU between each pairs of
@@ -551,7 +551,7 @@ class VOC07MApMetric(VOCMApMetric):
         prec : np.array
             cumulated precision
 
-        Returns:
+        Returns
         ----------
         float
             AP

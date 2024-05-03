@@ -215,7 +215,7 @@ class McvDataset(AsrDataset):
         lang : str, default 'en'
             Language.
 
-        Returns:
+        Returns
         -------
         list of str
             Vocabulary set.

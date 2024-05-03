@@ -79,7 +79,7 @@ class CvResize(object):
         img : PIL.Image
             input image.
 
-        Returns:
+        Returns
         -------
         PIL.Image
             Resulted image.

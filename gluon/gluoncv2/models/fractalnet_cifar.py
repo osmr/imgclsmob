@@ -179,7 +179,7 @@ class FractalBlock(HybridBlock):
         loc_drop_prob : float
             Local drop path probability.
 
-        Returns:
+        Returns
         -------
         np.array
             Resulted mask.
@@ -227,7 +227,7 @@ class FractalBlock(HybridBlock):
         training : bool
             Whether training mode for network.
 
-        Returns:
+        Returns
         -------
         NDArray
             Joined output.

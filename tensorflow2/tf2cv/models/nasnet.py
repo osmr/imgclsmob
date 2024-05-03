@@ -46,7 +46,7 @@ class NasDualPathScheme(object):
         training : bool or None
             Whether to work in training mode or in inference mode.
 
-        Returns:
+        Returns
         -------
         x_next : Tensor
             Next processed tensor.

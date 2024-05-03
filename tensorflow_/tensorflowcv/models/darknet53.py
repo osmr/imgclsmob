@@ -119,7 +119,7 @@ class DarkNet53(object):
         training : bool, or a TensorFlow boolean scalar tensor, default False
           Whether to return the output in training mode or in inference mode.
 
-        Returns:
+        Returns
         -------
         Tensor
             Resulted tensor.

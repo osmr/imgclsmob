@@ -94,7 +94,7 @@ class NemoAudioReader(object):
         audio_file_path : str
             Path to audio file.
 
-        Returns:
+        Returns
         -------
         np.array
             Audio data.
@@ -123,7 +123,7 @@ class NemoAudioReader(object):
         audio_file_paths : list of str
             Paths to audio files.
 
-        Returns:
+        Returns
         -------
         list of np.array
             Audio data.
@@ -281,7 +281,7 @@ class CtcDecoder(object):
         predictions : np.array of int or list of list of int
             Tensor with predicted labels.
 
-        Returns:
+        Returns
         -------
         list of str
             Words.

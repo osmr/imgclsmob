@@ -34,7 +34,7 @@ class CtcDecoder(object):
         predictions : np.array of int or list of list of int
             Tensor with predicted labels.
 
-        Returns:
+        Returns
         -------
         list of str
             Words.

@@ -39,7 +39,7 @@ class Top1Error(mx.metric.Accuracy):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -86,7 +86,7 @@ class TopKError(mx.metric.TopKAccuracy):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.

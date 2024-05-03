@@ -250,7 +250,7 @@ class NTSNet(HybridBlock):
         input_shape : tuple of 2 int
             Input image size.
 
-        Returns:
+        Returns
         -------
         center_anchors : np.array
             anchors * 4 (oy, ox, h, w).

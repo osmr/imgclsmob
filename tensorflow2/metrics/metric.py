@@ -128,7 +128,7 @@ class EvalMetric(object):
         """
         Gets the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -144,7 +144,7 @@ class EvalMetric(object):
         """
         Gets the current global evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -163,7 +163,7 @@ class EvalMetric(object):
         """
         Returns zipped name and value pairs.
 
-        Returns:
+        Returns
         -------
         list of tuples
             A (name, value) tuple list.
@@ -179,7 +179,7 @@ class EvalMetric(object):
         """
         Returns zipped name and value pairs for global results.
 
-        Returns:
+        Returns
         -------
         list of tuples
             A (name, value) tuple list.
@@ -283,7 +283,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Returns the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.
@@ -304,7 +304,7 @@ class CompositeEvalMetric(EvalMetric):
         """
         Returns the current evaluation result.
 
-        Returns:
+        Returns
         -------
         names : list of str
            Name of the metrics.

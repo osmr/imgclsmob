@@ -12,7 +12,8 @@ import torch.utils.data
 
 # from common.logger_utils import initialize_logging
 from cvutil.logger import initialize_logging
-from common.train_process_controller import TrainProcessController
+from cvutil.train import TrainProcessController
+# from common.train_process_controller import TrainProcessController
 from pytorch.cifar1 import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
 from pytorch.utils import prepare_pt_context, prepare_model, validate1, accuracy, AverageMeter
 

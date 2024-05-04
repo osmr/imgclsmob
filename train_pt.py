@@ -15,7 +15,8 @@ import torch.utils.data
 
 # from common.logger_utils import initialize_logging
 from cvutil.logger import initialize_logging
-from common.train_process_controller import TrainProcessController
+from cvutil.train import TrainProcessController
+# from common.train_process_controller import TrainProcessController
 from pytorch.utils import prepare_pt_context, prepare_model, validate
 from pytorch.utils import report_accuracy, get_composite_metric, get_metric_name
 

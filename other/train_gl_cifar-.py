@@ -11,7 +11,8 @@ from mxnet import autograd as ag
 
 # from common.logger_utils import initialize_logging
 from cvutil.logger import initialize_logging
-from common.train_process_controller import TrainProcessController
+from cvutil.train import TrainProcessController
+# from common.train_process_controller import TrainProcessController
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 

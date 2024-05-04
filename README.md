@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/osmr/imgclsmob.svg?branch=master)](https://travis-ci.org/osmr/imgclsmob)
 [![GitHub License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-2.7%2C3.6%2C3.7-lightgrey.svg)](https://github.com/osmr/imgclsmob)
+[![Python Version](https://img.shields.io/badge/python-3.10-lightgrey.svg)](https://github.com/osmr/imgclsmob)
 
 This repo is used to research convolutional networks primarily for computer vision tasks. For this purpose, the repo
 contains (re)implementations of various classification, segmentation, detection, and pose estimation models and scripts

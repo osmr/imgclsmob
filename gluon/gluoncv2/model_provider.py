@@ -1,21 +1,34 @@
-from .models.alexnet import *
-from .models.zfnet import *
-from .models.vgg import *
-from .models.bninception import *
-from .models.resnet import *
-from .models.preresnet import *
-from .models.resnext import *
-from .models.seresnet import *
-from .models.sepreresnet import *
-from .models.seresnext import *
-from .models.senet import *
-from .models.resnesta import *
-from .models.ibnresnet import *
-from .models.ibnbresnet import *
-from .models.ibnresnext import *
-from .models.ibndensenet import *
-from .models.airnet import *
-from .models.airnext import *
+from .models.alexnet import alexnet, alexnetb
+from .models.zfnet import zfnet, zfnetb
+from .models.vgg import (vgg11, vgg13, vgg16, vgg19, bn_vgg11, bn_vgg13, bn_vgg16, bn_vgg19, bn_vgg11b, bn_vgg13b,
+                         bn_vgg16b, bn_vgg19b)
+from .models.bninception import bninception
+from .models.resnet import (resnet10, resnet12, resnet14, resnetbc14b, resnet16, resnet18_wd4, resnet18_wd2,
+                            resnet18_w3d4, resnet18, resnet26, resnetbc26b, resnet34, resnetbc38b, resnet50, resnet50b,
+                            resnet101, resnet101b, resnet152, resnet152b, resnet200, resnet200b)
+from .models.preresnet import (preresnet10, preresnet12, preresnet14, preresnetbc14b, preresnet16, preresnet18_wd4,
+                               preresnet18_wd2, preresnet18_w3d4, preresnet18, preresnet26, preresnetbc26b, preresnet34,
+                               preresnetbc38b, preresnet50, preresnet50b, preresnet101, preresnet101b, preresnet152,
+                               preresnet152b, preresnet200, preresnet200b, preresnet269b)
+from .models.resnext import (resnext14_16x4d, resnext14_32x2d, resnext14_32x4d, resnext26_16x4d, resnext26_32x2d,
+                             resnext26_32x4d, resnext38_32x4d, resnext50_32x4d, resnext101_32x4d, resnext101_64x4d)
+from .models.seresnet import (seresnet10, seresnet12, seresnet14, seresnet16, seresnet18, seresnet26, seresnetbc26b,
+                              seresnet34, seresnetbc38b, seresnet50, seresnet50b, seresnet101, seresnet101b,
+                              seresnet152, seresnet152b, seresnet200, seresnet200b)
+from .models.sepreresnet import (sepreresnet10, sepreresnet12, sepreresnet14, sepreresnet16, sepreresnet18,
+                                 sepreresnet26, sepreresnetbc26b, sepreresnet34, sepreresnetbc38b, sepreresnet50,
+                                 sepreresnet50b, sepreresnet101, sepreresnet101b, sepreresnet152, sepreresnet152b,
+                                 sepreresnet200, sepreresnet200b)
+from .models.seresnext import seresnext50_32x4d, seresnext101_32x4d, seresnext101_64x4d
+from .models.senet import senet16, senet28, senet40, senet52, senet103, senet154
+from .models.resnesta import (resnestabc14, resnesta18, resnestabc26, resnestabc38, resnesta50, resnesta101,
+                              resnesta152, resnesta200, resnesta269)
+from .models.ibnresnet import ibn_resnet50, ibn_resnet101, ibn_resnet152
+from .models.ibnbresnet import ibnb_resnet50, ibnb_resnet101, ibnb_resnet152
+from .models.ibnresnext import ibn_resnext50_32x4d, ibn_resnext101_32x4d, ibn_resnext101_64x4d
+from .models.ibndensenet import ibn_densenet121, ibn_densenet161, ibn_densenet169, ibn_densenet201
+from .models.airnet import airnet50_1x64d_r2, airnet50_1x64d_r16, airnet101_1x64d_r2
+from .models.airnext import airnext50_32x4d_r2, airnext101_32x4d_r2, airnext101_32x4d_r16
 from .models.bamresnet import *
 from .models.cbamresnet import *
 from .models.resattnet import *
@@ -29,16 +42,16 @@ from .models.diracnetv2 import *
 from .models.sharesnet import *
 from .models.crunet import *
 from .models.crunetb import *
-from .models.densenet import *
+from .models.densenet import densenet121, densenet161, densenet169, densenet201
 from .models.condensenet import *
 from .models.sparsenet import *
 from .models.peleenet import *
 from .models.wrn import *
 from .models.drn import *
 from .models.dpn import *
-from .models.darknet import *
-from .models.darknet53 import *
-from .models.channelnet import *
+from .models.darknet import darknet_ref, darknet_tiny, darknet19
+from .models.darknet53 import darknet53
+from .models.channelnet import channelnet
 from .models.isqrtcovresnet import *
 from .models.irevnet import *
 from .models.bagnet import *
@@ -52,20 +65,27 @@ from .models.vovnet import *
 from .models.selecsls import *
 from .models.hardnet import *
 from .models.xdensenet import *
-from .models.squeezenet import *
-from .models.squeezenext import *
-from .models.shufflenet import *
-from .models.shufflenetv2 import *
-from .models.shufflenetv2b import *
-from .models.menet import *
-from .models.mobilenet import *
+from .models.squeezenet import squeezenet_v1_0, squeezenet_v1_1, squeezeresnet_v1_0, squeezeresnet_v1_1
+from .models.squeezenext import sqnxt23_w1, sqnxt23_w3d2, sqnxt23_w2, sqnxt23v5_w1, sqnxt23v5_w3d2, sqnxt23v5_w2
+from .models.shufflenet import (shufflenet_g1_w1, shufflenet_g2_w1, shufflenet_g3_w1, shufflenet_g4_w1,
+                                shufflenet_g8_w1, shufflenet_g1_w3d4, shufflenet_g3_w3d4, shufflenet_g1_wd2,
+                                shufflenet_g3_wd2, shufflenet_g1_wd4, shufflenet_g3_wd4)
+from .models.shufflenetv2 import shufflenetv2_wd2, shufflenetv2_w1, shufflenetv2_w3d2, shufflenetv2_w2
+from .models.shufflenetv2b import shufflenetv2b_wd2, shufflenetv2b_w1, shufflenetv2b_w3d2, shufflenetv2b_w2
+from .models.menet import (menet108_8x1_g3, menet128_8x1_g4, menet160_8x1_g8, menet228_12x1_g3, menet256_12x1_g4,
+                           menet348_12x1_g3, menet352_12x1_g8, menet456_24x1_g3)
+from .models.mobilenet import mobilenet_w1, mobilenet_w3d4, mobilenet_wd2, mobilenet_wd4
 from .models.mobilenetb import *
 from .models.fdmobilenet import *
-from .models.mobilenetv2 import *
-from .models.mobilenetv3 import *
-from .models.igcv3 import *
+from .models.mobilenetv2 import (mobilenetv2_w1, mobilenetv2_w3d4, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2b_w1,
+                                 mobilenetv2b_w3d4, mobilenetv2b_wd2, mobilenetv2b_wd4)
+from .models.mobilenetv3 import (mobilenetv3_small_w7d20, mobilenetv3_small_wd2, mobilenetv3_small_w3d4,
+                                 mobilenetv3_small_w1, mobilenetv3_small_w5d4, mobilenetv3_large_w7d20,
+                                 mobilenetv3_large_wd2, mobilenetv3_large_w3d4, mobilenetv3_large_w1,
+                                 mobilenetv3_large_w5d4)
+from .models.igcv3 import igcv3_w1, igcv3_w3d4, igcv3_wd2, igcv3_wd4
 from .models.ghostnet import *
-from .models.mnasnet import *
+from .models.mnasnet import mnasnet_b1, mnasnet_a1, mnasnet_small
 from .models.darts import *
 from .models.proxylessnas import *
 from .models.fbnet import *
@@ -78,7 +98,12 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 from .models.spnasnet import *
-from .models.efficientnet import *
+from .models.efficientnet import (efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4,
+                                  efficientnet_b5, efficientnet_b6, efficientnet_b7, efficientnet_b8, efficientnet_b0b,
+                                  efficientnet_b1b, efficientnet_b2b, efficientnet_b3b, efficientnet_b4b,
+                                  efficientnet_b5b, efficientnet_b6b, efficientnet_b7b, efficientnet_b0c,
+                                  efficientnet_b1c, efficientnet_b2c, efficientnet_b3c, efficientnet_b4c,
+                                  efficientnet_b5c, efficientnet_b6c, efficientnet_b7c, efficientnet_b8c)
 from .models.efficientnetedge import *
 from .models.mixnet import *
 

@@ -7,7 +7,8 @@ from chainer import training
 from chainer.training import extensions
 from chainer.serializers import save_npz
 
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from chainer_.utils import prepare_model
 from chainer_.cifar1 import add_dataset_parser_arguments
 from chainer_.cifar1 import get_data_iterators
@@ -245,12 +246,11 @@ def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     num_gpus = args.num_gpus
     if num_gpus > 0:

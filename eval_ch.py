@@ -10,7 +10,8 @@ from sys import version_info
 from chainer import global_config
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from chainer_.utils import prepare_ch_context, prepare_model, Predictor
 from chainer_.utils import get_composite_metric, report_accuracy
 from chainer_.dataset_utils import get_dataset_metainfo
@@ -287,12 +288,11 @@ def main():
     if args.disable_cudnn_autotune:
         os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     if args.all:
         args.use_pretrained = True

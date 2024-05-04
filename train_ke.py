@@ -12,7 +12,8 @@ import keras
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint
 import mxnet as mx
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
@@ -258,12 +259,11 @@ def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     batch_size = prepare_ke_context(
         num_gpus=args.num_gpus,

@@ -8,7 +8,8 @@ import logging
 import argparse
 from sys import version_info
 import tensorflow as tf
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from tensorflow2.utils import prepare_model
 from tensorflow2.tf2cv.models.model_store import _model_sha1
 from tensorflow2.dataset_utils import get_dataset_metainfo, get_val_data_source, get_test_data_source
@@ -236,12 +237,11 @@ def main():
         for gpu in gpus:
             tf.config.experimental.set_memory_growth(gpu, True)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     data_format = "channels_last"
     tf.keras.backend.set_image_data_format(data_format)

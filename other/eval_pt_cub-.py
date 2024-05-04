@@ -2,7 +2,8 @@ import argparse
 import time
 import logging
 
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from pytorch.model_stats import measure_model
 from pytorch.cub200_2011_utils1 import add_dataset_parser_arguments, get_val_data_loader
 from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, AverageMeter
@@ -179,12 +180,11 @@ def test(net,
 def main():
     args = parse_args()
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,

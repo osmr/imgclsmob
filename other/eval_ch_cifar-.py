@@ -9,7 +9,8 @@ import chainer.functions as F
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from chainer_.utils import prepare_model
 from chainer_.cifar1 import add_dataset_parser_arguments
 from chainer_.cifar1 import get_val_data_iterator
@@ -136,12 +137,11 @@ def test(net,
 def main():
     args = parse_args()
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     global_config.train = False
 

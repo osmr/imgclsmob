@@ -11,7 +11,8 @@ from tensorpack.utils.gpu import get_num_gpu
 from tensorpack import (ModelSaver, ScheduledHyperParamSetter, EstimatedTimeLeft, ClassificationError, InferenceRunner,
                         DataParallelInferenceRunner, TrainConfig, SyncMultiGPUTrainerParameterServer,
                         launch_train_with_config)
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data
 
 
@@ -224,12 +225,11 @@ def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
     logger.set_logger_dir(args.save_dir)
 
     batch_size = prepare_tf_context(

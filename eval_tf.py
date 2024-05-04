@@ -9,7 +9,8 @@ import logging
 from tensorpack.predict import PredictConfig, FeedfreePredictor
 from tensorpack.utils.stats import RatioCounter
 from tensorpack.input_source import QueueInput, StagingInput
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data, calc_flops
 
 
@@ -170,12 +171,11 @@ def main():
     """
     args = parse_args()
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     batch_size = prepare_tf_context(
         num_gpus=args.num_gpus,

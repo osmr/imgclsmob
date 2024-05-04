@@ -10,7 +10,8 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.utils.data
 
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from pytorch.cifar1 import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
 from pytorch.utils import prepare_pt_context, prepare_model, validate1, accuracy, AverageMeter
@@ -398,12 +399,11 @@ def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,

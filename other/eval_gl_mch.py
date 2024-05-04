@@ -9,7 +9,8 @@ import argparse
 import numpy as np
 import mxnet as mx
 from mxnet.gluon.utils import split_and_load
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
 from gluon.dataset_utils import get_dataset_metainfo
 from gluon.dataset_utils import get_val_data_source
@@ -272,12 +273,11 @@ def main():
     os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
     assert (args.batch_size == 1)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)

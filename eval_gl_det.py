@@ -7,7 +7,8 @@ import time
 import logging
 import argparse
 from sys import version_info
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
 from gluon.utils import calc_net_weight_count, validate
 from gluon.utils import get_composite_metric
@@ -327,12 +328,11 @@ def main():
     if args.disable_cudnn_autotune:
         os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     if args.all:
         args.use_pretrained = True

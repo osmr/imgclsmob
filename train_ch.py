@@ -9,7 +9,8 @@ import chainer
 from chainer import training
 from chainer.training import extensions
 from chainer.serializers import save_npz
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from chainer_.utils import prepare_ch_context, prepare_model
 from chainer_.dataset_utils import get_dataset_metainfo
 from chainer_.dataset_utils import get_train_data_source, get_val_data_source
@@ -279,12 +280,11 @@ def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)

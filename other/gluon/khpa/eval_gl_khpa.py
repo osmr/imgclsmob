@@ -4,7 +4,8 @@ import logging
 
 import mxnet as mx
 
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from other.gluon.khpa.khpa_utils import add_dataset_parser_arguments
 from other.gluon.khpa.khpa_utils import get_batch_fn
@@ -118,12 +119,11 @@ def test(net,
 def main():
     args = parse_args()
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,

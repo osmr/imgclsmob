@@ -16,3 +16,4 @@ imgaug
 scipy
 tqdm
 Cython
+cvutil

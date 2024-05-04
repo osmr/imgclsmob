@@ -6,7 +6,8 @@ import argparse
 import logging
 import re
 import numpy as np
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 
 
 def parse_args():
@@ -1500,7 +1501,7 @@ def _prepare_dst_model(args, ctx, use_cuda):
 
 def update_and_initialize_logging(args):
     """
-    Update arguments ans initialize logging.
+    Update arguments and initialize logging.
 
     Parameters
     ----------
@@ -1527,12 +1528,13 @@ def update_and_initialize_logging(args):
         packages += ["tensorflow"]
         pip_packages += ["tensorflow", "tensorflow-gpu"]
 
+    args.log_packages = ",".join(packages)
+    args.log_pip_packages = ",".join(pip_packages)
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=packages,
-        log_pip_packages=pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
 
 def main():

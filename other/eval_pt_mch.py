@@ -8,7 +8,8 @@ import logging
 import argparse
 import numpy as np
 import torch
-from common.logger_utils import initialize_logging
+# from common.logger_utils import initialize_logging
+from cvutil.logger import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_val_data_source
@@ -496,12 +497,11 @@ def main():
     os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
     assert (args.batch_size == 1)
 
-    _, log_file_exist = initialize_logging(
+    _, _ = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
+        main_script_path=__file__,
+        script_args=args)
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)

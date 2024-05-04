@@ -213,7 +213,7 @@ def test_model(args,
         logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
         acc_values = test_metric.get()[1]
-        acc_values = acc_values if type(acc_values) == list else [acc_values]
+        acc_values = acc_values if isinstance(acc_values, list) else [acc_values]
     else:
         acc_values = []
 

@@ -257,7 +257,7 @@ def update_input_image_size(net,
     """
     real_net = net.module if hasattr(net, "module") else net
     input_image_size = real_net.in_size if hasattr(real_net, "in_size") else\
-        ((input_size, input_size) if type(input_size) == int else input_size)
+        ((input_size, input_size) if isinstance(input_size, int) else input_size)
     return input_image_size
 
 
@@ -319,7 +319,7 @@ def calc_model_accuracy(net,
         logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
         acc_values = metric.get()[1]
-        acc_values = acc_values if type(acc_values) == list else [acc_values]
+        acc_values = acc_values if isinstance(acc_values, list) else [acc_values]
     else:
         acc_values = []
 

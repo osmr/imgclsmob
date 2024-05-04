@@ -8,8 +8,9 @@ import random
 from tensorpack.input_source import QueueInput
 from tensorpack.utils import logger
 from tensorpack.utils.gpu import get_num_gpu
-from tensorpack import ModelSaver, ScheduledHyperParamSetter, EstimatedTimeLeft, ClassificationError, InferenceRunner,\
-    DataParallelInferenceRunner, TrainConfig, SyncMultiGPUTrainerParameterServer, launch_train_with_config
+from tensorpack import (ModelSaver, ScheduledHyperParamSetter, EstimatedTimeLeft, ClassificationError, InferenceRunner,
+                        DataParallelInferenceRunner, TrainConfig, SyncMultiGPUTrainerParameterServer,
+                        launch_train_with_config)
 from common.logger_utils import initialize_logging
 from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data
 

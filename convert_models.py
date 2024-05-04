@@ -1016,7 +1016,7 @@ def convert_gl2tf2(dst_net,
                     dst_key.split("/")[-1][:-2] == "fb"):
                 src_weight = np.transpose(src_weight, axes=(2, 1, 0))
             if dst_key.split("/")[-1][:-2] == "depthwise_kernel":
-                assert(len(dst_params[dst_key].shape) == 4)
+                assert (len(dst_params[dst_key].shape) == 4)
                 src_weight = np.expand_dims(src_weight, -1)
         dst_weight = dst_params[dst_key]
         assert (tuple(dst_weight.shape) == src_weight.shape), \

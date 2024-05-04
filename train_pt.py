@@ -357,7 +357,7 @@ def prepare_trainer(net,
 
     if state_file_path:
         checkpoint = torch.load(state_file_path)
-        if type(checkpoint) == dict:
+        if isinstance(checkpoint, dict):
             optimizer.load_state_dict(checkpoint["optimizer"])
             start_epoch = checkpoint["epoch"]
         else:
@@ -553,7 +553,7 @@ def train_net(batch_size,
     if use_cuda:
         L = L.cuda()
 
-    assert (type(start_epoch1) == int)
+    assert isinstance(start_epoch1, int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info("Start training from [Epoch {}]".format(start_epoch1))
@@ -598,8 +598,8 @@ def train_net(batch_size,
             lp_saver_kwargs = {"state": state}
             val_acc_values = val_metric.get()[1]
             train_acc_values = train_metric.get()[1]
-            val_acc_values = val_acc_values if type(val_acc_values) == list else [val_acc_values]
-            train_acc_values = train_acc_values if type(train_acc_values) == list else [train_acc_values]
+            val_acc_values = val_acc_values if isinstance(val_acc_values, list) else [val_acc_values]
+            train_acc_values = train_acc_values if isinstance(train_acc_values, list) else [train_acc_values]
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
                 params=(val_acc_values + train_acc_values + [train_loss, optimizer.param_groups[0]["lr"]]),

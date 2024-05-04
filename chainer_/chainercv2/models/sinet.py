@@ -12,8 +12,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,\
-    Concurrent, ChannelShuffle, SimpleSequential
+from .common import (conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,
+                     Concurrent, ChannelShuffle, SimpleSequential)
 
 
 class InterpolationBlock(Chain):

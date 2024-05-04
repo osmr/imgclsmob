@@ -93,7 +93,7 @@ class CityscapesSegDataset(SegDataset):
     def _class_to_index(mask):
         values = np.unique(mask)
         for value in values:
-            assert(value in CityscapesSegDataset._mapping)
+            assert (value in CityscapesSegDataset._mapping)
         index = np.digitize(mask.ravel(), CityscapesSegDataset._mapping, right=True)
         return CityscapesSegDataset._key[index].reshape(mask.shape)
 

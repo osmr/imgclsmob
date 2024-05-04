@@ -12,8 +12,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,\
-    DualPathSequential, SimpleSequential
+from .common import (conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,
+                     DualPathSequential, SimpleSequential)
 
 
 class DwaConvBlock(Chain):

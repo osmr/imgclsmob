@@ -11,8 +11,8 @@ import chainer.functions as F
 from functools import partial
 from chainer import Chain
 from chainer.serializers import load_npz
-from .common import get_activation_layer, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,\
-    SimpleSequential, InterpolationBlock
+from .common import (get_activation_layer, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,
+                     SimpleSequential, InterpolationBlock)
 
 
 class IbpResBottleneck(Chain):

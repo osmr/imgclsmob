@@ -12,8 +12,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,\
-    DualPathSequential, SimpleSequential, InterpolationBlock
+from .common import (NormActivation, conv1x1, conv1x1_block, conv3x3_block, depthwise_conv3x3, SEBlock, Concurrent,
+                     DualPathSequential, SimpleSequential, InterpolationBlock)
 
 
 class CGBlock(Chain):

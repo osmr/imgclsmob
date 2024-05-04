@@ -10,8 +10,8 @@ import os
 import chainer.functions as F
 from chainer import Chain
 from chainer.serializers import load_npz
-from .common import conv1x1, conv1x1_block, conv3x3_block, SEBlock, InterpolationBlock, SimpleSequential,\
-    MultiOutputSequential
+from .common import (conv1x1, conv1x1_block, conv3x3_block, SEBlock, InterpolationBlock, SimpleSequential,
+                     MultiOutputSequential)
 
 
 class FPEBlock(Chain):

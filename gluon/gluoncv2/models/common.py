@@ -2371,7 +2371,7 @@ class MultiOutputSequential(nn.HybridSequential):
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
             elif hasattr(block, "do_output2") and block.do_output2:
-                assert (type(x) == tuple)
+                assert isinstance(x, tuple)
                 outs.extend(x[1])
                 x = x[0]
         if self.multi_output:

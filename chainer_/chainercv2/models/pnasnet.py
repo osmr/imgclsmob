@@ -13,8 +13,8 @@ from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
 from .common import conv1x1, SimpleSequential
-from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock,\
-    process_with_padding
+from .nasnet import (nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock,
+                     process_with_padding)
 
 
 class PnasMaxPoolBlock(Chain):

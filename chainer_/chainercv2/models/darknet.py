@@ -95,7 +95,7 @@ class DarkNet(Chain):
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 alpha=alpha,
-                                pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
+                                pointwise=(len(channels_per_stage) > 1) and not (((j + 1) % 2 == 1) ^ odd_pointwise)))
                             in_channels = out_channels
                         if i != len(channels) - 1:
                             setattr(stage, "pool{}".format(i + 1), partial(

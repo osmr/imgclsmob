@@ -190,7 +190,7 @@ def svhn_train_generator(data_generator,
     Sequential
         Image transform sequence.
     """
-    assert(ds_metainfo is not None)
+    assert (ds_metainfo is not None)
     x_train, y_train = get_svhn_data(
         root=ds_metainfo.root_dir_path,
         mode="train")
@@ -222,7 +222,7 @@ def svhn_val_generator(data_generator,
     Sequential
         Image transform sequence.
     """
-    assert(ds_metainfo is not None)
+    assert (ds_metainfo is not None)
     x_test, y_test = get_svhn_data(
         root=ds_metainfo.root_dir_path,
         mode="val")

@@ -82,10 +82,11 @@ def get_train_data_source(ds_metainfo,
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)
-    return tf.data.Dataset.from_generator(
-        generator=lambda: generator,
-        output_types=(tf.float32, tf.float32)),\
-           generator.n
+    return (
+        tf.data.Dataset.from_generator(
+            generator=lambda: generator,
+            output_types=(tf.float32, tf.float32)),
+        generator.n)
 
 
 def get_val_data_source(ds_metainfo,
@@ -119,10 +120,11 @@ def get_val_data_source(ds_metainfo,
         batch_size=batch_size)
     if hasattr(generator, "dataset"):
         ds_metainfo.update_from_dataset(generator.dataset)
-    return tf.data.Dataset.from_generator(
-        generator=lambda: generator,
-        output_types=(tf.float32, tf.float32)),\
-           generator.n
+    return (
+        tf.data.Dataset.from_generator(
+            generator=lambda: generator,
+            output_types=(tf.float32, tf.float32)),
+        generator.n)
 
 
 def get_test_data_source(ds_metainfo,
@@ -156,7 +158,8 @@ def get_test_data_source(ds_metainfo,
         batch_size=batch_size)
     if hasattr(generator, "dataset"):
         ds_metainfo.update_from_dataset(generator.dataset)
-    return tf.data.Dataset.from_generator(
-        generator=lambda: generator,
-        output_types=(tf.float32, tf.float32)),\
-           generator.n
+    return (
+        tf.data.Dataset.from_generator(
+            generator=lambda: generator,
+            output_types=(tf.float32, tf.float32)),
+        generator.n)

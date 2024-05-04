@@ -11,8 +11,8 @@ import chainer.functions as F
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,\
-    ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock, SimpleSequential
+from .common import (conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,
+                     ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock, SimpleSequential)
 
 
 class AsymConvBlock(Chain):

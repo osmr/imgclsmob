@@ -37,7 +37,7 @@ def cifar100_train_generator(data_generator,
     Sequential
         Image transform sequence.
     """
-    assert(ds_metainfo is not None)
+    assert (ds_metainfo is not None)
     (x_train, y_train), _ = cifar100.load_data()
     generator = data_generator.flow(
         x=x_train,
@@ -67,7 +67,7 @@ def cifar100_val_generator(data_generator,
     Sequential
         Image transform sequence.
     """
-    assert(ds_metainfo is not None)
+    assert (ds_metainfo is not None)
     _, (x_test, y_test) = cifar100.load_data()
     generator = data_generator.flow(
         x=x_test,

@@ -10,8 +10,8 @@ import chainer.functions as F
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,\
-    InterpolationBlock, SimpleSequential
+from .common import (conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,
+                     InterpolationBlock, SimpleSequential)
 
 
 class Stem(Chain):

@@ -9,8 +9,8 @@ __all__ = ['DABNet', 'dabnet_cityscapes']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,\
-    DualPathSequential, PReLU2
+from .common import (conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,
+                     DualPathSequential, PReLU2)
 
 
 class DwaConvBlock(HybridBlock):

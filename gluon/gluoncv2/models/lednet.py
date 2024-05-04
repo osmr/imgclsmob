@@ -9,8 +9,8 @@ __all__ = ['LEDNet', 'lednet_cityscapes']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,\
-    ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock
+from .common import (conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,
+                     ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock)
 
 
 class AsymConvBlock(HybridBlock):

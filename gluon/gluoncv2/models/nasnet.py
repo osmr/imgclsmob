@@ -52,7 +52,7 @@ class NasDualPathScheme(object):
                  x,
                  x_prev):
         x_next = block(x, x_prev)
-        if type(x_next) == tuple:
+        if isinstance(x_next, tuple):
             x_next, x = x_next
         if self.can_skip_input and hasattr(block, 'skip_input') and block.skip_input:
             x = x_prev

@@ -7,8 +7,8 @@ import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
 from mxnet.gluon.contrib.nn import Identity, PixelShuffle2D
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish,\
-    InterpolationBlock, HeatmapMaxDetBlock
+from .gluoncv2.models.common import (ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish,
+                                     InterpolationBlock, HeatmapMaxDetBlock)
 from .gluoncv2.models.fishnet import ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock

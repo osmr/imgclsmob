@@ -9,8 +9,8 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import Identity
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,\
-    InterpolationBlock
+from .common import (conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,
+                     InterpolationBlock)
 
 
 class Stem(HybridBlock):

@@ -9,8 +9,8 @@ __all__ = ['IbpPose', 'ibppose_coco']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import get_activation_layer, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,\
-    InterpolationBlock
+from .common import (get_activation_layer, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,
+                     InterpolationBlock)
 
 
 class IbpResBottleneck(HybridBlock):

@@ -132,7 +132,7 @@ class TopKAccuracy(EvalMetric):
                 self.num_inst += num_samples
                 self.global_num_inst += num_samples
             else:
-                assert(len(preds.shape) <= 2), "Predictions should be no more than 2 dims"
+                assert (len(preds.shape) <= 2), "Predictions should be no more than 2 dims"
                 pred_label = preds.cpu().numpy().astype(np.int32)
                 pred_label = np.argpartition(pred_label, -self.top_k)
                 label = labels.cpu().numpy().astype(np.int32)

@@ -10,8 +10,8 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
-from .common import PReLU2, conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,\
-    InterpolationBlock, ChannelShuffle
+from .common import (PReLU2, conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,
+                     InterpolationBlock, ChannelShuffle)
 
 
 class SEBlock(HybridBlock):

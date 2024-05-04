@@ -64,8 +64,8 @@ class LRScheduler(lr_scheduler.LRScheduler):
                  warmup_lr=0,
                  warmup_mode="linear"):
         super(LRScheduler, self).__init__(base_lr=base_lr)
-        assert(mode in ["step", "poly", "cosine"])
-        assert(warmup_mode in ["constant", "linear", "poly", "cosine"])
+        assert (mode in ["step", "poly", "cosine"])
+        assert (warmup_mode in ["constant", "linear", "poly", "cosine"])
 
         self.mode = mode
         self.learning_rate = self.base_lr

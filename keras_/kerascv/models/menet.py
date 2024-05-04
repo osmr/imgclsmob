@@ -10,8 +10,8 @@ __all__ = ['menet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, maxpool2d,\
-    avgpool2d, is_channels_first, get_channel_axis, flatten
+from .common import (conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, maxpool2d,
+                     avgpool2d, is_channels_first, get_channel_axis, flatten)
 
 
 def me_unit(x,

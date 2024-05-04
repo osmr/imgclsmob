@@ -10,8 +10,8 @@ __all__ = ['mobilenetv3', 'mobilenetv3_small_w7d20', 'mobilenetv3_small_wd2', 'm
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block,\
-    se_block, HSwish, is_channels_first, flatten
+from .common import (round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, se_block,
+                     HSwish, is_channels_first, flatten)
 
 
 def mobilenetv3_unit(x,

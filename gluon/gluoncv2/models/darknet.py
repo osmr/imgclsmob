@@ -98,7 +98,7 @@ class DarkNet(HybridBlock):
                             out_channels=out_channels,
                             bn_use_global_stats=bn_use_global_stats,
                             alpha=alpha,
-                            pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
+                            pointwise=(len(channels_per_stage) > 1) and not (((j + 1) % 2 == 1) ^ odd_pointwise)))
                         in_channels = out_channels
                     if i != len(channels) - 1:
                         stage.add(nn.MaxPool2D(

@@ -7,8 +7,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish,\
-    InterpolationBlock, HeatmapMaxDetBlock
+from .pytorchcv.models.common import (ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish,
+                                      InterpolationBlock, HeatmapMaxDetBlock)
 from .pytorchcv.models.fishnet import ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock

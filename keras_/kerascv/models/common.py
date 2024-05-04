@@ -1374,7 +1374,7 @@ def se_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert(len(x._keras_shape) == 4)
+    assert (len(x._keras_shape) == 4)
     mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
     pool_size = x._keras_shape[2:4] if is_channels_first() else x._keras_shape[1:3]
 

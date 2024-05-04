@@ -10,8 +10,8 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1
-from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock,\
-    process_with_padding
+from .nasnet import (nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock,
+                     process_with_padding)
 
 
 class PnasMaxPoolBlock(HybridBlock):

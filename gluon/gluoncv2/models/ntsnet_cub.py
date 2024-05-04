@@ -34,7 +34,7 @@ def hard_nms(cdds,
     np.array
         Filtered borders.
     """
-    assert (type(cdds) == np.ndarray)
+    assert isinstance(cdds, np.ndarray)
     assert (len(cdds.shape) == 2)
     assert (cdds.shape[1] >= 5)
 

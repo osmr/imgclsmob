@@ -9,8 +9,8 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import ReLU6, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential, flatten,\
-    is_channels_first
+from .common import (ReLU6, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential, flatten,
+                     is_channels_first)
 
 
 class LinearBottleneck(nn.Layer):

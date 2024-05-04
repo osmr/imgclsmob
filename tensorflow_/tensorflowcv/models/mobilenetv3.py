@@ -9,8 +9,8 @@ __all__ = ['MobileNetV3', 'mobilenetv3_small_w7d20', 'mobilenetv3_small_wd2', 'm
 
 import os
 import tensorflow as tf
-from .common import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block,\
-    se_block, hswish, is_channels_first, flatten
+from .common import (round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block,
+                     se_block, hswish, is_channels_first, flatten)
 # import tensorflow.compat.v1 as tf
 # tf.disable_v2_behavior()
 

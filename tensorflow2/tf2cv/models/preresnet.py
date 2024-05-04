@@ -12,8 +12,8 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetb
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, pre_conv1x1_block, pre_conv3x3_block, conv1x1, MaxPool2d, BatchNorm, SimpleSequential,\
-    flatten
+from .common import (Conv2d, pre_conv1x1_block, pre_conv3x3_block, conv1x1, MaxPool2d, BatchNorm, SimpleSequential,
+                     flatten)
 
 
 class PreResBlock(nn.Layer):

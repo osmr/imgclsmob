@@ -1321,7 +1321,7 @@ def se_block(x,
     Tensor
         Resulted tensor.
     """
-    assert(len(x.shape) == 4)
+    assert (len(x.shape) == 4)
     mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
     pool_size = x.shape[2:4] if is_channels_first(data_format) else x.shape[1:3]
 

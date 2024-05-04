@@ -10,8 +10,8 @@ import os
 import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, conv1x1_block, conv3x3_block, AvgPool2d, MaxPool2d, NormActivation,\
-    ChannelShuffle, Concurrent, PReLU2, SimpleSequential, is_channels_first, get_channel_axis, flatten
+from .common import (conv1x1, conv3x3, conv1x1_block, conv3x3_block, AvgPool2d, MaxPool2d, NormActivation,
+                     ChannelShuffle, Concurrent, PReLU2, SimpleSequential, is_channels_first, get_channel_axis, flatten)
 
 
 class SpatialDiceBranch(nn.Layer):

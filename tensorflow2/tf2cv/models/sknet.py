@@ -8,8 +8,8 @@ __all__ = ['SKNet', 'sknet50', 'sknet101', 'sknet152']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, SimpleSequential, flatten, is_channels_first,\
-    get_channel_axis
+from .common import (conv1x1, conv1x1_block, conv3x3_block, Concurrent, SimpleSequential, flatten, is_channels_first,
+                     get_channel_axis)
 from .resnet import ResInitBlock
 
 

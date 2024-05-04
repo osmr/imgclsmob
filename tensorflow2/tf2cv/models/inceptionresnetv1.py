@@ -10,8 +10,8 @@ __all__ = ['InceptionResNetV1', 'inceptionresnetv1', 'InceptionAUnit', 'Inceptio
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, BatchNorm, conv1x1, conv1x1_block, conv3x3_block, Concurrent, flatten,\
-    is_channels_first, SimpleSequential
+from .common import (MaxPool2d, BatchNorm, conv1x1, conv1x1_block, conv3x3_block, Concurrent, flatten,
+                     is_channels_first, SimpleSequential)
 from .inceptionv3 import MaxPoolBranch, Conv1x1Branch, ConvSeqBranch
 
 

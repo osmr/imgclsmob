@@ -9,8 +9,8 @@ __all__ = ['InceptionV3', 'inceptionv3', 'MaxPoolBranch', 'AvgPoolBranch', 'Conv
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, AvgPool2d, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent,\
-    flatten, is_channels_first, get_channel_axis
+from .common import (MaxPool2d, AvgPool2d, ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential, Concurrent,
+                     flatten, is_channels_first, get_channel_axis)
 
 
 class MaxPoolBranch(nn.Layer):

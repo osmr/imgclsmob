@@ -9,9 +9,9 @@ __all__ = ['SINet', 'sinet_cityscapes']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import PReLU2, BatchNorm, AvgPool2d, conv1x1, get_activation_layer, conv1x1_block, conv3x3_block,\
-    round_channels, dwconv_block, InterpolationBlock, ChannelShuffle, SimpleSequential, Concurrent, get_channel_axis,\
-    is_channels_first
+from .common import (PReLU2, BatchNorm, AvgPool2d, conv1x1, get_activation_layer, conv1x1_block, conv3x3_block,
+                     round_channels, dwconv_block, InterpolationBlock, ChannelShuffle, SimpleSequential, Concurrent,
+                     get_channel_axis, is_channels_first)
 
 
 class SEBlock(nn.Layer):

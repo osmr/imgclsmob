@@ -9,8 +9,8 @@ __all__ = ['FBNet', 'fbnet_cb']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SimpleSequential, flatten,\
-    is_channels_first
+from .common import (conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SimpleSequential, flatten,
+                     is_channels_first)
 
 
 class FBNetUnit(nn.Layer):

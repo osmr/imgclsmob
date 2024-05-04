@@ -9,8 +9,9 @@ __all__ = ['DABNet', 'dabnet_cityscapes']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,\
-    DualPathSequential, SimpleSequential, is_channels_first, get_im_size, PReLU2, MaxPool2d, AvgPool2d, get_channel_axis
+from .common import (conv1x1, conv3x3, conv3x3_block, ConvBlock, NormActivation, Concurrent, InterpolationBlock,
+                     DualPathSequential, SimpleSequential, is_channels_first, get_im_size, PReLU2, MaxPool2d, AvgPool2d,
+                     get_channel_axis)
 
 
 class DwaConvBlock(nn.Layer):

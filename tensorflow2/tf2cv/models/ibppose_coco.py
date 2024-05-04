@@ -9,8 +9,8 @@ __all__ = ['IbpPose', 'ibppose_coco']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import get_activation_layer, MaxPool2d, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,\
-    InterpolationBlock, SimpleSequential, is_channels_first, get_channel_axis
+from .common import (get_activation_layer, MaxPool2d, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,
+                     InterpolationBlock, SimpleSequential, is_channels_first, get_channel_axis)
 
 
 class IbpResBottleneck(nn.Layer):

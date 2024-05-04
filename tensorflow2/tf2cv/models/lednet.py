@@ -9,9 +9,9 @@ __all__ = ['LEDNet', 'lednet_cityscapes']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,\
-    ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock, SimpleSequential, MaxPool2d, is_channels_first,\
-    get_channel_axis, get_im_size
+from .common import (conv3x3, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block, ConvBlock, NormActivation,
+                     ChannelShuffle, InterpolationBlock, Hourglass, BreakBlock, SimpleSequential, MaxPool2d,
+                     is_channels_first, get_channel_axis, get_im_size)
 
 
 class AsymConvBlock(nn.Layer):

@@ -8,8 +8,8 @@ __all__ = ['Xception', 'xception']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, BatchNorm, MaxPool2d, AvgPool2d, conv1x1_block, conv3x3_block, flatten,\
-    SimpleSequential, is_channels_first
+from .common import (Conv2d, BatchNorm, MaxPool2d, AvgPool2d, conv1x1_block, conv3x3_block, flatten, SimpleSequential,
+                     is_channels_first)
 
 
 class DwsConv(nn.Layer):

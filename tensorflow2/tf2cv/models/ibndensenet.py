@@ -9,8 +9,8 @@ __all__ = ['IBNDenseNet', 'ibn_densenet121', 'ibn_densenet161', 'ibn_densenet169
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, BatchNorm, pre_conv3x3_block, IBN, SimpleSequential, flatten, is_channels_first,\
-    get_channel_axis
+from .common import (Conv2d, BatchNorm, pre_conv3x3_block, IBN, SimpleSequential, flatten, is_channels_first,
+                     get_channel_axis)
 from .preresnet import PreResInitBlock, PreResActivation
 from .densenet import TransitionBlock
 

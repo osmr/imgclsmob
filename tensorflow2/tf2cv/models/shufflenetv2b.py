@@ -9,8 +9,8 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock, MaxPool2d,\
-    SimpleSequential, get_channel_axis, flatten
+from .common import (conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock, MaxPool2d,
+                     SimpleSequential, get_channel_axis, flatten)
 
 
 class ShuffleUnit(nn.Layer):

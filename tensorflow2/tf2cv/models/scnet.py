@@ -9,8 +9,8 @@ __all__ = ['SCNet', 'scnet50', 'scnet101', 'scneta50', 'scneta101']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, AvgPool2d, InterpolationBlock, SimpleSequential, get_channel_axis,\
-    get_im_size, is_channels_first
+from .common import (conv1x1_block, conv3x3_block, AvgPool2d, InterpolationBlock, SimpleSequential, get_channel_axis,
+                     get_im_size, is_channels_first)
 from .resnet import ResInitBlock
 from .senet import SEInitBlock
 from .resnesta import ResNeStADownBlock

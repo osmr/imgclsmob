@@ -9,8 +9,8 @@ __all__ = ['BiSeNet', 'bisenet_resnet18_celebamaskhq']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential, get_channel_axis,\
-    get_im_size, is_channels_first
+from .common import (conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential, get_channel_axis,
+                     get_im_size, is_channels_first)
 from .resnet import resnet18
 
 

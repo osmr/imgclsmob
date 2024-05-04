@@ -8,8 +8,8 @@ __all__ = ['HarDNet', 'hardnet39ds', 'hardnet68ds', 'hardnet68', 'hardnet85']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv_block, MaxPool2d, SimpleSequential,\
-    flatten, get_channel_axis, is_channels_first
+from .common import (conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv_block, MaxPool2d, SimpleSequential,
+                     flatten, get_channel_axis, is_channels_first)
 
 
 class InvDwsConvBlock(nn.Layer):

@@ -8,8 +8,8 @@ __all__ = ['PyramidNet', 'pyramidnet101_a360', 'PyrUnit']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, BatchNorm, MaxPool2d, AvgPool2d, pre_conv1x1_block, pre_conv3x3_block, SimpleSequential,\
-    flatten, is_channels_first
+from .common import (Conv2d, BatchNorm, MaxPool2d, AvgPool2d, pre_conv1x1_block, pre_conv3x3_block, SimpleSequential,
+                     flatten, is_channels_first)
 from .preresnet import PreResActivation
 
 

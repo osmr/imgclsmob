@@ -12,8 +12,8 @@ import tensorflow as tf
 import tensorflow.keras.layers as nn
 from tensorflow.python.keras import initializers
 from tensorflow.python.keras.engine.input_spec import InputSpec
-from .common import get_activation_layer, Conv1d, BatchNorm, DualPathSequential, DualPathParallelConcurent,\
-    is_channels_first
+from .common import (get_activation_layer, Conv1d, BatchNorm, DualPathSequential, DualPathParallelConcurent,
+                     is_channels_first)
 
 
 class NemoAudioReader(object):

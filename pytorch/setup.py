@@ -20,7 +20,7 @@ setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     keywords='machine-learning deep-learning neuralnetwork image-classification pytorch imagenet cifar svhn vgg resnet '

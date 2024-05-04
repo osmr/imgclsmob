@@ -10,8 +10,8 @@ __all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan_coco', 'lwopenpose3d_mob
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block, SimpleSequential, is_channels_first,\
-    get_channel_axis
+from .common import (conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block, SimpleSequential, is_channels_first,
+                     get_channel_axis)
 
 
 class LwopResBottleneck(nn.Layer):

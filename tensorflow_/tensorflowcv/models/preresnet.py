@@ -11,8 +11,8 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetb
 
 import os
 import tensorflow as tf
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, batchnorm, maxpool2d, is_channels_first,\
-    flatten
+from .common import (pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, batchnorm, maxpool2d, is_channels_first,
+                     flatten)
 
 
 def preres_block(x,

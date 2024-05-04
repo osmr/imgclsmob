@@ -11,8 +11,8 @@ import os
 import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import BatchNorm, PReLU2, conv3x3, conv1x1_block, conv3x3_block, AvgPool2d, SimpleSequential,\
-    DualPathSequential, flatten, is_channels_first, get_channel_axis
+from .common import (BatchNorm, PReLU2, conv3x3, conv1x1_block, conv3x3_block, AvgPool2d, SimpleSequential,
+                     DualPathSequential, flatten, is_channels_first, get_channel_axis)
 
 
 class PreActivation(nn.Layer):

@@ -8,8 +8,8 @@ __all__ = ['MnasNet', 'mnasnet_b1', 'mnasnet_a1', 'mnasnet_small']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
-    SimpleSequential, flatten
+from .common import (round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,
+                     SimpleSequential, flatten)
 
 
 class DwsExpSEResUnit(nn.Layer):

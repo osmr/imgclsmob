@@ -11,8 +11,7 @@ __all__ = ['DeepLabv3', 'deeplabv3_resnetd50b_voc', 'deeplabv3_resnetd101b_voc',
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, is_channels_first, interpolate_im,\
-    get_im_size
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, is_channels_first, interpolate_im, get_im_size
 from .resnetd import resnetd50b, resnetd101b, resnetd152b
 
 

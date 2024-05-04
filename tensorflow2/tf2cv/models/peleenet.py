@@ -8,8 +8,8 @@ __all__ = ['PeleeNet', 'peleenet']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, Concurrent, MaxPool2d, AvgPool2d, SimpleSequential, flatten,\
-    is_channels_first, get_channel_axis
+from .common import (conv1x1_block, conv3x3_block, Concurrent, MaxPool2d, AvgPool2d, SimpleSequential, flatten,
+                     is_channels_first, get_channel_axis)
 
 
 class PeleeBranch1(nn.Layer):

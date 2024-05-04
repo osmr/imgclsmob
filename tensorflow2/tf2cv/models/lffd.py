@@ -8,8 +8,8 @@ __all__ = ['LFFD', 'lffd20x5s320v2_widerface', 'lffd25x8s560v1_widerface']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv3x3, conv1x1_block, conv3x3_block, Concurrent, MultiOutputSequential, ParallelConcurent,\
-    is_channels_first
+from .common import (conv3x3, conv1x1_block, conv3x3_block, Concurrent, MultiOutputSequential, ParallelConcurent,
+                     is_channels_first)
 from .resnet import ResUnit
 from .preresnet import PreResUnit
 

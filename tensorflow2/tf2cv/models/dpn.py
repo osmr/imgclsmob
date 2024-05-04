@@ -8,8 +8,8 @@ __all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn98', 'dpn107', 'dpn131']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, GlobalAvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, SimpleSequential,\
-    flatten, is_channels_first, get_channel_axis
+from .common import (MaxPool2d, GlobalAvgPool2d, BatchNorm, Conv2d, conv1x1, DualPathSequential, SimpleSequential,
+                     flatten, is_channels_first, get_channel_axis)
 
 
 class GlobalAvgMaxPool2D(nn.Layer):

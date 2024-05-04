@@ -9,8 +9,8 @@ __all__ = ['PolyNet', 'polynet']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MaxPool2d, Conv2d, ConvBlock, BatchNorm, SimpleSequential, ParametricSequential, Concurrent,\
-    ParametricConcurrent, conv1x1_block, conv3x3_block, flatten, is_channels_first
+from .common import (MaxPool2d, Conv2d, ConvBlock, BatchNorm, SimpleSequential, ParametricSequential, Concurrent,
+                     ParametricConcurrent, conv1x1_block, conv3x3_block, flatten, is_channels_first)
 
 
 class PolyConv(nn.Layer):

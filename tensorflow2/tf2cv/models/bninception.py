@@ -9,8 +9,8 @@ __all__ = ['BNInception', 'bninception']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, AvgPool2d, Concurrent, SimpleSequential,\
-    flatten, is_channels_first
+from .common import (conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, AvgPool2d, Concurrent, SimpleSequential,
+                     flatten, is_channels_first)
 
 
 class Inception3x3Branch(nn.Layer):

@@ -7,8 +7,8 @@ __all__ = ['MnasNet', 'mnasnet_b1', 'mnasnet_a1', 'mnasnet_small']
 
 import os
 import tensorflow as tf
-from .common import is_channels_first, flatten, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block,\
-    se_block, round_channels
+from .common import (is_channels_first, flatten, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block,
+                     se_block, round_channels)
 
 
 def dws_exp_se_res_unit(x,

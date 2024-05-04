@@ -10,8 +10,8 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, Conv2d, BatchNorm, AvgPool2d,\
-    MaxPool2d, SimpleSequential, get_channel_axis, flatten
+from .common import (conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, Conv2d, BatchNorm, AvgPool2d, MaxPool2d,
+                     SimpleSequential, get_channel_axis, flatten)
 
 
 class MEUnit(nn.Layer):

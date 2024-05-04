@@ -8,8 +8,8 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle, channel_shuffle2, maxpool2d,\
-    se_block, is_channels_first, get_channel_axis, flatten
+from .common import (conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle, channel_shuffle2, maxpool2d,
+                     se_block, is_channels_first, get_channel_axis, flatten)
 
 
 def shuffle_unit(x,

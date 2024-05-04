@@ -11,8 +11,8 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, BatchNorm, MaxPool2d, AvgPool2d,\
-    SimpleSequential, get_channel_axis, flatten
+from .common import (conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, BatchNorm, MaxPool2d, AvgPool2d,
+                     SimpleSequential, get_channel_axis, flatten)
 
 
 class ShuffleUnit(nn.Layer):

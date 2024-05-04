@@ -10,8 +10,8 @@ __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity, is_channels_first, interpolate_im,\
-    get_im_size
+from .common import (conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity, is_channels_first, interpolate_im,
+                     get_im_size)
 from .resnetd import resnetd50b, resnetd101b
 
 

@@ -11,7 +11,7 @@ from mxnet import autograd as ag
 
 # from common.logger_utils import initialize_logging
 from cvutil.logger import initialize_logging
-from common.train_log_param_saver import TrainLogParamSaver
+from common.train_process_controller import TrainProcessController
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model
 
@@ -494,7 +494,7 @@ def train_net(batch_size,
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
             val_metric_value_dec = -val_metric_value
             train_metric_value_dec = -train_metric_value
-            lp_saver.epoch_test_end_callback(
+            lp_saver.update_epoch_and_callback(
                 epoch1=(epoch + 1),
                 params=[val_metric_value_dec, train_metric_value_dec, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
@@ -575,7 +575,7 @@ def main():
 
     if args.save_dir and args.save_interval:
         metric_type = "F1"
-        lp_saver = TrainLogParamSaver(
+        lp_saver = TrainProcessController(
             checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
             last_checkpoint_file_name_suffix="last",
             best_checkpoint_file_name_suffix=None,
@@ -588,7 +588,7 @@ def main():
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
             param_names=['Val.' + metric_type, 'Train.' + metric_type, 'Train.Loss', 'LR'],
-            acc_ind=0,
+            key_metric_idx=0,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, 'score.log'),

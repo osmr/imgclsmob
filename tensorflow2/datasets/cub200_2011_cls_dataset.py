@@ -64,21 +64,21 @@ class CUBDirectoryIterator(DirectoryIterator):
 
         images_df = pd.read_csv(
             images_file_path,
-            sep="\s+",
+            sep=r"\s+",
             header=None,
             index_col=False,
             names=["image_id", "image_path"],
             dtype={"image_id": np.int32, "image_path": np.unicode})
         class_df = pd.read_csv(
             class_file_path,
-            sep="\s+",
+            sep=r"\s+",
             header=None,
             index_col=False,
             names=["image_id", "class_id"],
             dtype={"image_id": np.int32, "class_id": np.uint8})
         split_df = pd.read_csv(
             split_file_path,
-            sep="\s+",
+            sep=r"\s+",
             header=None,
             index_col=False,
             names=["image_id", "split_flag"],

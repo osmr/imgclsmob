@@ -176,7 +176,7 @@ def prepare_src_model(src_fwk,
         if src_model in ["oth_shufflenetv2_wd2"]:
             src_param_keys = [key for key in src_param_keys if not key.startswith("network.0.")]
         if src_model.startswith("oth_dla"):
-            src1 = list(filter(re.compile("\.project").search, src_param_keys))
+            src1 = list(filter(re.compile(r"\.project").search, src_param_keys))
             src1n = [key for key in src_param_keys if key not in src1]
             src2 = []
             for i in range(2, 6):
@@ -359,26 +359,26 @@ def convert_mx2gl(dst_net,
         src_param_keys = [re.sub('_c3x3-b', '.body.conv2A.', key) for key in src_param_keys]
         src_param_keys = [re.sub('_c1x1-b', '.body.conv2B.', key) for key in src_param_keys]
         src_param_keys = [re.sub('_c1x1-c', '.body.conv3.', key) for key in src_param_keys]
-        src_param_keys = [re.sub('_x__x_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convT.weight', key)
+        src_param_keys = [re.sub(r'_x__x_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convT.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__x_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convT.weight', key)
+        src_param_keys = [re.sub(r'_x__x_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convT.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(1\)_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(1\)_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(1\)_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(1\)_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(2\)_1x1_bases\[dim3\]_weight$', '_x__7.body.conv1.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(2\)_1x1_bases\[dim3\]_weight$', '_x__7.body.conv1.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(2\)_3x3_bases\[dim21\]_weight$', '_x__7.body.conv2.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(2\)_3x3_bases\[dim21\]_weight$', '_x__7.body.conv2.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(3\)_1x1_bases\[dim3\]_weight$', '_x__14.body.conv1.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(3\)_1x1_bases\[dim3\]_weight$', '_x__14.body.conv1.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__\(3\)_3x3_bases\[dim21\]_weight$', '_x__14.body.conv2.convQ.weight', key)
+        src_param_keys = [re.sub(r'_x__\(3\)_3x3_bases\[dim21\]_weight$', '_x__14.body.conv2.convQ.weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_c1x1-w\(s\/2\)', '.input_convZ.', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'_c1x1-w\(s\/2\)', '.input_convZ.', key) for key in src_param_keys]
         src_param_keys = [re.sub('_c1x1-w_weight$', '.input_convZ.conv.weight', key) for key in src_param_keys]
-        src_param_keys = [re.sub('_c1x1-w\(s\/1\)', '.input_conv.', key) for key in src_param_keys]
-        src_param_keys = [re.sub('_c1x1-w\(s\/key\)', '.identity_conv.', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'_c1x1-w\(s\/1\)', '.input_conv.', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'_c1x1-w\(s\/key\)', '.identity_conv.', key) for key in src_param_keys]
         src_param_keys = [re.sub('__conv_weight$', '.conv.weight', key) for key in src_param_keys]
         src_param_keys = [re.sub('__bn__bn_beta$', '.bn.beta', key) for key in src_param_keys]
         src_param_keys = [re.sub('__bn__bn_gamma$', '.bn.gamma', key) for key in src_param_keys]
@@ -394,38 +394,38 @@ def convert_mx2gl(dst_net,
         dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub("^features\.", "conv", key) for key in src_param_keys]
-        src_param_keys = [re.sub('^output\.1\.', 'fc6', key) for key in src_param_keys]
-        src_param_keys = [re.sub('_x__1\.body\.conv1\.convT\.weight$', '_x__x_1x1_bases[dim3]_weight', key)
+        src_param_keys = [re.sub(r"^features\.", "conv", key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'^output\.1\.', 'fc6', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'_x__1\.body\.conv1\.convT\.weight$', '_x__x_1x1_bases[dim3]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__1\.body\.conv2\.convT\.weight$', '_x__x_3x3_bases[dim21]_weight', key)
+        src_param_keys = [re.sub(r'_x__1\.body\.conv2\.convT\.weight$', '_x__x_3x3_bases[dim21]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__1\.body\.conv1\.convQ\.weight$', '_x__(1)_1x1_bases[dim3]_weight', key)
+        src_param_keys = [re.sub(r'_x__1\.body\.conv1\.convQ\.weight$', '_x__(1)_1x1_bases[dim3]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__1\.body\.conv2\.convQ\.weight$', '_x__(1)_3x3_bases[dim21]_weight', key)
+        src_param_keys = [re.sub(r'_x__1\.body\.conv2\.convQ\.weight$', '_x__(1)_3x3_bases[dim21]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__7\.body\.conv1\.convQ\.weight$', '_x__(2)_1x1_bases[dim3]_weight', key)
+        src_param_keys = [re.sub(r'_x__7\.body\.conv1\.convQ\.weight$', '_x__(2)_1x1_bases[dim3]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__7\.body\.conv2\.convQ\.weight$', '_x__(2)_3x3_bases[dim21]_weight', key)
+        src_param_keys = [re.sub(r'_x__7\.body\.conv2\.convQ\.weight$', '_x__(2)_3x3_bases[dim21]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__14\.body\.conv1\.convQ\.weight$', '_x__(3)_1x1_bases[dim3]_weight', key)
+        src_param_keys = [re.sub(r'_x__14\.body\.conv1\.convQ\.weight$', '_x__(3)_1x1_bases[dim3]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('_x__14\.body\.conv2\.convQ\.weight$', '_x__(3)_3x3_bases[dim21]_weight', key)
+        src_param_keys = [re.sub(r'_x__14\.body\.conv2\.convQ\.weight$', '_x__(3)_3x3_bases[dim21]_weight', key)
                           for key in src_param_keys]
-        src_param_keys = [re.sub('\.body\.conv1\.', '_c1x1-a', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.body\.conv2A\.', '_c3x3-b', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.body\.conv2B\.', '_c1x1-b', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.body\.conv3\.', '_c1x1-c', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.input_convZ\.conv\.weight$', '_c1x1-w_weight', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.input_convZ\.', '_c1x1-w(s/2)', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.input_conv\.', '_c1x1-w(s/1)', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.identity_conv\.', '_c1x1-w(s/key)', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.conv\.weight$', '__conv_weight', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.bn\.beta$', '__bn__bn_beta', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.bn\.gamma$', '__bn__bn_gamma', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.bn\.running_mean$', '__bn__bn_moving_mean', key) for key in src_param_keys]
-        src_param_keys = [re.sub('\.bn\.running_var$', '__bn__bn_moving_var', key) for key in src_param_keys]
-        src_param_keys = [re.sub('1_x_1\.conv\.bnA\.', '1_x_1__relu-sp__bn_', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.body\.conv1\.', '_c1x1-a', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.body\.conv2A\.', '_c3x3-b', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.body\.conv2B\.', '_c1x1-b', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.body\.conv3\.', '_c1x1-c', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.input_convZ\.conv\.weight$', '_c1x1-w_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.input_convZ\.', '_c1x1-w(s/2)', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.input_conv\.', '_c1x1-w(s/1)', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.identity_conv\.', '_c1x1-w(s/key)', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.conv\.weight$', '__conv_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.bn\.beta$', '__bn__bn_beta', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.bn\.gamma$', '__bn__bn_gamma', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.bn\.running_mean$', '__bn__bn_moving_mean', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'\.bn\.running_var$', '__bn__bn_moving_var', key) for key in src_param_keys]
+        src_param_keys = [re.sub(r'1_x_1\.conv\.bnA\.', '1_x_1__relu-sp__bn_', key) for key in src_param_keys]
 
         dst_i = 0
         for src_i, src_key in enumerate(src_param_keys):
@@ -521,8 +521,8 @@ def convert_mx2gl(dst_net,
         dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub("^output\.", "classifier_", key) for key in src_param_keys]
-        src_param_keys = [re.sub("^features\.", "res", key) for key in src_param_keys]
+        src_param_keys = [re.sub(r"^output\.", "classifier_", key) for key in src_param_keys]
+        src_param_keys = [re.sub(r"^features\.", "res", key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv1_aweight$', '_conv1_weight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv2_aweight$', '_conv2_weight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv3_aweight$', '_conv3_weight', key) for key in src_param_keys]
@@ -556,7 +556,7 @@ def convert_gl2ch(dst_net,
                   src_model):
 
     if src_model.startswith("diares") or src_model.startswith("diapreres"):
-        src1 = list(filter(re.compile("^features\.[0-9]*\.\d*[1-9]\d*\.attention").search, src_param_keys))
+        src1 = list(filter(re.compile(r"^features\.[0-9]*\.\d*[1-9]\d*\.attention").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n
         assert (len(src_param_keys) == len(dst_param_keys))
@@ -1058,32 +1058,32 @@ def convert_pt2pt(dst_params_file_path,
                   dst_model):
     import torch
     if src_model.startswith("oth_quartznet") or src_model.startswith("oth_jasper"):
-        src1 = list(filter(re.compile("\.res\.").search, src_param_keys))
+        src1 = list(filter(re.compile(r"\.res\.").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n + src1
 
-        dst1 = list(filter(re.compile("\.identity_block\.").search, dst_param_keys))
+        dst1 = list(filter(re.compile(r"\.identity_block\.").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
         dst_param_keys = dst1n + dst1
 
     elif src_model.startswith("oth_dicenet"):
-        src1 = list(filter(re.compile("\.conv_height\.").search, src_param_keys))
+        src1 = list(filter(re.compile(r"\.conv_height\.").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
-        src2 = list(filter(re.compile("\.conv_width\.").search, src1n))
+        src2 = list(filter(re.compile(r"\.conv_width\.").search, src1n))
         src2n = [key for key in src1n if key not in src2]
-        src3 = list(filter(re.compile("\.linear_comb_layer\.").search, src2n))
+        src3 = list(filter(re.compile(r"\.linear_comb_layer\.").search, src2n))
         src3n = [key for key in src2n if key not in src3]
-        src4 = list(filter(re.compile("\.proj_layer\.").search, src3n))
+        src4 = list(filter(re.compile(r"\.proj_layer\.").search, src3n))
         src4n = [key for key in src3n if key not in src4]
         src_param_keys = src4n + src1 + src2 + src3 + src4
 
-        dst1 = list(filter(re.compile("\.h_conv\.").search, dst_param_keys))
+        dst1 = list(filter(re.compile(r"\.h_conv\.").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
-        dst2 = list(filter(re.compile("\.w_conv\.").search, dst1n))
+        dst2 = list(filter(re.compile(r"\.w_conv\.").search, dst1n))
         dst2n = [key for key in dst1n if key not in dst2]
-        dst3 = list(filter(re.compile("\.att\.").search, dst2n))
+        dst3 = list(filter(re.compile(r"\.att\.").search, dst2n))
         dst3n = [key for key in dst2n if key not in dst3]
-        dst4 = list(filter(re.compile("\.proj_conv\.").search, dst3n))
+        dst4 = list(filter(re.compile(r"\.proj_conv\.").search, dst3n))
         dst4n = [key for key in dst3n if key not in dst4]
         dst_param_keys = dst4n + dst1 + dst2 + dst3 + dst4
 
@@ -1131,10 +1131,10 @@ def convert_pt2pt(dst_params_file_path,
         dst_param_keys = dst1n + dst1
 
     elif src_model.startswith("oth_dla"):
-        src1 = list(filter(re.compile("\.project").search, src_param_keys))
+        src1 = list(filter(re.compile(r"\.project").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1 + src1n
-        dst1 = list(filter(re.compile("\.project_conv").search, dst_param_keys))
+        dst1 = list(filter(re.compile(r"\.project_conv").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
         dst_param_keys = dst1 + dst1n
 
@@ -1142,32 +1142,32 @@ def convert_pt2pt(dst_params_file_path,
         src1 = list(filter(re.compile("^proposal_net").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1 + src1n
-        dst1 = list(filter(re.compile("^navigator_unit\.branch\d+\.down").search, dst_param_keys))
+        dst1 = list(filter(re.compile(r"^navigator_unit\.branch\d+\.down").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
-        dst2 = list(filter(re.compile("^navigator_unit\.branch\d+\.tidy").search, dst1n))
+        dst2 = list(filter(re.compile(r"^navigator_unit\.branch\d+\.tidy").search, dst1n))
         dst2n = [key for key in dst1n if key not in dst2]
         dst_param_keys = dst1 + dst2 + dst2n
 
     elif dst_model == "fishnet150":
-        src1 = list(filter(re.compile("^(conv|fish\.fish\.[0-2])").search, src_param_keys))
+        src1 = list(filter(re.compile(r"^(conv|fish\.fish\.[0-2])").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
-        src2 = list(filter(re.compile("^fish\.fish\.6\.1").search, src1n))
+        src2 = list(filter(re.compile(r"^fish\.fish\.6\.1").search, src1n))
         src2n = [key for key in src1n if key not in src2]
-        src3 = list(filter(re.compile("^fish\.fish\.5\.1").search, src2n))
+        src3 = list(filter(re.compile(r"^fish\.fish\.5\.1").search, src2n))
         src3n = [key for key in src2n if key not in src3]
-        src4 = list(filter(re.compile("^fish\.fish\.4\.1").search, src3n))
+        src4 = list(filter(re.compile(r"^fish\.fish\.4\.1").search, src3n))
         src4n = [key for key in src3n if key not in src4]
-        src5 = list(filter(re.compile("^fish\.fish\.3\.[0-1]").search, src4n))
+        src5 = list(filter(re.compile(r"^fish\.fish\.3\.[0-1]").search, src4n))
         src5n = [key for key in src4n if key not in src5]
-        src6 = list(filter(re.compile("^fish\.fish\.3\.3").search, src5n))
+        src6 = list(filter(re.compile(r"^fish\.fish\.3\.3").search, src5n))
         src6n = [key for key in src5n if key not in src6]
-        src7 = list(filter(re.compile("^fish\.fish\.[3-6]").search, src6n))
+        src7 = list(filter(re.compile(r"^fish\.fish\.[3-6]").search, src6n))
         src7n = [key for key in src6n if key not in src7]
-        src8 = list(filter(re.compile("^fish\.fish\.9\.1").search, src7n))
+        src8 = list(filter(re.compile(r"^fish\.fish\.9\.1").search, src7n))
         src8n = [key for key in src7n if key not in src8]
-        src9 = list(filter(re.compile("^fish\.fish\.8\.1").search, src8n))
+        src9 = list(filter(re.compile(r"^fish\.fish\.8\.1").search, src8n))
         src9n = [key for key in src8n if key not in src9]
-        src10 = list(filter(re.compile("^fish\.fish\.7\.1").search, src9n))
+        src10 = list(filter(re.compile(r"^fish\.fish\.7\.1").search, src9n))
         src10n = [key for key in src9n if key not in src10]
         src_param_keys = src1 + src2 + src3 + src4 + src5 + src6 + src7 + src8 + src9 + src10 + src10n
 
@@ -1181,41 +1181,41 @@ def convert_pt2pt(dst_params_file_path,
         dst_param_keys = dst_param_keys + dst_bams
 
     elif dst_model.startswith("sinet"):
-        src1 = list(filter(re.compile("\.vertical.weight").search, src_param_keys))
+        src1 = list(filter(re.compile(r"\.vertical.weight").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n + src1
-        src2 = list(filter(re.compile("\.horizontal.weight").search, src_param_keys))
+        src2 = list(filter(re.compile(r"\.horizontal.weight").search, src_param_keys))
         src2n = [key for key in src_param_keys if key not in src2]
         src_param_keys = src2n + src2
-        src3 = list(filter(re.compile("\.B_v\.").search, src_param_keys))
+        src3 = list(filter(re.compile(r"\.B_v\.").search, src_param_keys))
         src3n = [key for key in src_param_keys if key not in src3]
         src_param_keys = src3n + src3
-        src4 = list(filter(re.compile("\.B_h\.").search, src_param_keys))
+        src4 = list(filter(re.compile(r"\.B_h\.").search, src_param_keys))
         src4n = [key for key in src_param_keys if key not in src4]
         src_param_keys = src4n + src4
-        src5 = list(filter(re.compile("bn_4\.").search, src_param_keys))
+        src5 = list(filter(re.compile(r"bn_4\.").search, src_param_keys))
         src5n = [key for key in src_param_keys if key not in src5]
         src_param_keys = src5n + src5
-        src6 = list(filter(re.compile("bn_3\.").search, src_param_keys))
+        src6 = list(filter(re.compile(r"bn_3\.").search, src_param_keys))
         src6n = [key for key in src_param_keys if key not in src6]
         src_param_keys = src6n + src6
 
-        dst1 = list(filter(re.compile("\.v_conv.conv\.").search, dst_param_keys))
+        dst1 = list(filter(re.compile(r"\.v_conv.conv\.").search, dst_param_keys))
         dst1n = [key for key in dst_param_keys if key not in dst1]
         dst_param_keys = dst1n + dst1
-        dst2 = list(filter(re.compile("\.h_conv.conv\.").search, dst_param_keys))
+        dst2 = list(filter(re.compile(r"\.h_conv.conv\.").search, dst_param_keys))
         dst2n = [key for key in dst_param_keys if key not in dst2]
         dst_param_keys = dst2n + dst2
-        dst3 = list(filter(re.compile("\.v_conv.bn\.").search, dst_param_keys))
+        dst3 = list(filter(re.compile(r"\.v_conv.bn\.").search, dst_param_keys))
         dst3n = [key for key in dst_param_keys if key not in dst3]
         dst_param_keys = dst3n + dst3
-        dst4 = list(filter(re.compile("\.h_conv.bn\.").search, dst_param_keys))
+        dst4 = list(filter(re.compile(r"\.h_conv.bn\.").search, dst_param_keys))
         dst4n = [key for key in dst_param_keys if key not in dst4]
         dst_param_keys = dst4n + dst4
-        dst5 = list(filter(re.compile("decoder.decode1.bn\.").search, dst_param_keys))
+        dst5 = list(filter(re.compile(r"decoder.decode1.bn\.").search, dst_param_keys))
         dst5n = [key for key in dst_param_keys if key not in dst5]
         dst_param_keys = dst5n + dst5
-        dst6 = list(filter(re.compile("decoder.decode2.bn\.").search, dst_param_keys))
+        dst6 = list(filter(re.compile(r"decoder.decode2.bn\.").search, dst_param_keys))
         dst6n = [key for key in dst_param_keys if key not in dst6]
         dst_param_keys = dst6n + dst6
 

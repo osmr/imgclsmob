@@ -122,8 +122,8 @@ class VisemeNet(HybridBlock):
         super(VisemeNet, self).__init__(**kwargs)
         stage1_rnn_hidden_size = 256
         stage1_fc_mid_channels = 256
-        stage2_rnn_in_features = (audio_features + num_landmarks + stage1_fc_mid_channels) * \
-                                 stage2_window_size // audio_window_size
+        stage2_rnn_in_features = ((audio_features + num_landmarks + stage1_fc_mid_channels) *
+                                  stage2_window_size // audio_window_size)
         self.audio_window_size = audio_window_size
         self.stage2_window_size = stage2_window_size
 
@@ -177,7 +177,7 @@ class VisemeNet(HybridBlock):
         z = F.stack(
             *[z2[i:i + self.stage2_window_size].reshape(
                 (self.audio_window_size, n_net2_input * self.stage2_window_size // self.audio_window_size))
-              for i in range(z2.shape[0] - self.stage2_window_size)],
+                for i in range(z2.shape[0] - self.stage2_window_size)],
             axis=0)
         cls = self.cls_branch(z)
         reg = self.reg_branch(z)

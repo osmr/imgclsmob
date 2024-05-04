@@ -257,8 +257,8 @@ def segm_fw_iou2(label_hmask,
 
         u_ii = (class_i_pred_mask * class_i_label_mask).sum()
 
-        acc_iou += mx.nd.cast(u_i, dtype=np.float32) *\
-                   mx.nd.cast(u_ii, dtype=np.float32) / mx.nd.cast(u_i + u_ji_sj - u_ii, dtype=np.float32)
+        acc_iou += (mx.nd.cast(u_i, dtype=np.float32) *
+                    mx.nd.cast(u_ii, dtype=np.float32) / mx.nd.cast(u_i + u_ji_sj - u_ii, dtype=np.float32))
 
     fw_factor = pred_imask.size
 

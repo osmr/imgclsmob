@@ -372,14 +372,14 @@ class MaskConv1d(Conv1d):
         if self.use_mask:
             if is_channels_first(self.data_format):
                 max_len = x.shape[2]
-                mask = tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <\
-                       tf.expand_dims(x_len, -1)
+                mask = (tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <
+                        tf.expand_dims(x_len, -1))
                 mask = tf.broadcast_to(tf.expand_dims(mask, 1), x.shape)
                 x = tf.where(mask, x, tf.zeros(x.shape))
             else:
                 max_len = x.shape[1]
-                mask = tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <\
-                       tf.expand_dims(x_len, -1)
+                mask = (tf.expand_dims(tf.cast(tf.linspace(0, max_len - 1, max_len), tf.int64), 0) <
+                        tf.expand_dims(x_len, -1))
                 mask = tf.broadcast_to(tf.expand_dims(mask, -1), x.shape)
                 x = tf.where(mask, x, tf.zeros(x.shape))
             x_len = (x_len + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1) // self.strides + 1

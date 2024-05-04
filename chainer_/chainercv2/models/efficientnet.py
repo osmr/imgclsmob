@@ -452,7 +452,7 @@ def get_efficientnet(version,
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                       zip(channels_per_layers, layers, downsample), [])
     ksizes = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                          zip(kernel_sizes_per_layers, layers, downsample), [])
+                    zip(kernel_sizes_per_layers, layers, downsample), [])
     expansion_factors = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                                zip(expansion_factors_per_layers, layers, downsample), [])
     strides_per_stage = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],

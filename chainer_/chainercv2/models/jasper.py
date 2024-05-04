@@ -338,8 +338,8 @@ class MaskConv1d(L.Convolution1D):
 
     def __call__(self, x, x_len):
         if self.use_mask:
-            mask = F.broadcast_to(self.xp.arange(x.shape[2]), x.shape).array <\
-                   F.expand_dims(F.expand_dims(x_len, -1), -1).array
+            mask = (F.broadcast_to(self.xp.arange(x.shape[2]), x.shape).array <
+                    F.expand_dims(F.expand_dims(x_len, -1), -1).array)
             x *= mask
             x_len = (x_len + 2 * self.pad0 - self.dilate[0] * (self.ksize[0] - 1) - 1) // self.stride0 + 1
         x = F.convolution_1d(

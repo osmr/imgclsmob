@@ -3238,9 +3238,9 @@ class NormActivation(nn.Layer):
         assert (in_channels is not None)
 
         self.bn = BatchNorm(
-                epsilon=bn_eps,
-                data_format=data_format,
-                name="bn")
+            epsilon=bn_eps,
+            data_format=data_format,
+            name="bn")
         self.activ = get_activation_layer(activation, name="activ")
 
     def call(self, x, training=None):

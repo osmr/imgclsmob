@@ -232,8 +232,8 @@ class SPNASNet(HybridBlock):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if ((j == 0) and (i != 3)) or\
-                                      ((j == len(channels_per_stage) // 2) and (i == 3)) else 1
+                        strides = 2 if (((j == 0) and (i != 3)) or
+                                        ((j == len(channels_per_stage) // 2) and (i == 3))) else 1
                         use_kernel3 = kernels3[i][j] == 1
                         exp_factor = exp_factors[i][j]
                         stage.add(SPNASUnit(

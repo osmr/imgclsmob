@@ -172,16 +172,16 @@ def recalc_pose(pred,
 
         heatmap = cv2.resize(output_heatmap, (0, 0), fx=stride, fy=stride, interpolation=cv2.INTER_CUBIC)
         heatmap = heatmap[
-                  pad[0]:(output_blob.shape[0] * stride - pad[2]),
-                  pad[1]:(output_blob.shape[1] * stride - pad[3]),
-                  :]
+            pad[0]:(output_blob.shape[0] * stride - pad[2]),
+            pad[1]:(output_blob.shape[1] * stride - pad[3]),
+            :]
         heatmap = cv2.resize(heatmap, (image_src_shape[1], image_src_shape[0]), interpolation=cv2.INTER_CUBIC)
 
         paf = cv2.resize(output_paf, (0, 0), fx=stride, fy=stride, interpolation=cv2.INTER_CUBIC)
         paf = paf[
-              pad[0]:(output_blob.shape[0] * stride - pad[2]),
-              pad[1]:(output_blob.shape[1] * stride - pad[3]),
-              :]
+            pad[0]:(output_blob.shape[0] * stride - pad[2]),
+            pad[1]:(output_blob.shape[1] * stride - pad[3]),
+            :]
         paf = cv2.resize(paf, (image_src_shape[1], image_src_shape[0]), interpolation=cv2.INTER_CUBIC)
 
         all_peaks = find_peaks(heatmap)
@@ -455,8 +455,8 @@ def find_people(connection_all, special_k, all_peaks, limb_seq):
                             remove_c = c2
 
                         if remove_recon > 0:
-                            subset[small_j][-2][0] -= candidate[subset[small_j][remove_c][0].astype(int), 2] + \
-                                                      subset[small_j][remove_c][1]
+                            subset[small_j][-2][0] -= (candidate[subset[small_j][remove_c][0].astype(int), 2] +
+                                                       subset[small_j][remove_c][1])
                             subset[small_j][remove_c][0] = -1
                             subset[small_j][remove_c][1] = -1
                             subset[small_j][-1][0] -= 1

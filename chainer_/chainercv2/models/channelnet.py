@@ -34,13 +34,13 @@ def dwconv3x3(in_channels,
         Whether the layer uses a bias vector.
     """
     return L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=3,
-                stride=stride,
-                pad=1,
-                nobias=(not use_bias),
-                groups=out_channels)
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=3,
+        stride=stride,
+        pad=1,
+        nobias=(not use_bias),
+        groups=out_channels)
 
 
 class ChannetConv(Chain):

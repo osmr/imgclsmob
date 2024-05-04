@@ -534,11 +534,11 @@ def _test():
         assert (y.shape[0] == batch)
         if return_heatmap:
             if is_channels_first(data_format):
-                assert (y.shape[1] == classes + 4) and (y.shape[2] == x.shape[2] // 4) and (
-                            y.shape[3] == x.shape[3] // 4)
+                assert ((y.shape[1] == classes + 4) and (y.shape[2] == x.shape[2] // 4) and
+                        (y.shape[3] == x.shape[3] // 4))
             else:
-                assert (y.shape[3] == classes + 4) and (y.shape[1] == x.shape[1] // 4) and (
-                            y.shape[2] == x.shape[2] // 4)
+                assert ((y.shape[3] == classes + 4) and (y.shape[1] == x.shape[1] // 4) and
+                        (y.shape[2] == x.shape[2] // 4))
         else:
             assert (y.shape[1] == topk) and (y.shape[2] == 6)
 

@@ -376,8 +376,8 @@ class TResNet(nn.Module):
 
 
 def get_tresnet(version,
-                model_name=None,
-                pretrained=False,
+                model_name: str | None = None,
+                pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """

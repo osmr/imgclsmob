@@ -205,8 +205,8 @@ class LinkNet(nn.Module):
 
 def get_linknet(backbone,
                 backbone_out_channels,
-                model_name=None,
-                pretrained=False,
+                model_name: str | None = None,
+                pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """

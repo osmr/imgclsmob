@@ -370,8 +370,8 @@ class HarDNet(nn.Module):
 
 def get_hardnet(blocks,
                 use_deptwise=True,
-                model_name=None,
-                pretrained=False,
+                model_name: str | None = None,
+                pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """

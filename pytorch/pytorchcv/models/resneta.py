@@ -200,8 +200,8 @@ def get_resneta(blocks,
                 bottleneck=None,
                 conv1_stride=True,
                 width_scale=1.0,
-                model_name=None,
-                pretrained=False,
+                model_name: str | None = None,
+                pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """

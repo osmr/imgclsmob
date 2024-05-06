@@ -346,7 +346,7 @@ def calc_val_resize_value(input_image_size=(224, 224),
 
     Parameters
     ----------
-    input_image_size : tuple of 2 int
+    input_image_size : tuple(int, int)
         Main script arguments.
     resize_inv_factor : float
         Resize inverted factor.

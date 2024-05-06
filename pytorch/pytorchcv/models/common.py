@@ -95,7 +95,7 @@ class HSwish(nn.Module):
 
     Parameters
     ----------
-    inplace : bool
+    inplace : bool, default False
         Whether to use inplace version of the module.
     """
     def __init__(self, inplace: bool = False):
@@ -608,16 +608,16 @@ def conv3x3_block(in_channels: int,
         activation=activation)
 
 
-def conv5x5_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  padding=2,
-                  dilation=1,
-                  groups=1,
-                  bias=False,
-                  use_bn=True,
-                  bn_eps=1e-5,
-                  activation=(lambda: nn.ReLU(inplace=True))):
+def conv5x5_block(in_channels: int,
+                  out_channels: int,
+                  stride: int | tuple[int, int] = 1,
+                  padding: int | tuple[int, int] | tuple[int, int, int, int] = 2,
+                  dilation: int | tuple[int, int] = 1,
+                  groups: int = 1,
+                  bias: bool = False,
+                  use_bn: bool = True,
+                  bn_eps: float = 1e-5,
+                  activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     5x5 version of the standard convolution block.
 
@@ -643,6 +643,11 @@ def conv5x5_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -658,16 +663,16 @@ def conv5x5_block(in_channels,
         activation=activation)
 
 
-def conv7x7_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  padding=3,
-                  dilation=1,
-                  groups=1,
-                  bias=False,
-                  use_bn=True,
-                  bn_eps=1e-5,
-                  activation=(lambda: nn.ReLU(inplace=True))):
+def conv7x7_block(in_channels: int,
+                  out_channels: int,
+                  stride: int | tuple[int, int] = 1,
+                  padding: int | tuple[int, int] | tuple[int, int, int, int] = 3,
+                  dilation: int | tuple[int, int] = 1,
+                  groups: int = 1,
+                  bias: bool = False,
+                  use_bn: bool = True,
+                  bn_eps: float = 1e-5,
+                  activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     7x7 version of the standard convolution block.
 
@@ -677,9 +682,9 @@ def conv7x7_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    padding : int or tuple(int, int) or tuple(int, int, int, int), default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple(int, int), default 3
+    padding : int or tuple(int, int) or tuple(int, int, int, int), default 3
         Padding value for convolution layer.
     dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
@@ -693,6 +698,11 @@ def conv7x7_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -708,16 +718,16 @@ def conv7x7_block(in_channels,
         activation=activation)
 
 
-def dwconv_block(in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 padding=1,
-                 dilation=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+def dwconv_block(in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int] = 1,
+                 padding: int | tuple[int, int] | tuple[int, int, int, int] = 1,
+                 dilation: int | tuple[int, int] = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     Depthwise version of the standard convolution block.
 
@@ -743,6 +753,11 @@ def dwconv_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -758,14 +773,14 @@ def dwconv_block(in_channels,
         activation=activation)
 
 
-def dwconv3x3_block(in_channels,
-                    out_channels,
-                    stride=1,
-                    padding=1,
-                    dilation=1,
-                    bias=False,
-                    bn_eps=1e-5,
-                    activation=(lambda: nn.ReLU(inplace=True))):
+def dwconv3x3_block(in_channels: int,
+                    out_channels: int,
+                    stride: int | tuple[int, int] = 1,
+                    padding: int | tuple[int, int] | tuple[int, int, int, int] = 1,
+                    dilation: int | tuple[int, int] = 1,
+                    bias: bool = False,
+                    bn_eps: float = 1e-5,
+                    activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     3x3 depthwise version of the standard convolution block.
 
@@ -787,6 +802,11 @@ def dwconv3x3_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return dwconv_block(
         in_channels=in_channels,
@@ -800,14 +820,14 @@ def dwconv3x3_block(in_channels,
         activation=activation)
 
 
-def dwconv5x5_block(in_channels,
-                    out_channels,
-                    stride=1,
-                    padding=2,
-                    dilation=1,
-                    bias=False,
-                    bn_eps=1e-5,
-                    activation=(lambda: nn.ReLU(inplace=True))):
+def dwconv5x5_block(in_channels: int,
+                    out_channels: int,
+                    stride: int | tuple[int, int] = 1,
+                    padding: int | tuple[int, int] | tuple[int, int, int, int] = 2,
+                    dilation: int | tuple[int, int] = 1,
+                    bias: bool = False,
+                    bn_eps: float = 1e-5,
+                    activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))) -> nn.Module:
     """
     5x5 depthwise version of the standard convolution block.
 
@@ -829,6 +849,11 @@ def dwconv5x5_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return dwconv_block(
         in_channels=in_channels,
@@ -874,18 +899,18 @@ class DwsConvBlock(nn.Module):
         Activation function after the pointwise convolution block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 bias=False,
-                 dw_use_bn=True,
-                 pw_use_bn=True,
-                 bn_eps=1e-5,
-                 dw_activation=(lambda: nn.ReLU(inplace=True)),
-                 pw_activation=(lambda: nn.ReLU(inplace=True))):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int] | tuple[int, int, int, int],
+                 dilation: int | tuple[int, int] = 1,
+                 bias: bool = False,
+                 dw_use_bn: bool = True,
+                 pw_use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 dw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True)),
+                 pw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(DwsConvBlock, self).__init__()
         self.dw_conv = dwconv_block(
             in_channels=in_channels,
@@ -912,16 +937,16 @@ class DwsConvBlock(nn.Module):
         return x
 
 
-def dwsconv3x3_block(in_channels,
-                     out_channels,
-                     stride=1,
-                     padding=1,
-                     dilation=1,
-                     bias=False,
-                     bn_eps=1e-5,
-                     dw_activation=(lambda: nn.ReLU(inplace=True)),
-                     pw_activation=(lambda: nn.ReLU(inplace=True)),
-                     **kwargs):
+def dwsconv3x3_block(in_channels: int,
+                     out_channels: int,
+                     stride: int | tuple[int, int] = 1,
+                     padding: int | tuple[int, int] | tuple[int, int, int, int] = 1,
+                     dilation: int | tuple[int, int] = 1,
+                     bias: bool = False,
+                     bn_eps: float = 1e-5,
+                     dw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True)),
+                     pw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True)),
+                     **kwargs) -> nn.Module:
     """
     3x3 depthwise separable version of the standard convolution block.
 
@@ -945,6 +970,11 @@ def dwsconv3x3_block(in_channels,
         Activation function after the depthwise convolution block.
     pw_activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function after the pointwise convolution block.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return DwsConvBlock(
         in_channels=in_channels,
@@ -988,16 +1018,16 @@ class PreConvBlock(nn.Module):
         Whether activate the convolution block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 bias=False,
-                 use_bn=True,
-                 return_preact=False,
-                 activate=True):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int],
+                 dilation: int | tuple[int, int] = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 return_preact: bool = False,
+                 activate: bool = True):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
         self.activate = activate
@@ -1030,13 +1060,13 @@ class PreConvBlock(nn.Module):
             return x
 
 
-def pre_conv1x1_block(in_channels,
-                      out_channels,
-                      stride=1,
-                      bias=False,
-                      use_bn=True,
-                      return_preact=False,
-                      activate=True):
+def pre_conv1x1_block(in_channels: int,
+                      out_channels: int,
+                      stride: int | tuple[int, int] = 1,
+                      bias: bool = False,
+                      use_bn: bool = True,
+                      return_preact: bool = False,
+                      activate: bool = True) -> nn.Module:
     """
     1x1 version of the pre-activated convolution block.
 
@@ -1056,6 +1086,11 @@ def pre_conv1x1_block(in_channels,
         Whether return pre-activation.
     activate : bool, default True
         Whether activate the convolution block.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -1069,15 +1104,15 @@ def pre_conv1x1_block(in_channels,
         activate=activate)
 
 
-def pre_conv3x3_block(in_channels,
-                      out_channels,
-                      stride=1,
-                      padding=1,
-                      dilation=1,
-                      bias=False,
-                      use_bn=True,
-                      return_preact=False,
-                      activate=True):
+def pre_conv3x3_block(in_channels: int,
+                      out_channels: int,
+                      stride: int | tuple[int, int] = 1,
+                      padding: int | tuple[int, int] = 1,
+                      dilation: int | tuple[int, int] = 1,
+                      bias: bool = False,
+                      use_bn: bool = True,
+                      return_preact: bool = False,
+                      activate: bool = True) -> nn.Module:
     """
     3x3 version of the pre-activated convolution block.
 
@@ -1101,6 +1136,11 @@ def pre_conv3x3_block(in_channels,
         Whether return pre-activation.
     activate : bool, default True
         Whether activate the convolution block.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -1145,17 +1185,17 @@ class AsymConvBlock(nn.Module):
         Activation function after the rightwise convolution block.
     """
     def __init__(self,
-                 channels,
-                 kernel_size,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 lw_use_bn=True,
-                 rw_use_bn=True,
-                 bn_eps=1e-5,
-                 lw_activation=(lambda: nn.ReLU(inplace=True)),
-                 rw_activation=(lambda: nn.ReLU(inplace=True))):
+                 channels: int,
+                 kernel_size: int,
+                 padding: int,
+                 dilation: int = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 lw_use_bn: bool = True,
+                 rw_use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 lw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True)),
+                 rw_activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(AsymConvBlock, self).__init__()
         self.lw_conv = ConvBlock(
             in_channels=channels,
@@ -1188,8 +1228,8 @@ class AsymConvBlock(nn.Module):
         return x
 
 
-def asym_conv3x3_block(padding=1,
-                       **kwargs):
+def asym_conv3x3_block(padding: int = 1,
+                       **kwargs) -> nn.Module:
     """
     3x3 asymmetric separable convolution block.
 
@@ -1215,6 +1255,11 @@ def asym_conv3x3_block(padding=1,
         Activation function after the leftwise convolution block.
     rw_activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function after the rightwise convolution block.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return AsymConvBlock(
         kernel_size=3,
@@ -1238,9 +1283,9 @@ class DeconvBlock(nn.Module):
         Strides of the deconvolution.
     padding : int or tuple(int, int)
         Padding value for deconvolution layer.
-    ext_padding : tuple/list of 4 int, default None
+    ext_padding : tuple(int, int, int, int) or None, default None
         Extra padding value for deconvolution layer.
-    out_padding : int or tuple(int, int)
+    out_padding : int or tuple(int, int), default 0
         Output padding value for deconvolution layer.
     dilation : int or tuple(int, int), default 1
         Dilation value for deconvolution layer.
@@ -1256,19 +1301,19 @@ class DeconvBlock(nn.Module):
         Activation function or name of activation function.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 ext_padding=None,
-                 out_padding=0,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int],
+                 ext_padding: tuple[int, int, int, int] | None = None,
+                 out_padding: int | tuple[int, int] = 0,
+                 dilation: int | tuple[int, int] = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True))):
         super(DeconvBlock, self).__init__()
         self.activate = (activation is not None)
         self.use_bn = use_bn
@@ -1304,9 +1349,9 @@ class DeconvBlock(nn.Module):
         return x
 
 
-def deconv3x3_block(padding=1,
-                    out_padding=1,
-                    **kwargs):
+def deconv3x3_block(padding: int | tuple[int, int] = 1,
+                    out_padding: int | tuple[int, int] = 1,
+                    **kwargs) -> nn.Module:
     """
     3x3 version of the deconvolution block with batch normalization and activation.
 
@@ -1336,6 +1381,11 @@ def deconv3x3_block(padding=1,
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return DeconvBlock(
         kernel_size=3,
@@ -1354,13 +1404,13 @@ class NormActivation(nn.Module):
         Number of input channels.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
+    activation : function or str or nn.Module, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
     def __init__(self,
-                 in_channels,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 in_channels: int,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | nn.Module = (lambda: nn.ReLU(inplace=True))):
         super(NormActivation, self).__init__()
         self.bn = nn.BatchNorm2d(
             num_features=in_channels,
@@ -1381,7 +1431,7 @@ class InterpolationBlock(nn.Module):
     ----------
     scale_factor : int
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int) or None, default None
         Spatial size of the output tensor for the bilinear interpolation operation.
     mode : str, default 'bilinear'
         Algorithm used for upsampling.
@@ -1391,11 +1441,11 @@ class InterpolationBlock(nn.Module):
         Whether to upsample or downsample.
     """
     def __init__(self,
-                 scale_factor,
-                 out_size=None,
-                 mode="bilinear",
-                 align_corners=True,
-                 up=True):
+                 scale_factor: int,
+                 out_size: tuple[int, int] | None = None,
+                 mode: str = "bilinear",
+                 align_corners: bool = True,
+                 up: bool = True):
         super(InterpolationBlock, self).__init__()
         self.scale_factor = scale_factor
         self.out_size = out_size
@@ -1427,7 +1477,7 @@ class InterpolationBlock(nn.Module):
             return tuple(s // self.scale_factor for s in x.shape[2:])
 
     def __repr__(self):
-        s = '{name}(scale_factor={scale_factor}, out_size={out_size}, mode={mode}, align_corners={align_corners}, up={up})' # noqa
+        s = "{name}(scale_factor={scale_factor}, out_size={out_size}, mode={mode}, align_corners={align_corners}, up={up})" # noqa
         return s.format(
             name=self.__class__.__name__,
             scale_factor=self.scale_factor,
@@ -1446,22 +1496,22 @@ class InterpolationBlock(nn.Module):
         return num_flops, num_macs
 
 
-def channel_shuffle(x,
-                    groups):
+def channel_shuffle(x: torch.Tensor,
+                    groups: int) -> torch.Tensor:
     """
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 
     Parameters
     ----------
-    x : Tensor
+    x : torch.Tensor
         Input tensor.
     groups : int
         Number of groups.
 
     Returns
     -------
-    Tensor
+    torch.Tensor
         Resulted tensor.
     """
     batch, channels, height, width = x.size()
@@ -1485,8 +1535,8 @@ class ChannelShuffle(nn.Module):
         Number of groups.
     """
     def __init__(self,
-                 channels,
-                 groups):
+                 channels: int,
+                 groups: int):
         super(ChannelShuffle, self).__init__()
         # assert (channels % groups == 0)
         if channels % groups != 0:
@@ -1503,22 +1553,22 @@ class ChannelShuffle(nn.Module):
             groups=self.groups)
 
 
-def channel_shuffle2(x,
-                     groups):
+def channel_shuffle2(x: torch.Tensor,
+                     groups: int) -> torch.Tensor:
     """
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083. The alternative version.
 
     Parameters
     ----------
-    x : Tensor
+    x : torch.Tensor
         Input tensor.
     groups : int
         Number of groups.
 
     Returns
     -------
-    Tensor
+    torch.Tensor
         Resulted tensor.
     """
     batch, channels, height, width = x.size()
@@ -1543,8 +1593,8 @@ class ChannelShuffle2(nn.Module):
         Number of groups.
     """
     def __init__(self,
-                 channels,
-                 groups):
+                 channels: int,
+                 groups: int):
         super(ChannelShuffle2, self).__init__()
         # assert (channels % groups == 0)
         if channels % groups != 0:
@@ -1571,19 +1621,19 @@ class SEBlock(nn.Module):
         Whether to round middle channel number (make divisible by 8).
     use_conv : bool, default True
         Whether to convolutional layers instead of fully-connected ones.
-    activation : function, or str, or nn.Module, default 'relu'
+    mid_activation : function or str or nn.Module, default nn.ReLU(inplace=True)
         Activation function after the first convolution.
-    out_activation : function, or str, or nn.Module, default 'sigmoid'
+    out_activation : function or str or nn.Module, default nn.Sigmoid()
         Activation function after the last convolution.
     """
     def __init__(self,
-                 channels,
-                 reduction=16,
-                 mid_channels=None,
-                 round_mid=False,
-                 use_conv=True,
-                 mid_activation=(lambda: nn.ReLU(inplace=True)),
-                 out_activation=(lambda: nn.Sigmoid())):
+                 channels: int,
+                 reduction: int = 16,
+                 mid_channels: int | None = None,
+                 round_mid: bool = False,
+                 use_conv: bool = True,
+                 mid_activation: Callable | str | nn.Module = (lambda: nn.ReLU(inplace=True)),
+                 out_activation: Callable | str | nn.Module = (lambda: nn.Sigmoid())):
         super(SEBlock, self).__init__()
         self.use_conv = use_conv
         if mid_channels is None:
@@ -1647,13 +1697,13 @@ class SABlock(nn.Module):
         Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 out_channels,
-                 groups,
-                 radix,
-                 reduction=4,
-                 min_channels=32,
-                 use_conv=True,
-                 bn_eps=1e-5):
+                 out_channels: int,
+                 groups: int,
+                 radix: int,
+                 reduction: int = 4,
+                 min_channels: int = 32,
+                 use_conv: bool = True,
+                 bn_eps: float = 1e-5):
         super(SABlock, self).__init__()
         self.groups = groups
         self.radix = radix
@@ -1744,21 +1794,21 @@ class SAConvBlock(nn.Module):
         Whether to convolutional layers instead of fully-connected ones.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True)),
-                 radix=2,
-                 reduction=4,
-                 min_channels=32,
-                 use_conv=True):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int] | tuple[int, int, int, int],
+                 dilation: int | tuple[int, int] = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bn_eps: float = 1e-5,
+                 activation: Callable | str | None = (lambda: nn.ReLU(inplace=True)),
+                 radix: int = 2,
+                 reduction: int = 4,
+                 min_channels: int = 32,
+                 use_conv: bool = True):
         super(SAConvBlock, self).__init__()
         self.conv = ConvBlock(
             in_channels=in_channels,
@@ -1787,11 +1837,11 @@ class SAConvBlock(nn.Module):
         return x
 
 
-def saconv3x3_block(in_channels,
-                    out_channels,
-                    stride=1,
-                    padding=1,
-                    **kwargs):
+def saconv3x3_block(in_channels: int,
+                    out_channels: int,
+                    stride: int | tuple[int, int] = 1,
+                    padding: int | tuple[int, int] = 1,
+                    **kwargs) -> nn.Module:
     """
     3x3 version of the Split-Attention convolution block.
 
@@ -1805,6 +1855,11 @@ def saconv3x3_block(in_channels,
         Strides of the convolution.
     padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return SAConvBlock(
         in_channels=in_channels,
@@ -1830,9 +1885,9 @@ class DucBlock(nn.Module):
         Multiplier for spatial size.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 scale_factor):
+                 in_channels: int,
+                 out_channels: int,
+                 scale_factor: int):
         super(DucBlock, self).__init__()
         mid_channels = (scale_factor * scale_factor) * out_channels
 
@@ -1856,15 +1911,15 @@ class IBN(nn.Module):
     ----------
     channels : int
         Number of channels.
-    inst_fraction : float, default 0.5
+    first_fraction : float, default 0.5
         The first fraction of channels for normalization.
     inst_first : bool, default True
         Whether instance normalization be on the first part of channels.
     """
     def __init__(self,
-                 channels,
-                 first_fraction=0.5,
-                 inst_first=True):
+                 channels: int,
+                 first_fraction: float = 0.5,
+                 inst_first: bool = True):
         super(IBN, self).__init__()
         self.inst_first = inst_first
         h1_channels = int(math.floor(channels * first_fraction))
@@ -1913,11 +1968,11 @@ class DualPathSequential(nn.Sequential):
         Scheme of dual path response for an ordinal module.
     """
     def __init__(self,
-                 return_two=True,
-                 first_ordinals=0,
-                 last_ordinals=0,
-                 dual_path_scheme=(lambda module, x1, x2: module(x1, x2)),
-                 dual_path_scheme_ordinal=(lambda module, x1, x2: (module(x1), x2))):
+                 return_two: bool = True,
+                 first_ordinals: int = 0,
+                 last_ordinals: int = 0,
+                 dual_path_scheme: Callable = (lambda module, x1, x2: module(x1, x2)),
+                 dual_path_scheme_ordinal: Callable = (lambda module, x1, x2: (module(x1), x2))):
         super(DualPathSequential, self).__init__()
         self.return_two = return_two
         self.first_ordinals = first_ordinals
@@ -1948,13 +2003,13 @@ class Concurrent(nn.Sequential):
         The axis on which to concatenate the outputs.
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
-    merge_type : str, default None
+    merge_type : str or None, default None
         Type of branch merging.
     """
     def __init__(self,
-                 axis=1,
-                 stack=False,
-                 merge_type=None):
+                 axis: int = 1,
+                 stack: bool = False,
+                 merge_type: str | None = None):
         super(Concurrent, self).__init__()
         assert (merge_type is None) or (merge_type in ["cat", "stack", "sum"])
         self.axis = axis
@@ -1993,9 +2048,9 @@ class SequentialConcurrent(nn.Sequential):
         Whether to concatenate input tensor.
     """
     def __init__(self,
-                 axis=1,
-                 stack=False,
-                 cat_input=True):
+                 axis: int = 1,
+                 stack: bool = False,
+                 cat_input: bool = True):
         super(SequentialConcurrent, self).__init__()
         self.axis = axis
         self.stack = stack
@@ -2036,7 +2091,7 @@ class ParametricConcurrent(nn.Sequential):
     axis : int, default 1
         The axis on which to concatenate the outputs.
     """
-    def __init__(self, axis=1):
+    def __init__(self, axis: int = 1):
         super(ParametricConcurrent, self).__init__()
         self.axis = axis
 
@@ -2050,7 +2105,7 @@ class ParametricConcurrent(nn.Sequential):
 
 class Hourglass(nn.Module):
     """
-    A hourglass module.
+    An hourglass module.
 
     Parameters
     ----------
@@ -2066,11 +2121,11 @@ class Hourglass(nn.Module):
         Whether return the first skip connection output. Used in ResAttNet.
     """
     def __init__(self,
-                 down_seq,
-                 up_seq,
-                 skip_seq,
-                 merge_type="add",
-                 return_first_skip=False):
+                 down_seq: nn.Sequential,
+                 up_seq: nn.Sequential,
+                 skip_seq: nn.Sequential,
+                 merge_type: str = "add",
+                 return_first_skip: bool = False):
         super(Hourglass, self).__init__()
         self.depth = len(down_seq)
         assert (merge_type in ["cat", "add"])

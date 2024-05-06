@@ -340,7 +340,7 @@ class PoolingBranch(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool
         Whether to disable CUDNN batch normalization operator.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     down_size : int
         Spatial size of downscaled image.
@@ -395,7 +395,7 @@ class APN(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool
         Whether to disable CUDNN batch normalization operator.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     """
     def __init__(self,

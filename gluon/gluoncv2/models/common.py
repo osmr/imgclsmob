@@ -1416,7 +1416,7 @@ class InterpolationBlock(HybridBlock):
     ----------
     scale_factor : int
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int), default None
         Spatial size of the output tensor for the bilinear interpolation operation.
     bilinear : bool, default True
         Whether to use bilinear interpolation.
@@ -1853,7 +1853,7 @@ class PixelShuffle(HybridBlock):
     ----------
     scale_factor : int
         Multiplier for spatial size.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input heatmap tensor.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -1903,7 +1903,7 @@ class DucBlock(HybridBlock):
         Number of output channels.
     scale_factor : int
         Multiplier for spatial size.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input heatmap tensor.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -2472,7 +2472,7 @@ class HeatmapMaxDetBlock(HybridBlock):
     ----------
     channels : int
         Number of channels.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input heatmap tensor.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.

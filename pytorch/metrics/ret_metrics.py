@@ -68,9 +68,9 @@ class PointDetectionMatchRatio(EvalMetric):
             Confidences for detected points on the source image.
         dst_confs : torch.Tensor
             Confidences for detected points on the destination image.
-        src_img_size : tuple of 2 int
+        src_img_size : tuple(int, int)
             Size (H, W) of the source image.
-        dst_img_size : tuple of 2 int
+        dst_img_size : tuple(int, int)
             Size (H, W) of the destination image.
         """
         assert (src_confs.argsort(descending=True).cpu().detach().numpy() == np.arange(src_confs.shape[0])).all()
@@ -340,9 +340,9 @@ class PointDescriptionMatchRatio(EvalMetric):
             Descriptors for detected points on the source image.
         dst_descs : torch.Tensor
             Descriptors for detected points on the destination image.
-        src_img_size : tuple of 2 int
+        src_img_size : tuple(int, int)
             Size (H, W) of the source image.
-        dst_img_size : tuple of 2 int
+        dst_img_size : tuple(int, int)
             Size (H, W) of the destination image.
         """
         # max_dist_sat_value = 1e5

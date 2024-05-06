@@ -176,7 +176,7 @@ class PoolingBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     down_size : int
         Spatial size of downscaled image.
@@ -225,7 +225,7 @@ class FastPyramidPooling(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -278,7 +278,7 @@ class FeatureFusion(HybridBlock):
         Number of low resolution (y) input channels.
     out_channels : int
         Number of output channels.
-    x_in_size : tuple of 2 int or None
+    x_in_size : tuple(int, int) or None
         Spatial size of high resolution (x) input image.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

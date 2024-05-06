@@ -247,7 +247,7 @@ class NTSNet(HybridBlock):
 
         Parameters
         ----------
-        input_shape : tuple of 2 int
+        input_shape : tuple(int, int)
             Input image size.
 
         Returns

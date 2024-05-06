@@ -28,7 +28,7 @@ def calc_tf_padding(in_size,
 
     Parameters
     ----------
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of input image.
     kernel_size : int
         Convolution window size.
@@ -61,7 +61,7 @@ class EffiDwsConvUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution layer.
     bn_epsilon : float
         Small float added to variance in Batch norm.
@@ -71,7 +71,7 @@ class EffiDwsConvUnit(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of input image.
     """
     def __init__(self,
@@ -149,7 +149,7 @@ class EffiInvResUnit(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of input image.
     """
     def __init__(self,
@@ -240,7 +240,7 @@ class EffiInitBlock(HybridBlock):
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of input image.
     """
     def __init__(self,

@@ -67,7 +67,7 @@ class PyramidPoolingBranch(HybridBlock):
         Number of output channels.
     pool_out_size : int
         Target output size of the image.
-    upscale_out_size : tuple of 2 int or None
+    upscale_out_size : tuple(int, int) or None
         Spatial size of output image for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -101,7 +101,7 @@ class PyramidPooling(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,

@@ -22,7 +22,7 @@ class PreResBottleneck(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -69,7 +69,7 @@ class ResBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the convolution.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -110,7 +110,7 @@ class InterpolationBlock(HybridBlock):
 
     Parameters
     ----------
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -239,7 +239,7 @@ class UpAttBlock(HybridBlock):
         Number of output channels.
     length : int
         Length of residual blocks list.
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -314,7 +314,7 @@ class AttBlock(HybridBlock):
         Depth of hourglass block.
     att_scales : list of int
         Attention block specific scales.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

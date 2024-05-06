@@ -24,7 +24,7 @@ class AirNeXtBottleneck(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     cardinality: int
         Number of groups.
@@ -34,7 +34,7 @@ class AirNeXtBottleneck(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     ratio: int
         Air compression ratio.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -99,7 +99,7 @@ class AirNeXtUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     cardinality: int
         Number of groups.
@@ -109,7 +109,7 @@ class AirNeXtUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     ratio: int
         Air compression ratio.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,

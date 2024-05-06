@@ -135,7 +135,7 @@ class PoolingBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     down_size : int
         Spatial size of downscaled image.
@@ -174,7 +174,7 @@ class FastPyramidPooling(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     """
     def __init__(self,
@@ -215,7 +215,7 @@ class FeatureFusion(nn.Module):
         Number of low resolution (y) input channels.
     out_channels : int
         Number of output channels.
-    x_in_size : tuple of 2 int or None
+    x_in_size : tuple(int, int) or None
         Spatial size of high resolution (x) input image.
     """
     def __init__(self,

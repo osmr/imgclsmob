@@ -62,7 +62,7 @@ class ConvSeq3x3Branch(HybridBlock):
         Number of output channels.
     mid_channels_list : list of tuple of int
         List of numbers of output channels for middle layers.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
     strides_list : list of tuple of int or tuple of tuple/list of 2 int
         List of strides of the convolution.

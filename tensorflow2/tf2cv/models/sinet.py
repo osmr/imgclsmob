@@ -481,7 +481,7 @@ class SBBlock(nn.Layer):
         Convolution window size for a factorized depthwise separable convolution block.
     scale_factor : int
         Scale factor.
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -605,7 +605,7 @@ class ESPBlock(nn.Layer):
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.

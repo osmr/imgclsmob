@@ -24,7 +24,7 @@ class InterpolationBlock(Chain):
     ----------
     scale_factor : int
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int), default None
         Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -457,7 +457,7 @@ class SBBlock(Chain):
         Convolution window size for a factorized depthwise separable convolution block.
     scale_factor : int
         Scale factor.
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -562,7 +562,7 @@ class ESPBlock(Chain):
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -643,7 +643,7 @@ class SBStage(Chain):
         List of flags for using residual in each ESP-block.
     se_reduction : int
         Squeeze reduction value (0 means no-se).
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -765,7 +765,7 @@ class SBEncoder(Chain):
         Scale factor for each residual block.
     use_residual_list : list of list of int
         List of flags for using residual in each residual block.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -834,7 +834,7 @@ class SBDecodeBlock(Chain):
     ----------
     channels : int
         Number of output classes.
-    out_size : tuple of 2 int
+    out_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -871,7 +871,7 @@ class SBDecoder(Chain):
         Size of dimension #2.
     classes : int
         Number of segmentation classes.
-    out_size : tuple of 2 int
+    out_size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.

@@ -187,7 +187,7 @@ def calc_model_accuracy(net,
         Base data type for tensors.
     ctx : Context
         MXNet context.
-    input_image_size : tuple of 2 ints
+    input_image_size : tuple(int, int)
         Spatial size of the expected input image.
     in_channels : int
         Number of input channels.

@@ -25,7 +25,7 @@ class ScDownBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    pool_size: int or list/tuple of 2 ints, default 2
+    pool_size: int or tuple(int, int), default 2
         Size of the average pooling windows.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -75,7 +75,7 @@ class ScConv(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of output image for the upsampling operation.
     """
     def __init__(self,
@@ -142,7 +142,7 @@ class ScBottleneck(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of output image for the upsampling operation.
     """
     def __init__(self,
@@ -231,7 +231,7 @@ class ScUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
         Whether to disable CUDNN batch normalization operator.
-    in_size : tuple of 2 int, default None
+    in_size : tuple(int, int), default None
         Spatial size of output image for the upsampling operation.
     """
     def __init__(self,

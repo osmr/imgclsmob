@@ -332,7 +332,7 @@ class PoolingBranch(nn.Layer):
         Whether the layer uses a bias vector.
     bn_eps : float
         Small float added to variance in Batch norm.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -387,7 +387,7 @@ class APN(nn.Layer):
         Number of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

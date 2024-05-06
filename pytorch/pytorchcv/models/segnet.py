@@ -185,7 +185,20 @@ def segnet_cityscapes(num_classes: int = 19, **kwargs) -> nn.Module:
     return get_segnet(num_classes=num_classes, model_name="segnet_cityscapes", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

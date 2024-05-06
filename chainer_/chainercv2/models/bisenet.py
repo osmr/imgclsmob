@@ -24,7 +24,7 @@ class PyramidPoolingZeroBranch(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of output image for the upsampling operation.
     """
     def __init__(self,
@@ -177,7 +177,7 @@ class PyramidPooling(Chain):
         Number of input channels for x32.
     y_out_channels : int
         Number of output channels for y-outputs.
-    y32_out_size : tuple of 2 int
+    y32_out_size : tuple(int, int)
         Spatial size of the y32 tensor.
     """
     def __init__(self,

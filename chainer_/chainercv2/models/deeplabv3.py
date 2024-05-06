@@ -68,7 +68,7 @@ class ASPPAvgBranch(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple(int, int)
         Spatial size of output image for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -102,7 +102,7 @@ class AtrousSpatialPyramidPooling(Chain):
     ----------
     in_channels : int
         Number of input channels.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,

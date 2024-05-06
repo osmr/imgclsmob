@@ -101,7 +101,7 @@ class InterpolationBlock(Chain):
 
     Parameters
     ----------
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -217,7 +217,7 @@ class UpAttBlock(Chain):
         Number of output channels.
     length : int
         Length of residual blocks list.
-    size : tuple of 2 int
+    size : tuple(int, int)
         Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -280,7 +280,7 @@ class AttBlock(Chain):
         Depth of hourglass block.
     att_scales : list of int
         Attention block specific scales.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,

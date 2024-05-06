@@ -69,7 +69,7 @@ class PSPBlock(nn.Layer):
     ----------
     in_channels : int
         Number of input channels.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     bottleneck_factor : int
         Bottleneck factor.

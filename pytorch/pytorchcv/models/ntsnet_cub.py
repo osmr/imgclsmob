@@ -253,7 +253,7 @@ class NTSNet(nn.Module):
 
         Parameters
         ----------
-        input_shape : tuple of 2 int
+        input_shape : tuple(int, int)
             Input image size.
 
         Returns

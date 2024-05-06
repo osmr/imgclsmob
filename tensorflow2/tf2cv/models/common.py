@@ -114,7 +114,7 @@ def interpolate_im(x,
         A tensor.
     scale_factor : int, default 1
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int), default None
         Spatial size of the output tensor for the bilinear upsampling operation.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -3257,7 +3257,7 @@ class InterpolationBlock(nn.Layer):
     ----------
     scale_factor : int, default 1
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int), default None
         Spatial size of the output tensor for the interpolation operation.
     up : bool, default True
         Whether to upsample or downsample.

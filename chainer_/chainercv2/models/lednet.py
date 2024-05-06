@@ -296,7 +296,7 @@ class PoolingBranch(Chain):
         Whether the layer uses a bias vector.
     bn_eps : float
         Small float added to variance in Batch norm.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     down_size : int
         Spatial size of downscaled image.
@@ -342,7 +342,7 @@ class APN(Chain):
         Number of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
-    in_size : tuple of 2 int or None
+    in_size : tuple(int, int) or None
         Spatial size of input image.
     """
     def __init__(self,

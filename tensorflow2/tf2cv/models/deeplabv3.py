@@ -74,7 +74,7 @@ class ASPPAvgBranch(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    upscale_out_size : tuple of 2 int or None
+    upscale_out_size : tuple(int, int) or None
         Spatial size of output image for the bilinear upsampling operation.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -116,7 +116,7 @@ class AtrousSpatialPyramidPooling(nn.Layer):
     ----------
     in_channels : int
         Number of input channels.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

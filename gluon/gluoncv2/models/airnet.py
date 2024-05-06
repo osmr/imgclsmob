@@ -28,7 +28,7 @@ class AirBlock(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     ratio: int, default 2
         Air compression ratio.
-    in_size : tuple of 2 int, default (None, None)
+    in_size : tuple(int, int), default (None, None)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -91,7 +91,7 @@ class AirBottleneck(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     ratio: int
         Air compression ratio.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -156,7 +156,7 @@ class AirUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     ratio: int
         Air compression ratio.
-    in_size : tuple of 2 int
+    in_size : tuple(int, int)
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,

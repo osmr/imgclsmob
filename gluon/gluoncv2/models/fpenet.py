@@ -215,7 +215,7 @@ class MEUBlock(HybridBlock):
         Number of input channels for x_low.
     out_channels : int
         Number of output channels.
-    out_size : tuple of 2 int
+    out_size : tuple(int, int)
         Spatial size of output image.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

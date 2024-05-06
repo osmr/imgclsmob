@@ -23,13 +23,13 @@ class DwsConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layers use a bias vector.
@@ -75,11 +75,11 @@ class DartsConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     activate : bool, default True
         Whether activate the convolution block.
@@ -173,13 +173,13 @@ class DartsDwsConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Dilation value for convolution layer.
     """
     def __init__(self,
@@ -220,11 +220,11 @@ class DartsDwsBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     """
     def __init__(self,
@@ -269,7 +269,7 @@ class DartsReduceBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 2
+    strides : int or tuple(int, int), default 2
         Strides of the convolution.
     """
     def __init__(self,
@@ -364,7 +364,7 @@ def darts_maxpool3x3(channels,
     ----------
     channels : int
         Number of input/output channels. Unused parameter.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     """
     assert (channels > 0)
@@ -383,7 +383,7 @@ def darts_skip_connection(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     """
     assert (channels > 0)
@@ -406,7 +406,7 @@ def darts_dws_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     """
     return DartsDwsConv(
@@ -427,7 +427,7 @@ def darts_dws_branch3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     """
     return DartsDwsBranch(

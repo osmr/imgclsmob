@@ -25,7 +25,7 @@ class ScDownBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    pool_size: int or list/tuple of 2 ints, default 2
+    pool_size: int or tuple(int, int), default 2
         Size of the average pooling windows.
     """
     def __init__(self,

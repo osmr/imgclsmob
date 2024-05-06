@@ -253,7 +253,7 @@ def update_input_image_size(net,
 
     Returns
     -------
-    tuple of 2 ints
+    tuple(int, int)
         Spatial size of the expected input image.
     """
     real_net = net.module if hasattr(net, "module") else net
@@ -286,7 +286,7 @@ def calc_model_accuracy(net,
         Metric object instance.
     use_cuda : bool
         Whether to use CUDA.
-    input_image_size : tuple of 2 ints
+    input_image_size : tuple(int, int)
         Spatial size of the expected input image.
     in_channels : int
         Number of input channels.

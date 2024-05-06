@@ -31,8 +31,8 @@ class ResBlock(nn.Module):
         Whether to use BatchNorm layer.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  bias=False,
                  use_bn=True):

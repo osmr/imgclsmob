@@ -2104,7 +2104,7 @@ class InterpolationBlock(Chain):
     ----------
     scale_factor : int
         Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
+    out_size : tuple(int, int), default None
         Spatial size of the output tensor for the bilinear interpolation operation.
     up : bool, default True
         Whether to upsample or downsample.

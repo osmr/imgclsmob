@@ -417,9 +417,9 @@ class LwOpenPose(nn.Module):
 
     Parameters
     ----------
-    encoder_channels : list of list of int
+    encoder_channels : list(list(int))
         Number of output channels for each encoder unit.
-    encoder_paddings : list of list of int
+    encoder_paddings : list(list(int))
         Padding/dilation value for each encoder unit.
     encoder_init_block_channels : int
         Number of output channels for the encoder initial unit.
@@ -433,7 +433,7 @@ class LwOpenPose(nn.Module):
         Whether to return only heatmap.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (256, 192)
+    in_size : tuple(int, int), default (256, 192)
         Spatial size of the expected input image.
     keypoints : int, default 19
         Number of keypoints.

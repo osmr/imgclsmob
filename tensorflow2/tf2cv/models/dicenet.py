@@ -117,7 +117,7 @@ class DiceBaseBlock(nn.Layer):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -238,7 +238,7 @@ class DiceBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -323,7 +323,7 @@ class StridedDiceRightBranch(nn.Layer):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -370,7 +370,7 @@ class StridedDiceBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -416,7 +416,7 @@ class ShuffledDiceRightBranch(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -457,7 +457,7 @@ class ShuffledDiceBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -593,7 +593,7 @@ class DiceNet(tf.keras.Model):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -603,7 +603,7 @@ class DiceNet(tf.keras.Model):
         Parameter of Dropout layer in classifier. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

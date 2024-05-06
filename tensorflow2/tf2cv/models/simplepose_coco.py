@@ -30,7 +30,7 @@ class SimplePose(tf.keras.Model):
         Whether to return only heatmap.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (256, 192)
+    in_size : tuple(int, int), default (256, 192)
         Spatial size of the expected input image.
     keypoints : int, default 17
         Number of keypoints.

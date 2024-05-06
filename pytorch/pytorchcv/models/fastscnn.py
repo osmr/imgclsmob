@@ -101,7 +101,7 @@ class FeatureExtractor(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     """
     def __init__(self,
@@ -335,7 +335,7 @@ class FastSCNN(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 1024)
+    in_size : tuple(int, int), default (1024, 1024)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.

@@ -125,19 +125,19 @@ class AlexNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Convolution window sizes for each unit.
-    strides : list of list of int or tuple(int, int)
+    strides : list(list(int)) or tuple(int, int)
         Strides of the convolution for each unit.
-    paddings : list of list of int or tuple(int, int)
+    paddings : list(list(int)) or tuple(int, int)
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

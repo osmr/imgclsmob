@@ -127,7 +127,7 @@ class LFFD(HybridBlock):
         A half of bbox upper bound for each scale.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (640, 640)
+    in_size : tuple(int, int), default (640, 640)
         Spatial size of the expected input image.
     """
     def __init__(self,

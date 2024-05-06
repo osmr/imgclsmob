@@ -450,7 +450,7 @@ class IbpPose(HybridBlock):
         Whether to use BatchNorm layer.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (256, 256)
+    in_size : tuple(int, int), default (256, 256)
         Spatial size of the expected input image.
     """
     def __init__(self,

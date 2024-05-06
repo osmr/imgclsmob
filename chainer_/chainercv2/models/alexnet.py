@@ -131,19 +131,19 @@ class AlexNet(Chain):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
-    ksizes : list of list of int
+    ksizes : list(list(int))
         Convolution window sizes for each unit.
-    strides : list of list of int or tuple(int, int)
+    strides : list(list(int)) or tuple(int, int)
         Strides of the convolution for each unit.
-    pads : list of list of int or tuple(int, int)
+    pads : list(list(int)) or tuple(int, int)
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

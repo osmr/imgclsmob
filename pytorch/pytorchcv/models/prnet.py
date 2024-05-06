@@ -267,7 +267,7 @@ class PRNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of list of int
+    channels : list(list(list(int)))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -275,7 +275,7 @@ class PRNet(nn.Module):
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (256, 256)
+    in_size : tuple(int, int), default (256, 256)
         Spatial size of the expected input image.
     num_classes : int, default 3
         Number of classification classes.

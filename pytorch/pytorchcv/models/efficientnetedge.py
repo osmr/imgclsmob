@@ -90,17 +90,17 @@ class EfficientNetEdge(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Number of kernel sizes for each unit.
     strides_per_stage : list int
         Stride value for the first unit of each stage.
-    expansion_factors : list of list of int
+    expansion_factors : list(list(int))
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
@@ -110,7 +110,7 @@ class EfficientNetEdge(nn.Module):
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
@@ -221,7 +221,7 @@ def get_efficientnet_edge(version,
     ----------
     version : str
         Version of EfficientNet ('small', 'medium', 'large').
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     tf_mode : bool, default False
         Whether to use TF-like mode.
@@ -314,7 +314,7 @@ def efficientnet_edge_small_b(in_size=(224, 224), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -332,7 +332,7 @@ def efficientnet_edge_medium_b(in_size=(240, 240), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (240, 240)
+    in_size : tuple(int, int), default (240, 240)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -350,7 +350,7 @@ def efficientnet_edge_large_b(in_size=(300, 300), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple(int, int), default (300, 300)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

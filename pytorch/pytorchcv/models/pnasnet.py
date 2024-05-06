@@ -429,7 +429,7 @@ class PNASNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -437,7 +437,7 @@ class PNASNet(nn.Module):
         Number of output channels for the Stem1 unit.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (331, 331)
+    in_size : tuple(int, int), default (331, 331)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

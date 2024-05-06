@@ -287,7 +287,7 @@ class ESPNetv2(Chain):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -295,13 +295,13 @@ class ESPNetv2(Chain):
         Number of output channels for the final unit.
     final_block_groups : int
         Number of groups for the final unit.
-    dilates : list of list of list of int
+    dilates : list(list(list(int)))
         Dilation values for branches in each unit.
     dropout_rate : float, default 0.2
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

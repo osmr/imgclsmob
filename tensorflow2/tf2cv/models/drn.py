@@ -368,21 +368,21 @@ class DRN(tf.keras.Model):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    dilations : list of list of int
+    dilations : list(list(int))
         Dilation values for 3x3 convolution layers for each unit.
-    bottlenecks : list of list of int
+    bottlenecks : list(list(int))
         Whether to use a bottleneck or simple block in each unit.
-    simplifieds : list of list of int
+    simplifieds : list(list(int))
         Whether to use a simple or simplified block in each unit.
-    residuals : list of list of int
+    residuals : list(list(int))
         Whether to use residual block in each unit.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

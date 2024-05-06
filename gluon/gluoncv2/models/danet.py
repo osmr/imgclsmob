@@ -252,7 +252,7 @@ class DANet(HybridBlock):
         Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (480, 480)
+    in_size : tuple(int, int), default (480, 480)
         Spatial size of the expected input image.
     classes : int, default 19
         Number of segmentation classes.

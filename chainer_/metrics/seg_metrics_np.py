@@ -34,7 +34,7 @@ def seg_pixel_accuracy_np(label_imask,
 
     Returns
     -------
-    float or tuple of two ints
+    float or tuple(int, int)
         PA metric value.
     """
     assert (label_imask.shape == pred_imask.shape)

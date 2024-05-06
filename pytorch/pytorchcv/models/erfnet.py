@@ -83,7 +83,7 @@ class ERFNet(nn.Module):
     ----------
     channels : list of int
         Number of output channels for the first unit of each stage.
-    dilations : list of list of int
+    dilations : list(list(int))
         Dilation values for each unit.
     dropout_rates : list of float
         Parameter of dropout layer for each stage.
@@ -99,7 +99,7 @@ class ERFNet(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.

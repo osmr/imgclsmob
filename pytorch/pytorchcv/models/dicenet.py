@@ -78,7 +78,7 @@ class DiceBaseBlock(nn.Module):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -170,7 +170,7 @@ class DiceBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -237,7 +237,7 @@ class StridedDiceRightBranch(nn.Module):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -274,7 +274,7 @@ class StridedDiceBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -309,7 +309,7 @@ class ShuffledDiceRightBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -342,7 +342,7 @@ class ShuffledDiceBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     """
     def __init__(self,
@@ -445,7 +445,7 @@ class DiceNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -455,7 +455,7 @@ class DiceNet(nn.Module):
         Parameter of Dropout layer in classifier. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

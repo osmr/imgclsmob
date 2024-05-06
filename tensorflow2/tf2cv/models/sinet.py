@@ -829,13 +829,13 @@ class SBEncoder(nn.Layer):
         Number of output channels for convolutions in the initial block.
     down_channels_list : list of int
         Number of downsample channels for each residual block.
-    channels_list : list of list of int
+    channels_list : list(list(int))
         Number of output channels for all residual block.
-    kernel_sizes_list : list of list of int
+    kernel_sizes_list : list(list(int))
         Convolution window size for each residual block.
-    scale_factors_list : list of list of int
+    scale_factors_list : list(list(int))
         Scale factor for each residual block.
-    use_residual_list : list of list of int
+    use_residual_list : list(list(int))
         List of flags for using residual in each residual block.
     in_size : tuple of 2 int
         Spatial size of the output tensor for the bilinear upsampling operation.
@@ -1031,13 +1031,13 @@ class SINet(tf.keras.Model):
     ----------
     down_channels_list : list of int
         Number of downsample channels for each residual block.
-    channels_list : list of list of int
+    channels_list : list(list(int))
         Number of output channels for all residual block.
-    kernel_sizes_list : list of list of int
+    kernel_sizes_list : list(list(int))
         Convolution window size for each residual block.
-    scale_factors_list : list of list of int
+    scale_factors_list : list(list(int))
         Scale factor for each residual block.
-    use_residual_list : list of list of int
+    use_residual_list : list(list(int))
         List of flags for using residual in each residual block.
     dim2 : int
         Size of dimension #2.
@@ -1049,7 +1049,7 @@ class SINet(tf.keras.Model):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     classes : int, default 21
         Number of segmentation classes.

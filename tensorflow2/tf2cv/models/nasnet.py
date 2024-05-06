@@ -1355,7 +1355,7 @@ class NASNet(tf.keras.Model):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -1369,7 +1369,7 @@ class NASNet(tf.keras.Model):
         Whether to skip the reduction layers when calculating the previous layer to connect to.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
@@ -1507,7 +1507,7 @@ def get_nasnet(repeat,
         Whether to use extra padding.
     skip_reduction_layer_input : bool
         Whether to skip the reduction layers when calculating the previous layer to connect to.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     model_name : str or None, default None
         Model name for loading pretrained model.

@@ -94,7 +94,7 @@ class CIFAR10MSDNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of list of int
+    channels : list(list(list(int)))
         Number of output channels for each unit.
     init_layer_channels : list of int
         Number of output channels for the initial layer.
@@ -102,11 +102,11 @@ class CIFAR10MSDNet(nn.Module):
         Number of subnets.
     use_bottleneck : bool
         Whether to use a bottleneck.
-    bottleneck_factors : list of list of int
+    bottleneck_factors : list(list(int))
         Bottleneck factor for each layers and for each input scale.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (32, 32)
+    in_size : tuple(int, int), default (32, 32)
         Spatial size of the expected input image.
     num_classes : int, default 10
         Number of classification classes.

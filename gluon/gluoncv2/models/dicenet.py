@@ -83,7 +83,7 @@ class DiceBaseBlock(HybridBlock):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -194,7 +194,7 @@ class DiceBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -290,7 +290,7 @@ class StridedDiceRightBranch(HybridBlock):
     ----------
     channels : int
         Number of input/output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -343,7 +343,7 @@ class StridedDiceBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -395,7 +395,7 @@ class ShuffledDiceRightBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -444,7 +444,7 @@ class ShuffledDiceBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     fixed_size : bool
         Whether to expect fixed spatial size of input image.
@@ -573,7 +573,7 @@ class DiceNet(HybridBlock):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -590,7 +590,7 @@ class DiceNet(HybridBlock):
         Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

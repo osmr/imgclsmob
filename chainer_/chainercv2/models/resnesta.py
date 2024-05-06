@@ -218,7 +218,7 @@ class ResNeStA(Chain):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -228,7 +228,7 @@ class ResNeStA(Chain):
         Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
@@ -487,7 +487,7 @@ def resnesta200(in_size=(256, 256), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (256, 256)
+    in_size : tuple(int, int), default (256, 256)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -504,7 +504,7 @@ def resnesta269(in_size=(320, 320), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (320, 320)
+    in_size : tuple(int, int), default (320, 320)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

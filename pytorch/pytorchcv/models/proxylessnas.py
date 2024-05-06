@@ -138,25 +138,25 @@ class ProxylessNAS(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final unit.
-    residuals : list of list of int
+    residuals : list(list(int))
         Whether to use residual branch in units.
-    shortcuts : list of list of int
+    shortcuts : list(list(int))
         Whether to use identity branch in units.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Convolution window size for each units.
-    expansions : list of list of int
+    expansions : list(list(int))
         Expansion ratio for each units.
     bn_eps : float, default 1e-3
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

@@ -129,7 +129,7 @@ class SPDetector(HybridBlock):
         Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     reduction : int, default 8
         Feature reduction factor.
@@ -287,7 +287,7 @@ class SPDescriptor(HybridBlock):
         Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     reduction : int, default 8
         Feature reduction factor.
@@ -376,7 +376,7 @@ class SuperPointNet(HybridBlock):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     final_block_channels : int
         Number of output channels for the final units.
@@ -386,7 +386,7 @@ class SuperPointNet(HybridBlock):
         Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     in_channels : int, default 1
         Number of input channels.

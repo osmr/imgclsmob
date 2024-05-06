@@ -323,7 +323,7 @@ class DLA(nn.Module):
         Whether use residual connection in the root blocks.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

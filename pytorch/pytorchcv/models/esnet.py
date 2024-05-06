@@ -118,13 +118,13 @@ class ESNet(nn.Module):
 
     Parameters
     ----------
-    layers : list of list of int
+    layers : list(list(int))
         Number of layers in each stage of encoder and decoder.
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each in encoder and decoder.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Kernel size for each in encoder and decoder.
-    dropout_rates : list of list of int
+    dropout_rates : list(list(int))
         Dropout rates for each unit in encoder and decoder.
     correct_size_mistmatch : bool
         Whether to correct downscaled sizes of images in encoder.
@@ -136,7 +136,7 @@ class ESNet(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.

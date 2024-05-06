@@ -151,7 +151,7 @@ class HarDUnit(nn.Layer):
         Number of input channels for each block.
     out_channels_list : list of int
         Number of output channels for each block.
-    links_list : list of list of int
+    links_list : list(list(int))
         List of indices for each layer.
     use_deptwise : bool
         Whether to use depthwise downsampling.
@@ -328,11 +328,11 @@ class HarDNet(tf.keras.Model):
     ----------
     init_block_channels : int
         Number of output channels for the initial unit.
-    unit_in_channels : list of list of list of int
+    unit_in_channels : list(list(list(int)))
         Number of input channels for each layer in each stage.
     unit_out_channels : list list of of list of int
         Number of output channels for each layer in each stage.
-    unit_links : list of list of list of int
+    unit_links : list(list(list(int)))
         List of indices for each layer in each stage.
     use_deptwise : bool
         Whether to use depthwise downsampling.
@@ -342,7 +342,7 @@ class HarDNet(tf.keras.Model):
         Parameter of Dropout layer before classifier. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

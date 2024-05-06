@@ -788,7 +788,7 @@ class PolyNet(nn.Module):
         Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (331, 331)
+    in_size : tuple(int, int), default (331, 331)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

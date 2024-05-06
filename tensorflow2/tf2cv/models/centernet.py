@@ -226,7 +226,7 @@ class CenterNet(tf.keras.Model):
         Keep only `topk` detections.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (512, 512)
+    in_size : tuple(int, int), default (512, 512)
         Spatial size of the expected input image.
     classes : int, default 80
         Number of classification classes.

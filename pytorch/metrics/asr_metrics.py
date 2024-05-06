@@ -99,7 +99,7 @@ class CtcDecoder(object):
 
         Parameters
         ----------
-        predictions : np.array of int or list of list of int
+        predictions : np.array of int or list(list(int))
             Tensor with predicted labels.
 
         Returns

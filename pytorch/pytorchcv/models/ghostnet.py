@@ -210,7 +210,7 @@ class GhostNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -218,17 +218,17 @@ class GhostNet(nn.Module):
         Number of output channels for the final block of the feature extractor.
     classifier_mid_channels : int
         Number of middle channels for classifier.
-    kernels3 : list of list of int/bool
+    kernels3 : list(list(int))/bool
         Using 3x3 (instead of 5x5) kernel for each unit.
-    exp_factors : list of list of int
+    exp_factors : list(list(int))
         Expansion factor for each unit.
-    use_se : list of list of int/bool
+    use_se : list(list(int))/bool
         Using SE-block flag for each unit.
     first_stride : bool
         Whether to use stride for the first stage.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.

@@ -379,7 +379,7 @@ class DABNet(nn.Module):
         Number of output channels for each unit (for y-branch).
     init_block_channels : int
         Number of output channels for the initial unit.
-    dilations : list of list of int
+    dilations : list(list(int))
         Dilations for blocks.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
@@ -389,7 +389,7 @@ class DABNet(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.

@@ -138,7 +138,7 @@ class LFFD(tf.keras.Model):
         Whether to use PreResnet backbone instead of ResNet.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (640, 640)
+    in_size : tuple(int, int), default (640, 640)
         Spatial size of the expected input image.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

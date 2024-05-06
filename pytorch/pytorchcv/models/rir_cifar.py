@@ -143,7 +143,7 @@ class CIFARRiR(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -151,7 +151,7 @@ class CIFARRiR(nn.Module):
         Number of output channels for the final unit.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (32, 32)
+    in_size : tuple(int, int), default (32, 32)
         Spatial size of the expected input image.
     num_classes : int, default 10
         Number of classification classes.

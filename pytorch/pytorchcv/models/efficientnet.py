@@ -242,17 +242,17 @@ class EfficientNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Number of kernel sizes for each unit.
     strides_per_stage : list int
         Stride value for the first unit of each stage.
-    expansion_factors : list of list of int
+    expansion_factors : list(list(int))
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
@@ -262,7 +262,7 @@ class EfficientNet(nn.Module):
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
@@ -368,7 +368,7 @@ def get_efficientnet(version,
     ----------
     version : str
         Version of EfficientNet ('b0'...'b8').
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected input image.
     tf_mode : bool, default False
         Whether to use TF-like mode.
@@ -490,7 +490,7 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -507,7 +507,7 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (240, 240)
+    in_size : tuple(int, int), default (240, 240)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -524,7 +524,7 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (260, 260)
+    in_size : tuple(int, int), default (260, 260)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -541,7 +541,7 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple(int, int), default (300, 300)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -558,7 +558,7 @@ def efficientnet_b4(in_size=(380, 380), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (380, 380)
+    in_size : tuple(int, int), default (380, 380)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -575,7 +575,7 @@ def efficientnet_b5(in_size=(456, 456), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (456, 456)
+    in_size : tuple(int, int), default (456, 456)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -592,7 +592,7 @@ def efficientnet_b6(in_size=(528, 528), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (528, 528)
+    in_size : tuple(int, int), default (528, 528)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -609,7 +609,7 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (600, 600)
+    in_size : tuple(int, int), default (600, 600)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -626,7 +626,7 @@ def efficientnet_b8(in_size=(672, 672), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (672, 672)
+    in_size : tuple(int, int), default (672, 672)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -643,7 +643,7 @@ def efficientnet_b0b(in_size=(224, 224), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -661,7 +661,7 @@ def efficientnet_b1b(in_size=(240, 240), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (240, 240)
+    in_size : tuple(int, int), default (240, 240)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -679,7 +679,7 @@ def efficientnet_b2b(in_size=(260, 260), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (260, 260)
+    in_size : tuple(int, int), default (260, 260)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -697,7 +697,7 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple(int, int), default (300, 300)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -715,7 +715,7 @@ def efficientnet_b4b(in_size=(380, 380), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (380, 380)
+    in_size : tuple(int, int), default (380, 380)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -733,7 +733,7 @@ def efficientnet_b5b(in_size=(456, 456), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (456, 456)
+    in_size : tuple(int, int), default (456, 456)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -751,7 +751,7 @@ def efficientnet_b6b(in_size=(528, 528), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (528, 528)
+    in_size : tuple(int, int), default (528, 528)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -769,7 +769,7 @@ def efficientnet_b7b(in_size=(600, 600), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (600, 600)
+    in_size : tuple(int, int), default (600, 600)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -787,7 +787,7 @@ def efficientnet_b0c(in_size=(224, 224), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -805,7 +805,7 @@ def efficientnet_b1c(in_size=(240, 240), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (240, 240)
+    in_size : tuple(int, int), default (240, 240)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -823,7 +823,7 @@ def efficientnet_b2c(in_size=(260, 260), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (260, 260)
+    in_size : tuple(int, int), default (260, 260)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -841,7 +841,7 @@ def efficientnet_b3c(in_size=(300, 300), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple(int, int), default (300, 300)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -859,7 +859,7 @@ def efficientnet_b4c(in_size=(380, 380), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (380, 380)
+    in_size : tuple(int, int), default (380, 380)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -877,7 +877,7 @@ def efficientnet_b5c(in_size=(456, 456), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (456, 456)
+    in_size : tuple(int, int), default (456, 456)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -895,7 +895,7 @@ def efficientnet_b6c(in_size=(528, 528), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (528, 528)
+    in_size : tuple(int, int), default (528, 528)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -913,7 +913,7 @@ def efficientnet_b7c(in_size=(600, 600), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (600, 600)
+    in_size : tuple(int, int), default (600, 600)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -931,7 +931,7 @@ def efficientnet_b8c(in_size=(672, 672), **kwargs):
 
     Parameters
     ----------
-    in_size : tuple of two ints, default (672, 672)
+    in_size : tuple(int, int), default (672, 672)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

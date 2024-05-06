@@ -392,25 +392,25 @@ class MixNet(tf.keras.Model):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
-    exp_kernel_counts : list of list of int
+    exp_kernel_counts : list(list(int))
         Expansion convolution kernel count for each unit.
-    conv1_kernel_counts : list of list of int
+    conv1_kernel_counts : list(list(int))
         Conv1 kernel count for each unit.
-    conv2_kernel_counts : list of list of int
+    conv2_kernel_counts : list(list(int))
         Conv2 kernel count for each unit.
-    exp_factors : list of list of int
+    exp_factors : list(list(int))
         Expansion factor for each unit.
-    se_factors : list of list of int
+    se_factors : list(list(int))
         SE reduction factor for each unit.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

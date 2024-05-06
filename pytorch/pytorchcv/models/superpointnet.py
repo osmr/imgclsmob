@@ -199,7 +199,7 @@ class SuperPointNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     final_block_channels : int
         Number of output channels for the final units.

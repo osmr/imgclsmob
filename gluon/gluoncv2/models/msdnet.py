@@ -320,13 +320,13 @@ class MSDFeatureBlock(HybridBlock):
 
     Parameters
     ----------
-    in_channels : list of list of int
+    in_channels : list(list(int))
         Number of input channels for each layer and for each input scale.
-    out_channels : list of list of int
+    out_channels : list(list(int))
         Number of output channels for each layer and for each output scale.
     use_bottleneck : bool
         Whether to use a bottleneck.
-    bottleneck_factors : list of list of int
+    bottleneck_factors : list(list(int))
         Bottleneck factor for each layer and for each input scale.
     """
 
@@ -407,7 +407,7 @@ class MSDNet(HybridBlock):
 
     Parameters
     ----------
-    channels : list of list of list of int
+    channels : list(list(list(int)))
         Number of output channels for each unit.
     init_layer_channels : list of int
         Number of output channels for the initial layer.
@@ -415,11 +415,11 @@ class MSDNet(HybridBlock):
         Number of subnets.
     use_bottleneck : bool
         Whether to use a bottleneck.
-    bottleneck_factors : list of list of int
+    bottleneck_factors : list(list(int))
         Bottleneck factor for each layers and for each input scale.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

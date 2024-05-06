@@ -409,17 +409,17 @@ class ResAttNet(Chain):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    attentions : list of list of int
+    attentions : list(list(int))
         Whether to use a attention unit or residual one.
     att_scales : list of int
         Attention block specific scales.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

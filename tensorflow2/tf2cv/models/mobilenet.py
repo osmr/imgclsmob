@@ -19,7 +19,7 @@ class MobileNet(tf.keras.Model):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
@@ -29,7 +29,7 @@ class MobileNet(tf.keras.Model):
         Activation function after the depthwise convolution block.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.

@@ -322,7 +322,7 @@ class CIFARFractalNet(nn.Module):
         Global drop part fraction.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (32, 32)
+    in_size : tuple(int, int), default (32, 32)
         Spatial size of the expected input image.
     num_classes : int, default 10
         Number of classification classes.

@@ -21,7 +21,7 @@ class GRMIPoseLite(tf.keras.Model):
         Instance of the TFLite model interpreter.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (257, 257)
+    in_size : tuple(int, int), default (257, 257)
         Spatial size of the expected input image.
     keypoints : int, default 17
         Number of keypoints.

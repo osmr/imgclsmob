@@ -115,7 +115,7 @@ class CFFBlock(HybridBlock):
         Number of input channels (low high).
     out_channels : int
         Number of output channels.
-    out_size : tuple of two ints
+    out_size : tuple(int, int)
         Spatial size of the expected output image.
     classes : int
         Number of classification classes.
@@ -163,7 +163,7 @@ class ICHeadBlock(HybridBlock):
 
     Parameters
     ----------
-    in_size : tuple of two ints
+    in_size : tuple(int, int)
         Spatial size of the expected output image.
     classes : int
         Number of classification classes.
@@ -236,7 +236,7 @@ class ICNet(HybridBlock):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (480, 480)
+    in_size : tuple(int, int), default (480, 480)
         Spatial size of the expected input image.
     classes : int, default 21
         Number of segmentation classes.

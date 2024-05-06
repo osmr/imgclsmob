@@ -19,7 +19,7 @@ class PFPCNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     pca_size : int
         Number of PCA coefficients (number of blendshapes).
@@ -27,7 +27,7 @@ class PFPCNet(nn.Module):
         Whether to use BatchNorm layers.
     in_channels : int, default 1
         Number of input channels.
-    in_size : tuple of two ints, default (320, 240)
+    in_size : tuple(int, int), default (320, 240)
         Spatial size of the expected input image.
     vertices : int, default 5023
         Number of 3D geometry vertices.

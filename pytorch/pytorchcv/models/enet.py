@@ -364,13 +364,13 @@ class ENet(nn.Module):
         Number of output channels for the first unit of each stage.
     init_block_channels : int
         Number of output channels for the initial unit.
-    kernel_sizes : list of list of int
+    kernel_sizes : list(list(int))
         Kernel sizes for each unit.
-    paddings : list of list of int
+    paddings : list(list(int))
         Padding values for each unit.
-    dilations : list of list of int
+    dilations : list(list(int))
         Dilation values for each unit.
-    use_asym_convs : list of list of int
+    use_asym_convs : list(list(int))
         Whether to use asymmetric convolution blocks for each unit.
     dropout_rates : list of float
         Parameter of dropout layer for each stage.
@@ -386,7 +386,7 @@ class ENet(nn.Module):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     num_classes : int, default 19
         Number of segmentation classes.

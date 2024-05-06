@@ -444,7 +444,7 @@ class LEDNet(Chain):
         Number of output channels for each unit.
     dilates : list of int
         Dilations for units.
-    dropout_rates : list of list of int
+    dropout_rates : list(list(int))
         Dropout rates for each unit in encoder.
     correct_size_mistmatch : bool
         Whether to correct downscaled sizes of images in encoder.
@@ -456,7 +456,7 @@ class LEDNet(Chain):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (1024, 2048)
+    in_size : tuple(int, int), default (1024, 2048)
         Spatial size of the expected input image.
     classes : int, default 19
         Number of segmentation classes.

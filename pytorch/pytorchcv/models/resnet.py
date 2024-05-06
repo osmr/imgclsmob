@@ -33,9 +33,9 @@ class ResBlock(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
-                 bias=False,
-                 use_bn=True):
+                 stride: int | tuple[int, int],
+                 bias: bool = False,
+                 use_bn: bool = True):
         super(ResBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -78,8 +78,8 @@ class ResBottleneck(nn.Module):
         Bottleneck factor.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  padding=1,
                  dilation=1,
@@ -136,8 +136,8 @@ class ResUnit(nn.Module):
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  padding=1,
                  dilation=1,
@@ -196,8 +196,8 @@ class ResInitBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(ResInitBlock, self).__init__()
         self.conv = conv7x7_block(
             in_channels=in_channels,
@@ -220,7 +220,7 @@ class ResNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -230,19 +230,19 @@ class ResNet(nn.Module):
         Whether to use stride in the first or the second convolution layer in units.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple(int, int), default (224, 224)
         Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 conv1_stride,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
+                 conv1_stride: bool,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(ResNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes

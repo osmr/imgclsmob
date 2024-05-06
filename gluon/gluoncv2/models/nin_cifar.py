@@ -58,13 +58,13 @@ class CIFARNIN(HybridBlock):
 
     Parameters
     ----------
-    channels : list of list of int
+    channels : list(list(int))
         Number of output channels for each unit.
     first_kernel_sizes : list of int
         Convolution window sizes for the first units in each stage.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (32, 32)
+    in_size : tuple(int, int), default (32, 32)
         Spatial size of the expected input image.
     classes : int, default 10
         Number of classification classes.

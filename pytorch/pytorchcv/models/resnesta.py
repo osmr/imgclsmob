@@ -497,7 +497,20 @@ def resnesta269(in_size=(320, 320), **kwargs):
     return get_resnesta(blocks=269, in_size=in_size, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

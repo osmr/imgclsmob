@@ -406,7 +406,20 @@ def isqrtcovresnet101b(**kwargs):
     return get_isqrtcovresnet(blocks=101, conv1_stride=False, model_name="isqrtcovresnet101b", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

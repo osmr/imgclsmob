@@ -44,7 +44,20 @@ def jasperdr10x5_en_nr(num_classes=29, **kwargs):
                       **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

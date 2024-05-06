@@ -492,7 +492,20 @@ def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, 
                          model_name="deeplabv3_resnetd101b_cityscapes", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

@@ -33,8 +33,8 @@ class PreResBlock(nn.Module):
         Whether to use BatchNorm layer.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  bias=False,
                  use_bn=True):
@@ -74,8 +74,8 @@ class PreResBottleneck(nn.Module):
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  conv1_stride):
         super(PreResBottleneck, self).__init__()
@@ -123,8 +123,8 @@ class PreResUnit(nn.Module):
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
+                 in_channels: int,
+                 out_channels: int,
                  stride,
                  bias=False,
                  use_bn=True,
@@ -174,8 +174,8 @@ class PreResInitBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(PreResInitBlock, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=in_channels,
@@ -209,7 +209,7 @@ class PreResActivation(nn.Module):
         Number of input channels.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels: int):
         super(PreResActivation, self).__init__()
         self.bn = nn.BatchNorm2d(num_features=in_channels)
         self.activ = nn.ReLU(inplace=True)
@@ -721,7 +721,20 @@ def preresnet269b(**kwargs):
     return get_preresnet(blocks=269, conv1_stride=False, model_name="preresnet269b", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

@@ -394,7 +394,20 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **k
     return get_bisenet(backbone=backbone, num_classes=num_classes, model_name="bisenet_resnet18_celebamaskhq", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

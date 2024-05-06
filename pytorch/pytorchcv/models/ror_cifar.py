@@ -262,7 +262,7 @@ def get_ror_cifar(num_classes,
                   blocks,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join("~", ".torch", "models"),
+                  root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create RoR-3 model for CIFAR with specific parameters.

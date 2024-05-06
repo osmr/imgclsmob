@@ -187,9 +187,9 @@ class VoVNet(nn.Module):
 
 def get_vovnet(blocks,
                slim=False,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create ResNet model with specific parameters.

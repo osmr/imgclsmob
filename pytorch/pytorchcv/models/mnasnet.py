@@ -261,7 +261,7 @@ def get_mnasnet(version,
                 width_scale,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
+                root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create MnasNet model with specific parameters.

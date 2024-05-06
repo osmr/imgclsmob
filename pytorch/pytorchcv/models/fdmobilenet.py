@@ -13,7 +13,7 @@ from .mobilenet import MobileNet
 def get_fdmobilenet(width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join("~", ".torch", "models"),
+                    root: str = os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create FD-MobileNet model with specific parameters.

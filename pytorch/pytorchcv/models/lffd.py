@@ -209,7 +209,7 @@ def get_lffd(blocks,
              use_preresnet,
              model_name=None,
              pretrained=False,
-             root=os.path.join("~", ".torch", "models"),
+             root: str = os.path.join("~", ".torch", "models"),
              **kwargs):
     """
     Create LFFD model with specific parameters.

@@ -193,7 +193,7 @@ class SelecSLS(nn.Module):
 def get_selecsls(version,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join("~", ".torch", "models"),
+                 root: str = os.path.join("~", ".torch", "models"),
                  **kwargs):
     """
     Create SelecSLS model with specific parameters.

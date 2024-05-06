@@ -420,7 +420,7 @@ class BNInception(nn.Module):
 
 def get_bninception(model_name=None,
                     pretrained=False,
-                    root=os.path.join("~", ".torch", "models"),
+                    root: str = os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create BN-Inception model with specific parameters.

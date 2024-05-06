@@ -471,7 +471,7 @@ class ENet(nn.Module):
 
 def get_enet(model_name=None,
              pretrained=False,
-             root=os.path.join("~", ".torch", "models"),
+             root: str = os.path.join("~", ".torch", "models"),
              **kwargs):
     """
     Create ENet model with specific parameters.

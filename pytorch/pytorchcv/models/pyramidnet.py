@@ -250,7 +250,7 @@ def get_pyramidnet(blocks,
                    alpha,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join("~", ".torch", "models"),
+                   root: str = os.path.join("~", ".torch", "models"),
                    **kwargs):
     """
     Create PyramidNet model with specific parameters.

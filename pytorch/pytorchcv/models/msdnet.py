@@ -461,9 +461,9 @@ class MSDNet(nn.Module):
 
 
 def get_msdnet(blocks,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create MSDNet model with specific parameters.

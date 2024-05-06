@@ -330,7 +330,7 @@ class FPENet(nn.Module):
 
 def get_fpenet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create FPENet model with specific parameters.

@@ -124,9 +124,9 @@ class FCN8sd(nn.Module):
 def get_fcn8sd(backbone,
                num_classes,
                aux=False,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create FCN-8s(d) model with specific parameters.

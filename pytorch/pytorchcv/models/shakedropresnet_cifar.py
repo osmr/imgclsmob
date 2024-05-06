@@ -171,7 +171,7 @@ def get_shakedropresnet_cifar(classes,
                               bottleneck,
                               model_name=None,
                               pretrained=False,
-                              root=os.path.join("~", ".torch", "models"),
+                              root: str = os.path.join("~", ".torch", "models"),
                               **kwargs):
     """
     Create ShakeDrop-ResNet model for CIFAR with specific parameters.

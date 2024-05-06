@@ -98,7 +98,7 @@ def get_mobilenet(width_scale,
                   dws_simplified=False,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join("~", ".torch", "models"),
+                  root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create MobileNet model with specific parameters.

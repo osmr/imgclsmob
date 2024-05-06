@@ -97,7 +97,7 @@ def get_pyramidnet_cifar(num_classes,
                          bottleneck,
                          model_name=None,
                          pretrained=False,
-                         root=os.path.join("~", ".torch", "models"),
+                         root: str = os.path.join("~", ".torch", "models"),
                          **kwargs):
     """
     Create PyramidNet for CIFAR model with specific parameters.

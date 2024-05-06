@@ -131,7 +131,7 @@ def get_voca(base_persons,
              vertices,
              model_name=None,
              pretrained=False,
-             root=os.path.join("~", ".torch", "models"),
+             root: str = os.path.join("~", ".torch", "models"),
              **kwargs):
     """
     Create VOCA model with specific parameters.

@@ -973,9 +973,9 @@ def get_jasper(version,
                use_dr=False,
                bn_eps=1e-3,
                vocabulary=None,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create Jasper/DR/QuartzNet model with specific parameters.

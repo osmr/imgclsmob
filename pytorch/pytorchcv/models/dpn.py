@@ -442,7 +442,7 @@ def get_dpn(num_layers,
             for_training=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join("~", ".torch", "models"),
+            root: str = os.path.join("~", ".torch", "models"),
             **kwargs):
     """
     Create DPN model with specific parameters.

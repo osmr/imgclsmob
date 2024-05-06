@@ -247,7 +247,7 @@ class EDANet(nn.Module):
 
 def get_edanet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create EDANet model with specific parameters.

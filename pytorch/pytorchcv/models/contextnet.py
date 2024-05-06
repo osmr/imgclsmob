@@ -348,7 +348,7 @@ class ContextNet(nn.Module):
 
 def get_ctxnet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create ContextNet model with specific parameters.

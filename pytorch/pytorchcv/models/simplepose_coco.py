@@ -93,7 +93,7 @@ def get_simplepose(backbone,
                    keypoints,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join("~", ".torch", "models"),
+                   root: str = os.path.join("~", ".torch", "models"),
                    **kwargs):
     """
     Create SimplePose model with specific parameters.

@@ -310,7 +310,7 @@ def get_wrn(blocks,
             width_factor,
             model_name=None,
             pretrained=False,
-            root=os.path.join("~", ".torch", "models"),
+            root: str = os.path.join("~", ".torch", "models"),
             **kwargs):
     """
     Create WRN model with specific parameters.

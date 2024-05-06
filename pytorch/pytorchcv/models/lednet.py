@@ -353,7 +353,7 @@ class LEDNet(nn.Module):
 
 def get_lednet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create LEDNet model with specific parameters.

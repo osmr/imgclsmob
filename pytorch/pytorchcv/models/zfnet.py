@@ -12,7 +12,7 @@ from .alexnet import AlexNet
 def get_zfnet(version="a",
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root: str = os.path.join("~", ".torch", "models"),
               **kwargs):
     """
     Create ZFNet model with specific parameters.

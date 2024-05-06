@@ -392,7 +392,7 @@ def get_drn(blocks,
             simplified=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join("~", ".torch", "models"),
+            root: str = os.path.join("~", ".torch", "models"),
             **kwargs):
     """
     Create DRN-C or DRN-D model with specific parameters.

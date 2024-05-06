@@ -100,7 +100,7 @@ def get_diapreresnet_cifar(num_classes,
                            bottleneck,
                            model_name=None,
                            pretrained=False,
-                           root=os.path.join("~", ".torch", "models"),
+                           root: str = os.path.join("~", ".torch", "models"),
                            **kwargs):
     """
     Create DIA-PreResNet model for CIFAR with specific parameters.

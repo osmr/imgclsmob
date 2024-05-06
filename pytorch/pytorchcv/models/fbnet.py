@@ -216,7 +216,7 @@ def get_fbnet(version,
               bn_eps=1e-5,
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root: str = os.path.join("~", ".torch", "models"),
               **kwargs):
     """
     Create FBNet model with specific parameters.

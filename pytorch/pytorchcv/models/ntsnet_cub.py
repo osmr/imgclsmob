@@ -317,9 +317,9 @@ class NTSNet(nn.Module):
 
 def get_ntsnet(backbone,
                aux=False,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create NTS-Net model with specific parameters.

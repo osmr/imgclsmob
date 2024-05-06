@@ -150,7 +150,7 @@ class IGCV3(nn.Module):
 def get_igcv3(width_scale,
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root: str = os.path.join("~", ".torch", "models"),
               **kwargs):
     """
     Create IGCV3-D model with specific parameters.

@@ -202,9 +202,9 @@ def get_regnet(channels_init,
                depth,
                groups,
                use_se=False,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create RegNet model with specific parameters.

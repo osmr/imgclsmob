@@ -623,7 +623,7 @@ class DARTS(nn.Module):
 
 def get_darts(model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root: str = os.path.join("~", ".torch", "models"),
               **kwargs):
     """
     Create DARTS model with specific parameters.

@@ -443,9 +443,9 @@ class MixNet(nn.Module):
 
 def get_mixnet(version,
                width_scale,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create MixNet model with specific parameters.

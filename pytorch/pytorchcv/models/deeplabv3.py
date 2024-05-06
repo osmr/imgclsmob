@@ -213,7 +213,7 @@ def get_deeplabv3(backbone,
                   aux=False,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join("~", ".torch", "models"),
+                  root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create DeepLabv3 model with specific parameters.

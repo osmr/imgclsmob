@@ -265,7 +265,7 @@ class IBNbResNet(nn.Module):
 def get_ibnbresnet(blocks,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join("~", ".torch", "models"),
+                   root: str = os.path.join("~", ".torch", "models"),
                    **kwargs):
     """
     Create IBN(b)-ResNet model with specific parameters.

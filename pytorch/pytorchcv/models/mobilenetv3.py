@@ -284,7 +284,7 @@ def get_mobilenetv3(version,
                     width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join("~", ".torch", "models"),
+                    root: str = os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create MobileNetV3 model with specific parameters.

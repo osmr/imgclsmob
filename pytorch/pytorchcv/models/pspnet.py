@@ -200,9 +200,9 @@ class PSPNet(nn.Module):
 def get_pspnet(backbone,
                num_classes,
                aux=False,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create PSPNet model with specific parameters.

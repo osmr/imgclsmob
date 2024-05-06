@@ -167,7 +167,7 @@ class CIFAR10MSDNet(nn.Module):
 def get_msdnet_cifar10(blocks,
                        model_name=None,
                        pretrained=False,
-                       root=os.path.join("~", ".torch", "models"),
+                       root: str = os.path.join("~", ".torch", "models"),
                        **kwargs):
     """
     Create MSDNet model for CIFAR-10 with specific parameters.

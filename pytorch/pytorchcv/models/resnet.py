@@ -80,11 +80,11 @@ class ResBottleneck(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
-                 padding=1,
-                 dilation=1,
-                 conv1_stride=False,
-                 bottleneck_factor=4):
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int] = 1,
+                 dilation: int | tuple[int, int] = 1,
+                 conv1_stride: bool = False,
+                 bottleneck_factor: int = 4):
         super(ResBottleneck, self).__init__()
         mid_channels = out_channels // bottleneck_factor
 
@@ -138,13 +138,13 @@ class ResUnit(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
-                 padding=1,
-                 dilation=1,
-                 bias=False,
-                 use_bn=True,
-                 bottleneck=True,
-                 conv1_stride=False):
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int] = 1,
+                 dilation: int | tuple[int, int] = 1,
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bottleneck: bool = True,
+                 conv1_stride: bool = False):
         super(ResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -288,13 +288,13 @@ class ResNet(nn.Module):
         return x
 
 
-def get_resnet(blocks,
-               bottleneck=None,
-               conv1_stride=True,
-               width_scale=1.0,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+def get_resnet(blocks: int,
+               bottleneck: bool = None,
+               conv1_stride: bool = True,
+               width_scale: float = 1.0,
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create ResNet model with specific parameters.
@@ -698,7 +698,20 @@ def resnet200b(**kwargs):
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
-def _calc_width(net):
+def _calc_width(net: nn.Module) -> int:
+    """
+    Calculate network trainable weight count.
+
+    Parameters
+    ----------
+    net : int, nn.Module
+        Network.
+
+    Returns
+    -------
+    int
+        Calculated number of weights.
+    """
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0

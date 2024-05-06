@@ -193,7 +193,7 @@ class ERFNet(nn.Module):
 
 def get_erfnet(model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create ERFNet model with specific parameters.

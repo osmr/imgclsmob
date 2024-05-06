@@ -942,7 +942,7 @@ class SINet(nn.Module):
 
 def get_sinet(model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root: str = os.path.join("~", ".torch", "models"),
               **kwargs):
     """
     Create SINet model with specific parameters.

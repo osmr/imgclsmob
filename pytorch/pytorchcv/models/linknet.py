@@ -207,7 +207,7 @@ def get_linknet(backbone,
                 backbone_out_channels,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
+                root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create LinkNet model with specific parameters.

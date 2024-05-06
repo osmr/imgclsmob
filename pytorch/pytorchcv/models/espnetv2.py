@@ -368,7 +368,7 @@ class ESPNetv2(nn.Module):
 def get_espnetv2(width_scale,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join("~", ".torch", "models"),
+                 root: str = os.path.join("~", ".torch", "models"),
                  **kwargs):
     """
     Create ESPNetv2 model with specific parameters.

@@ -372,7 +372,7 @@ def get_hardnet(blocks,
                 use_deptwise=True,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
+                root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create HarDNet model with specific parameters.

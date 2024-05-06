@@ -335,7 +335,7 @@ class BiSeNet(nn.Module):
 
 def get_bisenet(model_name=None,
                 pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
+                root: str = os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create BiSeNet model with specific parameters.

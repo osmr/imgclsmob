@@ -149,7 +149,7 @@ def get_sepreresnet(blocks,
                     conv1_stride=True,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join("~", ".torch", "models"),
+                    root: str = os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create SE-PreResNet model with specific parameters.

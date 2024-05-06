@@ -160,7 +160,7 @@ def get_fastseresnet(blocks,
                      conv1_stride=True,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join("~", ".torch", "models"),
+                     root: str = os.path.join("~", ".torch", "models"),
                      **kwargs):
     """
     Create Fast-SE-ResNet model with specific parameters.

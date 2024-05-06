@@ -1157,9 +1157,9 @@ def get_nasnet(repeat,
                extra_padding,
                skip_reduction_layer_input,
                in_size,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               model_name: str | None = None,
+               pretrained: bool = False,
+               root: str = os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create NASNet-A model with specific parameters.

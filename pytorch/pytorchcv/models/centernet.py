@@ -266,7 +266,7 @@ def get_centernet(backbone,
                   num_classes,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join("~", ".torch", "models"),
+                  root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create CenterNet model with specific parameters.

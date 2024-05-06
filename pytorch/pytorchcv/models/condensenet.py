@@ -383,7 +383,7 @@ def get_condensenet(num_layers,
                     groups=4,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join("~", ".torch", "models"),
+                    root: str = os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create CondenseNet (converted) model with specific parameters.

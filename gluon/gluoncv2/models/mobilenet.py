@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1704.04861.
 """
 
-__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'get_mobilenet']
+__all__ = ['MobileNet', 'get_mobilenet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4']
 
 import os
 from mxnet import cpu

@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1802.03750.
 """
 
-__all__ = ['fdmobilenet_w1', 'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4', 'get_fdmobilenet']
+__all__ = ['get_fdmobilenet', 'fdmobilenet_w1', 'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
 from chainer.serializers import load_npz

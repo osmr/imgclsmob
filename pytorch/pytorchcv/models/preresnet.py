@@ -35,7 +35,7 @@ class PreResBlock(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
+                 stride: int | tuple[int, int],
                  bias: bool = False,
                  use_bn: bool = True):
         super(PreResBlock, self).__init__()
@@ -76,8 +76,8 @@ class PreResBottleneck(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
-                 conv1_stride):
+                 stride: int | tuple[int, int],
+                 conv1_stride: bool):
         super(PreResBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
@@ -125,7 +125,7 @@ class PreResUnit(nn.Module):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
-                 stride,
+                 stride: int | tuple[int, int],
                  bias: bool = False,
                  use_bn: bool = True,
                  bottleneck: bool = True,

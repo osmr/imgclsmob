@@ -465,9 +465,9 @@ class DiceNet(nn.Module):
                  init_block_channels,
                  classifier_mid_channels,
                  dropout_rate,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(DiceNet, self).__init__()
         assert ((in_size[0] % 32 == 0) and (in_size[1] % 32 == 0))
         self.in_size = in_size

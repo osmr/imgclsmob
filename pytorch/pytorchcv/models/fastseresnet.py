@@ -105,9 +105,9 @@ class FastSEResNet(nn.Module):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(FastSEResNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes

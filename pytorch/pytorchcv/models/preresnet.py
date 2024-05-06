@@ -36,8 +36,8 @@ class PreResBlock(nn.Module):
                  in_channels: int,
                  out_channels: int,
                  stride,
-                 bias=False,
-                 use_bn=True):
+                 bias: bool = False,
+                 use_bn: bool = True):
         super(PreResBlock, self).__init__()
         self.conv1 = pre_conv3x3_block(
             in_channels=in_channels,
@@ -126,10 +126,10 @@ class PreResUnit(nn.Module):
                  in_channels: int,
                  out_channels: int,
                  stride,
-                 bias=False,
-                 use_bn=True,
-                 bottleneck=True,
-                 conv1_stride=False):
+                 bias: bool = False,
+                 use_bn: bool = True,
+                 bottleneck: bool = True,
+                 conv1_stride: bool = False):
         super(PreResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -242,13 +242,13 @@ class PreResNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 conv1_stride,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
+                 conv1_stride: bool,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(PreResNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
@@ -295,12 +295,12 @@ class PreResNet(nn.Module):
         return x
 
 
-def get_preresnet(blocks,
-                  bottleneck=None,
-                  conv1_stride=True,
-                  width_scale=1.0,
-                  model_name=None,
-                  pretrained=False,
+def get_preresnet(blocks: int,
+                  bottleneck: bool = None,
+                  conv1_stride: bool = True,
+                  width_scale: float = 1.0,
+                  model_name: str | None = None,
+                  pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """

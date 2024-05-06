@@ -334,9 +334,9 @@ class DLA(nn.Module):
                  init_block_channels,
                  res_body_class,
                  residual_root,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(DLA, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes

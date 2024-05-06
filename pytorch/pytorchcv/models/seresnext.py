@@ -92,9 +92,9 @@ class SEResNeXt(nn.Module):
                  init_block_channels,
                  cardinality,
                  bottleneck_width,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(SEResNeXt, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
@@ -143,8 +143,8 @@ class SEResNeXt(nn.Module):
 def get_seresnext(blocks,
                   cardinality,
                   bottleneck_width,
-                  model_name=None,
-                  pretrained=False,
+                  model_name: str | None = None,
+                  pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
                   **kwargs):
     """

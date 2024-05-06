@@ -356,9 +356,9 @@ class BNInception(nn.Module):
                  mid2_channels_list,
                  bias=True,
                  use_bn=True,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (224, 224),
+                 num_classes: int = 1000):
         super(BNInception, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes

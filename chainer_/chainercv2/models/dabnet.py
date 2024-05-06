@@ -26,7 +26,7 @@ class DwaConvBlock(Chain):
         Number of input/output channels.
     ksize : int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     pad : int
         Padding value for convolution layer.

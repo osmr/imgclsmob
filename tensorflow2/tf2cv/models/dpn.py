@@ -100,11 +100,11 @@ class DPNConv(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     groups : int
         Number of groups.
@@ -158,7 +158,7 @@ def dpn_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the convolution.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -189,7 +189,7 @@ def dpn_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     groups : int
         Number of groups.
@@ -332,9 +332,9 @@ class DPNInitBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -416,9 +416,9 @@ class DPN(tf.keras.Model):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    init_block_kernel_size : int or tuple/list of 2 int
+    init_block_kernel_size : int or tuple(int, int)
         Convolution window size for the initial unit.
-    init_block_padding : int or tuple/list of 2 int
+    init_block_padding : int or tuple(int, int)
         Padding value for convolution layer in the initial unit.
     rs : list f int
         Number of intermediate channels for each unit.

@@ -23,7 +23,7 @@ class IbpResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -76,7 +76,7 @@ class IbpResUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     bias : bool, default False
         Whether the layer uses a bias vector.

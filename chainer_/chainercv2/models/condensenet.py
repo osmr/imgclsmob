@@ -27,11 +27,11 @@ class CondenseSimpleConv(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
     groups : int
         Number of groups.
@@ -97,11 +97,11 @@ class CondenseComplexConv(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
     groups : int
         Number of groups.

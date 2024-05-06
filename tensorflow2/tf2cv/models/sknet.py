@@ -23,7 +23,7 @@ class SKConvBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     groups : int, default 32
         Number of groups in branches.
@@ -120,7 +120,7 @@ class SKNetBottleneck(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     bottleneck_factor : int, default 2
         Bottleneck factor.
@@ -172,7 +172,7 @@ class SKNetUnit(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

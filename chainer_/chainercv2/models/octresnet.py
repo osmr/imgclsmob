@@ -27,13 +27,13 @@ class OctConvolution2D(L.Convolution2D):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -178,13 +178,13 @@ class OctConvBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -286,7 +286,7 @@ def oct_conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     groups : int, default 1
         Number of groups.
@@ -339,11 +339,11 @@ def oct_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -386,7 +386,7 @@ class OctResBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.
@@ -431,11 +431,11 @@ class OctResBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.
@@ -499,11 +499,11 @@ class OctResUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer in bottleneck.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.

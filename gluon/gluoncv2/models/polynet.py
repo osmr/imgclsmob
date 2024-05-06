@@ -26,11 +26,11 @@ class PolyConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -187,11 +187,11 @@ class ConvSeqBranch(HybridBlock):
         Number of input channels.
     out_channels_list : list of tuple of int
         List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+    strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -237,11 +237,11 @@ class PolyConvSeqBranch(HybridBlock):
         Number of input channels.
     out_channels_list : list of tuple of int
         List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+    strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

@@ -24,7 +24,7 @@ class PeleeBranch1(nn.Layer):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the second convolution.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

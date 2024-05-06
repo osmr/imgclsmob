@@ -88,11 +88,11 @@ class DPNConv(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
     groups : int
         Number of groups.
@@ -136,7 +136,7 @@ def dpn_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     """
     return DPNConv(
@@ -161,7 +161,7 @@ def dpn_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     groups : int
         Number of groups.
@@ -276,9 +276,9 @@ class DPNInitBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
     """
     def __init__(self,
@@ -344,9 +344,9 @@ class DPN(Chain):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    init_block_kernel_size : int or tuple/list of 2 int
+    init_block_kernel_size : int or tuple(int, int)
         Convolution window size for the initial unit.
-    init_block_padding : int or tuple/list of 2 int
+    init_block_padding : int or tuple(int, int)
         Padding value for convolution layer in the initial unit.
     rs : list f int
         Number of intermediate channels for each unit.

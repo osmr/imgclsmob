@@ -56,7 +56,7 @@ class MSDBaseBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     use_bottleneck : bool
         Whether to use a bottleneck.

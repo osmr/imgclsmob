@@ -22,9 +22,9 @@ class BagNetBottleneck(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size of the second convolution.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -77,9 +77,9 @@ class BagNetUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size of the second body convolution.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second body convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

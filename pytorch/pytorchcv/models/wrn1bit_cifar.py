@@ -39,13 +39,13 @@ class Conv2d1bit(nn.Conv2d):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -103,7 +103,7 @@ def conv1x1_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -139,9 +139,9 @@ def conv3x3_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -172,13 +172,13 @@ class ConvBlock1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -248,9 +248,9 @@ def conv1x1_block_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
+    padding : int or tuple(int, int), default 0
         Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -286,13 +286,13 @@ class PreConvBlock1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -367,11 +367,11 @@ def pre_conv3x3_block_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -405,7 +405,7 @@ class PreResBlock1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     binarized : bool, default False
         Whether to use binarization.
@@ -445,7 +445,7 @@ class PreResUnit1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     binarized : bool, default False
         Whether to use binarization.

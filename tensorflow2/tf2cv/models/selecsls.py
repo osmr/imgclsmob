@@ -65,7 +65,7 @@ class SelecSLSUnit(nn.Layer):
         Number of skipped channels.
     mid_channels : int
         Number of middle channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the branch convolution layers.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

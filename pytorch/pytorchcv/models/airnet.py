@@ -78,7 +78,7 @@ class AirBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     ratio: int
         Air compression ratio.
@@ -130,7 +130,7 @@ class AirUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     ratio: int
         Air compression ratio.

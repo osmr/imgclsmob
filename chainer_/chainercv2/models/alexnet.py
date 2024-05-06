@@ -25,11 +25,11 @@ class AlexConv(ConvBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
     use_lrn : bool
         Whether to use LRN layer.
@@ -135,9 +135,9 @@ class AlexNet(Chain):
         Number of output channels for each unit.
     ksizes : list of list of int
         Convolution window sizes for each unit.
-    strides : list of list of int or tuple/list of 2 int
+    strides : list of list of int or tuple(int, int)
         Strides of the convolution for each unit.
-    pads : list of list of int or tuple/list of 2 int
+    pads : list of list of int or tuple(int, int)
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.

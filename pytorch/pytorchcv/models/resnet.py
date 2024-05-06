@@ -23,7 +23,7 @@ class ResBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     bias : bool, default False
         Whether the layer uses a bias vector.
@@ -66,11 +66,11 @@ class ResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer.
     conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
@@ -120,11 +120,11 @@ class ResUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer in bottleneck.
     bias : bool, default False
         Whether the layer uses a bias vector.

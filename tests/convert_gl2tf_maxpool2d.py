@@ -34,11 +34,11 @@ def maxpool2d(x,
     ----------
     x : Tensor
         Input tensor.
-    pool_size : int or tuple/list of 2 int
+    pool_size : int or tuple(int, int)
         Size of the max pooling windows.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the pooling.
-    padding : int or tuple/list of 2 int, default 0
+    padding : int or tuple(int, int), default 0
         Padding value for convolution layer.
     ceil_mode : bool, default False
         When `True`, will use ceil instead of floor to compute the output shape.

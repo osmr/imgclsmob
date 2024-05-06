@@ -25,13 +25,13 @@ class OctConv(nn.Conv2d):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -176,13 +176,13 @@ class OctConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -283,7 +283,7 @@ def oct_conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -336,11 +336,11 @@ def oct_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -383,7 +383,7 @@ class OctResBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.
@@ -427,11 +427,11 @@ class OctResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.
@@ -494,11 +494,11 @@ class OctResUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for the second convolution layer in bottleneck.
     oct_alpha : float, default 0.0
         Octave alpha coefficient.

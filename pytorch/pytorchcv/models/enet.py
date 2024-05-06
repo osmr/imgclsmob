@@ -21,9 +21,9 @@ class ENetMaxDownBlock(nn.Module):
     ----------
     ext_channels : int
         Number of extra channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+    padding : int, or tuple(int, int), or tuple/list of 4 int
         Padding value for convolution layer.
     """
     def __init__(self,
@@ -88,11 +88,11 @@ class ENetUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int
+    padding : int, or tuple(int, int), or tuple/list of 4 int
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     use_asym_convs : bool
         Whether to use asymmetric convolution blocks.

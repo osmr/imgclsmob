@@ -20,7 +20,7 @@ class PnasMaxPoolBlock(nn.Module):
 
     Parameters
     ----------
-    stride : int or tuple/list of 2 int, default 2
+    stride : int or tuple(int, int), default 2
         Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -59,7 +59,7 @@ def pnas_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
     """
     return NasConv(
@@ -81,9 +81,9 @@ class DwsBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -136,7 +136,7 @@ def dws_branch_k3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 2
+    stride : int or tuple(int, int), default 2
         Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -166,7 +166,7 @@ def dws_branch_k5(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 2
+    stride : int or tuple(int, int), default 2
         Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
@@ -195,7 +195,7 @@ def dws_branch_k7(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 2
+    stride : int or tuple(int, int), default 2
         Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.

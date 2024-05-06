@@ -57,7 +57,7 @@ class XConvolution2D(L.Convolution2D):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
     groups : int, default 1
         Number of groups.
@@ -114,13 +114,13 @@ class PreXConvBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -191,7 +191,7 @@ def pre_xconv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -231,11 +231,11 @@ def pre_xconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation.

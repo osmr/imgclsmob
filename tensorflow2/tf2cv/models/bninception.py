@@ -25,7 +25,7 @@ class Inception3x3Branch(nn.Layer):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the second convolution.
     use_bias : bool, default True
         Whether the convolution layer uses a bias vector.
@@ -78,7 +78,7 @@ class InceptionDouble3x3Branch(nn.Layer):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the second convolution.
     use_bias : bool, default True
         Whether the convolution layer uses a bias vector.

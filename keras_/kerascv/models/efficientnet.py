@@ -68,7 +68,7 @@ def effi_dws_conv_unit(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution layer.
     bn_epsilon : float
         Small float added to variance in Batch norm.
@@ -142,9 +142,9 @@ def effi_inv_res_unit(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     expansion_factor : int
         Factor for expansion of channels.

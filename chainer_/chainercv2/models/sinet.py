@@ -101,13 +101,13 @@ class DwsConvBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -197,11 +197,11 @@ def dwsconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -251,11 +251,11 @@ def dwconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -288,11 +288,11 @@ class FDWConvBlock(Chain):
         Number of output channels.
     ksize : int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     pad : int
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -369,11 +369,11 @@ def fdwconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     pad : int, default 1
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -415,11 +415,11 @@ def fdwconv5x5_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     pad : int, default 1
         pad value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         dilate value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.

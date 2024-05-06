@@ -60,7 +60,7 @@ class SelecSLSUnit(Chain):
         Number of skipped channels.
     mid_channels : int
         Number of middle channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the branch convolution layers.
     """
     def __init__(self,

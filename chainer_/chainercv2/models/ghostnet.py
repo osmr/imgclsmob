@@ -71,7 +71,7 @@ class GhostExpBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     use_kernel3 : bool
         Whether to use 3x3 (instead of 5x5) kernel.
@@ -133,7 +133,7 @@ class GhostUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution layer.
     use_kernel3 : bool
         Whether to use 3x3 (instead of 5x5) kernel.

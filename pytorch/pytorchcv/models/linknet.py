@@ -23,9 +23,9 @@ class DecoderStage(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the deconvolution.
-    out_padding : int or tuple/list of 2 int
+    out_padding : int or tuple(int, int)
         Output padding value for deconvolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.

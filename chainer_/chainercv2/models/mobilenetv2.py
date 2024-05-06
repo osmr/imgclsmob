@@ -24,7 +24,7 @@ class LinearBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution layer.
     expansion : bool
         Whether do expansion of channels.

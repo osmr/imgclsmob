@@ -22,13 +22,13 @@ class MixConv(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of int, or tuple/list of tuple/list of 2 int
+    kernel_size : int or tuple/list of int, or tuple/list of tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of int, or tuple/list of tuple/list of 2 int
+    padding : int or tuple/list of int, or tuple/list of tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -100,13 +100,13 @@ class MixConvBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of int, or tuple/list of tuple/list of 2 int
+    kernel_size : int or tuple/list of int, or tuple/list of tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of int, or tuple/list of tuple/list of 2 int
+    padding : int or tuple/list of int, or tuple/list of tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -190,7 +190,7 @@ def mixconv1x1_block(in_channels,
         Number of output channels.
     kernel_count : int
         Kernel count.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -232,7 +232,7 @@ class MixUnit(nn.Layer):
         Number of output channels.
     exp_channels : int
         Number of middle (expanded) channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution layer.
     exp_kernel_count : int
         Expansion convolution kernel count for each unit.

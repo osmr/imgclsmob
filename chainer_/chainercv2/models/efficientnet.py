@@ -65,7 +65,7 @@ class EffiDwsConvUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution layer.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -125,9 +125,9 @@ class EffiInvResUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution layer.
     exp_factor : int
         Factor for expansion of channels.

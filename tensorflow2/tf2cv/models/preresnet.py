@@ -26,7 +26,7 @@ class PreResBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -77,7 +77,7 @@ class PreResBottleneck(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
@@ -130,7 +130,7 @@ class PreResUnit(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.

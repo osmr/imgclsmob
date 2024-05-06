@@ -28,13 +28,13 @@ class ShaConvBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple(int, int)
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -119,11 +119,11 @@ def sha_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -160,7 +160,7 @@ class ShaResBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     shared_conv : Chain, default None
         Shared convolution layer.
@@ -199,7 +199,7 @@ class ShaResBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     bottleneck_factor : int, default 4
         Bottleneck factor.
@@ -251,7 +251,7 @@ class ShaResUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.

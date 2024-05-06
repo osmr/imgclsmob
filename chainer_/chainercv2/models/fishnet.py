@@ -139,9 +139,9 @@ class FishBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    dilate : int or tuple/list of 2 int
+    dilate : int or tuple(int, int)
         Dilation value for convolution layer.
     """
     def __init__(self,
@@ -183,9 +183,9 @@ class FishBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     squeeze : bool, default False
         Whether to use a channel squeeze operation.
@@ -274,7 +274,7 @@ class UpUnit(Chain):
         Number of input channels.
     out_channels_list : list of int
         Number of output channels for each block.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     """
     def __init__(self,

@@ -24,11 +24,11 @@ class NINConv(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 0
+    pad : int or tuple(int, int), default 0
         Padding value for convolution layer.
     """
 

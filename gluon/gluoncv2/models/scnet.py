@@ -67,7 +67,7 @@ class ScConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     scale_factor : int
         Scale factor.
@@ -130,7 +130,7 @@ class ScBottleneck(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     bottleneck_factor : int, default 4
         Bottleneck factor.
@@ -223,7 +223,7 @@ class ScUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     avg_downsample : bool, default False
         Whether to use average downsampling.

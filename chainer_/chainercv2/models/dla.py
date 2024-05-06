@@ -25,7 +25,7 @@ class DLABottleneck(ResBottleneck):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     bottleneck_factor : int, default 2
         Bottleneck factor.
@@ -52,7 +52,7 @@ class DLABottleneckX(ResNeXtBottleneck):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     cardinality: int, default 32
         Number of groups.
@@ -83,7 +83,7 @@ class DLAResBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     body_class : nn.Module, default ResBlock
         Residual block body class.
@@ -184,7 +184,7 @@ class DLATree(Chain):
         Number of output channels.
     res_body_class : nn.Module
         Residual block body class.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution in a residual block.
     root_residual : bool
         Whether use residual connection in the root.

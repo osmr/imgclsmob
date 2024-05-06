@@ -28,7 +28,7 @@ class MobileNetV3Unit(Chain):
         Number of output channels.
     exp_channels : int
         Number of middle (expanded) channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution layer.
     use_kernel3 : bool
         Whether to use 3x3 (instead of 5x5) kernel.

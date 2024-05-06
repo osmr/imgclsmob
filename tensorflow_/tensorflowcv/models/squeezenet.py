@@ -29,9 +29,9 @@ def fire_conv(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     data_format : str
         The ordering of the dimensions in tensors.
@@ -144,7 +144,7 @@ def squeeze_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
     data_format : str
         The ordering of the dimensions in tensors.
@@ -180,7 +180,7 @@ class SqueezeNet(object):
         Number of output channels for each unit.
     residuals : bool
         Whether to use residual units.
-    init_block_kernel_size : int or tuple/list of 2 int
+    init_block_kernel_size : int or tuple(int, int)
         The dimensions of the convolution window for the initial unit.
     init_block_channels : int
         Number of output channels for the initial unit.

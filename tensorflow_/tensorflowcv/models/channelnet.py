@@ -29,7 +29,7 @@ def dwconv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
@@ -81,13 +81,13 @@ def channet_conv(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -159,7 +159,7 @@ def channet_conv1x1(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -221,11 +221,11 @@ def channet_conv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    padding : int or tuple(int, int), default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -285,7 +285,7 @@ def channet_dws_conv_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -501,9 +501,9 @@ def channet_unit(x,
         Input tensor.
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple/list of 2 int
+    out_channels_list : tuple(int, int)
         Number of output channels for each sub-block.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     multi_blocks : int
         Number of DWS layers in the sequence.

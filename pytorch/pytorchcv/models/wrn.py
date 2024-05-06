@@ -20,11 +20,11 @@ class WRNConv(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     activate : bool
         Whether activate the convolution block.
@@ -69,7 +69,7 @@ def wrn_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
@@ -96,7 +96,7 @@ def wrn_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
@@ -120,7 +120,7 @@ class WRNBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     width_factor : float
         Wide scale factor for width of layers.
@@ -166,7 +166,7 @@ class WRNUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     width_factor : float
         Wide scale factor for width of layers.

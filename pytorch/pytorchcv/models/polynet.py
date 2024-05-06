@@ -25,11 +25,11 @@ class PolyConv(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     num_blocks : int
         Number of blocks (BatchNorm layers).
@@ -161,11 +161,11 @@ class ConvSeqBranch(nn.Module):
         Number of input channels.
     out_channels_list : list of tuple of int
         List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+    strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     """
     def __init__(self,
@@ -205,11 +205,11 @@ class PolyConvSeqBranch(nn.Module):
         Number of input channels.
     out_channels_list : list of tuple of int
         List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+    strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     num_blocks : int
         Number of blocks for PolyConv.

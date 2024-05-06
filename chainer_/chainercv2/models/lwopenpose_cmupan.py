@@ -24,7 +24,7 @@ class LwopResBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
     use_bias : bool, default True
         Whether the layer uses a bias vector.
@@ -76,7 +76,7 @@ class LwopResUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the convolution.
     use_bias : bool, default True
         Whether the layer uses a bias vector.

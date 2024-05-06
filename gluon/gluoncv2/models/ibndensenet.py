@@ -24,11 +24,11 @@ class IBNPreConvBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.
@@ -101,7 +101,7 @@ def ibn_pre_conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
+    strides : int or tuple(int, int), default 1
         Strides of the convolution.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.

@@ -25,9 +25,9 @@ class BagNetBottleneck(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size of the second convolution.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second convolution.
     bottleneck_factor : int, default 4
         Bottleneck factor.
@@ -73,9 +73,9 @@ class BagNetUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    ksize : int or tuple/list of 2 int
+    ksize : int or tuple(int, int)
         Convolution window size of the second body convolution.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the second body convolution.
     """
     def __init__(self,

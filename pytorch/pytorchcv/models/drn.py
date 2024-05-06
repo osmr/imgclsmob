@@ -20,13 +20,13 @@ class DRNConv(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Dilation value for convolution layer.
     activate : bool
         Whether activate the convolution block.
@@ -75,7 +75,7 @@ def drn_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
@@ -104,9 +104,9 @@ def drn_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Padding/dilation value for convolution layer.
     activate : bool
         Whether activate the convolution block.
@@ -131,9 +131,9 @@ class DRNBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Padding/dilation value for convolution layers.
     """
     def __init__(self,
@@ -171,9 +171,9 @@ class DRNBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Padding/dilation value for 3x3 convolution layer.
     """
     def __init__(self,
@@ -218,9 +218,9 @@ class DRNUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+    dilation : int or tuple(int, int)
         Padding/dilation value for 3x3 convolution layers.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.

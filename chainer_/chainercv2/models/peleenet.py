@@ -26,7 +26,7 @@ class PeleeBranch1(Chain):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Stride of the second convolution.
     """
     def __init__(self,

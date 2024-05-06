@@ -22,9 +22,9 @@ class BagNetBottleneck(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size of the second convolution.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution.
     bottleneck_factor : int, default 4
         Bottleneck factor.
@@ -79,9 +79,9 @@ class BagNetUnit(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    kernel_size : int or tuple(int, int)
         Convolution window size of the second body convolution.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second body convolution.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.

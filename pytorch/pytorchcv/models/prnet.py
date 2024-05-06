@@ -30,11 +30,11 @@ def conv4x4_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default (1, 2, 1, 2)
+    padding : int, or tuple(int, int), or tuple/list of 4 int, default (1, 2, 1, 2)
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -82,15 +82,15 @@ def deconv4x4_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    stride : int or tuple(int, int), default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default (2, 1, 2, 1)
+    padding : int or tuple(int, int), default (2, 1, 2, 1)
         Padding value for deconvolution layer.
     ext_padding : tuple/list of 4 int, default None
         Extra padding value for deconvolution layer.
-    out_padding : int or tuple/list of 2 int
+    out_padding : int or tuple(int, int)
         Output padding value for deconvolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
@@ -129,9 +129,9 @@ class PRResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for the second convolution layer in bottleneck.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -179,9 +179,9 @@ class PRResUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple(int, int)
         Padding value for the second convolution layer in bottleneck.
     bn_eps : float
         Small float added to variance in Batch norm.

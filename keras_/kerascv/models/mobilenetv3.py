@@ -36,7 +36,7 @@ def mobilenetv3_unit(x,
         Number of output channels.
     exp_channels : int
         Number of middle (expanded) channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the second convolution layer.
     use_kernel3 : bool
         Whether to use 3x3 (instead of 5x5) kernel.

@@ -164,11 +164,11 @@ class DIAResUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple(int, int)
         Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 1
+    pad : int or tuple(int, int), default 1
         Padding value for the second convolution layer in bottleneck.
-    dilate : int or tuple/list of 2 int, default 1
+    dilate : int or tuple(int, int), default 1
         Dilation value for the second convolution layer in bottleneck.
     bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.

@@ -123,7 +123,7 @@ class ConvSeqBranch(HybridBlock):
         List of convolution window sizes.
     strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     bn_epsilon : float
         Small float added to variance in Batch norm.
@@ -173,11 +173,11 @@ class ConvSeq3x3Branch(HybridBlock):
         Number of input channels.
     out_channels_list : list of tuple of int
         List of numbers of output channels.
-    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+    kernel_size_list : list of tuple of int or tuple of tuple(int, int)
         List of convolution window sizes.
-    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+    strides_list : list of tuple of int or tuple of tuple(int, int)
         List of strides of the convolution.
-    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+    padding_list : list of tuple of int or tuple of tuple(int, int)
         List of padding values for convolution layers.
     bn_epsilon : float
         Small float added to variance in Batch norm.

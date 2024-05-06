@@ -33,7 +33,7 @@ def preres_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
@@ -85,7 +85,7 @@ def preres_bottleneck_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
@@ -150,7 +150,7 @@ def preres_unit(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple(int, int)
         Strides of the convolution.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.

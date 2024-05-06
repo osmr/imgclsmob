@@ -33,12 +33,12 @@ class AlexConv(ConvBlock):
         Whether to use LRN layer.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 use_lrn):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int],
+                 use_lrn: bool):
         super(AlexConv, self).__init__(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -68,8 +68,8 @@ class AlexDense(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(AlexDense, self).__init__()
         self.fc = nn.Linear(
             in_features=in_channels,
@@ -96,8 +96,8 @@ class AlexOutputBlock(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 in_channels,
-                 classes):
+                 in_channels: int,
+                 classes: int):
         super(AlexOutputBlock, self).__init__()
         mid_channels = 4096
 
@@ -129,9 +129,9 @@ class AlexNet(nn.Module):
         Number of output channels for each unit.
     kernel_sizes : list(list(int))
         Convolution window sizes for each unit.
-    strides : list(list(int)) or tuple(int, int)
+    strides : list(list(int))
         Strides of the convolution for each unit.
-    paddings : list(list(int)) or tuple(int, int)
+    paddings : list(list(int))
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
@@ -143,11 +143,11 @@ class AlexNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 kernel_sizes,
-                 strides,
-                 paddings,
-                 use_lrn,
+                 channels: list[list[int]],
+                 kernel_sizes: list[list[int]],
+                 strides: list[list[int]],
+                 paddings: list[list[int]],
+                 use_lrn: bool,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -195,7 +195,7 @@ class AlexNet(nn.Module):
         return x
 
 
-def get_alexnet(version="a",
+def get_alexnet(version: str = "a",
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),

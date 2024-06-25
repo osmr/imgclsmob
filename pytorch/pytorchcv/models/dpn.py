@@ -443,7 +443,7 @@ def get_dpn(num_layers,
             model_name=None,
             pretrained=False,
             root: str = os.path.join("~", ".torch", "models"),
-            **kwargs):
+            **kwargs) -> nn.Module:
     """
     Create DPN model with specific parameters.
 
@@ -461,6 +461,11 @@ def get_dpn(num_layers,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if num_layers == 68:
@@ -543,7 +548,7 @@ def get_dpn(num_layers,
     return net
 
 
-def dpn68(**kwargs):
+def dpn68(**kwargs) -> nn.Module:
     """
     DPN-68 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
@@ -553,11 +558,16 @@ def dpn68(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dpn(num_layers=68, b_case=False, model_name="dpn68", **kwargs)
 
 
-def dpn68b(**kwargs):
+def dpn68b(**kwargs) -> nn.Module:
     """
     DPN-68b model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
@@ -567,11 +577,16 @@ def dpn68b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dpn(num_layers=68, b_case=True, model_name="dpn68b", **kwargs)
 
 
-def dpn98(**kwargs):
+def dpn98(**kwargs) -> nn.Module:
     """
     DPN-98 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
@@ -581,11 +596,16 @@ def dpn98(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dpn(num_layers=98, b_case=False, model_name="dpn98", **kwargs)
 
 
-def dpn107(**kwargs):
+def dpn107(**kwargs) -> nn.Module:
     """
     DPN-107 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
@@ -595,11 +615,16 @@ def dpn107(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dpn(num_layers=107, b_case=False, model_name="dpn107", **kwargs)
 
 
-def dpn131(**kwargs):
+def dpn131(**kwargs) -> nn.Module:
     """
     DPN-131 model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 
@@ -609,6 +634,11 @@ def dpn131(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dpn(num_layers=131, b_case=False, model_name="dpn131", **kwargs)
 

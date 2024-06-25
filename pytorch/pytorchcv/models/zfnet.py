@@ -6,6 +6,7 @@
 __all__ = ['zfnet', 'zfnetb']
 
 import os
+import torch.nn as nn
 from .alexnet import AlexNet
 
 
@@ -13,7 +14,7 @@ def get_zfnet(version="a",
               model_name=None,
               pretrained=False,
               root: str = os.path.join("~", ".torch", "models"),
-              **kwargs):
+              **kwargs) -> nn.Module:
     """
     Create ZFNet model with specific parameters.
 
@@ -27,6 +28,11 @@ def get_zfnet(version="a",
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if version == "a":
         channels = [[96], [256], [384, 384, 256]]
@@ -63,7 +69,7 @@ def get_zfnet(version="a",
     return net
 
 
-def zfnet(**kwargs):
+def zfnet(**kwargs) -> nn.Module:
     """
     ZFNet model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 
@@ -73,11 +79,16 @@ def zfnet(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_zfnet(model_name="zfnet", **kwargs)
 
 
-def zfnetb(**kwargs):
+def zfnetb(**kwargs) -> nn.Module:
     """
     ZFNet-b model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 
@@ -87,6 +98,11 @@ def zfnetb(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_zfnet(version="b", model_name="zfnetb", **kwargs)
 

@@ -624,7 +624,7 @@ class DARTS(nn.Module):
 def get_darts(model_name=None,
               pretrained=False,
               root: str = os.path.join("~", ".torch", "models"),
-              **kwargs):
+              **kwargs) -> nn.Module:
     """
     Create DARTS model with specific parameters.
 
@@ -636,6 +636,11 @@ def get_darts(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     stem_blocks_channels = 48
     layers = [4, 5, 5]
@@ -680,7 +685,7 @@ def get_darts(model_name=None,
     return net
 
 
-def darts(**kwargs):
+def darts(**kwargs) -> nn.Module:
     """
     DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 
@@ -690,6 +695,11 @@ def darts(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_darts(model_name="darts", **kwargs)
 

@@ -421,7 +421,7 @@ class BNInception(nn.Module):
 def get_bninception(model_name=None,
                     pretrained=False,
                     root: str = os.path.join("~", ".torch", "models"),
-                    **kwargs):
+                    **kwargs) -> nn.Module:
     """
     Create BN-Inception model with specific parameters.
 
@@ -433,6 +433,11 @@ def get_bninception(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels_list = [64, 192]
     channels = [[256, 320], [576, 576, 576, 608, 608], [1056, 1024, 1024]]
@@ -480,7 +485,7 @@ def get_bninception(model_name=None,
     return net
 
 
-def bninception(**kwargs):
+def bninception(**kwargs) -> nn.Module:
     """
     BN-Inception model from 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
     Shift,' https://arxiv.org/abs/1502.03167.
@@ -491,6 +496,11 @@ def bninception(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_bninception(model_name="bninception", **kwargs)
 

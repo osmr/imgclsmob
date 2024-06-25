@@ -393,7 +393,7 @@ def get_drn(blocks,
             model_name=None,
             pretrained=False,
             root: str = os.path.join("~", ".torch", "models"),
-            **kwargs):
+            **kwargs) -> nn.Module:
     """
     Create DRN-C or DRN-D model with specific parameters.
 
@@ -409,6 +409,11 @@ def get_drn(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 22:
@@ -485,7 +490,7 @@ def get_drn(blocks,
     return net
 
 
-def drnc26(**kwargs):
+def drnc26(**kwargs) -> nn.Module:
     """
     DRN-C-26 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -495,11 +500,16 @@ def drnc26(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=26, model_name="drnc26", **kwargs)
 
 
-def drnc42(**kwargs):
+def drnc42(**kwargs) -> nn.Module:
     """
     DRN-C-42 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -509,11 +519,16 @@ def drnc42(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=42, model_name="drnc42", **kwargs)
 
 
-def drnc58(**kwargs):
+def drnc58(**kwargs) -> nn.Module:
     """
     DRN-C-58 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -523,11 +538,16 @@ def drnc58(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=58, model_name="drnc58", **kwargs)
 
 
-def drnd22(**kwargs):
+def drnd22(**kwargs) -> nn.Module:
     """
     DRN-D-58 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -537,11 +557,16 @@ def drnd22(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=22, simplified=True, model_name="drnd22", **kwargs)
 
 
-def drnd38(**kwargs):
+def drnd38(**kwargs) -> nn.Module:
     """
     DRN-D-38 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -551,11 +576,16 @@ def drnd38(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=38, simplified=True, model_name="drnd38", **kwargs)
 
 
-def drnd54(**kwargs):
+def drnd54(**kwargs) -> nn.Module:
     """
     DRN-D-54 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -565,11 +595,16 @@ def drnd54(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=54, simplified=True, model_name="drnd54", **kwargs)
 
 
-def drnd105(**kwargs):
+def drnd105(**kwargs) -> nn.Module:
     """
     DRN-D-105 model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -579,6 +614,11 @@ def drnd105(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_drn(blocks=105, simplified=True, model_name="drnd105", **kwargs)
 

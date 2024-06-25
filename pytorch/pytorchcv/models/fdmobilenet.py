@@ -7,6 +7,7 @@
 __all__ = ['get_fdmobilenet', 'fdmobilenet_w1', 'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
+import torch.nn as nn
 from .mobilenet import MobileNet
 
 

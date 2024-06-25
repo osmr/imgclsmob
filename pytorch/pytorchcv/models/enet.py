@@ -472,7 +472,7 @@ class ENet(nn.Module):
 def get_enet(model_name=None,
              pretrained=False,
              root: str = os.path.join("~", ".torch", "models"),
-             **kwargs):
+             **kwargs) -> nn.Module:
     """
     Create ENet model with specific parameters.
 
@@ -484,6 +484,11 @@ def get_enet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels = [64, 128, 64, 16]
     kernel_sizes = [[3, 3, 3, 3, 3], [3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3, 3, 3, 5, 3], [3, 3, 3], [3, 3]]
@@ -517,7 +522,7 @@ def get_enet(model_name=None,
     return net
 
 
-def enet_cityscapes(num_classes=19, **kwargs):
+def enet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     ENet model for Cityscapes from 'ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation,'
     https://arxiv.org/abs/1606.02147.
@@ -530,6 +535,11 @@ def enet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_enet(num_classes=num_classes, model_name="enet_cityscapes", **kwargs)
 

@@ -271,7 +271,7 @@ def get_resnet(blocks,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create BAM-ResNet model with specific parameters.
 
@@ -291,6 +291,11 @@ def get_resnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 18:
@@ -335,7 +340,7 @@ def get_resnet(blocks,
     return net
 
 
-def bam_resnet18(**kwargs):
+def bam_resnet18(**kwargs) -> nn.Module:
     """
     BAM-ResNet-18 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
@@ -345,11 +350,16 @@ def bam_resnet18(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, model_name="bam_resnet18", **kwargs)
 
 
-def bam_resnet34(**kwargs):
+def bam_resnet34(**kwargs) -> nn.Module:
     """
     BAM-ResNet-34 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
@@ -359,11 +369,16 @@ def bam_resnet34(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=34, model_name="bam_resnet34", **kwargs)
 
 
-def bam_resnet50(**kwargs):
+def bam_resnet50(**kwargs) -> nn.Module:
     """
     BAM-ResNet-50 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
@@ -373,11 +388,16 @@ def bam_resnet50(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=50, model_name="bam_resnet50", **kwargs)
 
 
-def bam_resnet101(**kwargs):
+def bam_resnet101(**kwargs) -> nn.Module:
     """
     BAM-ResNet-101 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
@@ -387,11 +407,16 @@ def bam_resnet101(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=101, model_name="bam_resnet101", **kwargs)
 
 
-def bam_resnet152(**kwargs):
+def bam_resnet152(**kwargs) -> nn.Module:
     """
     BAM-ResNet-152 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 
@@ -401,6 +426,11 @@ def bam_resnet152(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=152, model_name="bam_resnet152", **kwargs)
 

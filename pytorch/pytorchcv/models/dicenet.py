@@ -525,7 +525,7 @@ def get_dicenet(width_scale,
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create DiCENet model with specific parameters.
 
@@ -539,6 +539,11 @@ def get_dicenet(width_scale,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels_per_layers_dict = {
         0.2: [32, 64, 128],
@@ -597,7 +602,7 @@ def get_dicenet(width_scale,
     return net
 
 
-def dicenet_wd5(**kwargs):
+def dicenet_wd5(**kwargs) -> nn.Module:
     """
     DiCENet x0.2 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -608,11 +613,16 @@ def dicenet_wd5(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=0.2, model_name="dicenet_wd5", **kwargs)
 
 
-def dicenet_wd2(**kwargs):
+def dicenet_wd2(**kwargs) -> nn.Module:
     """
     DiCENet x0.5 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -623,11 +633,16 @@ def dicenet_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=0.5, model_name="dicenet_wd2", **kwargs)
 
 
-def dicenet_w3d4(**kwargs):
+def dicenet_w3d4(**kwargs) -> nn.Module:
     """
     DiCENet x0.75 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -638,11 +653,16 @@ def dicenet_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=0.75, model_name="dicenet_w3d4", **kwargs)
 
 
-def dicenet_w1(**kwargs):
+def dicenet_w1(**kwargs) -> nn.Module:
     """
     DiCENet x1.0 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -653,11 +673,16 @@ def dicenet_w1(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=1.0, model_name="dicenet_w1", **kwargs)
 
 
-def dicenet_w5d4(**kwargs):
+def dicenet_w5d4(**kwargs) -> nn.Module:
     """
     DiCENet x1.25 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -668,11 +693,16 @@ def dicenet_w5d4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=1.25, model_name="dicenet_w5d4", **kwargs)
 
 
-def dicenet_w3d2(**kwargs):
+def dicenet_w3d2(**kwargs) -> nn.Module:
     """
     DiCENet x1.5 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -683,11 +713,16 @@ def dicenet_w3d2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=1.5, model_name="dicenet_w3d2", **kwargs)
 
 
-def dicenet_w7d8(**kwargs):
+def dicenet_w7d8(**kwargs) -> nn.Module:
     """
     DiCENet x1.75 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -698,11 +733,16 @@ def dicenet_w7d8(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=1.75, model_name="dicenet_w7d8", **kwargs)
 
 
-def dicenet_w2(**kwargs):
+def dicenet_w2(**kwargs) -> nn.Module:
     """
     DiCENet x2.0 model from 'DiCENet: Dimension-wise Convolutions for Efficient Networks,'
     https://arxiv.org/abs/1906.03516.
@@ -713,6 +753,11 @@ def dicenet_w2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dicenet(width_scale=2.0, model_name="dicenet_w2", **kwargs)
 

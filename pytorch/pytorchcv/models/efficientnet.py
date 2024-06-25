@@ -360,7 +360,7 @@ def get_efficientnet(version,
                      model_name=None,
                      pretrained=False,
                      root: str = os.path.join("~", ".torch", "models"),
-                     **kwargs):
+                     **kwargs) -> nn.Module:
     """
     Create EfficientNet model with specific parameters.
 
@@ -380,6 +380,11 @@ def get_efficientnet(version,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if version == "b0":
         assert (in_size == (224, 224))
@@ -483,7 +488,7 @@ def get_efficientnet(version,
     return net
 
 
-def efficientnet_b0(in_size=(224, 224), **kwargs):
+def efficientnet_b0(in_size=(224, 224), **kwargs) -> nn.Module:
     """
     EfficientNet-B0 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -496,11 +501,16 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b0", in_size=in_size, model_name="efficientnet_b0", **kwargs)
 
 
-def efficientnet_b1(in_size=(240, 240), **kwargs):
+def efficientnet_b1(in_size=(240, 240), **kwargs) -> nn.Module:
     """
     EfficientNet-B1 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -513,11 +523,16 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b1", in_size=in_size, model_name="efficientnet_b1", **kwargs)
 
 
-def efficientnet_b2(in_size=(260, 260), **kwargs):
+def efficientnet_b2(in_size=(260, 260), **kwargs) -> nn.Module:
     """
     EfficientNet-B2 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -530,11 +545,16 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b2", in_size=in_size, model_name="efficientnet_b2", **kwargs)
 
 
-def efficientnet_b3(in_size=(300, 300), **kwargs):
+def efficientnet_b3(in_size=(300, 300), **kwargs) -> nn.Module:
     """
     EfficientNet-B3 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -547,11 +567,16 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b3", in_size=in_size, model_name="efficientnet_b3", **kwargs)
 
 
-def efficientnet_b4(in_size=(380, 380), **kwargs):
+def efficientnet_b4(in_size=(380, 380), **kwargs) -> nn.Module:
     """
     EfficientNet-B4 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -564,11 +589,16 @@ def efficientnet_b4(in_size=(380, 380), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b4", in_size=in_size, model_name="efficientnet_b4", **kwargs)
 
 
-def efficientnet_b5(in_size=(456, 456), **kwargs):
+def efficientnet_b5(in_size=(456, 456), **kwargs) -> nn.Module:
     """
     EfficientNet-B5 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -581,11 +611,16 @@ def efficientnet_b5(in_size=(456, 456), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b5", in_size=in_size, model_name="efficientnet_b5", **kwargs)
 
 
-def efficientnet_b6(in_size=(528, 528), **kwargs):
+def efficientnet_b6(in_size=(528, 528), **kwargs) -> nn.Module:
     """
     EfficientNet-B6 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -598,11 +633,16 @@ def efficientnet_b6(in_size=(528, 528), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b6", in_size=in_size, model_name="efficientnet_b6", **kwargs)
 
 
-def efficientnet_b7(in_size=(600, 600), **kwargs):
+def efficientnet_b7(in_size=(600, 600), **kwargs) -> nn.Module:
     """
     EfficientNet-B7 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -615,11 +655,16 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
 
 
-def efficientnet_b8(in_size=(672, 672), **kwargs):
+def efficientnet_b8(in_size=(672, 672), **kwargs) -> nn.Module:
     """
     EfficientNet-B8 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -632,11 +677,16 @@ def efficientnet_b8(in_size=(672, 672), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b8", in_size=in_size, model_name="efficientnet_b8", **kwargs)
 
 
-def efficientnet_b0b(in_size=(224, 224), **kwargs):
+def efficientnet_b0b(in_size=(224, 224), **kwargs) -> nn.Module:
     """
     EfficientNet-B0-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -649,12 +699,17 @@ def efficientnet_b0b(in_size=(224, 224), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0b",
                             **kwargs)
 
 
-def efficientnet_b1b(in_size=(240, 240), **kwargs):
+def efficientnet_b1b(in_size=(240, 240), **kwargs) -> nn.Module:
     """
     EfficientNet-B1-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -667,12 +722,17 @@ def efficientnet_b1b(in_size=(240, 240), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1b",
                             **kwargs)
 
 
-def efficientnet_b2b(in_size=(260, 260), **kwargs):
+def efficientnet_b2b(in_size=(260, 260), **kwargs) -> nn.Module:
     """
     EfficientNet-B2-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -685,12 +745,17 @@ def efficientnet_b2b(in_size=(260, 260), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2b",
                             **kwargs)
 
 
-def efficientnet_b3b(in_size=(300, 300), **kwargs):
+def efficientnet_b3b(in_size=(300, 300), **kwargs) -> nn.Module:
     """
     EfficientNet-B3-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -703,12 +768,17 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3b",
                             **kwargs)
 
 
-def efficientnet_b4b(in_size=(380, 380), **kwargs):
+def efficientnet_b4b(in_size=(380, 380), **kwargs) -> nn.Module:
     """
     EfficientNet-B4-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -721,12 +791,17 @@ def efficientnet_b4b(in_size=(380, 380), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4b",
                             **kwargs)
 
 
-def efficientnet_b5b(in_size=(456, 456), **kwargs):
+def efficientnet_b5b(in_size=(456, 456), **kwargs) -> nn.Module:
     """
     EfficientNet-B5-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -739,12 +814,17 @@ def efficientnet_b5b(in_size=(456, 456), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5b",
                             **kwargs)
 
 
-def efficientnet_b6b(in_size=(528, 528), **kwargs):
+def efficientnet_b6b(in_size=(528, 528), **kwargs) -> nn.Module:
     """
     EfficientNet-B6-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -757,12 +837,17 @@ def efficientnet_b6b(in_size=(528, 528), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6b",
                             **kwargs)
 
 
-def efficientnet_b7b(in_size=(600, 600), **kwargs):
+def efficientnet_b7b(in_size=(600, 600), **kwargs) -> nn.Module:
     """
     EfficientNet-B7-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -775,12 +860,17 @@ def efficientnet_b7b(in_size=(600, 600), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7b",
                             **kwargs)
 
 
-def efficientnet_b0c(in_size=(224, 224), **kwargs):
+def efficientnet_b0c(in_size=(224, 224), **kwargs) -> nn.Module:
     """
     EfficientNet-B0-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -793,12 +883,17 @@ def efficientnet_b0c(in_size=(224, 224), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0c",
                             **kwargs)
 
 
-def efficientnet_b1c(in_size=(240, 240), **kwargs):
+def efficientnet_b1c(in_size=(240, 240), **kwargs) -> nn.Module:
     """
     EfficientNet-B1-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -811,12 +906,17 @@ def efficientnet_b1c(in_size=(240, 240), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1c",
                             **kwargs)
 
 
-def efficientnet_b2c(in_size=(260, 260), **kwargs):
+def efficientnet_b2c(in_size=(260, 260), **kwargs) -> nn.Module:
     """
     EfficientNet-B2-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -829,12 +929,17 @@ def efficientnet_b2c(in_size=(260, 260), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2c",
                             **kwargs)
 
 
-def efficientnet_b3c(in_size=(300, 300), **kwargs):
+def efficientnet_b3c(in_size=(300, 300), **kwargs) -> nn.Module:
     """
     EfficientNet-B3-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -847,12 +952,17 @@ def efficientnet_b3c(in_size=(300, 300), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3c",
                             **kwargs)
 
 
-def efficientnet_b4c(in_size=(380, 380), **kwargs):
+def efficientnet_b4c(in_size=(380, 380), **kwargs) -> nn.Module:
     """
     EfficientNet-B4-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -865,12 +975,17 @@ def efficientnet_b4c(in_size=(380, 380), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4c",
                             **kwargs)
 
 
-def efficientnet_b5c(in_size=(456, 456), **kwargs):
+def efficientnet_b5c(in_size=(456, 456), **kwargs) -> nn.Module:
     """
     EfficientNet-B5-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -883,12 +998,17 @@ def efficientnet_b5c(in_size=(456, 456), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5c",
                             **kwargs)
 
 
-def efficientnet_b6c(in_size=(528, 528), **kwargs):
+def efficientnet_b6c(in_size=(528, 528), **kwargs) -> nn.Module:
     """
     EfficientNet-B6-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -901,12 +1021,17 @@ def efficientnet_b6c(in_size=(528, 528), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6c",
                             **kwargs)
 
 
-def efficientnet_b7c(in_size=(600, 600), **kwargs):
+def efficientnet_b7c(in_size=(600, 600), **kwargs) -> nn.Module:
     """
     EfficientNet-B7-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -919,12 +1044,17 @@ def efficientnet_b7c(in_size=(600, 600), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7c",
                             **kwargs)
 
 
-def efficientnet_b8c(in_size=(672, 672), **kwargs):
+def efficientnet_b8c(in_size=(672, 672), **kwargs) -> nn.Module:
     """
     EfficientNet-B8-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
     for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
@@ -937,6 +1067,11 @@ def efficientnet_b8c(in_size=(672, 672), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet(version="b8", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b8c",
                             **kwargs)

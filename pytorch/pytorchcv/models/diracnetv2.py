@@ -179,7 +179,7 @@ def get_diracnetv2(blocks,
                    model_name=None,
                    pretrained=False,
                    root: str = os.path.join("~", ".torch", "models"),
-                   **kwargs):
+                   **kwargs) -> nn.Module:
     """
     Create DiracNetV2 model with specific parameters.
 
@@ -193,6 +193,11 @@ def get_diracnetv2(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if blocks == 18:
         layers = [4, 4, 4, 4]
@@ -223,7 +228,7 @@ def get_diracnetv2(blocks,
     return net
 
 
-def diracnet18v2(**kwargs):
+def diracnet18v2(**kwargs) -> nn.Module:
     """
     DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
@@ -234,11 +239,16 @@ def diracnet18v2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diracnetv2(blocks=18, model_name="diracnet18v2", **kwargs)
 
 
-def diracnet34v2(**kwargs):
+def diracnet34v2(**kwargs) -> nn.Module:
     """
     DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
@@ -249,6 +259,11 @@ def diracnet34v2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diracnetv2(blocks=34, model_name="diracnet34v2", **kwargs)
 

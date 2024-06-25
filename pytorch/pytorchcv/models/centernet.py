@@ -267,7 +267,7 @@ def get_centernet(backbone,
                   model_name: str | None = None,
                   pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
-                  **kwargs):
+                  **kwargs) -> nn.Module:
     """
     Create CenterNet model with specific parameters.
 
@@ -289,7 +289,7 @@ def get_centernet(backbone,
     Returns
     -------
     nn.Module
-        A network.
+        Desired module.
     """
     channels = [256, 128, 64]
 
@@ -312,7 +312,7 @@ def get_centernet(backbone,
     return net
 
 
-def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs):
+def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -327,6 +327,11 @@ def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
     del backbone[-1]
@@ -334,7 +339,7 @@ def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs):
                          model_name="centernet_resnet18_voc", **kwargs)
 
 
-def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs):
+def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -349,6 +354,11 @@ def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs)
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
     del backbone[-1]
@@ -356,7 +366,7 @@ def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs)
                          model_name="centernet_resnet18_coco", **kwargs)
 
 
-def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs):
+def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -371,6 +381,11 @@ def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs)
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
     del backbone[-1]
@@ -378,7 +393,7 @@ def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs)
                          model_name="centernet_resnet50b_voc", **kwargs)
 
 
-def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs):
+def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -393,6 +408,11 @@ def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
     del backbone[-1]
@@ -400,7 +420,7 @@ def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs
                          model_name="centernet_resnet50b_coco", **kwargs)
 
 
-def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs):
+def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -415,6 +435,11 @@ def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]
@@ -422,7 +447,7 @@ def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs
                          model_name="centernet_resnet101b_voc", **kwargs)
 
 
-def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwargs):
+def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -437,6 +462,11 @@ def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwarg
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]

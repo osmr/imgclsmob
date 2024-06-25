@@ -6,6 +6,7 @@
 
 __all__ = ['mobilenetb_w1', 'mobilenetb_w3d4', 'mobilenetb_wd2', 'mobilenetb_wd4']
 
+import torch.nn as nn
 from .mobilenet import get_mobilenet
 
 

@@ -358,7 +358,7 @@ class CGNet(nn.Module):
 def get_cgnet(model_name=None,
               pretrained=False,
               root: str = os.path.join("~", ".torch", "models"),
-              **kwargs):
+              **kwargs) -> nn.Module:
     """
     Create CGNet model with specific parameters.
 
@@ -370,6 +370,11 @@ def get_cgnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels = 32
     layers = [0, 3, 21]
@@ -401,7 +406,7 @@ def get_cgnet(model_name=None,
     return net
 
 
-def cgnet_cityscapes(num_classes=19, **kwargs):
+def cgnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     CGNet model for Cityscapes from 'CGNet: A Light-weight Context Guided Network for Semantic Segmentation,'
     https://arxiv.org/abs/1811.08201.
@@ -414,6 +419,11 @@ def cgnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_cgnet(num_classes=num_classes, model_name="cgnet_cityscapes", **kwargs)
 

@@ -218,7 +218,7 @@ def get_airnext(blocks,
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create AirNet model with specific parameters.
 
@@ -240,6 +240,11 @@ def get_airnext(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 50:
@@ -275,7 +280,7 @@ def get_airnext(blocks,
     return net
 
 
-def airnext50_32x4d_r2(**kwargs):
+def airnext50_32x4d_r2(**kwargs) -> nn.Module:
     """
     AirNeXt50-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -286,6 +291,11 @@ def airnext50_32x4d_r2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnext(
         blocks=50,
@@ -297,7 +307,7 @@ def airnext50_32x4d_r2(**kwargs):
         **kwargs)
 
 
-def airnext101_32x4d_r2(**kwargs):
+def airnext101_32x4d_r2(**kwargs) -> nn.Module:
     """
     AirNeXt101-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -308,6 +318,11 @@ def airnext101_32x4d_r2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnext(
         blocks=101,
@@ -319,7 +334,7 @@ def airnext101_32x4d_r2(**kwargs):
         **kwargs)
 
 
-def airnext101_32x4d_r16(**kwargs):
+def airnext101_32x4d_r16(**kwargs) -> nn.Module:
     """
     AirNeXt101-32x4d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -330,6 +345,11 @@ def airnext101_32x4d_r16(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnext(
         blocks=101,

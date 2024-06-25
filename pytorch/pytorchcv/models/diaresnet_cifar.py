@@ -97,7 +97,7 @@ def get_diaresnet_cifar(num_classes,
                         model_name=None,
                         pretrained=False,
                         root: str = os.path.join("~", ".torch", "models"),
-                        **kwargs):
+                        **kwargs) -> nn.Module:
     """
     Create DIA-ResNet model for CIFAR with specific parameters.
 
@@ -115,6 +115,11 @@ def get_diaresnet_cifar(num_classes,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     assert (num_classes in [10, 100])
@@ -153,7 +158,7 @@ def get_diaresnet_cifar(num_classes,
     return net
 
 
-def diaresnet20_cifar10(num_classes=10, **kwargs):
+def diaresnet20_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-20 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -166,12 +171,17 @@ def diaresnet20_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="diaresnet20_cifar10",
                                **kwargs)
 
 
-def diaresnet20_cifar100(num_classes=100, **kwargs):
+def diaresnet20_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-20 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -184,12 +194,17 @@ def diaresnet20_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="diaresnet20_cifar100",
                                **kwargs)
 
 
-def diaresnet20_svhn(num_classes=10, **kwargs):
+def diaresnet20_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-20 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -201,12 +216,17 @@ def diaresnet20_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="diaresnet20_svhn",
                                **kwargs)
 
 
-def diaresnet56_cifar10(num_classes=10, **kwargs):
+def diaresnet56_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-56 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -219,12 +239,17 @@ def diaresnet56_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="diaresnet56_cifar10",
                                **kwargs)
 
 
-def diaresnet56_cifar100(num_classes=100, **kwargs):
+def diaresnet56_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-56 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -237,12 +262,17 @@ def diaresnet56_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="diaresnet56_cifar100",
                                **kwargs)
 
 
-def diaresnet56_svhn(num_classes=10, **kwargs):
+def diaresnet56_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-56 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -254,12 +284,17 @@ def diaresnet56_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="diaresnet56_svhn",
                                **kwargs)
 
 
-def diaresnet110_cifar10(num_classes=10, **kwargs):
+def diaresnet110_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-110 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -272,12 +307,17 @@ def diaresnet110_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False, model_name="diaresnet110_cifar10",
                                **kwargs)
 
 
-def diaresnet110_cifar100(num_classes=100, **kwargs):
+def diaresnet110_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-110 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -290,12 +330,17 @@ def diaresnet110_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False,
                                model_name="diaresnet110_cifar100", **kwargs)
 
 
-def diaresnet110_svhn(num_classes=10, **kwargs):
+def diaresnet110_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-110 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -307,12 +352,17 @@ def diaresnet110_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False, model_name="diaresnet110_svhn",
                                **kwargs)
 
 
-def diaresnet164bn_cifar10(num_classes=10, **kwargs):
+def diaresnet164bn_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-164(BN) model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -325,12 +375,17 @@ def diaresnet164bn_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True,
                                model_name="diaresnet164bn_cifar10", **kwargs)
 
 
-def diaresnet164bn_cifar100(num_classes=100, **kwargs):
+def diaresnet164bn_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-164(BN) model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -343,12 +398,17 @@ def diaresnet164bn_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True,
                                model_name="diaresnet164bn_cifar100", **kwargs)
 
 
-def diaresnet164bn_svhn(num_classes=10, **kwargs):
+def diaresnet164bn_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-164(BN) model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -361,12 +421,17 @@ def diaresnet164bn_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True, model_name="diaresnet164bn_svhn",
                                **kwargs)
 
 
-def diaresnet1001_cifar10(num_classes=10, **kwargs):
+def diaresnet1001_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1001 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -379,12 +444,17 @@ def diaresnet1001_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True,
                                model_name="diaresnet1001_cifar10", **kwargs)
 
 
-def diaresnet1001_cifar100(num_classes=100, **kwargs):
+def diaresnet1001_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1001 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -397,12 +467,17 @@ def diaresnet1001_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True,
                                model_name="diaresnet1001_cifar100", **kwargs)
 
 
-def diaresnet1001_svhn(num_classes=10, **kwargs):
+def diaresnet1001_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1001 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -415,12 +490,17 @@ def diaresnet1001_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True, model_name="diaresnet1001_svhn",
                                **kwargs)
 
 
-def diaresnet1202_cifar10(num_classes=10, **kwargs):
+def diaresnet1202_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1202 model for CIFAR-10 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -433,12 +513,17 @@ def diaresnet1202_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False,
                                model_name="diaresnet1202_cifar10", **kwargs)
 
 
-def diaresnet1202_cifar100(num_classes=100, **kwargs):
+def diaresnet1202_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1202 model for CIFAR-100 from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -451,12 +536,17 @@ def diaresnet1202_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False,
                                model_name="diaresnet1202_cifar100", **kwargs)
 
 
-def diaresnet1202_svhn(num_classes=10, **kwargs):
+def diaresnet1202_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DIA-ResNet-1202 model for SVHN from 'DIANet: Dense-and-Implicit Attention Network,'
     https://arxiv.org/abs/1905.10671.
@@ -469,6 +559,11 @@ def diaresnet1202_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False, model_name="diaresnet1202_svhn",
                                **kwargs)

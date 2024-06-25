@@ -384,7 +384,7 @@ def get_condensenet(num_layers,
                     model_name=None,
                     pretrained=False,
                     root: str = os.path.join("~", ".torch", "models"),
-                    **kwargs):
+                    **kwargs) -> nn.Module:
     """
     Create CondenseNet (converted) model with specific parameters.
 
@@ -400,6 +400,11 @@ def get_condensenet(num_layers,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if num_layers == 74:
@@ -436,7 +441,7 @@ def get_condensenet(num_layers,
     return net
 
 
-def condensenet74_c4_g4(**kwargs):
+def condensenet74_c4_g4(**kwargs) -> nn.Module:
     """
     CondenseNet-74 (C=G=4) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
@@ -447,11 +452,16 @@ def condensenet74_c4_g4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_condensenet(num_layers=74, groups=4, model_name="condensenet74_c4_g4", **kwargs)
 
 
-def condensenet74_c8_g8(**kwargs):
+def condensenet74_c8_g8(**kwargs) -> nn.Module:
     """
     CondenseNet-74 (C=G=8) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
@@ -462,6 +472,11 @@ def condensenet74_c8_g8(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_condensenet(num_layers=74, groups=8, model_name="condensenet74_c8_g8", **kwargs)
 

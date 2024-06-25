@@ -9,6 +9,7 @@
 __all__ = ['mobilenet_w1_cub', 'mobilenet_w3d4_cub', 'mobilenet_wd2_cub', 'mobilenet_wd4_cub', 'fdmobilenet_w1_cub',
            'fdmobilenet_w3d4_cub', 'fdmobilenet_wd2_cub', 'fdmobilenet_wd4_cub']
 
+import torch.nn as nn
 from .mobilenet import get_mobilenet
 from .fdmobilenet import get_fdmobilenet
 

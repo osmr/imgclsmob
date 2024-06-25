@@ -163,7 +163,7 @@ def get_densenet(blocks,
                  model_name=None,
                  pretrained=False,
                  root: str = os.path.join("~", ".torch", "models"),
-                 **kwargs):
+                 **kwargs) -> nn.Module:
     """
     Create DenseNet model with specific parameters.
 
@@ -177,6 +177,11 @@ def get_densenet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 121:
@@ -224,7 +229,7 @@ def get_densenet(blocks,
     return net
 
 
-def densenet121(**kwargs):
+def densenet121(**kwargs) -> nn.Module:
     """
     DenseNet-121 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
@@ -234,11 +239,16 @@ def densenet121(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet(blocks=121, model_name="densenet121", **kwargs)
 
 
-def densenet161(**kwargs):
+def densenet161(**kwargs) -> nn.Module:
     """
     DenseNet-161 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
@@ -248,11 +258,16 @@ def densenet161(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet(blocks=161, model_name="densenet161", **kwargs)
 
 
-def densenet169(**kwargs):
+def densenet169(**kwargs) -> nn.Module:
     """
     DenseNet-169 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
@@ -262,11 +277,16 @@ def densenet169(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet(blocks=169, model_name="densenet169", **kwargs)
 
 
-def densenet201(**kwargs):
+def densenet201(**kwargs) -> nn.Module:
     """
     DenseNet-201 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
@@ -276,6 +296,11 @@ def densenet201(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet(blocks=201, model_name="densenet201", **kwargs)
 

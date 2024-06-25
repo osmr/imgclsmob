@@ -258,7 +258,7 @@ def get_resnet(blocks,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create CBAM-ResNet model with specific parameters.
 
@@ -278,6 +278,11 @@ def get_resnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 18:
@@ -322,7 +327,7 @@ def get_resnet(blocks,
     return net
 
 
-def cbam_resnet18(**kwargs):
+def cbam_resnet18(**kwargs) -> nn.Module:
     """
     CBAM-ResNet-18 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
@@ -332,11 +337,16 @@ def cbam_resnet18(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, model_name="cbam_resnet18", **kwargs)
 
 
-def cbam_resnet34(**kwargs):
+def cbam_resnet34(**kwargs) -> nn.Module:
     """
     CBAM-ResNet-34 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
@@ -346,11 +356,16 @@ def cbam_resnet34(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=34, model_name="cbam_resnet34", **kwargs)
 
 
-def cbam_resnet50(**kwargs):
+def cbam_resnet50(**kwargs) -> nn.Module:
     """
     CBAM-ResNet-50 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
@@ -360,11 +375,16 @@ def cbam_resnet50(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=50, model_name="cbam_resnet50", **kwargs)
 
 
-def cbam_resnet101(**kwargs):
+def cbam_resnet101(**kwargs) -> nn.Module:
     """
     CBAM-ResNet-101 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
@@ -374,11 +394,16 @@ def cbam_resnet101(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=101, model_name="cbam_resnet101", **kwargs)
 
 
-def cbam_resnet152(**kwargs):
+def cbam_resnet152(**kwargs) -> nn.Module:
     """
     CBAM-ResNet-152 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
@@ -388,6 +413,11 @@ def cbam_resnet152(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=152, model_name="cbam_resnet152", **kwargs)
 

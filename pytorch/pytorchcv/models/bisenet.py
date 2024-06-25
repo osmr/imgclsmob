@@ -336,7 +336,7 @@ class BiSeNet(nn.Module):
 def get_bisenet(model_name=None,
                 pretrained=False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create BiSeNet model with specific parameters.
 
@@ -348,6 +348,11 @@ def get_bisenet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     net = BiSeNet(
         **kwargs)
@@ -364,7 +369,7 @@ def get_bisenet(model_name=None,
     return net
 
 
-def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **kwargs):
+def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **kwargs) -> nn.Module:
     """
     BiSeNet model on the base of ResNet-18 for face segmentation on CelebAMask-HQ from 'BiSeNet: Bilateral Segmentation
     Network for Real-time Semantic Segmentation,' https://arxiv.org/abs/1808.00897.
@@ -379,6 +384,11 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **k
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     def backbone():
         features_raw = resnet18(pretrained=pretrained_backbone).features

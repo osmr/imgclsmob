@@ -8,6 +8,7 @@ __all__ = ['seresnet10_cub', 'seresnet12_cub', 'seresnet14_cub', 'seresnetbc14b_
            'seresnet50_cub', 'seresnet50b_cub', 'seresnet101_cub', 'seresnet101b_cub', 'seresnet152_cub',
            'seresnet152b_cub', 'seresnet200_cub', 'seresnet200b_cub']
 
+import torch.nn as nn
 from .seresnet import get_seresnet
 
 

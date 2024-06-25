@@ -248,7 +248,7 @@ class EDANet(nn.Module):
 def get_edanet(model_name=None,
                pretrained=False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create EDANet model with specific parameters.
 
@@ -260,6 +260,11 @@ def get_edanet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels = [15, 60, 130, 450]
     dilations = [[0], [0, 1, 1, 1, 2, 2], [0, 2, 2, 4, 4, 8, 8, 16, 16]]
@@ -285,7 +290,7 @@ def get_edanet(model_name=None,
     return net
 
 
-def edanet_cityscapes(num_classes=19, **kwargs):
+def edanet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     EDANet model for Cityscapes from 'Efficient Dense Modules of Asymmetric Convolution for Real-Time Semantic
     Segmentation,' https://arxiv.org/abs/1809.06323.
@@ -298,6 +303,11 @@ def edanet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_edanet(num_classes=num_classes, model_name="edanet_cityscapes", **kwargs)
 

@@ -159,7 +159,7 @@ def get_diapreresnet(blocks,
                      model_name=None,
                      pretrained=False,
                      root: str = os.path.join("~", ".torch", "models"),
-                     **kwargs):
+                     **kwargs) -> nn.Module:
     """
     Create DIA-PreResNet model with specific parameters.
 
@@ -179,6 +179,11 @@ def get_diapreresnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if bottleneck is None:
         bottleneck = (blocks >= 50)
@@ -254,7 +259,7 @@ def get_diapreresnet(blocks,
     return net
 
 
-def diapreresnet10(**kwargs):
+def diapreresnet10(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-10 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
@@ -265,11 +270,16 @@ def diapreresnet10(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=10, model_name="diapreresnet10", **kwargs)
 
 
-def diapreresnet12(**kwargs):
+def diapreresnet12(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-12 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
@@ -280,11 +290,16 @@ def diapreresnet12(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=12, model_name="diapreresnet12", **kwargs)
 
 
-def diapreresnet14(**kwargs):
+def diapreresnet14(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-14 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
@@ -295,11 +310,16 @@ def diapreresnet14(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=14, model_name="diapreresnet14", **kwargs)
 
 
-def diapreresnetbc14b(**kwargs):
+def diapreresnetbc14b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-BC-14b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
@@ -310,11 +330,16 @@ def diapreresnetbc14b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="diapreresnetbc14b", **kwargs)
 
 
-def diapreresnet16(**kwargs):
+def diapreresnet16(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-16 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
@@ -325,11 +350,16 @@ def diapreresnet16(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=16, model_name="diapreresnet16", **kwargs)
 
 
-def diapreresnet18(**kwargs):
+def diapreresnet18(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-18 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -339,11 +369,16 @@ def diapreresnet18(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=18, model_name="diapreresnet18", **kwargs)
 
 
-def diapreresnet26(**kwargs):
+def diapreresnet26(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-26 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
@@ -354,11 +389,16 @@ def diapreresnet26(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=26, bottleneck=False, model_name="diapreresnet26", **kwargs)
 
 
-def diapreresnetbc26b(**kwargs):
+def diapreresnetbc26b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-BC-26b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
@@ -369,11 +409,16 @@ def diapreresnetbc26b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="diapreresnetbc26b", **kwargs)
 
 
-def diapreresnet34(**kwargs):
+def diapreresnet34(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-34 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -383,11 +428,16 @@ def diapreresnet34(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=34, model_name="diapreresnet34", **kwargs)
 
 
-def diapreresnetbc38b(**kwargs):
+def diapreresnetbc38b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-BC-38b model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
@@ -398,11 +448,16 @@ def diapreresnetbc38b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="diapreresnetbc38b", **kwargs)
 
 
-def diapreresnet50(**kwargs):
+def diapreresnet50(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-50 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -412,11 +467,16 @@ def diapreresnet50(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=50, model_name="diapreresnet50", **kwargs)
 
 
-def diapreresnet50b(**kwargs):
+def diapreresnet50b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-50 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
@@ -427,11 +487,16 @@ def diapreresnet50b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=50, conv1_stride=False, model_name="diapreresnet50b", **kwargs)
 
 
-def diapreresnet101(**kwargs):
+def diapreresnet101(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-101 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -441,11 +506,16 @@ def diapreresnet101(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=101, model_name="diapreresnet101", **kwargs)
 
 
-def diapreresnet101b(**kwargs):
+def diapreresnet101b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-101 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
@@ -456,11 +526,16 @@ def diapreresnet101b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=101, conv1_stride=False, model_name="diapreresnet101b", **kwargs)
 
 
-def diapreresnet152(**kwargs):
+def diapreresnet152(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-152 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -470,11 +545,16 @@ def diapreresnet152(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=152, model_name="diapreresnet152", **kwargs)
 
 
-def diapreresnet152b(**kwargs):
+def diapreresnet152b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-152 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
@@ -485,11 +565,16 @@ def diapreresnet152b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=152, conv1_stride=False, model_name="diapreresnet152b", **kwargs)
 
 
-def diapreresnet200(**kwargs):
+def diapreresnet200(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-200 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
@@ -499,11 +584,16 @@ def diapreresnet200(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=200, model_name="diapreresnet200", **kwargs)
 
 
-def diapreresnet200b(**kwargs):
+def diapreresnet200b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-200 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
@@ -514,11 +604,16 @@ def diapreresnet200b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=200, conv1_stride=False, model_name="diapreresnet200b", **kwargs)
 
 
-def diapreresnet269b(**kwargs):
+def diapreresnet269b(**kwargs) -> nn.Module:
     """
     DIA-PreResNet-269 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
     Attention Network,' https://arxiv.org/abs/1905.10671.
@@ -529,6 +624,11 @@ def diapreresnet269b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_diapreresnet(blocks=269, conv1_stride=False, model_name="diapreresnet269b", **kwargs)
 

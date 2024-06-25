@@ -28,7 +28,7 @@ def dark_convYxY(in_channels,
     alpha : float
         Slope coefficient for Leaky ReLU activation.
     pointwise : bool
-        Whether use 1x1 (pointwise) convolution or 3x3 convolution.
+        Whether to use 1x1 (pointwise) convolution or 3x3 convolution.
     """
     if pointwise:
         return conv1x1_block(
@@ -134,7 +134,7 @@ def get_darknet(version,
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create DarkNet model with specific parameters.
 
@@ -148,6 +148,11 @@ def get_darknet(version,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if version == 'ref':
@@ -188,7 +193,7 @@ def get_darknet(version,
     return net
 
 
-def darknet_ref(**kwargs):
+def darknet_ref(**kwargs) -> nn.Module:
     """
     DarkNet 'Reference' model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
@@ -198,11 +203,16 @@ def darknet_ref(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_darknet(version="ref", model_name="darknet_ref", **kwargs)
 
 
-def darknet_tiny(**kwargs):
+def darknet_tiny(**kwargs) -> nn.Module:
     """
     DarkNet Tiny model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
@@ -212,11 +222,16 @@ def darknet_tiny(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_darknet(version="tiny", model_name="darknet_tiny", **kwargs)
 
 
-def darknet19(**kwargs):
+def darknet19(**kwargs) -> nn.Module:
     """
     DarkNet-19 model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
@@ -226,6 +241,11 @@ def darknet19(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_darknet(version="19", model_name="darknet19", **kwargs)
 

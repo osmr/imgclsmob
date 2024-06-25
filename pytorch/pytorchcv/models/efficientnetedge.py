@@ -213,7 +213,7 @@ def get_efficientnet_edge(version,
                           model_name=None,
                           pretrained=False,
                           root: str = os.path.join("~", ".torch", "models"),
-                          **kwargs):
+                          **kwargs) -> nn.Module:
     """
     Create EfficientNet-Edge model with specific parameters.
 
@@ -233,6 +233,11 @@ def get_efficientnet_edge(version,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     dropout_rate = 0.0
     if version == "small":
@@ -307,7 +312,7 @@ def get_efficientnet_edge(version,
     return net
 
 
-def efficientnet_edge_small_b(in_size=(224, 224), **kwargs):
+def efficientnet_edge_small_b(in_size=(224, 224), **kwargs) -> nn.Module:
     """
     EfficientNet-Edge-Small-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -320,12 +325,17 @@ def efficientnet_edge_small_b(in_size=(224, 224), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet_edge(version="small", in_size=in_size, tf_mode=True, bn_eps=1e-3,
                                  model_name="efficientnet_edge_small_b", **kwargs)
 
 
-def efficientnet_edge_medium_b(in_size=(240, 240), **kwargs):
+def efficientnet_edge_medium_b(in_size=(240, 240), **kwargs) -> nn.Module:
     """
     EfficientNet-Edge-Medium-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -338,12 +348,17 @@ def efficientnet_edge_medium_b(in_size=(240, 240), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet_edge(version="medium", in_size=in_size, tf_mode=True, bn_eps=1e-3,
                                  model_name="efficientnet_edge_medium_b", **kwargs)
 
 
-def efficientnet_edge_large_b(in_size=(300, 300), **kwargs):
+def efficientnet_edge_large_b(in_size=(300, 300), **kwargs) -> nn.Module:
     """
     EfficientNet-Edge-Large-b model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -356,6 +371,11 @@ def efficientnet_edge_large_b(in_size=(300, 300), **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_efficientnet_edge(version="large", in_size=in_size, tf_mode=True, bn_eps=1e-3,
                                  model_name="efficientnet_edge_large_b", **kwargs)

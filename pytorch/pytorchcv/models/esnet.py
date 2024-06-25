@@ -242,7 +242,7 @@ class ESNet(nn.Module):
 def get_esnet(model_name=None,
               pretrained=False,
               root: str = os.path.join("~", ".torch", "models"),
-              **kwargs):
+              **kwargs) -> nn.Module:
     """
     Create ESNet model with specific parameters.
 
@@ -254,6 +254,11 @@ def get_esnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     layers = [[4, 3, 4], [3, 3]]
     channels = [[16, 64, 128], [64, 16]]
@@ -281,7 +286,7 @@ def get_esnet(model_name=None,
     return net
 
 
-def esnet_cityscapes(num_classes=19, **kwargs):
+def esnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     ESNet model for Cityscapes from 'ESNet: An Efficient Symmetric Network for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1906.09826.
@@ -294,6 +299,11 @@ def esnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_esnet(num_classes=num_classes, model_name="esnet_cityscapes", **kwargs)
 

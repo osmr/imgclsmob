@@ -509,7 +509,7 @@ class ChannelNet(nn.Module):
 def get_channelnet(model_name=None,
                    pretrained=False,
                    root: str = os.path.join("~", ".torch", "models"),
-                   **kwargs):
+                   **kwargs) -> nn.Module:
     """
     Create ChannelNet model with specific parameters.
 
@@ -521,6 +521,11 @@ def get_channelnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     channels = [[[32, 64]], [[128, 128]], [[256, 256]], [[512, 512], [512, 512]], [[1024, 1024]]]
@@ -549,7 +554,7 @@ def get_channelnet(model_name=None,
     return net
 
 
-def channelnet(**kwargs):
+def channelnet(**kwargs) -> nn.Module:
     """
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
@@ -560,6 +565,11 @@ def channelnet(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_channelnet(model_name="channelnet", **kwargs)
 

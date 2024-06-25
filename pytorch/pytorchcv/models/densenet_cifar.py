@@ -144,7 +144,7 @@ def get_densenet_cifar(num_classes,
                        model_name=None,
                        pretrained=False,
                        root: str = os.path.join("~", ".torch", "models"),
-                       **kwargs):
+                       **kwargs) -> nn.Module:
     """
     Create DenseNet model for CIFAR with specific parameters.
 
@@ -164,6 +164,11 @@ def get_densenet_cifar(num_classes,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     assert (num_classes in [10, 100])
 
@@ -203,7 +208,7 @@ def get_densenet_cifar(num_classes,
     return net
 
 
-def densenet40_k12_cifar10(num_classes=10, **kwargs):
+def densenet40_k12_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-40 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -216,12 +221,17 @@ def densenet40_k12_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=False,
                               model_name="densenet40_k12_cifar10", **kwargs)
 
 
-def densenet40_k12_cifar100(num_classes=100, **kwargs):
+def densenet40_k12_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-40 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -234,12 +244,17 @@ def densenet40_k12_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=False,
                               model_name="densenet40_k12_cifar100", **kwargs)
 
 
-def densenet40_k12_svhn(num_classes=10, **kwargs):
+def densenet40_k12_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -252,12 +267,17 @@ def densenet40_k12_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=False,
                               model_name="densenet40_k12_svhn", **kwargs)
 
 
-def densenet40_k12_bc_cifar10(num_classes=10, **kwargs):
+def densenet40_k12_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -270,12 +290,17 @@ def densenet40_k12_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=True,
                               model_name="densenet40_k12_bc_cifar10", **kwargs)
 
 
-def densenet40_k12_bc_cifar100(num_classes=100, **kwargs):
+def densenet40_k12_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -288,12 +313,17 @@ def densenet40_k12_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=True,
                               model_name="densenet40_k12_bc_cifar100", **kwargs)
 
 
-def densenet40_k12_bc_svhn(num_classes=10, **kwargs):
+def densenet40_k12_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -306,12 +336,17 @@ def densenet40_k12_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=12, bottleneck=True,
                               model_name="densenet40_k12_bc_svhn", **kwargs)
 
 
-def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
+def densenet40_k24_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -324,12 +359,17 @@ def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                               model_name="densenet40_k24_bc_cifar10", **kwargs)
 
 
-def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
+def densenet40_k24_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -342,12 +382,17 @@ def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                               model_name="densenet40_k24_bc_cifar100", **kwargs)
 
 
-def densenet40_k24_bc_svhn(num_classes=10, **kwargs):
+def densenet40_k24_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -360,12 +405,17 @@ def densenet40_k24_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                               model_name="densenet40_k24_bc_svhn", **kwargs)
 
 
-def densenet40_k36_bc_cifar10(num_classes=10, **kwargs):
+def densenet40_k36_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=36) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -378,12 +428,17 @@ def densenet40_k36_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                               model_name="densenet40_k36_bc_cifar10", **kwargs)
 
 
-def densenet40_k36_bc_cifar100(num_classes=100, **kwargs):
+def densenet40_k36_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=36) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -396,12 +451,17 @@ def densenet40_k36_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                               model_name="densenet40_k36_bc_cifar100", **kwargs)
 
 
-def densenet40_k36_bc_svhn(num_classes=10, **kwargs):
+def densenet40_k36_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-40 (k=36) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -414,12 +474,17 @@ def densenet40_k36_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                               model_name="densenet40_k36_bc_svhn", **kwargs)
 
 
-def densenet100_k12_cifar10(num_classes=10, **kwargs):
+def densenet100_k12_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -432,12 +497,17 @@ def densenet100_k12_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=False,
                               model_name="densenet100_k12_cifar10", **kwargs)
 
 
-def densenet100_k12_cifar100(num_classes=100, **kwargs):
+def densenet100_k12_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -450,12 +520,17 @@ def densenet100_k12_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=False,
                               model_name="densenet100_k12_cifar100", **kwargs)
 
 
-def densenet100_k12_svhn(num_classes=10, **kwargs):
+def densenet100_k12_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -468,12 +543,17 @@ def densenet100_k12_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=False,
                               model_name="densenet100_k12_svhn", **kwargs)
 
 
-def densenet100_k24_cifar10(num_classes=10, **kwargs):
+def densenet100_k24_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -486,12 +566,17 @@ def densenet100_k24_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=24, bottleneck=False,
                               model_name="densenet100_k24_cifar10", **kwargs)
 
 
-def densenet100_k24_cifar100(num_classes=100, **kwargs):
+def densenet100_k24_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -504,12 +589,17 @@ def densenet100_k24_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=24, bottleneck=False,
                               model_name="densenet100_k24_cifar100", **kwargs)
 
 
-def densenet100_k24_svhn(num_classes=10, **kwargs):
+def densenet100_k24_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-100 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -522,12 +612,17 @@ def densenet100_k24_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=24, bottleneck=False,
                               model_name="densenet100_k24_svhn", **kwargs)
 
 
-def densenet100_k12_bc_cifar10(num_classes=10, **kwargs):
+def densenet100_k12_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-100 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -540,12 +635,17 @@ def densenet100_k12_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=True,
                               model_name="densenet100_k12_bc_cifar10", **kwargs)
 
 
-def densenet100_k12_bc_cifar100(num_classes=100, **kwargs):
+def densenet100_k12_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-100 (k=12) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -558,12 +658,17 @@ def densenet100_k12_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=True,
                               model_name="densenet100_k12_bc_cifar100", **kwargs)
 
 
-def densenet100_k12_bc_svhn(num_classes=10, **kwargs):
+def densenet100_k12_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -576,12 +681,17 @@ def densenet100_k12_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, bottleneck=True,
                               model_name="densenet100_k12_bc_svhn", **kwargs)
 
 
-def densenet190_k40_bc_cifar10(num_classes=10, **kwargs):
+def densenet190_k40_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-190 (k=40) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -594,12 +704,17 @@ def densenet190_k40_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=190, growth_rate=40, bottleneck=True,
                               model_name="densenet190_k40_bc_cifar10", **kwargs)
 
 
-def densenet190_k40_bc_cifar100(num_classes=100, **kwargs):
+def densenet190_k40_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-190 (k=40) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -612,12 +727,17 @@ def densenet190_k40_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=190, growth_rate=40, bottleneck=True,
                               model_name="densenet190_k40_bc_cifar100", **kwargs)
 
 
-def densenet190_k40_bc_svhn(num_classes=10, **kwargs):
+def densenet190_k40_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-190 (k=40) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -630,12 +750,17 @@ def densenet190_k40_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=190, growth_rate=40, bottleneck=True,
                               model_name="densenet190_k40_bc_svhn", **kwargs)
 
 
-def densenet250_k24_bc_cifar10(num_classes=10, **kwargs):
+def densenet250_k24_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-250 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -648,12 +773,17 @@ def densenet250_k24_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=250, growth_rate=24, bottleneck=True,
                               model_name="densenet250_k24_bc_cifar10", **kwargs)
 
 
-def densenet250_k24_bc_cifar100(num_classes=100, **kwargs):
+def densenet250_k24_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     DenseNet-BC-250 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -666,12 +796,17 @@ def densenet250_k24_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=250, growth_rate=24, bottleneck=True,
                               model_name="densenet250_k24_bc_cifar100", **kwargs)
 
 
-def densenet250_k24_bc_svhn(num_classes=10, **kwargs):
+def densenet250_k24_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     DenseNet-BC-250 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
@@ -684,6 +819,11 @@ def densenet250_k24_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=250, growth_rate=24, bottleneck=True,
                               model_name="densenet250_k24_bc_svhn", **kwargs)

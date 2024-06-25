@@ -217,13 +217,13 @@ def get_bagnet(field,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create BagNet model with specific parameters.
 
     Parameters
     ----------
-    blocks : int
+    field : int
         Number of blocks.
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -231,6 +231,11 @@ def get_bagnet(field,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     layers = [3, 4, 6, 3]
@@ -271,7 +276,7 @@ def get_bagnet(field,
     return net
 
 
-def bagnet9(**kwargs):
+def bagnet9(**kwargs) -> nn.Module:
     """
     BagNet-9 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
@@ -282,11 +287,16 @@ def bagnet9(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_bagnet(field=9, model_name="bagnet9", **kwargs)
 
 
-def bagnet17(**kwargs):
+def bagnet17(**kwargs) -> nn.Module:
     """
     BagNet-17 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
@@ -297,11 +307,16 @@ def bagnet17(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_bagnet(field=17, model_name="bagnet17", **kwargs)
 
 
-def bagnet33(**kwargs):
+def bagnet33(**kwargs) -> nn.Module:
     """
     BagNet-33 model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
@@ -312,6 +327,11 @@ def bagnet33(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_bagnet(field=33, model_name="bagnet33", **kwargs)
 

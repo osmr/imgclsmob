@@ -150,7 +150,7 @@ def get_xdensenet_cifar(num_classes,
                         model_name=None,
                         pretrained=False,
                         root: str = os.path.join("~", ".torch", "models"),
-                        **kwargs):
+                        **kwargs) -> nn.Module:
     """
     Create X-DenseNet model for CIFAR with specific parameters.
 
@@ -172,6 +172,11 @@ def get_xdensenet_cifar(num_classes,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     assert (num_classes in [10, 100])
 
@@ -212,7 +217,7 @@ def get_xdensenet_cifar(num_classes,
     return net
 
 
-def xdensenet40_2_k24_bc_cifar10(num_classes=10, **kwargs):
+def xdensenet40_2_k24_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=24) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -225,12 +230,17 @@ def xdensenet40_2_k24_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                                model_name="xdensenet40_2_k24_bc_cifar10", **kwargs)
 
 
-def xdensenet40_2_k24_bc_cifar100(num_classes=100, **kwargs):
+def xdensenet40_2_k24_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=24) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -243,12 +253,17 @@ def xdensenet40_2_k24_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                                model_name="xdensenet40_2_k24_bc_cifar100", **kwargs)
 
 
-def xdensenet40_2_k24_bc_svhn(num_classes=10, **kwargs):
+def xdensenet40_2_k24_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=24) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -261,12 +276,17 @@ def xdensenet40_2_k24_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
                                model_name="xdensenet40_2_k24_bc_svhn", **kwargs)
 
 
-def xdensenet40_2_k36_bc_cifar10(num_classes=10, **kwargs):
+def xdensenet40_2_k36_bc_cifar10(num_classes=10, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=36) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -279,12 +299,17 @@ def xdensenet40_2_k36_bc_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                                model_name="xdensenet40_2_k36_bc_cifar10", **kwargs)
 
 
-def xdensenet40_2_k36_bc_cifar100(num_classes=100, **kwargs):
+def xdensenet40_2_k36_bc_cifar100(num_classes=100, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=36) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -297,12 +322,17 @@ def xdensenet40_2_k36_bc_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                                model_name="xdensenet40_2_k36_bc_cifar100", **kwargs)
 
 
-def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs):
+def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     X-DenseNet-BC-40-2 (k=36) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
@@ -315,6 +345,11 @@ def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                                model_name="xdensenet40_2_k36_bc_svhn", **kwargs)

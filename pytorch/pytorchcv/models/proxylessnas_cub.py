@@ -6,6 +6,7 @@
 
 __all__ = ['proxylessnas_cpu_cub', 'proxylessnas_gpu_cub', 'proxylessnas_mobile_cub', 'proxylessnas_mobile14_cub']
 
+import torch.nn as nn
 from .proxylessnas import get_proxylessnas
 
 

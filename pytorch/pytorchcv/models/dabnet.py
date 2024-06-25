@@ -459,7 +459,7 @@ class DABNet(nn.Module):
 def get_dabnet(model_name=None,
                pretrained=False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create DABNet model with specific parameters.
 
@@ -471,6 +471,11 @@ def get_dabnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels = 32
     channels = [35, 131, 259]
@@ -496,7 +501,7 @@ def get_dabnet(model_name=None,
     return net
 
 
-def dabnet_cityscapes(num_classes=19, **kwargs):
+def dabnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     DABNet model for Cityscapes from 'DABNet: Depth-wise Asymmetric Bottleneck for Real-time Semantic Segmentation,'
     https://arxiv.org/abs/1907.11357.
@@ -509,6 +514,11 @@ def dabnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dabnet(num_classes=num_classes, model_name="dabnet_cityscapes", **kwargs)
 

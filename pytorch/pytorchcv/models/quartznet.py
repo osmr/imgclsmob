@@ -8,6 +8,7 @@ __all__ = ['quartznet5x5_en_ls', 'quartznet15x5_en', 'quartznet15x5_en_nr', 'qua
            'quartznet15x5_it', 'quartznet15x5_es', 'quartznet15x5_ca', 'quartznet15x5_pl', 'quartznet15x5_ru',
            'quartznet15x5_ru34']
 
+import torch.nn as nn
 from .jasper import get_jasper
 
 

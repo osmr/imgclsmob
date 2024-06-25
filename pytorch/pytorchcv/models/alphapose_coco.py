@@ -90,7 +90,7 @@ def get_alphapose(backbone,
                   model_name: str | None = None,
                   pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
-                  **kwargs):
+                  **kwargs) -> nn.Module:
     """
     Create AlphaPose model with specific parameters.
 
@@ -108,6 +108,11 @@ def get_alphapose(backbone,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels = [256, 128]
 
@@ -130,7 +135,7 @@ def get_alphapose(backbone,
     return net
 
 
-def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
+def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **kwargs) -> nn.Module:
     """
     AlphaPose model on the base of ResNet-101b for COCO Keypoint from 'RMPE: Regional Multi-person Pose Estimation,'
     https://arxiv.org/abs/1612.00137.
@@ -145,6 +150,11 @@ def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **k
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     backbone = fastseresnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]

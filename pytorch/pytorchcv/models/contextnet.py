@@ -349,7 +349,7 @@ class ContextNet(nn.Module):
 def get_ctxnet(model_name=None,
                pretrained=False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create ContextNet model with specific parameters.
 
@@ -361,6 +361,11 @@ def get_ctxnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     net = ContextNet(
         **kwargs)
@@ -377,7 +382,7 @@ def get_ctxnet(model_name=None,
     return net
 
 
-def ctxnet_cityscapes(num_classes=19, **kwargs):
+def ctxnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     ContextNet model for Cityscapes from 'ContextNet: Exploring Context and Detail for Semantic Segmentation in
     Real-time,' https://arxiv.org/abs/1805.04554.
@@ -390,6 +395,11 @@ def ctxnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_ctxnet(num_classes=num_classes, model_name="ctxnet_cityscapes", **kwargs)
 

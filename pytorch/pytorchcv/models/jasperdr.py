@@ -5,6 +5,7 @@
 
 __all__ = ['jasperdr10x5_en', 'jasperdr10x5_en_nr']
 
+import torch.nn as nn
 from .jasper import get_jasper
 
 

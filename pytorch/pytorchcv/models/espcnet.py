@@ -303,7 +303,7 @@ class ESPCNet(nn.Module):
 def get_espcnet(model_name=None,
                 pretrained=False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create ESPNet-C model with specific parameters.
 
@@ -315,6 +315,11 @@ def get_espcnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels = 16
     layers = [0, 6, 4]
@@ -342,7 +347,7 @@ def get_espcnet(model_name=None,
     return net
 
 
-def espcnet_cityscapes(num_classes=19, **kwargs):
+def espcnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     ESPNet-C model for Cityscapes from 'ESPNet: Efficient Spatial Pyramid of Dilated Convolutions for Semantic
     Segmentation,' https://arxiv.org/abs/1803.06815.
@@ -355,6 +360,11 @@ def espcnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espcnet(num_classes=num_classes, model_name="espcnet_cityscapes", **kwargs)
 

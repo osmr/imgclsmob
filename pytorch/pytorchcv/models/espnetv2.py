@@ -369,7 +369,7 @@ def get_espnetv2(width_scale,
                  model_name=None,
                  pretrained=False,
                  root: str = os.path.join("~", ".torch", "models"),
-                 **kwargs):
+                 **kwargs) -> nn.Module:
     """
     Create ESPNetv2 model with specific parameters.
 
@@ -383,6 +383,11 @@ def get_espnetv2(width_scale,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     assert (width_scale <= 2.0)
 
@@ -422,7 +427,7 @@ def get_espnetv2(width_scale,
     return net
 
 
-def espnetv2_wd2(**kwargs):
+def espnetv2_wd2(**kwargs) -> nn.Module:
     """
     ESPNetv2 x0.5 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -433,11 +438,16 @@ def espnetv2_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espnetv2(width_scale=0.5, model_name="espnetv2_wd2", **kwargs)
 
 
-def espnetv2_w1(**kwargs):
+def espnetv2_w1(**kwargs) -> nn.Module:
     """
     ESPNetv2 x1.0 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -448,11 +458,16 @@ def espnetv2_w1(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espnetv2(width_scale=1.0, model_name="espnetv2_w1", **kwargs)
 
 
-def espnetv2_w5d4(**kwargs):
+def espnetv2_w5d4(**kwargs) -> nn.Module:
     """
     ESPNetv2 x1.25 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -463,11 +478,16 @@ def espnetv2_w5d4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espnetv2(width_scale=1.25, model_name="espnetv2_w5d4", **kwargs)
 
 
-def espnetv2_w3d2(**kwargs):
+def espnetv2_w3d2(**kwargs) -> nn.Module:
     """
     ESPNetv2 x1.5 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -478,11 +498,16 @@ def espnetv2_w3d2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espnetv2(width_scale=1.5, model_name="espnetv2_w3d2", **kwargs)
 
 
-def espnetv2_w2(**kwargs):
+def espnetv2_w2(**kwargs) -> nn.Module:
     """
     ESPNetv2 x2.0 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -493,6 +518,11 @@ def espnetv2_w2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_espnetv2(width_scale=2.0, model_name="espnetv2_w2", **kwargs)
 

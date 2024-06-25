@@ -135,7 +135,7 @@ class DarkNet53(nn.Module):
 def get_darknet53(model_name=None,
                   pretrained=False,
                   root: str = os.path.join("~", ".torch", "models"),
-                  **kwargs):
+                  **kwargs) -> nn.Module:
     """
     Create DarkNet model with specific parameters.
 
@@ -147,6 +147,11 @@ def get_darknet53(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels = 32
     layers = [2, 3, 9, 9, 5]
@@ -170,7 +175,7 @@ def get_darknet53(model_name=None,
     return net
 
 
-def darknet53(**kwargs):
+def darknet53(**kwargs) -> nn.Module:
     """
     DarkNet-53 'Reference' model from 'YOLOv3: An Incremental Improvement,' https://arxiv.org/abs/1804.02767.
 
@@ -180,6 +185,11 @@ def darknet53(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_darknet53(model_name="darknet53", **kwargs)
 

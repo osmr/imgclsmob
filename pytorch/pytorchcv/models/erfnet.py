@@ -81,13 +81,13 @@ class ERFNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for the first unit of each stage.
     dilations : list(list(int))
         Dilation values for each unit.
-    dropout_rates : list of float
+    dropout_rates : list(list(float))
         Parameter of dropout layer for each stage.
-    downs : list of int
+    downs : list(int)
         Whether to downscale or upscale in each stage.
     correct_size_mistmatch : bool
         Whether to correct downscaled sizes of images in encoder.
@@ -105,10 +105,10 @@ class ERFNet(nn.Module):
         Number of segmentation classes.
     """
     def __init__(self,
-                 channels,
-                 dilations,
-                 dropout_rates,
-                 downs,
+                 channels: list[int],
+                 dilations: list[list[int]],
+                 dropout_rates: list[list[float]],
+                 downs: list[int],
                  correct_size_mismatch=False,
                  bn_eps=1e-5,
                  aux=False,
@@ -194,7 +194,7 @@ class ERFNet(nn.Module):
 def get_erfnet(model_name=None,
                pretrained=False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create ERFNet model with specific parameters.
 
@@ -206,6 +206,11 @@ def get_erfnet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     downs = [1, 1, 1, 0, 0]
     channels = [16, 64, 128, 64, 16]
@@ -232,7 +237,7 @@ def get_erfnet(model_name=None,
     return net
 
 
-def erfnet_cityscapes(num_classes=19, **kwargs):
+def erfnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     """
     ERFNet model for Cityscapes from 'ERFNet: Efficient Residual Factorized ConvNet for Real-time Semantic
     Segmentation,' http://www.robesafe.uah.es/personal/eduardo.romera/pdfs/Romera17tits.pdf.
@@ -245,6 +250,11 @@ def erfnet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_erfnet(num_classes=num_classes, model_name="erfnet_cityscapes", **kwargs)
 

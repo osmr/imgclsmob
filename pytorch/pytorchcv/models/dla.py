@@ -140,7 +140,7 @@ class DLARoot(nn.Module):
     out_channels : int
         Number of output channels.
     residual : bool
-        Whether use residual connection.
+        Whether to use residual connection.
     """
     def __init__(self,
                  in_channels,
@@ -177,12 +177,12 @@ class DLATree(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    res_body_class : nn.Module
+    res_body_class : type(nn.Module)
         Residual block body class.
     stride : int or tuple(int, int)
         Strides of the convolution in a residual block.
     root_residual : bool
-        Whether use residual connection in the root.
+        Whether to use residual connection in the root.
     root_dim : int
         Number of input channels in the root block.
     first_tree : bool, default False
@@ -311,16 +311,16 @@ class DLA(nn.Module):
 
     Parameters
     ----------
-    levels : int
+    levels : list(int)
         Number of levels in each stage.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each stage.
     init_block_channels : int
         Number of output channels for the initial unit.
-    res_body_class : nn.Module
+    res_body_class : type(nn.Module)
         Residual block body class.
     residual_root : bool
-        Whether use residual connection in the root blocks.
+        Whether to use residual connection in the root blocks.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple(int, int), default (224, 224)
@@ -329,10 +329,10 @@ class DLA(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 levels,
-                 channels,
-                 init_block_channels,
-                 res_body_class,
+                 levels: list[int],
+                 channels: list[int],
+                 init_block_channels: int,
+                 res_body_class: type[nn.Module],
                  residual_root,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
@@ -386,33 +386,38 @@ class DLA(nn.Module):
         return x
 
 
-def get_dla(levels,
-            channels,
-            res_body_class,
+def get_dla(levels: list[int],
+            channels: list[int],
+            res_body_class: type[nn.Module],
             residual_root=False,
             model_name=None,
             pretrained=False,
             root: str = os.path.join("~", ".torch", "models"),
-            **kwargs):
+            **kwargs) -> nn.Module:
     """
     Create DLA model with specific parameters.
 
     Parameters
     ----------
-    levels : int
+    levels : list(int)
         Number of levels in each stage.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each stage.
-    res_body_class : nn.Module
+    res_body_class : type(nn.Module)
         Residual block body class.
     residual_root : bool, default False
-        Whether use residual connection in the root blocks.
+        Whether to use residual connection in the root blocks.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     init_block_channels = 32
 
@@ -436,7 +441,7 @@ def get_dla(levels,
     return net
 
 
-def dla34(**kwargs):
+def dla34(**kwargs) -> nn.Module:
     """
     DLA-34 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -446,12 +451,17 @@ def dla34(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 2, 1], channels=[64, 128, 256, 512], res_body_class=ResBlock, model_name="dla34",
                    **kwargs)
 
 
-def dla46c(**kwargs):
+def dla46c(**kwargs) -> nn.Module:
     """
     DLA-46-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -461,12 +471,17 @@ def dla46c(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 2, 1], channels=[64, 64, 128, 256], res_body_class=DLABottleneck, model_name="dla46c",
                    **kwargs)
 
 
-def dla46xc(**kwargs):
+def dla46xc(**kwargs) -> nn.Module:
     """
     DLA-X-46-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -476,12 +491,17 @@ def dla46xc(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 2, 1], channels=[64, 64, 128, 256], res_body_class=DLABottleneckX,
                    model_name="dla46xc", **kwargs)
 
 
-def dla60(**kwargs):
+def dla60(**kwargs) -> nn.Module:
     """
     DLA-60 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -491,12 +511,17 @@ def dla60(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 3, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneck,
                    model_name="dla60", **kwargs)
 
 
-def dla60x(**kwargs):
+def dla60x(**kwargs) -> nn.Module:
     """
     DLA-X-60 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -506,12 +531,17 @@ def dla60x(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 3, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneckX,
                    model_name="dla60x", **kwargs)
 
 
-def dla60xc(**kwargs):
+def dla60xc(**kwargs) -> nn.Module:
     """
     DLA-X-60-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -521,12 +551,17 @@ def dla60xc(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 2, 3, 1], channels=[64, 64, 128, 256], res_body_class=DLABottleneckX,
                    model_name="dla60xc", **kwargs)
 
 
-def dla102(**kwargs):
+def dla102(**kwargs) -> nn.Module:
     """
     DLA-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -536,12 +571,17 @@ def dla102(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 3, 4, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneck,
                    residual_root=True, model_name="dla102", **kwargs)
 
 
-def dla102x(**kwargs):
+def dla102x(**kwargs) -> nn.Module:
     """
     DLA-X-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -551,12 +591,17 @@ def dla102x(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[1, 3, 4, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneckX,
                    residual_root=True, model_name="dla102x", **kwargs)
 
 
-def dla102x2(**kwargs):
+def dla102x2(**kwargs) -> nn.Module:
     """
     DLA-X2-102 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -566,6 +611,11 @@ def dla102x2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     class DLABottleneckX64(DLABottleneckX):
         def __init__(self, in_channels, out_channels, stride):
@@ -575,7 +625,7 @@ def dla102x2(**kwargs):
                    residual_root=True, model_name="dla102x2", **kwargs)
 
 
-def dla169(**kwargs):
+def dla169(**kwargs) -> nn.Module:
     """
     DLA-169 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 
@@ -585,6 +635,11 @@ def dla169(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_dla(levels=[2, 3, 5, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneck,
                    residual_root=True, model_name="dla169", **kwargs)

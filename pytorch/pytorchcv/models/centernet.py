@@ -10,7 +10,7 @@ __all__ = ['CenterNet', 'centernet_resnet18_voc', 'centernet_resnet18_coco', 'ce
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv3x3_block, DeconvBlock, Concurrent
+from .common import conv1x1, conv3x3_block, DeconvBlock, Concurrent, calc_net_weights
 from .resnet import resnet18, resnet50b, resnet101b
 
 
@@ -472,28 +472,6 @@ def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwarg
     del backbone[-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, num_classes=num_classes,
                          model_name="centernet_resnet101b_coco", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

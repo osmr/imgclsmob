@@ -10,7 +10,7 @@ import os
 import torch
 from torch import nn
 from .common import (get_activation_layer, conv1x1_block, conv3x3_block, conv7x7_block, SEBlock, Hourglass,
-                     InterpolationBlock)
+                     InterpolationBlock, calc_net_weights)
 
 
 class IbpResBottleneck(nn.Module):
@@ -551,28 +551,6 @@ def ibppose_coco(**kwargs):
         Location for keeping the model parameters.
     """
     return get_ibppose(model_name="ibppose_coco", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

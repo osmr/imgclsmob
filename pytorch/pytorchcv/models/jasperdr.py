@@ -5,8 +5,8 @@
 
 __all__ = ['jasperdr10x5_en', 'jasperdr10x5_en_nr']
 
-import torch.nn as nn
 from .jasper import get_jasper
+from .common import calc_net_weights
 
 
 def jasperdr10x5_en(num_classes=29, **kwargs):
@@ -43,28 +43,6 @@ def jasperdr10x5_en_nr(num_classes=29, **kwargs):
     """
     return get_jasper(num_classes=num_classes, version=("jasper", "10x5"), use_dr=True, model_name="jasperdr10x5_en_nr",
                       **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

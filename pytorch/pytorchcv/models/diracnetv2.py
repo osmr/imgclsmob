@@ -9,6 +9,7 @@ __all__ = ['DiracNetV2', 'diracnet18v2', 'diracnet34v2']
 import os
 import torch.nn as nn
 import torch.nn.init as init
+from .common import calc_net_weights
 
 
 class DiracConv(nn.Module):
@@ -266,28 +267,6 @@ def diracnet34v2(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_diracnetv2(blocks=34, model_name="diracnet34v2", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

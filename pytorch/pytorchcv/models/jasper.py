@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .common import DualPathSequential, DualPathParallelConcurent
+from .common import DualPathSequential, DualPathParallelConcurent, calc_net_weights
 
 
 def outmask_fill(x, x_len, value=0.0):
@@ -1088,28 +1088,6 @@ def jasper10x5(**kwargs):
         Location for keeping the model parameters.
     """
     return get_jasper(version=("jasper", "10x5"), model_name="jasper10x5", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

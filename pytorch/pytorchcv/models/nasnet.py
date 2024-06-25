@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, DualPathSequential
+from .common import conv1x1, DualPathSequential, calc_net_weights
 
 
 class NasDualPathScheme(object):
@@ -1265,28 +1265,6 @@ def nasnet_6a4032(**kwargs):
         in_size=(331, 331),
         model_name="nasnet_6a4032",
         **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

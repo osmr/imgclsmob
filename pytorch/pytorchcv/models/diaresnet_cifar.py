@@ -12,7 +12,7 @@ __all__ = ['CIFARDIAResNet', 'diaresnet20_cifar10', 'diaresnet20_cifar100', 'dia
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3_block, DualPathSequential
+from .common import conv3x3_block, DualPathSequential, calc_net_weights
 from .diaresnet import DIAAttention, DIAResUnit
 
 
@@ -567,28 +567,6 @@ def diaresnet1202_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     return get_diaresnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False, model_name="diaresnet1202_svhn",
                                **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

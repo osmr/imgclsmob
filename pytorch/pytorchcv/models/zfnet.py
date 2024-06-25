@@ -8,6 +8,7 @@ __all__ = ['zfnet', 'zfnetb']
 import os
 import torch.nn as nn
 from .alexnet import AlexNet
+from .common import calc_net_weights
 
 
 def get_zfnet(version="a",
@@ -105,28 +106,6 @@ def zfnetb(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_zfnet(version="b", model_name="zfnetb", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

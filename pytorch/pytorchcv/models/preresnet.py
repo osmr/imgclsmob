@@ -12,7 +12,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetb
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, calc_net_weights
 
 
 class PreResBlock(nn.Module):
@@ -719,28 +719,6 @@ def preresnet269b(**kwargs):
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=269, conv1_stride=False, model_name="preresnet269b", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

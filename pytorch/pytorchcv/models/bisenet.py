@@ -9,7 +9,7 @@ __all__ = ['BiSeNet', 'bisenet_resnet18_celebamaskhq']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential
+from .common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential, calc_net_weights
 from .resnet import resnet18
 
 
@@ -402,28 +402,6 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **k
         out_channels = [128, 256, 512]
         return features, out_channels
     return get_bisenet(backbone=backbone, num_classes=num_classes, model_name="bisenet_resnet18_celebamaskhq", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

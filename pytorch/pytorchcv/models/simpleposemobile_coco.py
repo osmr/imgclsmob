@@ -10,7 +10,7 @@ __all__ = ['SimplePoseMobile', 'simplepose_mobile_resnet18_coco', 'simplepose_mo
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, DucBlock, HeatmapMaxDetBlock
+from .common import conv1x1, DucBlock, HeatmapMaxDetBlock, calc_net_weights
 from .resnet import resnet18, resnet50b
 from .mobilenet import mobilenet_w1
 from .mobilenetv2 import mobilenetv2b_w1
@@ -273,28 +273,6 @@ def simplepose_mobile_mobilenetv3_large_w1_coco(pretrained_backbone=False, keypo
     del backbone[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=960, keypoints=keypoints,
                                 model_name="simplepose_mobile_mobilenetv3_large_w1_coco", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

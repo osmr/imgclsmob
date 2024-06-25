@@ -9,7 +9,7 @@ __all__ = ['SCNet', 'scnet50', 'scnet101', 'scneta50', 'scneta101']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, InterpolationBlock
+from .common import conv1x1_block, conv3x3_block, InterpolationBlock, calc_net_weights
 from .resnet import ResInitBlock
 from .senet import SEInitBlock
 from .resnesta import ResNeStADownBlock
@@ -437,28 +437,6 @@ def scneta101(**kwargs):
     """
     return get_scnet(blocks=101, se_init_block=True, avg_downsample=True, init_block_channels_scale=2,
                      model_name="scneta101", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

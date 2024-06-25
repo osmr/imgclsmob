@@ -10,7 +10,7 @@ import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from .common import ConvBlock
+from .common import ConvBlock, calc_net_weights
 
 
 class AlexConv(ConvBlock):
@@ -292,28 +292,6 @@ def alexnetb(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_alexnet(version="b", model_name="alexnetb", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

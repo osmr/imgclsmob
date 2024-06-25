@@ -9,7 +9,8 @@ __all__ = ['ESPCNet', 'espcnet_cityscapes', 'ESPBlock']
 import os
 import torch
 import torch.nn as nn
-from .common import NormActivation, conv1x1, conv3x3, conv3x3_block, DualPathSequential, InterpolationBlock
+from .common import (NormActivation, conv1x1, conv3x3, conv3x3_block, DualPathSequential, InterpolationBlock,
+                     calc_net_weights)
 
 
 class HierarchicalConcurrent(nn.Sequential):
@@ -367,28 +368,6 @@ def espcnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
         Desired module.
     """
     return get_espcnet(num_classes=num_classes, model_name="espcnet_cityscapes", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

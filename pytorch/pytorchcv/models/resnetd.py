@@ -8,7 +8,7 @@ __all__ = ['ResNetD', 'resnetd50b', 'resnetd101b', 'resnetd152b']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import MultiOutputSequential
+from .common import MultiOutputSequential, calc_net_weights
 from .resnet import ResUnit, ResInitBlock
 from .senet import SEInitBlock
 
@@ -233,28 +233,6 @@ def resnetd152b(**kwargs):
         Location for keeping the model parameters.
     """
     return get_resnetd(blocks=152, conv1_stride=False, model_name="resnetd152b", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

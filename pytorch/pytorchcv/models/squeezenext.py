@@ -8,7 +8,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ConvBlock, conv1x1_block, conv7x7_block
+from .common import ConvBlock, conv1x1_block, conv7x7_block, calc_net_weights
 
 
 class SqnxtUnit(nn.Module):
@@ -337,28 +337,6 @@ def sqnxt23v5_w2(**kwargs):
         Location for keeping the model parameters.
     """
     return get_squeezenext(version="23v5", width_scale=2.0, model_name="sqnxt23v5_w2", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

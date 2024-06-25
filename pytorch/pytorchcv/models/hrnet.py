@@ -9,7 +9,7 @@ __all__ = ['hrnet_w18_small_v1', 'hrnet_w18_small_v2', 'hrnetv2_w18', 'hrnetv2_w
 
 import os
 import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, Identity
+from .common import conv1x1_block, conv3x3_block, Identity, calc_net_weights
 from .resnet import ResUnit
 
 
@@ -600,28 +600,6 @@ def hrnetv2_w64(**kwargs):
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w64", model_name="hrnetv2_w64", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

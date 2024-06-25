@@ -9,7 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv7x7_block
+from .common import conv1x1_block, conv7x7_block, calc_net_weights
 from .resnet import ResInitBlock, ResBlock, ResBottleneck
 
 
@@ -420,28 +420,6 @@ def cbam_resnet152(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_resnet(blocks=152, model_name="cbam_resnet152", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

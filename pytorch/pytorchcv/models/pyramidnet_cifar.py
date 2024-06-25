@@ -14,7 +14,7 @@ __all__ = ['CIFARPyramidNet', 'pyramidnet110_a48_cifar10', 'pyramidnet110_a48_ci
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3_block
+from .common import conv3x3_block, calc_net_weights
 from .preresnet import PreResActivation
 from .pyramidnet import PyrUnit
 
@@ -632,28 +632,6 @@ def pyramidnet272_a200_bn_svhn(num_classes=10, **kwargs):
         bottleneck=True,
         model_name="pyramidnet272_a200_bn_svhn",
         **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

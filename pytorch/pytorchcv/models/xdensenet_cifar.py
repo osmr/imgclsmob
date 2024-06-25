@@ -12,7 +12,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3
+from .common import conv3x3, calc_net_weights
 from .preresnet import PreResActivation
 from .densenet import TransitionBlock
 from .xdensenet import pre_xconv3x3_block, XDenseUnit
@@ -353,28 +353,6 @@ def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
                                model_name="xdensenet40_2_k36_bc_svhn", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

@@ -10,7 +10,7 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 import os
 import torch
 import torch.nn as nn
-from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock
+from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock, calc_net_weights
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -286,28 +286,6 @@ def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, **kwarg
     del backbone[-1]
     return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta152b_coco", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

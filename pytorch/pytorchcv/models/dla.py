@@ -9,7 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, conv1x1_block, conv3x3_block, conv7x7_block
+from .common import conv1x1, conv1x1_block, conv3x3_block, conv7x7_block, calc_net_weights
 from .resnet import ResBlock, ResBottleneck
 from .resnext import ResNeXtBottleneck
 
@@ -643,28 +643,6 @@ def dla169(**kwargs) -> nn.Module:
     """
     return get_dla(levels=[2, 3, 5, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneck,
                    residual_root=True, model_name="dla169", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

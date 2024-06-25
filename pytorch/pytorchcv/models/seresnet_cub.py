@@ -8,8 +8,8 @@ __all__ = ['seresnet10_cub', 'seresnet12_cub', 'seresnet14_cub', 'seresnetbc14b_
            'seresnet50_cub', 'seresnet50b_cub', 'seresnet101_cub', 'seresnet101b_cub', 'seresnet152_cub',
            'seresnet152b_cub', 'seresnet200_cub', 'seresnet200b_cub']
 
-import torch.nn as nn
 from .seresnet import get_seresnet
+from .common import calc_net_weights
 
 
 def seresnet10_cub(num_classes=200, **kwargs):
@@ -317,28 +317,6 @@ def seresnet200b_cub(num_classes=200, **kwargs):
     """
     return get_seresnet(num_classes=num_classes, blocks=200, conv1_stride=False, model_name="seresnet200b_cub",
                         **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

@@ -8,8 +8,8 @@ __all__ = ['quartznet5x5_en_ls', 'quartznet15x5_en', 'quartznet15x5_en_nr', 'qua
            'quartznet15x5_it', 'quartznet15x5_es', 'quartznet15x5_ca', 'quartznet15x5_pl', 'quartznet15x5_ru',
            'quartznet15x5_ru34']
 
-import torch.nn as nn
 from .jasper import get_jasper
+from .common import calc_net_weights
 
 
 def quartznet5x5_en_ls(num_classes=29, **kwargs):
@@ -231,28 +231,6 @@ def quartznet15x5_ru34(num_classes=34, **kwargs):
                   'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
     return get_jasper(num_classes=num_classes, version=("quartznet", "15x5"), use_dw=True, vocabulary=vocabulary,
                       model_name="quartznet15x5_ru34", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

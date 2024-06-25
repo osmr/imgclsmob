@@ -8,7 +8,7 @@ __all__ = ['AlphaPose', 'alphapose_fastseresnet101b_coco']
 import os
 import torch
 import torch.nn as nn
-from .common import conv3x3, DucBlock, HeatmapMaxDetBlock
+from .common import conv3x3, DucBlock, HeatmapMaxDetBlock, calc_net_weights
 from .fastseresnet import fastseresnet101b
 
 
@@ -160,28 +160,6 @@ def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **k
     del backbone[-1]
     return get_alphapose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                          model_name="alphapose_fastseresnet101b_coco", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

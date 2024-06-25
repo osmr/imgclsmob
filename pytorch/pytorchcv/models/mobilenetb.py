@@ -6,8 +6,8 @@
 
 __all__ = ['mobilenetb_w1', 'mobilenetb_w3d4', 'mobilenetb_wd2', 'mobilenetb_wd4']
 
-import torch.nn as nn
 from .mobilenet import get_mobilenet
+from .common import calc_net_weights
 
 
 def mobilenetb_w1(**kwargs):
@@ -68,28 +68,6 @@ def mobilenetb_wd4(**kwargs):
         Location for keeping the model parameters.
     """
     return get_mobilenet(width_scale=0.25, dws_simplified=True, model_name="mobilenetb_wd4", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

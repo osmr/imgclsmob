@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 from torch.autograd import Variable
-from .common import ChannelShuffle
+from .common import ChannelShuffle, calc_net_weights
 
 
 class CondenseSimpleConv(nn.Module):
@@ -479,28 +479,6 @@ def condensenet74_c8_g8(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_condensenet(num_layers=74, groups=8, model_name="condensenet74_c8_g8", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

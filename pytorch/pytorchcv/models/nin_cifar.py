@@ -8,6 +8,7 @@ __all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100', 'nin_svhn']
 import os
 import torch.nn as nn
 import torch.nn.init as init
+from .common import calc_net_weights
 
 
 class NINConv(nn.Module):
@@ -215,28 +216,6 @@ def nin_svhn(num_classes=10, **kwargs):
         Location for keeping the model parameters.
     """
     return get_nin_cifar(num_classes=num_classes, model_name="nin_svhn", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

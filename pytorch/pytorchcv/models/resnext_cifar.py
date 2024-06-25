@@ -14,7 +14,7 @@ __all__ = ['CIFARResNeXt', 'resnext20_16x4d_cifar10', 'resnext20_16x4d_cifar100'
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3_block
+from .common import conv3x3_block, calc_net_weights
 from .resnext import ResNeXtUnit
 
 
@@ -525,28 +525,6 @@ def resnext272_2x32d_svhn(num_classes=10, **kwargs):
     """
     return get_resnext_cifar(num_classes=num_classes, blocks=272, cardinality=2, bottleneck_width=32,
                              model_name="resnext272_2x32d_svhn", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

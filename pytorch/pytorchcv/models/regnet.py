@@ -11,7 +11,7 @@ __all__ = ['RegNet', 'regnetx002', 'regnetx004', 'regnetx006', 'regnetx008', 're
 import os
 import numpy as np
 import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock, calc_net_weights
 
 
 class RegNetBottleneck(nn.Module):
@@ -629,28 +629,6 @@ def regnety320(**kwargs):
     """
     return get_regnet(channels_init=232, channels_slope=115.89, channels_mult=2.53, depth=20, groups=232, use_se=True,
                       model_name="regnety320", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

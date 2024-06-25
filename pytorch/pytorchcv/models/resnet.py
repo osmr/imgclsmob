@@ -10,7 +10,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet1
 
 import os
 import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, calc_net_weights
 
 
 class ResBlock(nn.Module):
@@ -806,28 +806,6 @@ def resnet200b(**kwargs) -> nn.Module:
         Desired module.
     """
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

@@ -12,7 +12,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, calc_net_weights
 
 
 class ShuffleUnit(nn.Module):
@@ -419,28 +419,6 @@ def shufflenet_g3_wd4(**kwargs):
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=3, width_scale=0.25, model_name="shufflenet_g3_wd4", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

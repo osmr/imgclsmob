@@ -17,7 +17,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3, pre_conv3x3_block
+from .common import conv3x3, pre_conv3x3_block, calc_net_weights
 from .preresnet import PreResActivation
 from .densenet import DenseUnit, TransitionBlock
 
@@ -827,28 +827,6 @@ def densenet250_k24_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
     """
     return get_densenet_cifar(num_classes=num_classes, blocks=250, growth_rate=24, bottleneck=True,
                               model_name="densenet250_k24_bc_svhn", **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

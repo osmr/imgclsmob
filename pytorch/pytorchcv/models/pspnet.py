@@ -10,7 +10,7 @@ __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_
 import os
 import torch.nn as nn
 import torch.nn.functional as F
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity, calc_net_weights
 from .resnetd import resnetd50b, resnetd101b
 
 
@@ -429,28 +429,6 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, aux
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes",
                       **kwargs)
-
-
-def calc_net_weights(net: nn.Module) -> int:
-    """
-    Calculate network trainable weight count.
-
-    Parameters
-    ----------
-    net : nn.Module
-        Network.
-
-    Returns
-    -------
-    int
-        Calculated number of weights.
-    """
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

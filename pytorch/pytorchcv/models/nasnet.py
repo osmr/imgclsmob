@@ -1273,7 +1273,7 @@ def _calc_width(net: nn.Module) -> int:
 
     Parameters
     ----------
-    net : int, nn.Module
+    net : nn.Module
         Network.
 
     Returns

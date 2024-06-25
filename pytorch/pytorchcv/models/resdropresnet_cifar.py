@@ -142,7 +142,7 @@ class CIFARResDropResNet(nn.Module):
         return x
 
 
-def get_resdropresnet_cifar(classes,
+def get_resdropresnet_cifar(num_classes,
                             blocks,
                             bottleneck,
                             model_name=None,
@@ -154,7 +154,7 @@ def get_resdropresnet_cifar(classes,
 
     Parameters
     ----------
-    classes : int
+    num_classes : int
         Number of classification classes.
     blocks : int
         Number of blocks.
@@ -167,7 +167,7 @@ def get_resdropresnet_cifar(classes,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    assert (classes in [10, 100])
+    assert (num_classes in [10, 100])
 
     if bottleneck:
         assert ((blocks - 2) % 9 == 0)
@@ -193,7 +193,7 @@ def get_resdropresnet_cifar(classes,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         life_probs=life_probs,
-        num_classes=classes,
+        num_classes=num_classes,
         **kwargs)
 
     if pretrained:
@@ -208,55 +208,70 @@ def get_resdropresnet_cifar(classes,
     return net
 
 
-def resdropresnet20_cifar10(classes=10, **kwargs):
+def resdropresnet20_cifar10(num_classes=10,
+                            **kwargs):
     """
     ResDrop-ResNet-20 model for CIFAR-10 from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
     Parameters
     ----------
-    classes : int, default 10
+    num_classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resdropresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resdropresnet20_cifar10",
-                                   **kwargs)
+    return get_resdropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resdropresnet20_cifar10",
+        **kwargs)
 
 
-def resdropresnet20_cifar100(classes=100, **kwargs):
+def resdropresnet20_cifar100(num_classes=100,
+                             **kwargs):
     """
     ResDrop-ResNet-20 model for CIFAR-100 from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
     Parameters
     ----------
-    classes : int, default 100
+    num_classes : int, default 100
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resdropresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resdropresnet20_cifar100",
-                                   **kwargs)
+    return get_resdropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resdropresnet20_cifar100",
+        **kwargs)
 
 
-def resdropresnet20_svhn(classes=10, **kwargs):
+def resdropresnet20_svhn(num_classes=10,
+                         **kwargs):
     """
     ResDrop-ResNet-20 model for SVHN from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 
     Parameters
     ----------
-    classes : int, default 10
+    num_classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resdropresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resdropresnet20_svhn",
-                                   **kwargs)
+    return get_resdropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resdropresnet20_svhn",
+        **kwargs)
 
 
 def _test():

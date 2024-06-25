@@ -7,317 +7,506 @@ __all__ = ['resnet10_cub', 'resnet12_cub', 'resnet14_cub', 'resnetbc14b_cub', 'r
            'resnet26_cub', 'resnetbc26b_cub', 'resnet34_cub', 'resnetbc38b_cub', 'resnet50_cub', 'resnet50b_cub',
            'resnet101_cub', 'resnet101b_cub', 'resnet152_cub', 'resnet152b_cub', 'resnet200_cub', 'resnet200b_cub']
 
+import torch.nn as nn
 from .resnet import get_resnet
 from .common import calc_net_weights
 
 
-def resnet10_cub(num_classes=200, **kwargs):
+def resnet10_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-10 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=10, model_name="resnet10_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=10,
+        model_name="resnet10_cub",
+        **kwargs)
 
 
-def resnet12_cub(num_classes=200, **kwargs):
+def resnet12_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-12 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=12, model_name="resnet12_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=12,
+        model_name="resnet12_cub",
+        **kwargs)
 
 
-def resnet14_cub(num_classes=200, **kwargs):
+def resnet14_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-14 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=14, model_name="resnet14_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=14,
+        model_name="resnet14_cub",
+        **kwargs)
 
 
-def resnetbc14b_cub(num_classes=200, **kwargs):
+def resnetbc14b_cub(num_classes: int = 200,
+                    **kwargs) -> nn.Module:
     """
     ResNet-BC-14b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=14, bottleneck=True, conv1_stride=False,
-                      model_name="resnetbc14b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=14,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc14b_cub",
+        **kwargs)
 
 
-def resnet16_cub(num_classes=200, **kwargs):
+def resnet16_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-16 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=16, model_name="resnet16_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=16,
+        model_name="resnet16_cub",
+        **kwargs)
 
 
-def resnet18_cub(num_classes=200, **kwargs):
+def resnet18_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-18 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=18, model_name="resnet18_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=18,
+        model_name="resnet18_cub",
+        **kwargs)
 
 
-def resnet26_cub(num_classes=200, **kwargs):
+def resnet26_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-26 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=26, bottleneck=False, model_name="resnet26_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=26,
+        bottleneck=False,
+        model_name="resnet26_cub",
+        **kwargs)
 
 
-def resnetbc26b_cub(num_classes=200, **kwargs):
+def resnetbc26b_cub(num_classes: int = 200,
+                    **kwargs) -> nn.Module:
     """
     ResNet-BC-26b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=26, bottleneck=True, conv1_stride=False,
-                      model_name="resnetbc26b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=26,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc26b_cub",
+        **kwargs)
 
 
-def resnet34_cub(num_classes=200, **kwargs):
+def resnet34_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-34 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=34, model_name="resnet34_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=34,
+        model_name="resnet34_cub",
+        **kwargs)
 
 
-def resnetbc38b_cub(num_classes=200, **kwargs):
+def resnetbc38b_cub(num_classes: int = 200,
+                    **kwargs) -> nn.Module:
     """
     ResNet-BC-38b model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=38, bottleneck=True, conv1_stride=False,
-                      model_name="resnetbc38b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=38,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc38b_cub",
+        **kwargs)
 
 
-def resnet50_cub(num_classes=200, **kwargs):
+def resnet50_cub(num_classes: int = 200,
+                 **kwargs) -> nn.Module:
     """
     ResNet-50 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=50, model_name="resnet50_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=50,
+        model_name="resnet50_cub",
+        **kwargs)
 
 
-def resnet50b_cub(num_classes=200, **kwargs):
+def resnet50b_cub(num_classes: int = 200,
+                  **kwargs) -> nn.Module:
     """
     ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=50, conv1_stride=False, model_name="resnet50b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=50,
+        conv1_stride=False,
+        model_name="resnet50b_cub",
+        **kwargs)
 
 
-def resnet101_cub(num_classes=200, **kwargs):
+def resnet101_cub(num_classes: int = 200,
+                  **kwargs) -> nn.Module:
     """
     ResNet-101 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=101, model_name="resnet101_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=101,
+        model_name="resnet101_cub",
+        **kwargs)
 
 
-def resnet101b_cub(num_classes=200, **kwargs):
+def resnet101b_cub(num_classes: int = 200,
+                   **kwargs) -> nn.Module:
     """
     ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=101, conv1_stride=False, model_name="resnet101b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=101,
+        conv1_stride=False,
+        model_name="resnet101b_cub",
+        **kwargs)
 
 
-def resnet152_cub(num_classes=200, **kwargs):
+def resnet152_cub(num_classes: int = 200,
+                  **kwargs) -> nn.Module:
     """
     ResNet-152 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=152, model_name="resnet152_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=152,
+        model_name="resnet152_cub",
+        **kwargs)
 
 
-def resnet152b_cub(num_classes=200, **kwargs):
+def resnet152b_cub(num_classes: int = 200,
+                   **kwargs) -> nn.Module:
     """
     ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=152, conv1_stride=False, model_name="resnet152b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=152,
+        conv1_stride=False,
+        model_name="resnet152b_cub",
+        **kwargs)
 
 
-def resnet200_cub(num_classes=200, **kwargs):
+def resnet200_cub(num_classes: int = 200,
+                  **kwargs) -> nn.Module:
     """
     ResNet-200 model for CUB-200-2011 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=200, model_name="resnet200_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=200,
+        model_name="resnet200_cub",
+        **kwargs)
 
 
-def resnet200b_cub(num_classes=200, **kwargs):
+def resnet200b_cub(num_classes: int = 200,
+                   **kwargs) -> nn.Module:
     """
     ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters
     ----------
-    classes : int, default 200
+    num_classes : int, default 200
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet(num_classes=num_classes, blocks=200, conv1_stride=False, model_name="resnet200b_cub", **kwargs)
+    return get_resnet(
+        num_classes=num_classes,
+        blocks=200,
+        conv1_stride=False,
+        model_name="resnet200b_cub",
+        **kwargs)
 
 
 def _test():

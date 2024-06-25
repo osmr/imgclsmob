@@ -165,7 +165,7 @@ class CIFARShakeDropResNet(nn.Module):
         return x
 
 
-def get_shakedropresnet_cifar(classes,
+def get_shakedropresnet_cifar(num_classes,
                               blocks,
                               bottleneck,
                               model_name=None,
@@ -177,7 +177,7 @@ def get_shakedropresnet_cifar(classes,
 
     Parameters
     ----------
-    classes : int
+    num_classes : int
         Number of classification classes.
     blocks : int
         Number of blocks.
@@ -190,7 +190,7 @@ def get_shakedropresnet_cifar(classes,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    assert (classes in [10, 100])
+    assert (num_classes in [10, 100])
 
     if bottleneck:
         assert ((blocks - 2) % 9 == 0)
@@ -216,7 +216,7 @@ def get_shakedropresnet_cifar(classes,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         life_probs=life_probs,
-        num_classes=classes,
+        num_classes=num_classes,
         **kwargs)
 
     if pretrained:
@@ -231,58 +231,73 @@ def get_shakedropresnet_cifar(classes,
     return net
 
 
-def shakedropresnet20_cifar10(classes=10, **kwargs):
+def shakedropresnet20_cifar10(num_classes=10,
+                              **kwargs):
     """
     ShakeDrop-ResNet-20 model for CIFAR-10 from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
     Parameters
     ----------
-    classes : int, default 10
+    num_classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_shakedropresnet_cifar(classes=classes, blocks=20, bottleneck=False,
-                                     model_name="shakedropresnet20_cifar10", **kwargs)
+    return get_shakedropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="shakedropresnet20_cifar10",
+        **kwargs)
 
 
-def shakedropresnet20_cifar100(classes=100, **kwargs):
+def shakedropresnet20_cifar100(num_classes=100,
+                               **kwargs):
     """
     ShakeDrop-ResNet-20 model for CIFAR-100 from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
     Parameters
     ----------
-    classes : int, default 100
+    num_classes : int, default 100
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_shakedropresnet_cifar(classes=classes, blocks=20, bottleneck=False,
-                                     model_name="shakedropresnet20_cifar100", **kwargs)
+    return get_shakedropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="shakedropresnet20_cifar100",
+        **kwargs)
 
 
-def shakedropresnet20_svhn(classes=10, **kwargs):
+def shakedropresnet20_svhn(num_classes=10,
+                           **kwargs):
     """
     ShakeDrop-ResNet-20 model for SVHN from 'ShakeDrop Regularization for Deep Residual Learning,'
     https://arxiv.org/abs/1802.02375.
 
     Parameters
     ----------
-    classes : int, default 10
+    num_classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_shakedropresnet_cifar(classes=classes, blocks=20, bottleneck=False,
-                                     model_name="shakedropresnet20_svhn", **kwargs)
+    return get_shakedropresnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="shakedropresnet20_svhn",
+        **kwargs)
 
 
 def _test():

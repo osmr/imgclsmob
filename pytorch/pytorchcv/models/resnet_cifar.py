@@ -38,12 +38,12 @@ class CIFARResNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 in_channels=3,
-                 in_size=(32, 32),
-                 num_classes=10):
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (32, 32),
+                 num_classes: int = 10):
         super(CIFARResNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
@@ -89,13 +89,13 @@ class CIFARResNet(nn.Module):
         return x
 
 
-def get_resnet_cifar(num_classes,
-                     blocks,
-                     bottleneck,
-                     model_name=None,
-                     pretrained=False,
+def get_resnet_cifar(num_classes: int,
+                     blocks: int,
+                     bottleneck: bool,
+                     model_name: str | None = None,
+                     pretrained: bool = False,
                      root: str = os.path.join("~", ".torch", "models"),
-                     **kwargs):
+                     **kwargs) -> nn.Module:
     """
     Create ResNet model for CIFAR with specific parameters.
 
@@ -113,8 +113,12 @@ def get_resnet_cifar(num_classes,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
-    """
 
+    Returns
+    -------
+    nn.Module
+        Desired module.
+    """
     assert (num_classes in [10, 100])
 
     if bottleneck:
@@ -151,7 +155,8 @@ def get_resnet_cifar(num_classes,
     return net
 
 
-def resnet20_cifar10(num_classes=10, **kwargs):
+def resnet20_cifar10(num_classes: int = 10,
+                     **kwargs) -> nn.Module:
     """
     ResNet-20 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -163,12 +168,22 @@ def resnet20_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="resnet20_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resnet20_cifar10",
+        **kwargs)
 
 
-def resnet20_cifar100(num_classes=100, **kwargs):
+def resnet20_cifar100(num_classes: int = 100,
+                      **kwargs) -> nn.Module:
     """
     ResNet-20 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -180,12 +195,22 @@ def resnet20_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="resnet20_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resnet20_cifar100",
+        **kwargs)
 
 
-def resnet20_svhn(num_classes=10, **kwargs):
+def resnet20_svhn(num_classes: int = 10,
+                  **kwargs) -> nn.Module:
     """
     ResNet-20 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -197,12 +222,22 @@ def resnet20_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=20, bottleneck=False, model_name="resnet20_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=20,
+        bottleneck=False,
+        model_name="resnet20_svhn",
+        **kwargs)
 
 
-def resnet56_cifar10(num_classes=10, **kwargs):
+def resnet56_cifar10(num_classes: int = 10,
+                     **kwargs) -> nn.Module:
     """
     ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -214,12 +249,22 @@ def resnet56_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="resnet56_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=56,
+        bottleneck=False,
+        model_name="resnet56_cifar10",
+        **kwargs)
 
 
-def resnet56_cifar100(num_classes=100, **kwargs):
+def resnet56_cifar100(num_classes: int = 100,
+                      **kwargs) -> nn.Module:
     """
     ResNet-56 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -231,12 +276,22 @@ def resnet56_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="resnet56_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=56,
+        bottleneck=False,
+        model_name="resnet56_cifar100",
+        **kwargs)
 
 
-def resnet56_svhn(num_classes=10, **kwargs):
+def resnet56_svhn(num_classes: int = 10,
+                  **kwargs) -> nn.Module:
     """
     ResNet-56 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -248,12 +303,22 @@ def resnet56_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=56, bottleneck=False, model_name="resnet56_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=56,
+        bottleneck=False,
+        model_name="resnet56_svhn",
+        **kwargs)
 
 
-def resnet110_cifar10(num_classes=10, **kwargs):
+def resnet110_cifar10(num_classes: int = 10,
+                      **kwargs) -> nn.Module:
     """
     ResNet-110 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -265,12 +330,22 @@ def resnet110_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False, model_name="resnet110_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=110,
+        bottleneck=False,
+        model_name="resnet110_cifar10",
+        **kwargs)
 
 
-def resnet110_cifar100(num_classes=100, **kwargs):
+def resnet110_cifar100(num_classes: int = 100,
+                       **kwargs) -> nn.Module:
     """
     ResNet-110 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -283,12 +358,22 @@ def resnet110_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False, model_name="resnet110_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=110,
+        bottleneck=False,
+        model_name="resnet110_cifar100",
+        **kwargs)
 
 
-def resnet110_svhn(num_classes=10, **kwargs):
+def resnet110_svhn(num_classes: int = 10,
+                   **kwargs) -> nn.Module:
     """
     ResNet-110 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -300,12 +385,22 @@ def resnet110_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=110, bottleneck=False, model_name="resnet110_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=110,
+        bottleneck=False,
+        model_name="resnet110_svhn",
+        **kwargs)
 
 
-def resnet164bn_cifar10(num_classes=10, **kwargs):
+def resnet164bn_cifar10(num_classes: int = 10,
+                        **kwargs) -> nn.Module:
     """
     ResNet-164(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -318,12 +413,22 @@ def resnet164bn_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True, model_name="resnet164bn_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=164,
+        bottleneck=True,
+        model_name="resnet164bn_cifar10",
+        **kwargs)
 
 
-def resnet164bn_cifar100(num_classes=100, **kwargs):
+def resnet164bn_cifar100(num_classes: int = 100,
+                         **kwargs) -> nn.Module:
     """
     ResNet-164(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -336,12 +441,22 @@ def resnet164bn_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True, model_name="resnet164bn_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=164,
+        bottleneck=True,
+        model_name="resnet164bn_cifar100",
+        **kwargs)
 
 
-def resnet164bn_svhn(num_classes=10, **kwargs):
+def resnet164bn_svhn(num_classes: int = 10,
+                     **kwargs) -> nn.Module:
     """
     ResNet-164(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -354,12 +469,22 @@ def resnet164bn_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=164, bottleneck=True, model_name="resnet164bn_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=164,
+        bottleneck=True,
+        model_name="resnet164bn_svhn",
+        **kwargs)
 
 
-def resnet272bn_cifar10(num_classes=10, **kwargs):
+def resnet272bn_cifar10(num_classes: int = 10,
+                        **kwargs) -> nn.Module:
     """
     ResNet-272(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -372,12 +497,22 @@ def resnet272bn_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=272,
+        bottleneck=True,
+        model_name="resnet272bn_cifar10",
+        **kwargs)
 
 
-def resnet272bn_cifar100(num_classes=100, **kwargs):
+def resnet272bn_cifar100(num_classes: int = 100,
+                         **kwargs) -> nn.Module:
     """
     ResNet-272(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -390,12 +525,22 @@ def resnet272bn_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=272,
+        bottleneck=True,
+        model_name="resnet272bn_cifar100",
+        **kwargs)
 
 
-def resnet272bn_svhn(num_classes=10, **kwargs):
+def resnet272bn_svhn(num_classes: int = 10,
+                     **kwargs) -> nn.Module:
     """
     ResNet-272(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -408,12 +553,22 @@ def resnet272bn_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=272,
+        bottleneck=True,
+        model_name="resnet272bn_svhn",
+        **kwargs)
 
 
-def resnet542bn_cifar10(num_classes=10, **kwargs):
+def resnet542bn_cifar10(num_classes: int = 10,
+                        **kwargs) -> nn.Module:
     """
     ResNet-542(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -426,12 +581,22 @@ def resnet542bn_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=542,
+        bottleneck=True,
+        model_name="resnet542bn_cifar10",
+        **kwargs)
 
 
-def resnet542bn_cifar100(num_classes=100, **kwargs):
+def resnet542bn_cifar100(num_classes: int = 100,
+                         **kwargs) -> nn.Module:
     """
     ResNet-542(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -444,12 +609,22 @@ def resnet542bn_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=542,
+        bottleneck=True,
+        model_name="resnet542bn_cifar100",
+        **kwargs)
 
 
-def resnet542bn_svhn(num_classes=10, **kwargs):
+def resnet542bn_svhn(num_classes: int = 10,
+                     **kwargs) -> nn.Module:
     """
     ResNet-542(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -462,12 +637,22 @@ def resnet542bn_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=542,
+        bottleneck=True,
+        model_name="resnet542bn_svhn",
+        **kwargs)
 
 
-def resnet1001_cifar10(num_classes=10, **kwargs):
+def resnet1001_cifar10(num_classes: int = 10,
+                       **kwargs) -> nn.Module:
     """
     ResNet-1001 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -480,12 +665,22 @@ def resnet1001_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1001,
+        bottleneck=True,
+        model_name="resnet1001_cifar10",
+        **kwargs)
 
 
-def resnet1001_cifar100(num_classes=100, **kwargs):
+def resnet1001_cifar100(num_classes: int = 100,
+                        **kwargs) -> nn.Module:
     """
     ResNet-1001 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -498,12 +693,22 @@ def resnet1001_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1001,
+        bottleneck=True,
+        model_name="resnet1001_cifar100",
+        **kwargs)
 
 
-def resnet1001_svhn(num_classes=10, **kwargs):
+def resnet1001_svhn(num_classes: int = 10,
+                    **kwargs) -> nn.Module:
     """
     ResNet-1001 model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -516,12 +721,22 @@ def resnet1001_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1001, bottleneck=True, model_name="resnet1001_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1001,
+        bottleneck=True,
+        model_name="resnet1001_svhn",
+        **kwargs)
 
 
-def resnet1202_cifar10(num_classes=10, **kwargs):
+def resnet1202_cifar10(num_classes: int = 10,
+                       **kwargs) -> nn.Module:
     """
     ResNet-1202 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -534,12 +749,22 @@ def resnet1202_cifar10(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar10",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1202,
+        bottleneck=False,
+        model_name="resnet1202_cifar10",
+        **kwargs)
 
 
-def resnet1202_cifar100(num_classes=100, **kwargs):
+def resnet1202_cifar100(num_classes: int = 100,
+                        **kwargs) -> nn.Module:
     """
     ResNet-1202 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -552,12 +777,22 @@ def resnet1202_cifar100(num_classes=100, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar100",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1202,
+        bottleneck=False,
+        model_name="resnet1202_cifar100",
+        **kwargs)
 
 
-def resnet1202_svhn(num_classes=10, **kwargs):
+def resnet1202_svhn(num_classes: int = 10,
+                    **kwargs) -> nn.Module:
     """
     ResNet-1202 model for SVHN from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -570,9 +805,18 @@ def resnet1202_svhn(num_classes=10, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_resnet_cifar(num_classes=num_classes, blocks=1202, bottleneck=False, model_name="resnet1202_svhn",
-                            **kwargs)
+    return get_resnet_cifar(
+        num_classes=num_classes,
+        blocks=1202,
+        bottleneck=False,
+        model_name="resnet1202_svhn",
+        **kwargs)
 
 
 def _test():

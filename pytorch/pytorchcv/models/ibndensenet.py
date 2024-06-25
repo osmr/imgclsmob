@@ -9,7 +9,6 @@ __all__ = ['IBNDenseNet', 'ibn_densenet121', 'ibn_densenet161', 'ibn_densenet169
 import os
 import torch
 import torch.nn as nn
-import torch.nn.init as init
 from .common import pre_conv3x3_block, IBN, calc_net_weights
 from .preresnet import PreResInitBlock, PreResActivation
 from .densenet import TransitionBlock
@@ -222,9 +221,9 @@ class IBNDenseNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

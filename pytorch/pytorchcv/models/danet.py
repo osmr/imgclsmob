@@ -9,7 +9,6 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.init as init
 from torch.nn.parameter import Parameter
 from .common import conv1x1, conv3x3_block, calc_net_weights
 from .resnetd import resnetd50b, resnetd101b
@@ -248,9 +247,9 @@ class DANet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         in_size = self.in_size if self.fixed_size else x.shape[2:]

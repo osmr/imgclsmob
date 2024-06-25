@@ -8,7 +8,6 @@ __all__ = ['IBNbResNet', 'ibnb_resnet50', 'ibnb_resnet101', 'ibnb_resnet152']
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv1x1_block, calc_net_weights
 from .resnet import ResBottleneck
 
@@ -251,9 +250,9 @@ class IBNbResNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

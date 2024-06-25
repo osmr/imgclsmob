@@ -11,7 +11,6 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 import torch
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, calc_net_weights
 
 
@@ -182,9 +181,9 @@ class ShuffleNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

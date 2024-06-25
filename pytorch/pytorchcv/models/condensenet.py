@@ -9,7 +9,6 @@ __all__ = ['CondenseNet', 'condensenet74_c4_g4', 'condensenet74_c8_g8']
 import os
 import torch
 import torch.nn as nn
-import torch.nn.init as init
 from torch.autograd import Variable
 from .common import ChannelShuffle, calc_net_weights
 
@@ -363,14 +362,14 @@ class CondenseNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
             elif isinstance(module, nn.BatchNorm2d):
-                init.constant_(module.weight, 1)
-                init.constant_(module.bias, 0)
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
             elif isinstance(module, nn.Linear):
-                init.constant_(module.bias, 0)
+                nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

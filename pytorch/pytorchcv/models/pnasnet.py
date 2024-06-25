@@ -9,7 +9,6 @@ __all__ = ['PNASNet', 'pnasnet5large']
 import os
 import torch
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv1x1, calc_net_weights
 from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock
 
@@ -501,9 +500,9 @@ class PNASNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

@@ -8,7 +8,6 @@ __all__ = ['FishNet', 'fishnet99', 'fishnet150', 'ChannelSqueeze']
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import (pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass, Identity,
                      InterpolationBlock, calc_net_weights)
 from .preresnet import PreResActivation
@@ -484,9 +483,9 @@ class FishNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

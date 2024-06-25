@@ -12,7 +12,6 @@ __all__ = ['CIFARDIAPreResNet', 'diapreresnet20_cifar10', 'diapreresnet20_cifar1
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv3x3, DualPathSequential, calc_net_weights
 from .preresnet import PreResActivation
 from .diaresnet import DIAAttention
@@ -84,9 +83,9 @@ class CIFARDIAPreResNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

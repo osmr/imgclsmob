@@ -8,7 +8,6 @@ __all__ = ['DiracNetV2', 'diracnet18v2', 'diracnet34v2']
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import calc_net_weights
 
 
@@ -165,9 +164,9 @@ class DiracNetV2(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

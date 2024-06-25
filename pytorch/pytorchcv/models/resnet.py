@@ -410,7 +410,10 @@ def resnet10(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
+    return get_resnet(
+        blocks=10,
+        model_name="resnet10",
+        **kwargs)
 
 
 def resnet12(**kwargs) -> nn.Module:
@@ -430,7 +433,10 @@ def resnet12(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
+    return get_resnet(
+        blocks=12,
+        model_name="resnet12",
+        **kwargs)
 
 
 def resnet14(**kwargs) -> nn.Module:
@@ -450,7 +456,10 @@ def resnet14(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+    return get_resnet(
+        blocks=14,
+        model_name="resnet14",
+        **kwargs)
 
 
 def resnetbc14b(**kwargs) -> nn.Module:
@@ -470,7 +479,12 @@ def resnetbc14b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
+    return get_resnet(
+        blocks=14,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc14b",
+        **kwargs)
 
 
 def resnet16(**kwargs) -> nn.Module:
@@ -490,7 +504,10 @@ def resnet16(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
+    return get_resnet(
+        blocks=16,
+        model_name="resnet16",
+        **kwargs)
 
 
 def resnet18_wd4(**kwargs) -> nn.Module:
@@ -510,7 +527,11 @@ def resnet18_wd4(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_resnet(
+        blocks=18,
+        width_scale=0.25,
+        model_name="resnet18_wd4",
+        **kwargs)
 
 
 def resnet18_wd2(**kwargs) -> nn.Module:
@@ -530,7 +551,11 @@ def resnet18_wd2(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
+    return get_resnet(
+        blocks=18,
+        width_scale=0.5,
+        model_name="resnet18_wd2",
+        **kwargs)
 
 
 def resnet18_w3d4(**kwargs) -> nn.Module:
@@ -550,7 +575,11 @@ def resnet18_w3d4(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+    return get_resnet(
+        blocks=18,
+        width_scale=0.75,
+        model_name="resnet18_w3d4",
+        **kwargs)
 
 
 def resnet18(**kwargs) -> nn.Module:
@@ -569,7 +598,10 @@ def resnet18(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
+    return get_resnet(
+        blocks=18,
+        model_name="resnet18",
+        **kwargs)
 
 
 def resnet26(**kwargs) -> nn.Module:
@@ -589,7 +621,11 @@ def resnet26(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+    return get_resnet(
+        blocks=26,
+        bottleneck=False,
+        model_name="resnet26",
+        **kwargs)
 
 
 def resnetbc26b(**kwargs) -> nn.Module:
@@ -609,7 +645,12 @@ def resnetbc26b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
+    return get_resnet(
+        blocks=26,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc26b",
+        **kwargs)
 
 
 def resnet34(**kwargs) -> nn.Module:
@@ -628,7 +669,10 @@ def resnet34(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
+    return get_resnet(
+        blocks=34,
+        model_name="resnet34",
+        **kwargs)
 
 
 def resnetbc38b(**kwargs) -> nn.Module:
@@ -648,7 +692,12 @@ def resnetbc38b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="resnetbc38b", **kwargs)
+    return get_resnet(
+        blocks=38,
+        bottleneck=True,
+        conv1_stride=False,
+        model_name="resnetbc38b",
+        **kwargs)
 
 
 def resnet50(**kwargs) -> nn.Module:
@@ -667,7 +716,10 @@ def resnet50(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
+    return get_resnet(
+        blocks=50,
+        model_name="resnet50",
+        **kwargs)
 
 
 def resnet50b(**kwargs) -> nn.Module:
@@ -687,7 +739,11 @@ def resnet50b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
+    return get_resnet(
+        blocks=50,
+        conv1_stride=False,
+        model_name="resnet50b",
+        **kwargs)
 
 
 def resnet101(**kwargs) -> nn.Module:
@@ -706,7 +762,10 @@ def resnet101(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
+    return get_resnet(
+        blocks=101,
+        model_name="resnet101",
+        **kwargs)
 
 
 def resnet101b(**kwargs) -> nn.Module:
@@ -726,7 +785,11 @@ def resnet101b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
+    return get_resnet(
+        blocks=101,
+        conv1_stride=False,
+        model_name="resnet101b",
+        **kwargs)
 
 
 def resnet152(**kwargs) -> nn.Module:
@@ -745,7 +808,10 @@ def resnet152(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
+    return get_resnet(
+        blocks=152,
+        model_name="resnet152",
+        **kwargs)
 
 
 def resnet152b(**kwargs) -> nn.Module:
@@ -765,7 +831,11 @@ def resnet152b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
+    return get_resnet(
+        blocks=152,
+        conv1_stride=False,
+        model_name="resnet152b",
+        **kwargs)
 
 
 def resnet200(**kwargs) -> nn.Module:
@@ -785,7 +855,10 @@ def resnet200(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
+    return get_resnet(
+        blocks=200,
+        model_name="resnet200",
+        **kwargs)
 
 
 def resnet200b(**kwargs) -> nn.Module:
@@ -805,7 +878,11 @@ def resnet200b(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
+    return get_resnet(
+        blocks=200,
+        conv1_stride=False,
+        model_name="resnet200b",
+        **kwargs)
 
 
 def _test():

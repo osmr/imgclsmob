@@ -14,7 +14,6 @@ __all__ = ['CIFARSEPreResNet', 'sepreresnet20_cifar10', 'sepreresnet20_cifar100'
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv3x3_block, calc_net_weights
 from .sepreresnet import SEPreResUnit
 
@@ -79,9 +78,9 @@ class CIFARSEPreResNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

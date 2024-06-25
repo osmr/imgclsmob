@@ -10,7 +10,6 @@ __all__ = ['DIAPreResNet', 'diapreresnet10', 'diapreresnet12', 'diapreresnet14',
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
 from .common import conv1x1, DualPathSequential, calc_net_weights
 from .preresnet import PreResBlock, PreResBottleneck, PreResInitBlock, PreResActivation
 from .diaresnet import DIAAttention
@@ -141,9 +140,9 @@ class DIAPreResNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

@@ -199,7 +199,7 @@ def get_alexnet(version: str = "a",
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
-                **kwargs):
+                **kwargs) -> nn.Module:
     """
     Create AlexNet model with specific parameters.
 
@@ -213,6 +213,11 @@ def get_alexnet(version: str = "a",
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if version == "a":
         channels = [[96], [256], [384, 384, 256]]
@@ -249,7 +254,7 @@ def get_alexnet(version: str = "a",
     return net
 
 
-def alexnet(**kwargs):
+def alexnet(**kwargs) -> nn.Module:
     """
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
@@ -260,11 +265,16 @@ def alexnet(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_alexnet(model_name="alexnet", **kwargs)
 
 
-def alexnetb(**kwargs):
+def alexnetb(**kwargs) -> nn.Module:
     """
     AlexNet-b model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997. Non-standard version.
@@ -275,6 +285,11 @@ def alexnetb(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_alexnet(version="b", model_name="alexnetb", **kwargs)
 

@@ -49,35 +49,34 @@ class SegNet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
         self.fixed_size = fixed_size
+        down_idx = 0
+        up_idx = 1
         bias = True
 
-        for i, out_channels in enumerate(channels[0]):
+        for i, out_channels in enumerate(channels[down_idx]):
             stage = nn.Sequential()
-            for j in range(layers[0][i]):
-                if j == layers[0][i] - 1:
-                    unit = nn.MaxPool2d(
-                        kernel_size=2,
-                        stride=2,
-                        return_indices=True)
-                else:
+            for j in range(layers[down_idx][i]):
+                if j < layers[down_idx][i] - 1:
                     unit = conv3x3_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         bias=bias)
+                else:
+                    unit = nn.MaxPool2d(
+                        kernel_size=2,
+                        stride=2,
+                        return_indices=True)
                 stage.add_module("unit{}".format(j + 1), unit)
                 in_channels = out_channels
             setattr(self, "down_stage{}".format(i + 1), stage)
 
-        for i, channels_per_stage in enumerate(channels[1]):
+        for i, channels_per_stage in enumerate(channels[up_idx]):
             stage = DualPathSequential(
                 return_two=False,
-                last_ordinals=(layers[1][i] - 1),
+                last_ordinals=(layers[up_idx][i] - 1),
                 dual_path_scheme=(lambda module, x1, x2: (module(x1, x2), x2)))
-            for j in range(layers[1][i]):
-                if j == layers[1][i] - 1:
-                    out_channels = channels_per_stage
-                else:
-                    out_channels = in_channels
+            for j in range(layers[up_idx][i]):
+                out_channels = in_channels if j < layers[up_idx][i] - 1 else channels_per_stage
                 if j == 0:
                     unit = nn.MaxUnpool2d(
                         kernel_size=2,
@@ -94,7 +93,7 @@ class SegNet(nn.Module):
         self.head = conv3x3(
             in_channels=in_channels,
             out_channels=num_classes,
-            bias=bias)
+            bias=True)
 
         self._init_params()
 

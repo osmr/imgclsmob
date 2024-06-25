@@ -9,7 +9,7 @@ __all__ = ['UNet', 'unet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv3x3_block, InterpolationBlock, Hourglass, Identity
+from common import conv1x1, conv3x3_block, InterpolationBlock, Hourglass, Identity
 
 
 class UNetBlock(nn.Module):
@@ -26,9 +26,9 @@ class UNetBlock(nn.Module):
         Whether the layer uses a bias vector.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias):
+                 in_channels: int,
+                 out_channels: int,
+                 bias: bool):
         super(UNetBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -59,9 +59,9 @@ class UNetDownStage(nn.Module):
         Whether the layer uses a bias vector.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias):
+                 in_channels: int,
+                 out_channels: int,
+                 bias: bool):
         super(UNetDownStage, self).__init__()
         self.pool = nn.MaxPool2d(kernel_size=2)
         self.conv = UNetBlock(
@@ -89,9 +89,9 @@ class UNetUpStage(nn.Module):
         Whether the layer uses a bias vector.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias):
+                 in_channels: int,
+                 out_channels: int,
+                 bias: bool):
         super(UNetUpStage, self).__init__()
         self.conv = UNetBlock(
             in_channels=in_channels,
@@ -121,9 +121,9 @@ class UNetHead(nn.Module):
         Whether the layer uses a bias vector.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias):
+                 in_channels: int,
+                 out_channels: int,
+                 bias: bool):
         super(UNetHead, self).__init__()
         mid_channels = in_channels // 2
         self.conv1 = UNetBlock(
@@ -164,13 +164,13 @@ class UNet(nn.Module):
         Number of segmentation classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 aux=False,
-                 fixed_size=False,
-                 in_channels=3,
-                 in_size=(1024, 2048),
-                 num_classes=19):
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 aux: bool = False,
+                 fixed_size: bool = False,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (1024, 2048),
+                 num_classes: int = 19):
         super(UNet, self).__init__()
         assert (aux is not None)
         assert (fixed_size is not None)
@@ -199,11 +199,11 @@ class UNet(nn.Module):
         up_seq = nn.Sequential()
         for i, out_channels in enumerate(channels[1]):
             if i == 0:
-                up_seq.add_module("down{}".format(i + 1), InterpolationBlock(
+                up_seq.add_module("up{}".format(i + 1), InterpolationBlock(
                     scale_factor=2,
                     align_corners=True))
             else:
-                up_seq.add_module("down{}".format(i + 1), UNetUpStage(
+                up_seq.add_module("up{}".format(i + 1), UNetUpStage(
                     in_channels=(2 * in_channels),
                     out_channels=out_channels,
                     bias=bias))
@@ -219,7 +219,7 @@ class UNet(nn.Module):
         self.head = UNetHead(
             in_channels=(2 * in_channels),
             out_channels=num_classes,
-            bias=True)
+            bias=bias)
 
         self._init_params()
 
@@ -237,10 +237,10 @@ class UNet(nn.Module):
         return x
 
 
-def get_unet(model_name=None,
-             pretrained=False,
+def get_unet(model_name: str | None = None,
+             pretrained: bool = False,
              root: str = os.path.join("~", ".torch", "models"),
-             **kwargs):
+             **kwargs) -> nn.Module:
     """
     Create U-Net model with specific parameters.
 
@@ -252,6 +252,11 @@ def get_unet(model_name=None,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     channels = [[128, 256, 512, 512], [512, 256, 128, 64]]
     init_block_channels = 64
@@ -273,7 +278,7 @@ def get_unet(model_name=None,
     return net
 
 
-def unet_cityscapes(num_classes=19, **kwargs):
+def unet_cityscapes(num_classes: int = 19, **kwargs) -> nn.Module:
     """
     U-Net model for Cityscapes from 'U-Net: Convolutional Networks for Biomedical Image Segmentation,'
     https://arxiv.org/abs/1505.04597.
@@ -286,6 +291,11 @@ def unet_cityscapes(num_classes=19, **kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_unet(num_classes=num_classes, model_name="unet_cityscapes", **kwargs)
 

@@ -295,7 +295,7 @@ def get_resnet(blocks: int,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create ResNet model with specific parameters.
 
@@ -315,6 +315,11 @@ def get_resnet(blocks: int,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if bottleneck is None:
         bottleneck = (blocks >= 50)
@@ -388,7 +393,7 @@ def get_resnet(blocks: int,
     return net
 
 
-def resnet10(**kwargs):
+def resnet10(**kwargs) -> nn.Module:
     """
     ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -399,11 +404,16 @@ def resnet10(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=10, model_name="resnet10", **kwargs)
 
 
-def resnet12(**kwargs):
+def resnet12(**kwargs) -> nn.Module:
     """
     ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -414,11 +424,16 @@ def resnet12(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=12, model_name="resnet12", **kwargs)
 
 
-def resnet14(**kwargs):
+def resnet14(**kwargs) -> nn.Module:
     """
     ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -429,11 +444,16 @@ def resnet14(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=14, model_name="resnet14", **kwargs)
 
 
-def resnetbc14b(**kwargs):
+def resnetbc14b(**kwargs) -> nn.Module:
     """
     ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
@@ -444,11 +464,16 @@ def resnetbc14b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
 
 
-def resnet16(**kwargs):
+def resnet16(**kwargs) -> nn.Module:
     """
     ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -459,11 +484,16 @@ def resnet16(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=16, model_name="resnet16", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def resnet18_wd4(**kwargs) -> nn.Module:
     """
     ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
@@ -474,11 +504,16 @@ def resnet18_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
 
 
-def resnet18_wd2(**kwargs):
+def resnet18_wd2(**kwargs) -> nn.Module:
     """
     ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
@@ -489,11 +524,16 @@ def resnet18_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
 
 
-def resnet18_w3d4(**kwargs):
+def resnet18_w3d4(**kwargs) -> nn.Module:
     """
     ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
@@ -504,11 +544,16 @@ def resnet18_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
 
 
-def resnet18(**kwargs):
+def resnet18(**kwargs) -> nn.Module:
     """
     ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -518,11 +563,16 @@ def resnet18(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=18, model_name="resnet18", **kwargs)
 
 
-def resnet26(**kwargs):
+def resnet26(**kwargs) -> nn.Module:
     """
     ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -533,11 +583,16 @@ def resnet26(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
 
 
-def resnetbc26b(**kwargs):
+def resnetbc26b(**kwargs) -> nn.Module:
     """
     ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
@@ -548,11 +603,16 @@ def resnetbc26b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
 
 
-def resnet34(**kwargs):
+def resnet34(**kwargs) -> nn.Module:
     """
     ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -562,11 +622,16 @@ def resnet34(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=34, model_name="resnet34", **kwargs)
 
 
-def resnetbc38b(**kwargs):
+def resnetbc38b(**kwargs) -> nn.Module:
     """
     ResNet-BC-38b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model (bottleneck compressed).
@@ -577,11 +642,16 @@ def resnetbc38b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="resnetbc38b", **kwargs)
 
 
-def resnet50(**kwargs):
+def resnet50(**kwargs) -> nn.Module:
     """
     ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -591,11 +661,16 @@ def resnet50(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=50, model_name="resnet50", **kwargs)
 
 
-def resnet50b(**kwargs):
+def resnet50b(**kwargs) -> nn.Module:
     """
     ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
@@ -606,11 +681,16 @@ def resnet50b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
 
 
-def resnet101(**kwargs):
+def resnet101(**kwargs) -> nn.Module:
     """
     ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -620,11 +700,16 @@ def resnet101(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=101, model_name="resnet101", **kwargs)
 
 
-def resnet101b(**kwargs):
+def resnet101b(**kwargs) -> nn.Module:
     """
     ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
@@ -635,11 +720,16 @@ def resnet101b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
 
 
-def resnet152(**kwargs):
+def resnet152(**kwargs) -> nn.Module:
     """
     ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -649,11 +739,16 @@ def resnet152(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=152, model_name="resnet152", **kwargs)
 
 
-def resnet152b(**kwargs):
+def resnet152b(**kwargs) -> nn.Module:
     """
     ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385.
@@ -664,11 +759,16 @@ def resnet152b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
 
 
-def resnet200(**kwargs):
+def resnet200(**kwargs) -> nn.Module:
     """
     ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
     It's an experimental model.
@@ -679,11 +779,16 @@ def resnet200(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=200, model_name="resnet200", **kwargs)
 
 
-def resnet200b(**kwargs):
+def resnet200b(**kwargs) -> nn.Module:
     """
     ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
     Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
@@ -694,6 +799,11 @@ def resnet200b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 

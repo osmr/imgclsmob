@@ -87,9 +87,9 @@ class ESPNet(ESPCNet):
                  bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
-                 in_channels=3,
-                 in_size=(1024, 2048),
-                 num_classes=19):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (1024, 2048),
+                 num_classes: int = 19):
         super(ESPNet, self).__init__(
             layers=layers,
             channels=channels,

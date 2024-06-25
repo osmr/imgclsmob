@@ -284,7 +284,7 @@ def get_airnet(blocks,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
-               **kwargs):
+               **kwargs) -> nn.Module:
     """
     Create AirNet model with specific parameters.
 
@@ -302,6 +302,11 @@ def get_airnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
 
     if blocks == 50:
@@ -335,7 +340,7 @@ def get_airnet(blocks,
     return net
 
 
-def airnet50_1x64d_r2(**kwargs):
+def airnet50_1x64d_r2(**kwargs) -> nn.Module:
     """
     AirNet50-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -346,11 +351,16 @@ def airnet50_1x64d_r2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnet(blocks=50, base_channels=64, ratio=2, model_name="airnet50_1x64d_r2", **kwargs)
 
 
-def airnet50_1x64d_r16(**kwargs):
+def airnet50_1x64d_r16(**kwargs) -> nn.Module:
     """
     AirNet50-1x64d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -361,11 +371,16 @@ def airnet50_1x64d_r16(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnet(blocks=50, base_channels=64, ratio=16, model_name="airnet50_1x64d_r16", **kwargs)
 
 
-def airnet101_1x64d_r2(**kwargs):
+def airnet101_1x64d_r2(**kwargs) -> nn.Module:
     """
     AirNet101-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
@@ -376,6 +391,11 @@ def airnet101_1x64d_r2(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     return get_airnet(blocks=101, base_channels=64, ratio=2, model_name="airnet101_1x64d_r2", **kwargs)
 

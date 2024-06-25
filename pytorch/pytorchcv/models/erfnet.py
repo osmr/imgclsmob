@@ -113,9 +113,9 @@ class ERFNet(nn.Module):
                  bn_eps=1e-5,
                  aux=False,
                  fixed_size=False,
-                 in_channels=3,
-                 in_size=(1024, 2048),
-                 num_classes=19):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (1024, 2048),
+                 num_classes: int = 19):
         super(ERFNet, self).__init__()
         assert (aux is not None)
         assert (fixed_size is not None)

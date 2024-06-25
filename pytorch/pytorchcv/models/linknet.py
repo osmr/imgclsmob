@@ -143,9 +143,9 @@ class LinkNet(nn.Module):
                  output_paddings,
                  aux=False,
                  fixed_size=False,
-                 in_channels=3,
-                 in_size=(1024, 2048),
-                 num_classes=19):
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (1024, 2048),
+                 num_classes: int = 19):
         super(LinkNet, self).__init__()
         assert (in_channels == 3)
         assert (aux is not None)

@@ -752,7 +752,7 @@ def diaresnet200b(**kwargs) -> nn.Module:
     return get_diaresnet(blocks=200, conv1_stride=False, model_name="diaresnet200b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -806,7 +806,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != diaresnet10 or weight_count == 6297352)
         assert (model != diaresnet12 or weight_count == 6371336)

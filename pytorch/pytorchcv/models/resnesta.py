@@ -497,7 +497,7 @@ def resnesta269(in_size=(320, 320), **kwargs):
     return get_resnesta(blocks=269, in_size=in_size, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -541,7 +541,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnestabc14 or weight_count == 10611688)
         assert (model != resnesta18 or weight_count == 12763784)

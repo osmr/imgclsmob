@@ -790,7 +790,7 @@ def octresnet50b_ad2(**kwargs):
     return get_octresnet(blocks=50, conv1_stride=False, oct_alpha=0.5, model_name="octresnet50b_ad2", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -828,7 +828,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != octresnet10_ad2 or weight_count == 5423016)
         assert (model != octresnet50b_ad2 or weight_count == 25557032)

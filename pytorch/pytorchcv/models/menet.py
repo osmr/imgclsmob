@@ -430,7 +430,7 @@ def menet456_24x1_g3(**kwargs):
     return get_menet(first_stage_channels=456, side_channels=24, groups=3, model_name="menet456_24x1_g3", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -474,7 +474,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != menet108_8x1_g3 or weight_count == 654516)
         assert (model != menet128_8x1_g4 or weight_count == 750796)

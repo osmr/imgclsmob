@@ -634,7 +634,7 @@ def pyramidnet272_a200_bn_svhn(num_classes=10, **kwargs):
         **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -691,7 +691,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != pyramidnet110_a48_cifar10 or weight_count == 1772706)
         assert (model != pyramidnet110_a48_cifar100 or weight_count == 1778556)

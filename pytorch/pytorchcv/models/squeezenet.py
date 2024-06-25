@@ -337,7 +337,7 @@ def squeezeresnet_v1_1(**kwargs):
     return get_squeezenet(version="1.1", residual=True, model_name="squeezeresnet_v1_1", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -376,7 +376,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != squeezenet_v1_0 or weight_count == 1248424)
         assert (model != squeezenet_v1_1 or weight_count == 1235496)

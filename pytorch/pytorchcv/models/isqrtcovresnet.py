@@ -406,7 +406,7 @@ def isqrtcovresnet101b(**kwargs):
     return get_isqrtcovresnet(blocks=101, conv1_stride=False, model_name="isqrtcovresnet101b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -448,7 +448,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != isqrtcovresnet18 or weight_count == 44205096)
         assert (model != isqrtcovresnet34 or weight_count == 54313256)

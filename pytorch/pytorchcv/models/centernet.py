@@ -474,7 +474,7 @@ def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwarg
                          model_name="centernet_resnet101b_coco", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -517,7 +517,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != centernet_resnet18_voc or weight_count == 14215640)
         assert (model != centernet_resnet18_coco or weight_count == 14219540)

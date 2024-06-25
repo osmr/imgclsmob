@@ -217,7 +217,7 @@ def nin_svhn(num_classes=10, **kwargs):
     return get_nin_cifar(num_classes=num_classes, model_name="nin_svhn", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -256,7 +256,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != nin_cifar10 or weight_count == 966986)
         assert (model != nin_cifar100 or weight_count == 984356)

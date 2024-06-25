@@ -602,7 +602,7 @@ def hrnetv2_w64(**kwargs):
     return get_hrnet(version="w64", model_name="hrnetv2_w64", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -647,7 +647,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != hrnet_w18_small_v1 or weight_count == 13187464)
         assert (model != hrnet_w18_small_v2 or weight_count == 15597464)

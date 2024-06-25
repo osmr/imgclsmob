@@ -222,7 +222,7 @@ def visemenet20(**kwargs):
     return get_visemenet(model_name="visemenet20", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -259,7 +259,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != visemenet20 or weight_count == 14574303)
 

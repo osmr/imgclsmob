@@ -286,7 +286,7 @@ def shakedropresnet20_svhn(classes=10, **kwargs):
                                      model_name="shakedropresnet20_svhn", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -325,7 +325,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shakedropresnet20_cifar10 or weight_count == 272474)
         assert (model != shakedropresnet20_cifar100 or weight_count == 278324)

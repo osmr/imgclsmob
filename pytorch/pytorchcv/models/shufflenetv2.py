@@ -322,7 +322,7 @@ def shufflenetv2_w2(**kwargs):
     return get_shufflenetv2(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -362,7 +362,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shufflenetv2_wd2 or weight_count == 1366792)
         assert (model != shufflenetv2_w1 or weight_count == 2278604)

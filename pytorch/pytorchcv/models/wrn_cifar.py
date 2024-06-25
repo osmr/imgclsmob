@@ -277,7 +277,7 @@ def wrn40_8_svhn(num_classes=10, **kwargs):
     return get_wrn_cifar(num_classes=num_classes, blocks=40, width_factor=8, model_name="wrn40_8_svhn", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -322,7 +322,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != wrn16_10_cifar10 or weight_count == 17116634)
         assert (model != wrn16_10_cifar100 or weight_count == 17174324)

@@ -235,7 +235,7 @@ def resnetd152b(**kwargs):
     return get_resnetd(blocks=152, conv1_stride=False, model_name="resnetd152b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -279,7 +279,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         if ordinary_init:
             assert (model != resnetd50b or weight_count == 25557032)

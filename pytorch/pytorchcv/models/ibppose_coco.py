@@ -553,7 +553,7 @@ def ibppose_coco(**kwargs):
     return get_ibppose(model_name="ibppose_coco", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -589,7 +589,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ibppose_coco or weight_count == 95827784)
 

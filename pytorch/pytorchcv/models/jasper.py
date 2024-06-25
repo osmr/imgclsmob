@@ -1090,7 +1090,7 @@ def jasper10x5(**kwargs):
     return get_jasper(version=("jasper", "10x5"), model_name="jasper10x5", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -1140,7 +1140,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != jasper5x3 or weight_count == 107681053)
         assert (model != jasper10x4 or weight_count == 261393693)

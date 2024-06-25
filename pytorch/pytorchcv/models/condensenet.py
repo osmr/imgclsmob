@@ -481,7 +481,7 @@ def condensenet74_c8_g8(**kwargs) -> nn.Module:
     return get_condensenet(num_layers=74, groups=8, model_name="condensenet74_c8_g8", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -519,7 +519,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != condensenet74_c4_g4 or weight_count == 4773944)
         assert (model != condensenet74_c8_g8 or weight_count == 2935416)

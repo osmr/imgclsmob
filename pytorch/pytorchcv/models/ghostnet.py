@@ -371,7 +371,7 @@ def ghostnet(**kwargs):
     return get_ghostnet(model_name="ghostnet", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -408,7 +408,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ghostnet or weight_count == 5180840)
 

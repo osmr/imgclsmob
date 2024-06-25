@@ -762,7 +762,7 @@ def dicenet_w2(**kwargs) -> nn.Module:
     return get_dicenet(width_scale=2.0, model_name="dicenet_w2", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -804,7 +804,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != dicenet_wd5 or weight_count == 1130704)
         assert (model != dicenet_wd2 or weight_count == 1214120)

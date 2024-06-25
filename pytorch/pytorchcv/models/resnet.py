@@ -808,7 +808,7 @@ def resnet200b(**kwargs) -> nn.Module:
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -865,7 +865,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)

@@ -233,7 +233,7 @@ def quartznet15x5_ru34(num_classes=34, **kwargs):
                       model_name="quartznet15x5_ru34", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -290,7 +290,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != quartznet5x5_en_ls or weight_count == 6713181)
         assert (model != quartznet15x5_en or weight_count == 18924381)

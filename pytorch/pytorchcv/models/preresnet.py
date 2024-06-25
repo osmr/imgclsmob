@@ -721,7 +721,7 @@ def preresnet269b(**kwargs):
     return get_preresnet(blocks=269, conv1_stride=False, model_name="preresnet269b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -779,7 +779,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet10 or weight_count == 5417128)
         assert (model != preresnet12 or weight_count == 5491112)

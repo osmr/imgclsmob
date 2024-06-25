@@ -300,7 +300,7 @@ def ibn_resnext101_64x4d(**kwargs):
     return get_ibnresnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="ibn_resnext101_64x4d", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -339,7 +339,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ibn_resnext50_32x4d or weight_count == 25028904)
         assert (model != ibn_resnext101_32x4d or weight_count == 44177704)

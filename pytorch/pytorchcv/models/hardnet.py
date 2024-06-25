@@ -580,7 +580,7 @@ def hardnet85(**kwargs):
     return get_hardnet(blocks=85, use_deptwise=False, model_name="hardnet85", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -620,7 +620,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != hardnet39ds or weight_count == 3488228)
         assert (model != hardnet68ds or weight_count == 4180602)

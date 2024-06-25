@@ -386,7 +386,7 @@ def resneta152b(**kwargs):
     return get_resneta(blocks=152, conv1_stride=False, model_name="resneta152b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -428,7 +428,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resneta10 or weight_count == 5438024)
         assert (model != resnetabc14b or weight_count == 10084168)

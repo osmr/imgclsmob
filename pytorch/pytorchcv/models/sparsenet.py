@@ -334,7 +334,7 @@ def sparsenet264(**kwargs):
     return get_sparsenet(num_layers=264, model_name="sparsenet264", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -375,7 +375,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sparsenet121 or weight_count == 3250824)
         assert (model != sparsenet161 or weight_count == 9853288)

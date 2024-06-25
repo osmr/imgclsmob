@@ -481,7 +481,7 @@ def sepreresnet200b(**kwargs):
     return get_sepreresnet(blocks=200, conv1_stride=False, model_name="sepreresnet200b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -534,7 +534,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sepreresnet10 or weight_count == 5461668)
         assert (model != sepreresnet12 or weight_count == 5536232)

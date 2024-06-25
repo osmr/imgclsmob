@@ -374,7 +374,7 @@ def ntsnet_cub(pretrained_backbone=False, aux=True, **kwargs):
     return get_ntsnet(backbone=backbone, aux=aux, model_name="ntsnet_cub", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -412,7 +412,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
             assert (model != ntsnet_cub or weight_count == 29033133)

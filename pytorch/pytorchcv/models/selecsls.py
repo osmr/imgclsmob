@@ -332,7 +332,7 @@ def selecsls84(**kwargs):
     return get_selecsls(version="84", model_name="selecsls84", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -373,7 +373,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != selecsls42 or weight_count == 30354952)
         assert (model != selecsls42b or weight_count == 32458248)

@@ -381,7 +381,7 @@ def efficientnet_edge_large_b(in_size=(300, 300), **kwargs) -> nn.Module:
                                  model_name="efficientnet_edge_large_b", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -420,7 +420,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != efficientnet_edge_small_b or weight_count == 5438392)
         assert (model != efficientnet_edge_medium_b or weight_count == 6899496)

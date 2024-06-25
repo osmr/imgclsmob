@@ -275,7 +275,7 @@ def simplepose_mobile_mobilenetv3_large_w1_coco(pretrained_backbone=False, keypo
                                 model_name="simplepose_mobile_mobilenetv3_large_w1_coco", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -318,7 +318,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != simplepose_mobile_resnet18_coco or weight_count == 12858208)
         assert (model != simplepose_mobile_resnet50b_coco or weight_count == 25582944)

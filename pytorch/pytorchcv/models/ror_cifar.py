@@ -461,7 +461,7 @@ def ror3_164_svhn(num_classes=10, **kwargs):
     return get_ror_cifar(num_classes=num_classes, blocks=164, model_name="ror3_164_svhn", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -506,7 +506,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ror3_56_cifar10 or weight_count == 762746)
         assert (model != ror3_56_cifar100 or weight_count == 768596)

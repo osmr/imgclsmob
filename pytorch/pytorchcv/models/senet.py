@@ -392,7 +392,7 @@ def senet154(**kwargs):
     return get_senet(blocks=154, model_name="senet154", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -434,7 +434,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != senet16 or weight_count == 31366168)
         assert (model != senet28 or weight_count == 36453768)

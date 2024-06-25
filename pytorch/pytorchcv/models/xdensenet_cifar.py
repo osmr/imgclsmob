@@ -355,7 +355,7 @@ def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs) -> nn.Module:
                                model_name="xdensenet40_2_k36_bc_svhn", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -397,7 +397,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != xdensenet40_2_k24_bc_cifar10 or weight_count == 690346)
         assert (model != xdensenet40_2_k24_bc_cifar100 or weight_count == 714196)

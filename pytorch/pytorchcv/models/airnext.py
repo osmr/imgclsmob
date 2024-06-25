@@ -361,7 +361,7 @@ def airnext101_32x4d_r16(**kwargs) -> nn.Module:
         **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -400,7 +400,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != airnext50_32x4d_r2 or weight_count == 27604296)
         assert (model != airnext101_32x4d_r2 or weight_count == 54099272)

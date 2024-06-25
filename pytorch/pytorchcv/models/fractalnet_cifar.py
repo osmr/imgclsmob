@@ -457,7 +457,7 @@ def fractalnet_cifar100(num_classes=100, **kwargs):
     return get_fractalnet_cifar(num_classes=num_classes, model_name="fractalnet_cifar100", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -495,7 +495,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != fractalnet_cifar10 or weight_count == 33724618)
         assert (model != fractalnet_cifar100 or weight_count == 33770788)

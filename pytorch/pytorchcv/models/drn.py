@@ -623,7 +623,7 @@ def drnd105(**kwargs) -> nn.Module:
     return get_drn(blocks=105, simplified=True, model_name="drnd105", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -666,7 +666,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != drnc26 or weight_count == 21126584)
         assert (model != drnc42 or weight_count == 31234744)

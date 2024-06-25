@@ -581,7 +581,7 @@ def fishnet150(**kwargs):
     return get_fishnet(blocks=150, model_name="fishnet150", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -619,7 +619,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != fishnet99 or weight_count == 16628904)
         assert (model != fishnet150 or weight_count == 24959400)

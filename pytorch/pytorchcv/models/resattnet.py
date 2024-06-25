@@ -629,7 +629,7 @@ def resattnet452(**kwargs):
     return get_resattnet(blocks=452, model_name="resattnet452", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -672,7 +672,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resattnet56 or weight_count == 31810728)
         assert (model != resattnet92 or weight_count == 52466344)

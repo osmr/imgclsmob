@@ -358,7 +358,7 @@ def ibn_densenet201(**kwargs):
     return get_ibndensenet(num_layers=201, model_name="ibn_densenet201", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -398,7 +398,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ibn_densenet121 or weight_count == 7978856)
         assert (model != ibn_densenet161 or weight_count == 28681000)

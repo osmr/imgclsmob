@@ -498,7 +498,7 @@ def mobilenetv3_large_w5d4(**kwargs):
     return get_mobilenetv3(version="large", width_scale=1.25, model_name="mobilenetv3_large_w5d4", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -544,7 +544,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenetv3_small_w7d20 or weight_count == 2159600)
         assert (model != mobilenetv3_small_wd2 or weight_count == 2288976)

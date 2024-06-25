@@ -340,7 +340,7 @@ def pyramidnet101_a360(**kwargs):
     return get_pyramidnet(blocks=101, alpha=360, model_name="pyramidnet101_a360", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -377,7 +377,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != pyramidnet101_a360 or weight_count == 42455070)
 

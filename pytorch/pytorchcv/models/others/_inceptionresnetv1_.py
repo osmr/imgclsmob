@@ -484,7 +484,7 @@ def inceptionresnetv1(pretrained=False, **kwargs):
     return InceptionResNetV1(bn_eps=1e-3, **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -521,7 +521,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionresnetv1 or weight_count == 23995624)
 

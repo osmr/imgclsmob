@@ -150,7 +150,7 @@ def fdmobilenet_wd4_cub(num_classes=200, **kwargs):
     return get_fdmobilenet(num_classes=num_classes, width_scale=0.25, model_name="fdmobilenet_wd4_cub", **kwargs)
 
 
-def _calc_width(net: nn.Module) -> int:
+def calc_net_weights(net: nn.Module) -> int:
     """
     Calculate network trainable weight count.
 
@@ -194,7 +194,7 @@ def _test():
 
         # net.train()
         net.eval()
-        weight_count = _calc_width(net)
+        weight_count = calc_net_weights(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenet_w1_cub or weight_count == 3411976)
         assert (model != mobilenet_w3d4_cub or weight_count == 1970360)

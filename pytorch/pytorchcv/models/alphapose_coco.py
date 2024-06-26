@@ -6,7 +6,6 @@
 __all__ = ['AlphaPose', 'alphapose_fastseresnet101b_coco']
 
 import os
-import torch
 import torch.nn as nn
 from .common import conv3x3, DucBlock, HeatmapMaxDetBlock, calc_net_weights
 from .fastseresnet import fastseresnet101b
@@ -22,7 +21,7 @@ class AlphaPose(nn.Module):
         Feature extractor.
     backbone_out_channels : int
         Number of output channels for the backbone.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each decoder unit.
     return_heatmap : bool, default False
         Whether to return only heatmap.
@@ -34,13 +33,13 @@ class AlphaPose(nn.Module):
         Number of keypoints.
     """
     def __init__(self,
-                 backbone,
-                 backbone_out_channels,
-                 channels,
-                 return_heatmap=False,
-                 in_channels=3,
-                 in_size=(256, 192),
-                 keypoints=17):
+                 backbone: nn.Sequential,
+                 backbone_out_channels: int,
+                 channels: list[int],
+                 return_heatmap: bool = False,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (256, 192),
+                 keypoints: int = 17):
         super(AlphaPose, self).__init__()
         assert (in_channels == 3)
         self.in_size = in_size
@@ -84,9 +83,9 @@ class AlphaPose(nn.Module):
             return keypoints
 
 
-def get_alphapose(backbone,
-                  backbone_out_channels,
-                  keypoints,
+def get_alphapose(backbone: nn.Sequential,
+                  backbone_out_channels: int,
+                  keypoints: int,
                   model_name: str | None = None,
                   pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
@@ -135,7 +134,9 @@ def get_alphapose(backbone,
     return net
 
 
-def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **kwargs) -> nn.Module:
+def alphapose_fastseresnet101b_coco(pretrained_backbone: bool = False,
+                                    keypoints: int = 17,
+                                    **kwargs) -> nn.Module:
     """
     AlphaPose model on the base of ResNet-101b for COCO Keypoint from 'RMPE: Regional Multi-person Pose Estimation,'
     https://arxiv.org/abs/1612.00137.
@@ -158,11 +159,17 @@ def alphapose_fastseresnet101b_coco(pretrained_backbone=False, keypoints=17, **k
     """
     backbone = fastseresnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_alphapose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
-                         model_name="alphapose_fastseresnet101b_coco", **kwargs)
+    return get_alphapose(
+        backbone=backbone,
+        backbone_out_channels=2048,
+        keypoints=keypoints,
+        model_name="alphapose_fastseresnet101b_coco",
+        **kwargs)
 
 
 def _test():
+    import torch
+
     in_size = (256, 192)
     keypoints = 17
     return_heatmap = False

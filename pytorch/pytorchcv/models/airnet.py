@@ -28,10 +28,10 @@ class AirBlock(nn.Module):
         Air compression ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 groups=1,
-                 ratio=2):
+                 in_channels: int,
+                 out_channels: int,
+                 groups: int = 1,
+                 ratio: int = 2):
         super(AirBlock, self).__init__()
         assert (out_channels % ratio == 0)
         mid_channels = out_channels // ratio
@@ -83,10 +83,10 @@ class AirBottleneck(nn.Module):
         Air compression ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 ratio):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 ratio: int):
         super(AirBottleneck, self).__init__()
         mid_channels = out_channels // 4
         self.use_air_block = (stride == 1 and mid_channels < 512)
@@ -135,10 +135,10 @@ class AirUnit(nn.Module):
         Air compression ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 ratio):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 ratio: int):
         super(AirUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -178,8 +178,8 @@ class AirInitBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(AirInitBlock, self).__init__()
         mid_channels = out_channels // 2
 
@@ -227,9 +227,9 @@ class AirNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 ratio,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 ratio: int,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -277,9 +277,9 @@ class AirNet(nn.Module):
         return x
 
 
-def get_airnet(blocks,
-               base_channels,
-               ratio,
+def get_airnet(blocks: int,
+               base_channels: int,
+               ratio: int,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
@@ -356,7 +356,12 @@ def airnet50_1x64d_r2(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_airnet(blocks=50, base_channels=64, ratio=2, model_name="airnet50_1x64d_r2", **kwargs)
+    return get_airnet(
+        blocks=50,
+        base_channels=64,
+        ratio=2,
+        model_name="airnet50_1x64d_r2",
+        **kwargs)
 
 
 def airnet50_1x64d_r16(**kwargs) -> nn.Module:
@@ -376,7 +381,12 @@ def airnet50_1x64d_r16(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_airnet(blocks=50, base_channels=64, ratio=16, model_name="airnet50_1x64d_r16", **kwargs)
+    return get_airnet(
+        blocks=50,
+        base_channels=64,
+        ratio=16,
+        model_name="airnet50_1x64d_r16",
+        **kwargs)
 
 
 def airnet101_1x64d_r2(**kwargs) -> nn.Module:
@@ -396,7 +406,12 @@ def airnet101_1x64d_r2(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_airnet(blocks=101, base_channels=64, ratio=2, model_name="airnet101_1x64d_r2", **kwargs)
+    return get_airnet(
+        blocks=101,
+        base_channels=64,
+        ratio=2,
+        model_name="airnet101_1x64d_r2",
+        **kwargs)
 
 
 def _test():

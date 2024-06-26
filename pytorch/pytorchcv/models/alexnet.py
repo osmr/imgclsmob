@@ -270,7 +270,9 @@ def alexnet(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_alexnet(model_name="alexnet", **kwargs)
+    return get_alexnet(
+        model_name="alexnet",
+        **kwargs)
 
 
 def alexnetb(**kwargs) -> nn.Module:
@@ -290,7 +292,10 @@ def alexnetb(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_alexnet(version="b", model_name="alexnetb", **kwargs)
+    return get_alexnet(
+        version="b",
+        model_name="alexnetb",
+        **kwargs)
 
 
 def _test():

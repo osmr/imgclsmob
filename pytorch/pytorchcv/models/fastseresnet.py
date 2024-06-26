@@ -31,12 +31,12 @@ class FastSEResUnit(nn.Module):
         Whether to use SE-module.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bottleneck,
-                 conv1_stride,
-                 use_se):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 bottleneck: bool,
+                 conv1_stride: bool,
+                 use_se: bool):
         super(FastSEResUnit, self).__init__()
         self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
@@ -100,10 +100,10 @@ class FastSEResNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 conv1_stride,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
+                 conv1_stride: bool,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -154,13 +154,13 @@ class FastSEResNet(nn.Module):
         return x
 
 
-def get_fastseresnet(blocks,
-                     bottleneck=None,
-                     conv1_stride=True,
-                     model_name=None,
-                     pretrained=False,
+def get_fastseresnet(blocks: int,
+                     bottleneck: bool | None = None,
+                     conv1_stride: bool = True,
+                     model_name: str | None = None,
+                     pretrained: bool = False,
                      root: str = os.path.join("~", ".torch", "models"),
-                     **kwargs):
+                     **kwargs) -> nn.Module:
     """
     Create Fast-SE-ResNet model with specific parameters.
 
@@ -168,7 +168,7 @@ def get_fastseresnet(blocks,
     ----------
     blocks : int
         Number of blocks.
-    bottleneck : bool, default None
+    bottleneck : bool or None, default None
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
@@ -178,6 +178,11 @@ def get_fastseresnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
     if bottleneck is None:
         bottleneck = (blocks >= 50)
@@ -246,7 +251,7 @@ def get_fastseresnet(blocks,
     return net
 
 
-def fastseresnet101b(**kwargs):
+def fastseresnet101b(**kwargs) -> nn.Module:
     """
     Fast-SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
@@ -257,8 +262,17 @@ def fastseresnet101b(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    nn.Module
+        Desired module.
     """
-    return get_fastseresnet(blocks=101, conv1_stride=False, model_name="fastseresnet101b", **kwargs)
+    return get_fastseresnet(
+        blocks=101,
+        conv1_stride=False,
+        model_name="fastseresnet101b",
+        **kwargs)
 
 
 def _test():

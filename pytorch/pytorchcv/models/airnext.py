@@ -33,12 +33,12 @@ class AirNeXtBottleneck(nn.Module):
         Air compression ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 cardinality,
-                 bottleneck_width,
-                 ratio):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 cardinality: int,
+                 bottleneck_width: int,
+                 ratio: int):
         super(AirNeXtBottleneck, self).__init__()
         mid_channels = out_channels // 4
         D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
@@ -95,12 +95,12 @@ class AirNeXtUnit(nn.Module):
         Air compression ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 cardinality,
-                 bottleneck_width,
-                 ratio):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 cardinality: int,
+                 bottleneck_width: int,
+                 ratio: int):
         super(AirNeXtUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -155,11 +155,11 @@ class AirNeXt(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 cardinality,
-                 bottleneck_width,
-                 ratio,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 cardinality: int,
+                 bottleneck_width: int,
+                 ratio: int,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -209,11 +209,11 @@ class AirNeXt(nn.Module):
         return x
 
 
-def get_airnext(blocks,
-                cardinality,
-                bottleneck_width,
-                base_channels,
-                ratio,
+def get_airnext(blocks: int,
+                cardinality: int,
+                bottleneck_width: int,
+                base_channels: int,
+                ratio: int,
                 model_name: str | None = None,
                 pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),

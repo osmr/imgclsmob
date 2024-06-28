@@ -789,13 +789,13 @@ class JasperFinalBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each block.
-    kernel_sizes : list of int
+    kernel_sizes : list(int)
         Kernel sizes for each block.
     bn_eps : float
         Small float added to variance in Batch norm.
-    dropout_rates : list of int
+    dropout_rates : list(int)
         Dropout rates for each block.
     use_dw : bool
         Whether to use depthwise block.
@@ -847,13 +847,13 @@ class Jasper(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit and initial/final block.
-    kernel_sizes : list of int
+    kernel_sizes : list(int)
         Kernel sizes for each unit and initial/final block.
     bn_eps : float
         Small float added to variance in Batch norm.
-    dropout_rates : list of int
+    dropout_rates : list(int)
         Dropout rates for each unit and initial/final block.
     repeat : int
         Count of body convolution blocks.

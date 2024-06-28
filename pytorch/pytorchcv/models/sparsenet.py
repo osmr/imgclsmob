@@ -78,7 +78,7 @@ class SparseStage(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    channels_per_stage : list of int
+    channels_per_stage : list(int)
         Number of output channels for each unit in stage.
     growth_rate : int
         Growth rate for blocks.

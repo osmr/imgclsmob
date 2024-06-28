@@ -130,9 +130,9 @@ class HarDUnit(nn.Module):
 
     Parameters
     ----------
-    in_channels_list : list of int
+    in_channels_list : list(int)
         Number of input channels for each block.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each block.
     links_list : list(list(int))
         List of indices for each layer.

@@ -28,7 +28,7 @@ class SimplePoseMobile(nn.Module):
         Feature extractor.
     backbone_out_channels : int
         Number of output channels for the backbone.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each decoder unit.
     decoder_init_block_channels : int
         Number of output channels for the initial unit of the decoder.

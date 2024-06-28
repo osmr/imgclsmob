@@ -132,7 +132,7 @@ class RegNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    groups : list of int
+    groups : list(int)
         Number of groups for each stage.
     use_se : bool
         Whether to use SE-module.

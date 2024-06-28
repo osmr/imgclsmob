@@ -211,7 +211,7 @@ class DownUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each block.
     """
     def __init__(self,
@@ -242,7 +242,7 @@ class UpUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each block.
     dilation : int or tuple(int, int), default 1
         Dilation value for convolution layer.
@@ -277,7 +277,7 @@ class SkipUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each block.
     """
     def __init__(self,
@@ -304,7 +304,7 @@ class SkipAttUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each block.
     """
     def __init__(self,

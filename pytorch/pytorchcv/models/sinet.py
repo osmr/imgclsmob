@@ -520,9 +520,9 @@ class ESPBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_sizes : list of int
+    kernel_sizes : list(int)
         Convolution window size for branches.
-    scale_factors : list of int
+    scale_factors : list(int)
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
@@ -591,13 +591,13 @@ class SBStage(nn.Module):
         Number of input channels.
     down_channels : int
         Number of output channels for a downscale block.
-    channels_list : list of int
+    channels_list : list(int)
         Number of output channels for all residual block.
-    kernel_sizes_list : list of int
+    kernel_sizes_list : list(int)
         Convolution window size for branches.
-    scale_factors_list : list of int
+    scale_factors_list : list(int)
         Scale factor for branches.
-    use_residual_list : list of int
+    use_residual_list : list(int)
         List of flags for using residual in each ESP-block.
     se_reduction : int
         Squeeze reduction value (0 means no-se).
@@ -706,7 +706,7 @@ class SBEncoder(nn.Module):
         Number of input channels.
     init_block_channels : list int
         Number of output channels for convolutions in the initial block.
-    down_channels_list : list of int
+    down_channels_list : list(int)
         Number of downsample channels for each residual block.
     channels_list : list(list(int))
         Number of output channels for all residual block.
@@ -858,7 +858,7 @@ class SINet(nn.Module):
 
     Parameters
     ----------
-    down_channels_list : list of int
+    down_channels_list : list(int)
         Number of downsample channels for each residual block.
     channels_list : list(list(int))
         Number of output channels for all residual block.

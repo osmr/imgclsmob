@@ -95,7 +95,7 @@ class CIFAR10MSDNet(nn.Module):
     ----------
     channels : list(list(list(int)))
         Number of output channels for each unit.
-    init_layer_channels : list of int
+    init_layer_channels : list(int)
         Number of output channels for the initial layer.
     num_feature_blocks : int
         Number of subnets.

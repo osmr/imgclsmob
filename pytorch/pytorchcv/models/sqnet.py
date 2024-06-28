@@ -176,7 +176,7 @@ class SQNet(nn.Module):
         Number of output channels for each stage in encoder and decoder.
     init_block_channels : int
         Number of output channels for the initial unit.
-    layers : list of int
+    layers : list(int)
         Number of layers for each stage in encoder.
     aux : bool, default False
         Whether to output an auxiliary result.

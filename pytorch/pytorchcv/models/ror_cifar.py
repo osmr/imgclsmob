@@ -105,7 +105,7 @@ class RoRResStage(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels for each unit.
     dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.

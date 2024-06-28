@@ -25,7 +25,7 @@ class SimplePose(nn.Module):
         Feature extractor.
     backbone_out_channels : int
         Number of output channels for the backbone.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each decoder unit.
     return_heatmap : bool, default False
         Whether to return only heatmap.

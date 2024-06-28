@@ -9,6 +9,7 @@ __all__ = ['BiSeNet', 'bisenet_resnet18_celebamaskhq']
 import os
 import torch
 import torch.nn as nn
+from typing import Callable
 from .common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential, calc_net_weights
 from .resnet import resnet18
 
@@ -27,9 +28,9 @@ class PyramidPoolingZeroBranch(nn.Module):
         Spatial size of output image for the upsampling operation.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 in_size):
+                 in_channels: int,
+                 out_channels: int,
+                 in_size: tuple[int, int]):
         super(PyramidPoolingZeroBranch, self).__init__()
         self.in_size = in_size
 
@@ -62,8 +63,8 @@ class AttentionRefinementBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(AttentionRefinementBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -96,9 +97,9 @@ class PyramidPoolingMainBranch(nn.Module):
         Multiplier for spatial size.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 scale_factor):
+                 in_channels: int,
+                 out_channels: int,
+                 scale_factor: float):
         super(PyramidPoolingMainBranch, self).__init__()
         self.att = AttentionRefinementBlock(
             in_channels=in_channels,
@@ -133,9 +134,9 @@ class FeatureFusion(nn.Module):
         Squeeze reduction value.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 reduction=4):
+                 in_channels: int,
+                 out_channels: int,
+                 reduction: int = 4):
         super(FeatureFusion, self).__init__()
         mid_channels = out_channels // reduction
 
@@ -181,10 +182,10 @@ class PyramidPooling(nn.Module):
         Spatial size of the y32 tensor.
     """
     def __init__(self,
-                 x16_in_channels,
-                 x32_in_channels,
-                 y_out_channels,
-                 y32_out_size):
+                 x16_in_channels: int,
+                 x32_in_channels: int,
+                 y_out_channels: int,
+                 y32_out_size: tuple[int, int]):
         super(PyramidPooling, self).__init__()
         z_out_channels = 2 * y_out_channels
 
@@ -226,9 +227,9 @@ class BiSeHead(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 mid_channels,
-                 out_channels):
+                 in_channels: int,
+                 mid_channels: int,
+                 out_channels: int):
         super(BiSeHead, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -250,7 +251,7 @@ class BiSeNet(nn.Module):
 
     Parameters
     ----------
-    backbone : func -> nn.Sequential
+    backbone : func -> (nn.Sequential, tuple(int, int, int))
         Feature extractor.
     aux : bool, default True
         Whether to output an auxiliary results.
@@ -264,12 +265,12 @@ class BiSeNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 backbone,
-                 aux=True,
-                 fixed_size=True,
-                 in_channels=3,
-                 in_size=(640, 480),
-                 num_classes=19):
+                 backbone: Callable[[], tuple[nn.Sequential, tuple[int, int, int]]],
+                 aux: bool = True,
+                 fixed_size: bool = True,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (640, 480),
+                 num_classes: int = 19):
         super(BiSeNet, self).__init__()
         assert (in_channels == 3)
         self.in_size = in_size
@@ -333,8 +334,8 @@ class BiSeNet(nn.Module):
             return z8
 
 
-def get_bisenet(model_name=None,
-                pretrained=False,
+def get_bisenet(model_name: str | None = None,
+                pretrained: bool = False,
                 root: str = os.path.join("~", ".torch", "models"),
                 **kwargs) -> nn.Module:
     """
@@ -342,6 +343,10 @@ def get_bisenet(model_name=None,
 
     Parameters
     ----------
+    backbone : func -> (nn.Sequential, tuple(int, int, int))
+        Feature extractor.
+    num_classes : int, default 1000
+        Number of classification classes.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -354,8 +359,7 @@ def get_bisenet(model_name=None,
     nn.Module
         Desired module.
     """
-    net = BiSeNet(
-        **kwargs)
+    net = BiSeNet(**kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -369,7 +373,9 @@ def get_bisenet(model_name=None,
     return net
 
 
-def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **kwargs) -> nn.Module:
+def bisenet_resnet18_celebamaskhq(pretrained_backbone: bool = False,
+                                  num_classes: int = 19,
+                                  **kwargs) -> nn.Module:
     """
     BiSeNet model on the base of ResNet-18 for face segmentation on CelebAMask-HQ from 'BiSeNet: Bilateral Segmentation
     Network for Real-time Semantic Segmentation,' https://arxiv.org/abs/1808.00897.
@@ -401,7 +407,11 @@ def bisenet_resnet18_celebamaskhq(pretrained_backbone=False, num_classes=19, **k
             features.add_module("stage{}".format(i + 1), stage)
         out_channels = [128, 256, 512]
         return features, out_channels
-    return get_bisenet(backbone=backbone, num_classes=num_classes, model_name="bisenet_resnet18_celebamaskhq", **kwargs)
+    return get_bisenet(
+        backbone=backbone,
+        num_classes=num_classes,
+        model_name="bisenet_resnet18_celebamaskhq",
+        **kwargs)
 
 
 def _test():

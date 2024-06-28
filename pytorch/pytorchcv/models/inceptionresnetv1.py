@@ -21,7 +21,7 @@ class InceptionAUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         List for numbers of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -76,7 +76,7 @@ class InceptionBUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         List for numbers of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -124,7 +124,7 @@ class InceptionCUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         List for numbers of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -181,7 +181,7 @@ class ReductionAUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         List for numbers of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -221,7 +221,7 @@ class ReductionBUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         List for numbers of output channels.
     bn_eps : float
         Small float added to variance in Batch norm.

@@ -19,7 +19,7 @@ class VisemeDenseBranch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of middle/output channels.
     """
     def __init__(self,
@@ -52,7 +52,7 @@ class VisemeRnnBranch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of middle/output channels.
     rnn_num_layers : int
         Number of RNN layers.

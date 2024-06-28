@@ -26,8 +26,8 @@ class CenterNetDecoderUnit(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(CenterNetDecoderUnit, self).__init__()
         self.conv = conv3x3_block(
             in_channels=in_channels,
@@ -58,8 +58,8 @@ class CenterNetHeadBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(CenterNetHeadBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -88,12 +88,12 @@ class CenterNetHeatmapBlock(nn.Module):
     out_channels : int
         Number of output channels.
     do_nms : bool
-        Whether do NMS (or simply clip for training otherwise).
+        Whether to do NMS (or simply clip for training otherwise).
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 do_nms):
+                 in_channels: int,
+                 out_channels: int,
+                 do_nms: bool):
         super(CenterNetHeatmapBlock, self).__init__()
         self.do_nms = do_nms
 
@@ -131,8 +131,8 @@ class CenterNetHeatmapMaxDet(nn.Module):
         Downsampling scale factor.
     """
     def __init__(self,
-                 topk=40,
-                 scale=4):
+                 topk: int = 40,
+                 scale: int = 4):
         super(CenterNetHeatmapMaxDet, self).__init__()
         self.topk = topk
         self.scale = scale
@@ -189,7 +189,7 @@ class CenterNet(nn.Module):
         Feature extractor.
     backbone_out_channels : int
         Number of output channels for the backbone.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each decoder unit.
     return_heatmap : bool, default False
         Whether to return only heatmap.
@@ -203,14 +203,14 @@ class CenterNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 backbone,
-                 backbone_out_channels,
-                 channels,
-                 return_heatmap=False,
-                 topk=40,
-                 in_channels=3,
-                 in_size=(512, 512),
-                 num_classes=80):
+                 backbone: nn.Sequential,
+                 backbone_out_channels: int,
+                 channels: list[int],
+                 return_heatmap: bool = False,
+                 topk: int = 40,
+                 in_channels: int = 3,
+                 in_size: tuple[int, int] = (512, 512),
+                 num_classes: int = 80):
         super(CenterNet, self).__init__()
         self.in_size = in_size
         self.in_channels = in_channels
@@ -261,9 +261,9 @@ class CenterNet(nn.Module):
         return x
 
 
-def get_centernet(backbone,
-                  backbone_out_channels,
-                  num_classes,
+def get_centernet(backbone: nn.Sequential,
+                  backbone_out_channels: int,
+                  num_classes: int,
                   model_name: str | None = None,
                   pretrained: bool = False,
                   root: str = os.path.join("~", ".torch", "models"),
@@ -312,7 +312,9 @@ def get_centernet(backbone,
     return net
 
 
-def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
+def centernet_resnet18_voc(pretrained_backbone: bool = False,
+                           num_classes: int = 20,
+                           **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -335,11 +337,17 @@ def centernet_resnet18_voc(pretrained_backbone=False, num_classes=20, **kwargs) 
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=512, num_classes=num_classes,
-                         model_name="centernet_resnet18_voc", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=512,
+        num_classes=num_classes,
+        model_name="centernet_resnet18_voc",
+        **kwargs)
 
 
-def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
+def centernet_resnet18_coco(pretrained_backbone: bool = False,
+                            num_classes: int = 80,
+                            **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -362,11 +370,17 @@ def centernet_resnet18_coco(pretrained_backbone=False, num_classes=80, **kwargs)
     """
     backbone = resnet18(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=512, num_classes=num_classes,
-                         model_name="centernet_resnet18_coco", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=512,
+        num_classes=num_classes,
+        model_name="centernet_resnet18_coco",
+        **kwargs)
 
 
-def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
+def centernet_resnet50b_voc(pretrained_backbone: bool = False,
+                            num_classes: int = 20,
+                            **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -389,11 +403,17 @@ def centernet_resnet50b_voc(pretrained_backbone=False, num_classes=20, **kwargs)
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=2048, num_classes=num_classes,
-                         model_name="centernet_resnet50b_voc", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=2048,
+        num_classes=num_classes,
+        model_name="centernet_resnet50b_voc",
+        **kwargs)
 
 
-def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
+def centernet_resnet50b_coco(pretrained_backbone: bool = False,
+                             num_classes: int = 80,
+                             **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -416,11 +436,17 @@ def centernet_resnet50b_coco(pretrained_backbone=False, num_classes=80, **kwargs
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=2048, num_classes=num_classes,
-                         model_name="centernet_resnet50b_coco", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=2048,
+        num_classes=num_classes,
+        model_name="centernet_resnet50b_coco",
+        **kwargs)
 
 
-def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs) -> nn.Module:
+def centernet_resnet101b_voc(pretrained_backbone: bool = False,
+                             num_classes: int = 20,
+                             **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for VOC Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -443,11 +469,17 @@ def centernet_resnet101b_voc(pretrained_backbone=False, num_classes=20, **kwargs
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=2048, num_classes=num_classes,
-                         model_name="centernet_resnet101b_voc", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=2048,
+        num_classes=num_classes,
+        model_name="centernet_resnet101b_voc",
+        **kwargs)
 
 
-def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwargs) -> nn.Module:
+def centernet_resnet101b_coco(pretrained_backbone: bool = False,
+                              num_classes: int = 80,
+                              **kwargs) -> nn.Module:
     """
     CenterNet model on the base of ResNet-101b for COCO Detection from 'Objects as Points,'
     https://arxiv.org/abs/1904.07850.
@@ -470,8 +502,12 @@ def centernet_resnet101b_coco(pretrained_backbone=False, num_classes=80, **kwarg
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features
     del backbone[-1]
-    return get_centernet(backbone=backbone, backbone_out_channels=2048, num_classes=num_classes,
-                         model_name="centernet_resnet101b_coco", **kwargs)
+    return get_centernet(
+        backbone=backbone,
+        backbone_out_channels=2048,
+        num_classes=num_classes,
+        model_name="centernet_resnet101b_coco",
+        **kwargs)
 
 
 def _test():

@@ -52,13 +52,13 @@ class HRBlock(nn.Module):
 
     Parameters
     ----------
-    in_channels_list : list of int
+    in_channels_list : list(int)
         Number of input channels.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels.
     num_branches : int
         Number of branches.
-    num_subblocks : list of int
+    num_subblocks : list(int)
         Number of subblock.
     """
     def __init__(self,
@@ -141,15 +141,15 @@ class HRStage(nn.Module):
 
     Parameters
     ----------
-    in_channels_list : list of int
+    in_channels_list : list(int)
         Number of output channels from the previous layer.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels in the current layer.
     num_modules : int
         Number of modules.
     num_branches : int
         Number of branches.
-    num_subblocks : list of int
+    num_subblocks : list(int)
         Number of subblocks.
     """
     def __init__(self,
@@ -258,9 +258,9 @@ class HRFinalBlock(nn.Module):
 
     Parameters
     ----------
-    in_channels_list : list of int
+    in_channels_list : list(int)
         Number of input channels per stage.
-    out_channels_list : list of int
+    out_channels_list : list(int)
         Number of output channels per stage.
     """
     def __init__(self,
@@ -302,7 +302,7 @@ class HRNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -310,7 +310,7 @@ class HRNet(nn.Module):
         Number of subblocks in the initial unit.
     num_modules : int
         Number of modules per stage.
-    num_subblocks : list of int
+    num_subblocks : list(int)
         Number of subblocks per stage.
     in_channels : int, default 3
         Number of input channels.

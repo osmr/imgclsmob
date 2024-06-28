@@ -309,7 +309,7 @@ class CIFARFractalNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit.
     num_columns : int
         Number of columns in each block.

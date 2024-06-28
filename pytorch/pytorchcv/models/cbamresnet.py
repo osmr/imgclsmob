@@ -24,8 +24,8 @@ class MLP(nn.Module):
         Channel reduction ratio.
     """
     def __init__(self,
-                 channels,
-                 reduction_ratio=16):
+                 channels: int,
+                 reduction_ratio: int = 16):
         super(MLP, self).__init__()
         mid_channels = channels // reduction_ratio
 
@@ -57,8 +57,8 @@ class ChannelGate(nn.Module):
         Channel reduction ratio.
     """
     def __init__(self,
-                 channels,
-                 reduction_ratio=16):
+                 channels: int,
+                 reduction_ratio: int = 16):
         super(ChannelGate, self).__init__()
 
         self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
@@ -114,8 +114,8 @@ class CbamBlock(nn.Module):
         Channel reduction ratio.
     """
     def __init__(self,
-                 channels,
-                 reduction_ratio=16):
+                 channels: int,
+                 reduction_ratio: int = 16):
         super(CbamBlock, self).__init__()
         self.ch_gate = ChannelGate(
             channels=channels,
@@ -144,10 +144,10 @@ class CbamResUnit(nn.Module):
         Whether to use a bottleneck or simple block in units.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bottleneck):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 bottleneck: bool):
         super(CbamResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -203,9 +203,9 @@ class CbamResNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -253,7 +253,7 @@ class CbamResNet(nn.Module):
         return x
 
 
-def get_resnet(blocks,
+def get_resnet(blocks: int,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
@@ -283,7 +283,6 @@ def get_resnet(blocks,
     nn.Module
         Desired module.
     """
-
     if blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
@@ -342,7 +341,10 @@ def cbam_resnet18(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, model_name="cbam_resnet18", **kwargs)
+    return get_resnet(
+        blocks=18,
+        model_name="cbam_resnet18",
+        **kwargs)
 
 
 def cbam_resnet34(**kwargs) -> nn.Module:
@@ -361,7 +363,10 @@ def cbam_resnet34(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=34, model_name="cbam_resnet34", **kwargs)
+    return get_resnet(
+        blocks=34,
+        model_name="cbam_resnet34",
+        **kwargs)
 
 
 def cbam_resnet50(**kwargs) -> nn.Module:
@@ -380,7 +385,10 @@ def cbam_resnet50(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=50, model_name="cbam_resnet50", **kwargs)
+    return get_resnet(
+        blocks=50,
+        model_name="cbam_resnet50",
+        **kwargs)
 
 
 def cbam_resnet101(**kwargs) -> nn.Module:
@@ -399,7 +407,10 @@ def cbam_resnet101(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=101, model_name="cbam_resnet101", **kwargs)
+    return get_resnet(
+        blocks=101,
+        model_name="cbam_resnet101",
+        **kwargs)
 
 
 def cbam_resnet152(**kwargs) -> nn.Module:
@@ -418,7 +429,10 @@ def cbam_resnet152(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=152, model_name="cbam_resnet152", **kwargs)
+    return get_resnet(
+        blocks=152,
+        model_name="cbam_resnet152",
+        **kwargs)
 
 
 def _test():

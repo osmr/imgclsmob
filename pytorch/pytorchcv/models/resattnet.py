@@ -270,7 +270,7 @@ class AttBlock(nn.Module):
         Number of output channels.
     hourglass_depth : int
         Depth of hourglass block.
-    att_scales : list of int
+    att_scales : list(int)
         Attention block specific scales.
     """
     def __init__(self,
@@ -393,7 +393,7 @@ class ResAttNet(nn.Module):
         Number of output channels for the initial unit.
     attentions : list(list(int))
         Whether to use a attention unit or residual one.
-    att_scales : list of int
+    att_scales : list(int)
         Attention block specific scales.
     in_channels : int, default 3
         Number of input channels.

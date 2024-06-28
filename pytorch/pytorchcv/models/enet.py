@@ -232,13 +232,13 @@ class ENetStage(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_sizes : list of int
+    kernel_sizes : list(int)
         Kernel sizes.
-    paddings : list of int
+    paddings : list(int)
         Padding values.
-    dilations : list of int
+    dilations : list(int)
         Dilation values.
-    use_asym_convs : list of int
+    use_asym_convs : list(int)
         Whether to use asymmetric convolution blocks.
     dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
@@ -360,7 +360,7 @@ class ENet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for the first unit of each stage.
     init_block_channels : int
         Number of output channels for the initial unit.
@@ -374,7 +374,7 @@ class ENet(nn.Module):
         Whether to use asymmetric convolution blocks for each unit.
     dropout_rates : list of float
         Parameter of dropout layer for each stage.
-    downs : list of int
+    downs : list(int)
         Whether to downscale or upscale in each stage.
     correct_size_mistmatch : bool
         Whether to correct downscaled sizes of images in encoder.

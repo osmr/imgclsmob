@@ -23,8 +23,8 @@ class DenseBlock(nn.Module):
         Number of output features.
     """
     def __init__(self,
-                 in_features,
-                 out_features):
+                 in_features: int,
+                 out_features: int):
         super(DenseBlock, self).__init__()
         self.fc = nn.Linear(
             in_features=in_features,
@@ -53,9 +53,9 @@ class ChannelGate(nn.Module):
         Number of dense blocks.
     """
     def __init__(self,
-                 channels,
-                 reduction_ratio=16,
-                 num_layers=1):
+                 channels: int,
+                 reduction_ratio: int = 16,
+                 num_layers: int = 1):
         super(ChannelGate, self).__init__()
         mid_channels = channels // reduction_ratio
 
@@ -99,10 +99,10 @@ class SpatialGate(nn.Module):
         Dilation/padding value for corresponding convolutions.
     """
     def __init__(self,
-                 channels,
-                 reduction_ratio=16,
-                 num_dil_convs=2,
-                 dilation=4):
+                 channels: int,
+                 reduction_ratio: int = 16,
+                 num_dil_convs: int = 2,
+                 dilation: int = 4):
         super(SpatialGate, self).__init__()
         mid_channels = channels // reduction_ratio
 
@@ -145,7 +145,7 @@ class BamBlock(nn.Module):
         Number of input/output channels.
     """
     def __init__(self,
-                 channels):
+                 channels: int):
         super(BamBlock, self).__init__()
         self.ch_att = ChannelGate(channels=channels)
         self.sp_att = SpatialGate(channels=channels)
@@ -173,10 +173,10 @@ class BamResUnit(nn.Module):
         Whether to use a bottleneck or simple block in units.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bottleneck):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 bottleneck: bool):
         super(BamResUnit, self).__init__()
         self.use_bam = (stride != 1)
 
@@ -216,9 +216,9 @@ class BamResNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 bottleneck: bool,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -355,7 +355,10 @@ def bam_resnet18(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=18, model_name="bam_resnet18", **kwargs)
+    return get_resnet(
+        blocks=18,
+        model_name="bam_resnet18",
+        **kwargs)
 
 
 def bam_resnet34(**kwargs) -> nn.Module:
@@ -374,7 +377,10 @@ def bam_resnet34(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=34, model_name="bam_resnet34", **kwargs)
+    return get_resnet(
+        blocks=34,
+        model_name="bam_resnet34",
+        **kwargs)
 
 
 def bam_resnet50(**kwargs) -> nn.Module:
@@ -393,7 +399,10 @@ def bam_resnet50(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=50, model_name="bam_resnet50", **kwargs)
+    return get_resnet(
+        blocks=50,
+        model_name="bam_resnet50",
+        **kwargs)
 
 
 def bam_resnet101(**kwargs) -> nn.Module:
@@ -412,7 +421,10 @@ def bam_resnet101(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=101, model_name="bam_resnet101", **kwargs)
+    return get_resnet(
+        blocks=101,
+        model_name="bam_resnet101",
+        **kwargs)
 
 
 def bam_resnet152(**kwargs) -> nn.Module:
@@ -431,7 +443,10 @@ def bam_resnet152(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_resnet(blocks=152, model_name="bam_resnet152", **kwargs)
+    return get_resnet(
+        blocks=152,
+        model_name="bam_resnet152",
+        **kwargs)
 
 
 def _test():

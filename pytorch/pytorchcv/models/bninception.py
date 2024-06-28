@@ -217,9 +217,9 @@ class InceptionBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    mid1_channels_list : list of int
+    mid1_channels_list : list(int)
         Number of pre-middle channels for branches.
-    mid2_channels_list : list of int
+    mid2_channels_list : list(int)
         Number of middle channels for branches.
     avg_pool : bool
         Whether use average pooling or max pooling.
@@ -277,9 +277,9 @@ class ReductionBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    mid1_channels_list : list of int
+    mid1_channels_list : list(int)
         Number of pre-middle channels for branches.
-    mid2_channels_list : list of int
+    mid2_channels_list : list(int)
         Number of middle channels for branches.
     bias : bool
         Whether the convolution layer uses a bias vector.
@@ -331,7 +331,7 @@ class BNInception(nn.Module):
     ----------
     channels : list(list(int))
         Number of output channels for each unit.
-    init_block_channels_list : list of int
+    init_block_channels_list : list(int)
         Number of output channels for the initial unit.
     mid1_channels_list : list(list(list(int)))
         Number of pre-middle channels for each unit.

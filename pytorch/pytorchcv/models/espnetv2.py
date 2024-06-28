@@ -102,7 +102,7 @@ class ESPBlock(nn.Module):
         Number of output channels.
     stride : int or tuple(int, int)
         Strides of the branch convolution layers.
-    dilations : list of int
+    dilations : list(int)
         Dilation values for branches.
     """
     def __init__(self,
@@ -164,7 +164,7 @@ class DownsampleBlock(nn.Module):
         Number of output channels.
     x0_channels : int
         Number of input channels for shortcut.
-    dilations : list of int
+    dilations : list(int)
         Dilation values for branches in EESP block.
     """
     def __init__(self,

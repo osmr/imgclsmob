@@ -203,7 +203,7 @@ class PeleeNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    bottleneck_sizes : list of int
+    bottleneck_sizes : list(int)
         Bottleneck sizes for each stage.
     dropout_rate : float, default 0.5
         Parameter of Dropout layer. Faction of the input units to drop.

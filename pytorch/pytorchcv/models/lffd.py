@@ -102,15 +102,15 @@ class LFFD(nn.Module):
 
     Parameters
     ----------
-    enc_channels : list of int
+    enc_channels : list(int)
         Number of output channels for each encoder stage.
     dec_channels : int
         Number of output channels for each decoder stage.
     init_block_channels : int
         Number of output channels for the initial encoder unit.
-    layers : list of int
+    layers : list(int)
         Number of units in each encoder stage.
-    int_bends : list of int
+    int_bends : list(int)
         Number of internal bends for each encoder stage.
     use_preresnet : bool
         Whether to use PreResnet backbone instead of ResNet.

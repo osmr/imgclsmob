@@ -215,13 +215,13 @@ class ESPCNet(nn.Module):
 
     Parameters
     ----------
-    layers : list of int
+    layers : list(int)
         Number of layers for each unit.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit (for y-branch).
     init_block_channels : int
         Number of output channels for the initial unit.
-    cut_x : list of int
+    cut_x : list(int)
         Whether to concatenate with x-branch for each unit.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.

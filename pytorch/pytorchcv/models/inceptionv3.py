@@ -521,7 +521,7 @@ class InceptionV3(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    b_mid_channels : list of int
+    b_mid_channels : list(int)
         Number of middle channels for each Inception-B unit.
     dropout_rate : float, default 0.0
         Fraction of the input units to drop. Must be a number between 0 and 1.

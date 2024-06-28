@@ -243,7 +243,7 @@ class DABUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dilations : list of int
+    dilations : list(int)
         Dilations for blocks.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -286,7 +286,7 @@ class DABStage(nn.Module):
         Number of input channels for y.
     y_out_channels : int
         Number of output channels for y.
-    dilations : list of int
+    dilations : list(int)
         Dilations for blocks.
     bn_eps : float
         Small float added to variance in Batch norm.
@@ -375,7 +375,7 @@ class DABNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit (for y-branch).
     init_block_channels : int
         Number of output channels for the initial unit.

@@ -33,12 +33,12 @@ class CGBlock(nn.Module):
         Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 dilation,
-                 se_reduction,
-                 down,
-                 bn_eps):
+                 in_channels: int,
+                 out_channels: int,
+                 dilation: int,
+                 se_reduction: int,
+                 down: bool,
+                 bn_eps: float):
         super(CGBlock, self).__init__()
         self.down = down
         if self.down:
@@ -118,12 +118,12 @@ class CGUnit(nn.Module):
         Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 layers,
-                 dilation,
-                 se_reduction,
-                 bn_eps):
+                 in_channels: int,
+                 out_channels: int,
+                 layers: int,
+                 dilation: int,
+                 se_reduction: int,
+                 bn_eps: float):
         super(CGUnit, self).__init__()
         mid_channels = out_channels // 2
 
@@ -173,13 +173,13 @@ class CGStage(nn.Module):
         Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 x_channels,
-                 y_in_channels,
-                 y_out_channels,
-                 layers,
-                 dilation,
-                 se_reduction,
-                 bn_eps):
+                 x_channels: int,
+                 y_in_channels: int,
+                 y_out_channels: int,
+                 layers: int,
+                 dilation: int,
+                 se_reduction: int,
+                 bn_eps: float):
         super(CGStage, self).__init__()
         self.use_x = (x_channels > 0)
         self.use_unit = (layers > 0)
@@ -228,9 +228,9 @@ class CGInitBlock(nn.Module):
         Small float added to variance in Batch norm.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps):
+                 in_channels: int,
+                 out_channels: int,
+                 bn_eps: float):
         super(CGInitBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
@@ -263,17 +263,17 @@ class CGNet(nn.Module):
 
     Parameters
     ----------
-    layers : list of int
+    layers : list(int)
         Number of layers for each unit.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit (for y-branch).
     init_block_channels : int
         Number of output channels for the initial unit.
-    dilations : list of int
+    dilations : list(int)
         Dilations for each unit.
-    se_reductions : list of int
+    se_reductions : list(int)
         SE-block reduction value for each unit.
-    cut_x : list of int
+    cut_x : list(int)
         Whether to concatenate with x-branch for each unit.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
@@ -289,15 +289,15 @@ class CGNet(nn.Module):
         Number of segmentation classes.
     """
     def __init__(self,
-                 layers,
-                 channels,
-                 init_block_channels,
-                 dilations,
-                 se_reductions,
-                 cut_x,
-                 bn_eps=1e-5,
-                 aux=False,
-                 fixed_size=False,
+                 layers: list[int],
+                 channels: list[int],
+                 init_block_channels: int,
+                 dilations: list[int],
+                 se_reductions: list[int],
+                 cut_x: list[int],
+                 bn_eps: float = 1e-5,
+                 aux: bool = False,
+                 fixed_size: bool = False,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (1024, 2048),
                  num_classes: int = 19):
@@ -355,8 +355,8 @@ class CGNet(nn.Module):
         return y
 
 
-def get_cgnet(model_name=None,
-              pretrained=False,
+def get_cgnet(model_name: str | None = None,
+              pretrained: bool = False,
               root: str = os.path.join("~", ".torch", "models"),
               **kwargs) -> nn.Module:
     """
@@ -406,7 +406,8 @@ def get_cgnet(model_name=None,
     return net
 
 
-def cgnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
+def cgnet_cityscapes(num_classes: int = 19,
+                     **kwargs) -> nn.Module:
     """
     CGNet model for Cityscapes from 'CGNet: A Light-weight Context Guided Network for Semantic Segmentation,'
     https://arxiv.org/abs/1811.08201.
@@ -425,7 +426,10 @@ def cgnet_cityscapes(num_classes=19, **kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_cgnet(num_classes=num_classes, model_name="cgnet_cityscapes", **kwargs)
+    return get_cgnet(
+        num_classes=num_classes,
+        model_name="cgnet_cityscapes",
+        **kwargs)
 
 
 def _test():

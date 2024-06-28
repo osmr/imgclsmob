@@ -114,13 +114,13 @@ class LinkNet(nn.Module):
         Feature extractor.
     backbone_out_channels : int
         Number of output channels form feature extractor.
-    channels : list of int
+    channels : list(int)
         Number of output channels for the first unit of each stage.
     dilations : list(list(int))
         Dilation values for each unit.
     dropout_rates : list of float
         Parameter of dropout layer for each stage.
-    downs : list of int
+    downs : list(int)
         Whether to downscale or upscale in each stage.
     correct_size_mistmatch : bool
         Whether to correct downscaled sizes of images in encoder.

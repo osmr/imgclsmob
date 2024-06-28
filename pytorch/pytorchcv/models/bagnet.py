@@ -29,11 +29,11 @@ class BagNetBottleneck(nn.Module):
         Bottleneck factor.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 bottleneck_factor=4):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 bottleneck_factor: int = 4):
         super(BagNetBottleneck, self).__init__()
         mid_channels = out_channels // bottleneck_factor
 
@@ -74,10 +74,10 @@ class BagNetUnit(nn.Module):
         Strides of the second body convolution.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int]):
         super(BagNetUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -120,8 +120,8 @@ class BagNetInitBlock(nn.Module):
         Number of output channels.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels):
+                 in_channels: int,
+                 out_channels: int):
         super(BagNetInitBlock, self).__init__()
         self.conv1 = conv1x1(
             in_channels=in_channels,
@@ -150,7 +150,7 @@ class BagNet(nn.Module):
         Number of output channels for the initial unit.
     final_pool_size : int
         Size of the pooling windows for final pool.
-    normal_kernel_sizes : list of int
+    normal_kernel_sizes : list(int)
         Count of the first units with 3x3 convolution window size for each stage.
     in_channels : int, default 3
         Number of input channels.
@@ -160,10 +160,10 @@ class BagNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 final_pool_size,
-                 normal_kernel_sizes,
+                 channels: list[list[int]],
+                 init_block_channels: int,
+                 final_pool_size: int,
+                 normal_kernel_sizes: list[int],
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -212,7 +212,7 @@ class BagNet(nn.Module):
         return x
 
 
-def get_bagnet(field,
+def get_bagnet(field: int,
                model_name: str | None = None,
                pretrained: bool = False,
                root: str = os.path.join("~", ".torch", "models"),
@@ -236,7 +236,6 @@ def get_bagnet(field,
     nn.Module
         Desired module.
     """
-
     layers = [3, 4, 6, 3]
 
     if field == 9:
@@ -292,7 +291,10 @@ def bagnet9(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_bagnet(field=9, model_name="bagnet9", **kwargs)
+    return get_bagnet(
+        field=9,
+        model_name="bagnet9",
+        **kwargs)
 
 
 def bagnet17(**kwargs) -> nn.Module:
@@ -312,7 +314,10 @@ def bagnet17(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_bagnet(field=17, model_name="bagnet17", **kwargs)
+    return get_bagnet(
+        field=17,
+        model_name="bagnet17",
+        **kwargs)
 
 
 def bagnet33(**kwargs) -> nn.Module:
@@ -332,7 +337,10 @@ def bagnet33(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_bagnet(field=33, model_name="bagnet33", **kwargs)
+    return get_bagnet(
+        field=33,
+        model_name="bagnet33",
+        **kwargs)
 
 
 def _test():

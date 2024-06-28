@@ -58,7 +58,7 @@ class CIFARNIN(nn.Module):
     ----------
     channels : list(list(int))
         Number of output channels for each unit.
-    first_kernel_sizes : list of int
+    first_kernel_sizes : list(int)
         Convolution window sizes for the first units in each stage.
     in_channels : int, default 3
         Number of input channels.

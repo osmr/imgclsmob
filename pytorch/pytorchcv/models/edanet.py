@@ -162,7 +162,7 @@ class EDANet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for the first unit of each stage.
     dilations : list(list(int))
         Dilations for blocks.

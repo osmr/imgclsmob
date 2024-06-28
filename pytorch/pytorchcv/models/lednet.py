@@ -265,9 +265,9 @@ class LEDNet(nn.Module):
 
     Parameters
     ----------
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit.
-    dilations : list of int
+    dilations : list(int)
         Dilations for units.
     dropout_rates : list(list(int))
         Dropout rates for each unit in encoder.

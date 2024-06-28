@@ -234,13 +234,13 @@ class FPENet(nn.Module):
 
     Parameters
     ----------
-    layers : list of int
+    layers : list(int)
         Number of layers for each unit.
-    channels : list of int
+    channels : list(int)
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    meu_channels : list of int
+    meu_channels : list(int)
         Number of output channels for MEU blocks.
     use_se : bool
         Whether to use SE-module.

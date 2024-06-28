@@ -12,10 +12,10 @@ import torch.nn as nn
 from .common import calc_net_weights
 
 
-def dwconv3x3(in_channels,
-              out_channels,
-              stride,
-              bias=False):
+def dwconv3x3(in_channels: int,
+              out_channels: int,
+              stride: int | tuple[int, int],
+              bias: bool = False):
     """
     3x3 depthwise version of the standard convolution layer.
 
@@ -68,16 +68,16 @@ class ChannetConv(nn.Module):
         Whether activate the convolution block.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 dropout_rate=0.0,
-                 activate=True):
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int | tuple[int, int],
+                 stride: int | tuple[int, int],
+                 padding: int | tuple[int, int],
+                 dilation: int | tuple[int, int] = 1,
+                 groups: int = 1,
+                 bias: bool = False,
+                 dropout_rate: float = 0.0,
+                 activate: bool = True):
         super(ChannetConv, self).__init__()
         self.use_dropout = (dropout_rate > 0.0)
         self.activate = activate
@@ -107,13 +107,13 @@ class ChannetConv(nn.Module):
         return x
 
 
-def channet_conv1x1(in_channels,
-                    out_channels,
-                    stride=1,
-                    groups=1,
-                    bias=False,
-                    dropout_rate=0.0,
-                    activate=True):
+def channet_conv1x1(in_channels: int,
+                    out_channels: int,
+                    stride: int | tuple[int, int] = 1,
+                    groups: int = 1,
+                    bias: bool = False,
+                    dropout_rate: float = 0.0,
+                    activate: bool = True):
     """
     1x1 version of ChannelNet specific convolution block.
 
@@ -146,15 +146,15 @@ def channet_conv1x1(in_channels,
         activate=activate)
 
 
-def channet_conv3x3(in_channels,
-                    out_channels,
-                    stride,
-                    padding=1,
-                    dilation=1,
-                    groups=1,
-                    bias=False,
-                    dropout_rate=0.0,
-                    activate=True):
+def channet_conv3x3(in_channels: int,
+                    out_channels: int,
+                    stride: int | tuple[int, int],
+                    padding: int | tuple[int, int] = 1,
+                    dilation: int | tuple[int, int] = 1,
+                    groups: int = 1,
+                    bias: bool = False,
+                    dropout_rate: float = 0.0,
+                    activate: bool = True):
     """
     3x3 version of the standard convolution block.
 
@@ -211,11 +211,11 @@ class ChannetDwsConvBlock(nn.Module):
         Dropout rate.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 groups=1,
-                 dropout_rate=0.0):
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int | tuple[int, int],
+                 groups: int = 1,
+                 dropout_rate: float = 0.0):
         super(ChannetDwsConvBlock, self).__init__()
         self.dw_conv = dwconv3x3(
             in_channels=in_channels,
@@ -249,10 +249,10 @@ class SimpleGroupBlock(nn.Module):
         Dropout rate.
     """
     def __init__(self,
-                 channels,
-                 multi_blocks,
-                 groups,
-                 dropout_rate):
+                 channels: int,
+                 multi_blocks: int,
+                 groups: int,
+                 dropout_rate: float):
         super(SimpleGroupBlock, self).__init__()
         self.blocks = nn.Sequential()
         for i in range(multi_blocks):
@@ -280,8 +280,8 @@ class ChannelwiseConv2d(nn.Module):
         Dropout rate.
     """
     def __init__(self,
-                 groups,
-                 dropout_rate):
+                 groups: int,
+                 dropout_rate: float):
         super(ChannelwiseConv2d, self).__init__()
         self.use_dropout = (dropout_rate > 0.0)
 
@@ -321,10 +321,10 @@ class ConvGroupBlock(nn.Module):
         Dropout rate.
     """
     def __init__(self,
-                 channels,
-                 multi_blocks,
-                 groups,
-                 dropout_rate):
+                 channels: int,
+                 multi_blocks: int,
+                 groups: int,
+                 dropout_rate: float):
         super(ConvGroupBlock, self).__init__()
         self.conv = ChannelwiseConv2d(
             groups=groups,
@@ -359,20 +359,20 @@ class ChannetUnit(nn.Module):
         Number of groups.
     dropout_rate : float
         Dropout rate.
-    block_names : tuple/list of 2 str
+    block_names : tuple(str, str)
         Sub-block names.
     merge_type : str
         Type of sub-block output merging.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels_list,
-                 strides,
-                 multi_blocks,
-                 groups,
-                 dropout_rate,
-                 block_names,
-                 merge_type):
+                 in_channels: int,
+                 out_channels_list: tuple[int, int],
+                 strides: int | tuple[int, int],
+                 multi_blocks: int,
+                 groups: int,
+                 dropout_rate: float,
+                 block_names: tuple[str, str],
+                 merge_type: str):
         super(ChannetUnit, self).__init__()
         assert (len(block_names) == 2)
         assert (merge_type in ["seq", "add", "cat"])
@@ -432,9 +432,9 @@ class ChannelNet(nn.Module):
     ----------
     channels : list(list(list(int)))
         Number of output channels for each unit.
-    block_names : list of list of list of str
+    block_names : list(list(list(str)))
         Names of blocks for each unit.
-    block_names : list of list of str
+    block_names : list(list(str))
         Merge types for each unit.
     dropout_rate : float, default 0.0001
         Dropout rate.
@@ -450,12 +450,12 @@ class ChannelNet(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
-                 channels,
-                 block_names,
-                 merge_types,
-                 dropout_rate=0.0001,
-                 multi_blocks=2,
-                 groups=2,
+                 channels: list[list[list[int]]],
+                 block_names: list[list[list[str]]],
+                 merge_types: list[list[str]],
+                 dropout_rate: float = 0.0001,
+                 multi_blocks: int = 2,
+                 groups: int = 2,
                  in_channels: int = 3,
                  in_size: tuple[int, int] = (224, 224),
                  num_classes: int = 1000):
@@ -470,12 +470,12 @@ class ChannelNet(nn.Module):
                 strides = 2 if (j == 0) else 1
                 stage.add_module("unit{}".format(j + 1), ChannetUnit(
                     in_channels=in_channels,
-                    out_channels_list=out_channels,
+                    out_channels_list=tuple[int, int](out_channels),
                     strides=strides,
                     multi_blocks=multi_blocks,
                     groups=groups,
                     dropout_rate=dropout_rate,
-                    block_names=block_names[i][j],
+                    block_names=tuple[str, str](block_names[i][j]),
                     merge_type=merge_types[i][j]))
                 if merge_types[i][j] == "cat":
                     in_channels = sum(out_channels)
@@ -506,8 +506,8 @@ class ChannelNet(nn.Module):
         return x
 
 
-def get_channelnet(model_name=None,
-                   pretrained=False,
+def get_channelnet(model_name: str | None = None,
+                   pretrained: bool = False,
                    root: str = os.path.join("~", ".torch", "models"),
                    **kwargs) -> nn.Module:
     """
@@ -527,7 +527,6 @@ def get_channelnet(model_name=None,
     nn.Module
         Desired module.
     """
-
     channels = [[[32, 64]], [[128, 128]], [[256, 256]], [[512, 512], [512, 512]], [[1024, 1024]]]
     block_names = [[["channet_conv3x3", "channet_dws_conv_block"]],
                    [["channet_dws_conv_block", "channet_dws_conv_block"]],
@@ -571,7 +570,9 @@ def channelnet(**kwargs) -> nn.Module:
     nn.Module
         Desired module.
     """
-    return get_channelnet(model_name="channelnet", **kwargs)
+    return get_channelnet(
+        model_name="channelnet",
+        **kwargs)
 
 
 def _test():

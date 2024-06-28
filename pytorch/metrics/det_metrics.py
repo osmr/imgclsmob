@@ -19,7 +19,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         Processed image height.
     coco_annotations_file_path : str
         COCO anotation file path.
-    contiguous_id_to_json : list of int
+    contiguous_id_to_json : list(int)
         Processed IDs.
     validation_ids : bool, default False
         Whether to use temporary file for estimation.

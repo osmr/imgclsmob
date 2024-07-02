@@ -55,9 +55,9 @@ class KHPA(Dataset):
             train_file_path,
             sep=",",
             index_col=False,
-            dtype={"Id": np.unicode, "Target": np.unicode})
-        train_file_ids = train_df["Id"].values.astype(np.unicode)
-        train_file_labels = train_df["Target"].values.astype(np.unicode)
+            dtype={"Id": np.str_, "Target": np.str_})
+        train_file_ids = train_df["Id"].values.astype(np.str_)
+        train_file_labels = train_df["Target"].values.astype(np.str_)
 
         image_count = len(train_file_ids)
 

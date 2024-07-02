@@ -68,7 +68,7 @@ class CUBDirectoryIterator(DirectoryIterator):
             header=None,
             index_col=False,
             names=["image_id", "image_path"],
-            dtype={"image_id": np.int32, "image_path": np.unicode})
+            dtype={"image_id": np.int32, "image_path": np.str_})
         class_df = pd.read_csv(
             class_file_path,
             sep=r"\s+",
@@ -89,7 +89,7 @@ class CUBDirectoryIterator(DirectoryIterator):
 
         image_ids = subset_df["image_id"].values.astype(np.int32)
         class_ids = subset_df["class_id"].values.astype(np.int32) - 1
-        image_file_names = subset_df["image_path"].values.astype(np.unicode)
+        image_file_names = subset_df["image_path"].values.astype(np.str_)
 
         images_dir_name = "images"
         self.images_dir_path = os.path.join(root_dir_path, images_dir_name)

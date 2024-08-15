@@ -6,7 +6,7 @@ __all__ = ['AsrDataset', 'asr_test_transform']
 
 import torch.utils.data as data
 import torchvision.transforms as transforms
-from pytorch.pytorchcv.models.jasper import NemoAudioReader
+from pytorchcv.models.jasper import NemoAudioReader
 
 
 class AsrDataset(data.Dataset):

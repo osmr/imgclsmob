@@ -1,15 +1,15 @@
 """
-Evaluation Metrics for Object Detection.
+    Evaluation Metrics for Object Detection.
 """
 
 import warnings
 import numpy as np
-from .metric import EvalMetric
+import mxnet as mx
 
 __all__ = ['CocoDetMApMetric']
 
 
-class CocoDetMApMetric(EvalMetric):
+class CocoDetMApMetric(mx.metric.EvalMetric):
     """
     Detection metric for COCO bbox task.
 

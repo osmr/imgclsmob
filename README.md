@@ -31,7 +31,7 @@ Currently, models are mostly implemented on Gluon and then ported to other frame
 are loaded automatically during use. See examples of such automatic loading of weights in the corresponding sections of
 the documentation dedicated to a particular package:
 - [Gluon models](gluon/README.md),
-- [PyTorch models](pytorch/README.md),
+- [PyTorch models](https://github.com/osmr/pytorchcv/blob/master/README.md),
 - [Chainer models](chainer_/README.md),
 - [Keras models](keras_/README.md),
 - [TensorFlow 1.x models](tensorflow_/README.md),
@@ -52,7 +52,7 @@ Some remarks:
 - `a`, `b`, `c`, `d`, and `e` means the implementation of a model for ImageNet-1K, CIFAR-10, CIFAR-100, SVHN, and CUB-200-2011, respectively.
 - `A`, `B`, `C`, `D`, and `E` means having a pre-trained model for corresponding datasets.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md) | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](https://github.com/osmr/pytorchcv/blob/master/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md) | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlexNet | A | A | A | A | A | A | [link](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) | [link](https://code.google.com/archive/p/cuda-convnet2) | 2012 |
 | ZFNet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1311.2901) | - | 2013 |
@@ -160,7 +160,7 @@ Some remarks:
 - `d/D` corresponds to COCO.
 - `e/E` corresponds to CelebAMask-HQ.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](https://github.com/osmr/pytorchcv/blob/master/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PSPNet | ABCD | ABCD | ABCD | - | - | ABCD | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
 | DeepLabv3 | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
@@ -189,7 +189,7 @@ Some remarks:
 Some remarks:
 - `a/A` corresponds to COCO.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](https://github.com/osmr/pytorchcv/blob/master/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CenterNet | a | a | a | - | - | a | [link](https://arxiv.org/abs/1904.07850) | [link](https://github.com/xingyizhou/CenterNet) | 2019 |
 
@@ -198,7 +198,7 @@ Some remarks:
 Some remarks:
 - `a/A` corresponds to COCO.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](https://github.com/osmr/pytorchcv/blob/master/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlphaPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1612.00137) | [link](https://github.com/MVIG-SJTU/AlphaPose) | 2016 |
 | SimplePose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | [link](https://github.com/microsoft/human-pose-estimation.pytorch) | 2018 |
@@ -212,7 +212,7 @@ Some remarks:
 - `a/A` corresponds to LibriSpeech.
 - `b/B` corresponds to Mozilla Common Voice.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](https://github.com/osmr/pytorchcv/blob/master/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Jasper DR | AB | AB | ab | - | - | ab | [link](https://arxiv.org/abs/1904.03288) | [link](https://github.com/NVIDIA/NeMo) | 2019 |
 | QuartzNet | AB | AB | ab | - | - | ab | [link](https://arxiv.org/abs/1910.10261) | [link](https://github.com/NVIDIA/NeMo) | 2019 |

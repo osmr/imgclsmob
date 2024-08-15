@@ -7,16 +7,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from .pytorchcv.models.common import (ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish,
-                                      InterpolationBlock, HeatmapMaxDetBlock)
-from .pytorchcv.models.fishnet import ChannelSqueeze
-from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
-from .pytorchcv.models.rir_cifar import RiRFinalBlock
-from .pytorchcv.models.proxylessnas import ProxylessUnit
-from .pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
-from .pytorchcv.models.centernet import CenterNetHeatmapMaxDet
-from .pytorchcv.models.danet import ScaleBlock
-from .pytorchcv.models.jasper import MaskConv1d, NemoMelSpecExtractor
+from pytorchcv.models.common.activ import Swish, HSigmoid, HSwish
+from pytorchcv.models.common.tutti import (ChannelShuffle, ChannelShuffle2, Identity, Flatten, InterpolationBlock,
+                                           HeatmapMaxDetBlock)
+from pytorchcv.models.fishnet import ChannelSqueeze
+from pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
+from pytorchcv.models.rir_cifar import RiRFinalBlock
+from pytorchcv.models.proxylessnas import ProxylessUnit
+from pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
+from pytorchcv.models.centernet import CenterNetHeatmapMaxDet
+from pytorchcv.models.danet import ScaleBlock
+from pytorchcv.models.jasper import MaskConv1d, NemoMelSpecExtractor
 
 __all__ = ['measure_model']
 

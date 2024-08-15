@@ -1,16 +1,16 @@
 from torchbench.image_classification import ImageNet
-from pytorch.pytorchcv.models.model_store import _model_sha1
-from pytorch.pytorchcv.model_provider import get_model as ptcv_get_model
+from pytorchcv.models.common.model_store import get_model_metainfo_dict
+from pytorchcv.model_provider import get_model as ptcv_get_model
 import torchvision.transforms as transforms
 import torch
 import math
 from sys import version_info
-# import os
 
 
-for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
+model_metainfo_dict = get_model_metainfo_dict()
+for model_name, model_metainfo in (model_metainfo_dict.items() if version_info[0] >= 3 else model_metainfo_dict.iteritems()):  # noqa
+    caption, paper, ds, img_size, scale, batch, rem = model_metainfo[4:]
     net = ptcv_get_model(model_name, pretrained=True)
-    error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
     if (ds != "in1k") or (img_size == 0) or ((len(rem) > 0) and (rem[-1] == "*")):
         continue
     paper_model_name = caption

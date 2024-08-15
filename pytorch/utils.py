@@ -6,7 +6,7 @@ import logging
 import os
 import numpy as np
 import torch.utils.data
-from .pytorchcv.model_provider import get_model
+from pytorchcv.model_provider import get_model
 from .metrics.metric import EvalMetric, CompositeEvalMetric
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric

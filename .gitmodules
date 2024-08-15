@@ -1,0 +1,3 @@
+[submodule "pytorchcv"]
+	path = pytorchcv
+	url = https://github.com/osmr/pytorchcv

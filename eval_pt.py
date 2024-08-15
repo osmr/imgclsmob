@@ -16,7 +16,7 @@ from pytorch.utils import report_accuracy
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_val_data_source, get_test_data_source
 from pytorch.model_stats import measure_model
-from pytorch.pytorchcv.models.model_store import _model_sha1
+from pytorchcv.models.common.model_store import get_model_metainfo_dict
 
 
 def add_eval_cls_parser_arguments(parser):
@@ -436,8 +436,9 @@ def main():
             "ls": "LibriSpeech",
             "mcv": "MCV",
         }
-        for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
-            error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
+        model_metainfo_dict = get_model_metainfo_dict()
+        for model_name, model_metainfo in (model_metainfo_dict.items() if version_info[0] >= 3 else model_metainfo_dict.iteritems()):  # noqa
+            error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo[1:]
             if (ds != "in1k") or (img_size == 0) or ((len(rem) > 0) and (rem[-1] == "*")):
                 continue
             args.dataset = dataset_name_map[ds]

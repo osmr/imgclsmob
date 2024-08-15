@@ -4,8 +4,9 @@ MS COCO object detection dataset.
 import os
 import cv2
 import logging
-import mxnet as mx
 import numpy as np
+np.bool = np.bool_
+import mxnet as mx
 from PIL import Image
 import torch.utils.data as data
 from .dataset_metainfo import DatasetMetaInfo
